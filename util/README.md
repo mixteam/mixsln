@@ -2,9 +2,18 @@
 
 mix核心工具库
 
-* [Utilities@1.0.0](https://github.com/mixteam/utilities.js)
-* [Detect@0.2.1](https://github.com/mixteam/detect.js)
-* [Dom@1.0.0](https://github.com/mixteam/dom.js)
-* [Router@0.2.0](https://github.com/mixteam/router.js)
-* [History@0.2.0](https://github.com/mixteam/history.js)
-* [MVC@0.1.0](https://github.com/mixteam/mvc.js)
+* Utilities@1.0.0
+* Detect@0.2.1
+* Router@1.0.0
+* History@1.0.0
+* dom
+	* Selector@1.0.0
+	* Animation@1.0.0
+	* Event@1.0.0
+	* Ajax@1.0.0
+* mvc
+	* controller@0.1.0
+	* model@1.0.0
+	* navigator@0.1.0
+	* orm@1.0.0
+	* view@0.1.0
