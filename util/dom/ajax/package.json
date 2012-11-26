@@ -1,0 +1,18 @@
+{
+    "name" : "mix/core/util/dom/ajax",
+    "version" : "1.0.0",
+    "description" : "ajax for dom",
+    "license" : "MIT",
+    "author" : "zepto",
+    "homepage" : "http://zeptojs.com",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/madrobby/zepto.git"
+    },
+    "dependencies" : {
+        "selector" : "mix/core/util/dom/selector/1.0.0/selector"
+    },
+    "output" : {
+        "ajax.js" : "."
+    }
+}

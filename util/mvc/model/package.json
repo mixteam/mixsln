@@ -1,0 +1,21 @@
+{
+    "name" : "mix/core/util/mvc/model",
+    "version" : "1.0.0",
+    "description" : "model for mvc",
+    "license" : "MIT",
+    "author" : "zhuxun <zhuxun.jb@taobao.com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/mvc.js.git",
+        "path" : "./model"
+    },
+    "dependencies" : {
+        "reset" : "mix/core/base/reset/1.0.0/reset",
+        "class" : "mix/core/base/class/1.0.0/class",
+        "utilities" : "mix/core/util/utilities/1.0.0/utilities"
+    },
+    "output" : {
+        "model.js" : "."
+    }
+}

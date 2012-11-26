@@ -1,0 +1,24 @@
+{
+    "name" : "mix/core/ui/module",
+    "version" : "0.1.0",
+    "description" : "module engine",
+    "license" : "MIT",
+    "author" : "zhuxun <zhuxun.jb@taobao.com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/module.js.git"
+    },
+    "dependencies" : {
+        "reset" : "mix/core/base/reset/1.0.0/reset",
+        "class" : "mix/core/base/class/1.0.0/class",
+        "message" : "mix/core/base/message/1.0.0/message",
+        "selector" : "mix/core/util/dom/selector/1.0.0/selector",
+        "event" : "mix/core/util/dom/event/1.0.0/event"
+    },
+    "output" : {
+        "module.js" : "."
+    }
+}
+
+

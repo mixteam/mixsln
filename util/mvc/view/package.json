@@ -1,0 +1,26 @@
+{
+    "name" : "mix/core/util/mvc/view",
+    "version" : "0.1.0",
+    "description" : "view for mvc",
+    "license" : "MIT",
+    "author" : "zhuxun <zhuxun.jb@taobao.com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/mvc.js.git",
+        "path" : "./view"
+    },
+    "dependencies" : {
+        "reset" : "mix/core/base/reset/1.0.0/reset",
+        "message" : "mix/core/base/message/1.0.0/message",
+        "class" : "mix/core/base/class/1.0.0/class",
+        "selector" : "mix/core/util/dom/selector/1.0.0/selector",
+        "event" : "mix/core/util/dom/event/1.0.0/event",
+        "ajax" : "mix/core/util/dom/ajax/1.0.0/ajax",
+        "template" : "mix/core/ui/template/0.2.0/template",
+        "component" : "mix/core/ui/component/0.2.0/component"
+    },
+    "output" : {
+        "view.js" : "."
+    }
+}

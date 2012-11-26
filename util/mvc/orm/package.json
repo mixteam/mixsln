@@ -1,0 +1,22 @@
+{
+    "name" : "mix/core/util/mvc/orm",
+    "version" : "1.0.0",
+    "description" : "orm controller for mvc",
+    "license" : "MIT",
+    "author" : "wanyan <wanyan.wz@taobao.com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/mvc.js.git",
+        "path" : "./orm"
+    },
+    "dependencies" : {
+        "reset" : "mix/core/base/reset/1.0.0/reset",
+        "class" : "mix/core/base/class/1.0.0/class",
+        "utilities" : "mix/core/util/utilities/1.0.0/utilities",
+        "model" : "mix/core/util/mvc/model/1.0.0/model"
+    },
+    "output" : {
+        "orm.js" : "."
+    }
+}

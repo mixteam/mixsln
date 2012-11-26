@@ -1,0 +1,19 @@
+{
+    "name" : "mix/core/base/message",
+    "version" : "1.0.0",
+    "description" : "Global message",
+    "license" : "MIT",
+    "author" : "xuanji <xuanji.jw@taobao.com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/message.js.git"
+    },
+    "dependencies" : {
+        "reset" : "mix/core/base/reset/1.0.0/reset",
+        "class" : "mix/core/base/class/1.0.0/class"
+    },
+    "output" : {
+        "message.js" : "."
+    }
+}

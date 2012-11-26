@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+    <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+	<script src="../../../../libs/seajs/1.2.1/dist/sea-debug.js"></script>
+	<style type="text/css">
+		div, fieldset {display: -webkit-box;}
+		div {margin:5px;}
+		fieldset {
+			padding:0;
+			margin:0;
+			border:0;
+		}
+		textarea {
+			margin: 2px; 
+			display: block;
+			width: 95%;
+			height: 300px;
+		}
+
+		#J_template {-webkit-box-flex: 6;}
+		#J_data {-webkit-box-flex: 4;}
+		#J_result {-webkit-box-flex: 1;}
+		#T_chunk_path {width: 100px;}
+		#J_chunk_data {-webkit-box-flex: 1;}
+		#J_chunk_result {-webkit-box-flex: 1;}
+	</style>
+</head>
+<body>
+	<div id="J_dom">
+
+	</div>
+	<div>
+		<fieldset id="J_template">
+			<legend>template</legend>
+			<textarea id="T_template">
+<header>
+	{{#chunk inav}}
+	<div class="c-inav">
+		<section>
+			{{#chunk back}}
+			<button class="back">
+				<span><em></em></span><a href="{{href}}">{{text}}</a>
+			</button>
+			{{/chunk}}
+		</section>
+		<section>
+			{{#chunk main}}
+			<button class="main">
+				{{#if text}}
+				<a href="{{href}}" {{#if highlight}}class="highlight"{{/if}}>{{text}}</a>
+				{{/if}}
+				{{#if title}}
+				<span>{{title}}</span>
+				{{/if}}
+			</button>
+			{{/chunk}}
+		</section>
+		<section>
+			{{#chunk other}}
+			<button class="other">
+				<a href="{{href1}}">{{text1}}</a>
+			</button>
+			<button class="other">
+				<a href="{{href2}}">{{text2}}</a>
+			</button>
+			<button class="other">
+				<a href="{{href3}}">{{text3}}</a>
+			</button>
+			{{/chunk}}
+		</section>
+	</div>
+	{{/chunk}}
+	{{#chunk subnav}}
+		<span>{{text}}</span>
+	{{/chunk}}
+</header>
+			</textarea>
+		</fieldset>
+		<fieldset id="J_data">
+			<legend>data</legend>
+			<textarea id="T_data">
+{
+	inav : {
+		back : {
+			href : 'javascript:;',
+			text : '我的淘宝'
+		},
+		main : {
+			href : 'javascript:;',
+			highlight : true,
+			text : '最近联系'
+		},
+		other : {
+			href1 : 'javascript:;',
+			text1 : '设置1',
+			href2 : 'javascript:;',
+			text2 : '设置2',
+			href3 : 'javascript:;',
+			text3 : '设置3'
+		}
+	},
+	subnav : {
+		text : 'subnav'
+	}
+}
+			</textarea>
+		</fieldset>
+	</div>
+
+	<button id="B_parse">生成</button>
+
+	<div>
+		<fieldset id="J_result">
+			<legend>result</legend>
+			<textarea id="T_result"></textarea>
+		</fieldset>
+	</div>
+
+	<div>
+		<label>path:</label> 
+		<input type="text" id="T_chunk_path" value="inav.other" />
+	</div>
+
+	<div>
+		<fieldset id="J_chunk_data">
+			<legend>chunk data</legend>
+			<textarea id="T_chunk_data">
+{
+	href1 : 'javascript:;',
+	text1 : '返回1',
+}
+			</textarea>
+		</fieldset>
+	</div>
+
+	<button id="B_update">更新</button>
+
+	<div>
+		<fieldset id="J_chunk_result">
+			<legend>chunk result</legend>
+			<textarea id="T_chunk_result"></textarea>
+		</fieldset>
+	</div>
+
+	<script type="text/javascript">
+		seajs.config({
+			base : 'http://localhost:8000/',
+			alias : {
+				'template' : 'mix/core/ui/template/0.2.0/template-debug'
+			},
+			debug : true
+		});
+
+		seajs.use('./example');
+	</script>
+</body>
+</html>

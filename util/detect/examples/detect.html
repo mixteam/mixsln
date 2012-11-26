@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>测试</title>
+	<script src="../src/detect.js"></script>
+	<script src="../src/ua.js"></script>
+	<script src="../src/network.js"></script>
+</head>
+<body>	
+
+	<div id="J_DETECT"></div>
+
+	<script>
+		DETECT.init({
+			user_ip: "<user's ip address>",
+			beacon_url: "http://yoursite.com/path/to/beacon.php",
+			autorun: false
+		});
+	</script>
+
+	<script>
+		console.log(DETECT.INFO);
+/*
+		var obj=""; 
+
+		for(var i in DETECT.INFO) {
+			obj = obj + "\n "+ i +": " + DETECT.INFO[i] + '<br/>';
+		}
+
+*/
+
+		//document.write('DETECT.INFO：<br/>'+JSON.stringify(DETECT.INFO));
+
+	</script>
+
+
+</body>
+</html>

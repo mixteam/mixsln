@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+    <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+	<script src="../../../../libs/seajs/1.2.1/dist/sea-debug.js"></script>
+</head>
+<body>
+	<button id="btn">click me</button>
+	<div id="log"></div>
+	<script type="text/javascript">
+		seajs.config({
+			base : 'http://localhost:8000/',
+			alias : {
+				'message' : 'mix/core/base/message/1.0.0/message-debug',
+			},
+			debug : true
+		});
+
+		seajs.use('./example');
+	</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+    "name" : "mix/core/util/history",
+    "version" : "0.2.0",
+    "description" : "history",
+    "license" : "MIT",
+    "author" : "zhuxun <zhuxun.jb@taobao.com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/history.js.git"
+    },
+    "dependencies" : {
+        "reset" : "mix/core/base/reset/1.0.0/reset",
+        "class" : "mix/core/base/class/1.0.0/class",
+        "message" : "mix/core/base/message/1.0.0/message"
+    },
+    "output" : {
+        "history.js" : "."
+    }
+}
+
+
+

@@ -1,0 +1,23 @@
+{
+    "name" : "mix/core/util/mvc/controller",
+    "version" : "0.1.0",
+    "description" : "controller for mvc",
+    "license" : "MIT",
+    "author" : "zhuxun <zhuxun.jb@taobao.com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/mvc.js.git",
+        "path" : "./controller"
+    },
+    "dependencies" : {
+        "reset" : "mix/core/base/reset/1.0.0/reset",
+        "class" : "mix/core/base/class/1.0.0/class",
+        "message" : "mix/core/base/message/1.0.0/message",
+        "history" : "mix/core/util/history/0.2.0/history",
+        "router" : "mix/core/util/router/0.2.0/router"
+    },
+    "output" : {
+        "controller.js" : "."
+    }
+}

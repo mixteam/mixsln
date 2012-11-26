@@ -1,0 +1,15 @@
+{
+    "name" : "mix/core/util/dom/selector",
+    "version" : "1.0.0",
+    "description" : "selector for dom",
+    "license" : "MIT",
+    "author" : "zepto",
+    "homepage" : "http://zeptojs.com",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/madrobby/zepto.git"
+    },
+    "output" : {
+        "selector.js" : "."
+    }
+}

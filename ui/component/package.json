@@ -1,0 +1,26 @@
+{
+    "name" : "mix/core/ui/component",
+    "version" : "0.2.0",
+    "description" : "component engine",
+    "license" : "MIT",
+    "author" : "zhuxun <zhuxun.jb@taobao.com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/component.js.git"
+    },
+    "dependencies" : {
+        "reset" : "mix/core/base/reset/1.0.0/reset",
+        "class" : "mix/core/base/class/1.0.0/class",
+        "message" : "mix/core/base/message/1.0.0/message",
+        "selector" : "mix/core/util/dom/selector/1.0.0/selector",
+        "module" : "mix/core/ui/module/0.1.0/module",
+        "template" : "mix/core/ui/template/0.2.0/template"
+    },
+    "output" : {
+        "component.js" : "."
+    }
+}
+
+
+

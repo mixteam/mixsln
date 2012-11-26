@@ -1,0 +1,23 @@
+{
+    "name" : "mix/core/util/router",
+    "version" : "0.2.0",
+    "description" : "router",
+    "license" : "MIT",
+    "author" : "zhuxun <zhuxun.jb@taobao.com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/router.js.git"
+    },
+    "dependencies" : {
+        "reset" : "mix/core/base/reset/1.0.0/reset",
+        "class" : "mix/core/base/class/1.0.0/class",
+        "history" : "mix/core/util/history/0.2.0/history"
+    },
+    "output" : {
+        "router.js" : "."
+    }
+}
+
+
+

@@ -1,0 +1,21 @@
+{
+    "name" : "mix/core/ui/template",
+    "version" : "0.2.0",
+    "description" : "template engine",
+    "license" : "MIT",
+    "author" : "zhuxun <zhuxun.jb@taobao.com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/template.js.git"
+    },
+    "dependencies" : {
+        "handlebars" : "mix/libs/handlebars/1.0.5/handlebars",
+        "reset" : "mix/core/base/reset/1.0.0/reset",
+        "class" : "mix/core/base/class/1.0.0/class"
+    },
+    "output" : {
+        "template.js" : "."
+    }
+}
+

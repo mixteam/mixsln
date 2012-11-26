@@ -1,0 +1,20 @@
+{
+    "name" : "mix/core/util/detect",
+    "version" : "0.2.1",
+    "description" : "basic information detection - core",    
+    "license" : "MIT",
+    "author" : "wanyan <wanyan.wz@taoobao/com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/detect.js.git"
+    },
+    "output" : {
+        "detect.js" : ".",
+	"ability.js" : ".",
+	"deviceapi.js" : ".",
+	"hardware.js" : ".",
+	"network.js" : ".",
+	"ua.js" : "."
+    }
+}

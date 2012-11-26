@@ -1,0 +1,8 @@
+[spm build -compiler=closure]
+./package.json
+./src/detect.js
+./src/ability.js
+./src/deviceapi.js
+./src/hardware.js
+./src/network.js
+./src/ua.js

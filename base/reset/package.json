@@ -1,0 +1,15 @@
+{
+    "name" : "mix/core/base/reset",
+    "version" : "1.0.0",
+    "description" : "reset functions",
+    "license" : "MIT",
+    "author" : "zhuxun <zhuxun.jb@taobao.com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/reset.js.git"
+    },
+    "output" : {
+    	"reset.js" : "."
+    }
+}
