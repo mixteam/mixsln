@@ -1,3 +1,7 @@
+/**
+ * 针对mix Class实现的jasmine测试用例，五组测试用例分别针对: 1.简单Class创建；2.继承情况下的Class创建；3.extend功能;4.Implements功能;5.转化普通构造函数 进行了测试。
+ * 用例校验方式: 配置HttpServer, 访问 ./runner.html 页面
+ */
 define(function(require) {
 
     var Class = require('../src/class');
@@ -62,7 +66,7 @@ define(function(require) {
 			expect(motoCar.setWheelNum).toBeDefined();
 		});
 
-		//测试转换普通构造函数转换位Class类工作正常
+		//测试转换普通构造函数转换为Class类工作正常
 		test("Class Generate works",function(){
 			function Oldschool(){
 				this.age = 98;
