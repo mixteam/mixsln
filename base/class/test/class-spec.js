@@ -17,7 +17,6 @@ define(function(require) {
 			});
 			var vehicle = new Vehicle(120);
 			expect(vehicle.speed).toBeDefined(); //保证 initialize 方法被正确执行
-
 			expect(vehicle.isOverspeed(240)).toBeTruthy(); 
 			expect(vehicle.isOverspeed(40)).not.toBeTruthy(); //保证对象属性方法工作正常
 			tmp.Vehicle = Vehicle;
@@ -36,7 +35,6 @@ define(function(require) {
 			expect(car.speed).toEqual(140); //保证继承成功
 			car.setDoorNum(4);
 			expect(car.doorNum).toBeDefined(); //保证混入成功
-			
 			tmp.Car = Car;
 		});
 
@@ -51,7 +49,6 @@ define(function(require) {
 			var moto = new Moto(80);
 			expect(moto.speed).toEqual(80); //保证继承成功
 			expect(moto.setWheelNum).toBeDefined();//保证扩展成功
-			
 			tmp.Moto = Moto;
 		});
 
@@ -74,7 +71,6 @@ define(function(require) {
 			Oldschool.prototype.getAge = function(){
 				return this.age;
 			};
-			
 			var NewOne = Class(Oldschool);
 			var Youth = NewOne.extend({
 				saySomething:function(){
