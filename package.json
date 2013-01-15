@@ -11,69 +11,13 @@
         "url": "git@github.com:mixteam/mixsln.git"
     },
     "dependencies" : {
-        "handlebars" : "mix/libs/handlebars/1.0.5/handlebars",
-
         "reset" : "mix/core/0.3.0/base/reset/reset",
         "class" : "mix/core/0.3.0/base/class/class",
         "message" : "mix/core/0.3.0/base/message/message",
-        "util" : "mix/core/0.3.0/base/util/util",
-
-        "selector" : "mix/core/0.3.0/dom/selector/selector",
-        "event" : "mix/core/0.3.0/dom/event/event",
-        "ajax" : "mix/core/0.3.0/dom/ajax/ajax",
-        "animation" : "mix/core/0.3.0/dom/animation/animation",
-
-        "template" : "mix/core/0.3.0/ui/template/template",
-        "module" : "mix/core/0.3.0/ui/module/module",
-        "component" : "mix/core/0.3.0/ui/component/component",
-        
         "history" : "mix/core/0.3.0/url/history/history",
-        "router" : "mix/core/0.3.0/url/router/router",
-
-        "controller" : "mix/core/0.3.0/mvc/controller/controller",
-        "navigator" : "mix/core/0.3.0/mvc/navigator/navigator",
-        "view" : "mix/core/0.3.0/mvc/view/view",
-        "model" : "mix/core/0.3.0/mvc/model/model",
-        "orm" : "mix/core/0.3.0/mvc/orm/orm"
+        "router" : "mix/core/0.3.0/url/router/router"
     },
     "output" : {
-        "*.js" : ".",
-        "*/*.js" : ".",
-        "*/*/*.js" : ".",
-
-        "mix.js" : {
-            "main" : "base/reset/reset.js",
-            "includes" : [
-                "base/reset/reset.js",
-                "base/class/class.js",
-                "base/message/message.js",
-                "base/util/util.js",
-
-                "detect/detect.js",
-                "detect/ability/ability.js",
-                "detect/deviceapi/deviceapi.js",
-                "detect/hardware/hardware.js",
-                "detect/network/network.js",
-                "detect/ua/ua.js",
-
-                "dom/selector/selector.js",
-                "dom/event/event.js",
-                "dom/ajax/ajax.js",
-                "dom/animation/animation.js",
-
-                "ui/template/template.js",
-                "ui/module/module.js",
-                "ui/component/component.js",
-
-                "url/history/history.js",
-                "url/router/router.js",
-
-                "mvc/controller/controller.js",
-                "mvc/navigator/navigator.js",
-                "mvc/view/view.js",
-                "mvc/model/model.js",
-                "mvc/orm/orm.js"
-            ]
-        }
+        "sln.js" : "*"
     }
 }
