@@ -5,9 +5,10 @@ require('reset');
 var win = window,
     doc = win.document,
     Class = require('class'),
-    gestrue = require('./gestrue'),
+    gestrue = require('./gesture'),
     MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/,
-    MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/
+    MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/,
+    prevented = false
     ;
 
 function quadratic2cubicBezier(a, b) {
@@ -57,16 +58,24 @@ var Scroll = Class.create({
         that._originalY = null;
         that._currentY = null;
 
-        that._onTouchStart = Function.bind(that._onTouchStart, that);
-        that._onPanStart = Function.bind(that._onPanStart, that);
-        that._onPan = Function.bind(that._onPan, that);
-        that._onPanEnd = Function.bind(that._onPanEnd, that);
-        that._onFlick = Function.bind(that._onFlick, that);
+        that._onTouchStart = that._onTouchStart.bind(that);
+        that._onPanStart = that._onPanStart.bind(that);
+        that._onPan = that._onPan.bind(that);
+        that._onPanEnd = that._onPanEnd.bind(that);
+        that._onFlick = that._onFlick.bind(that);
 
+        element.addEventListener('touchstart', that._onTouchStart, false);
+        element.addEventListener('panstart', that._onPanStart, false);
+        element.addEventListener('pan', that._onPan, false);
+        element.addEventListener('panend', that._onPanEnd, false);
+        element.addEventListener('flick', that._onFlick, false);
 
-        doc.body.addEventListener('touchmove',function(e){
-            e.preventDefault();
-        }, false);
+        if (!prevented) {
+            prevented = true;
+            doc.body.addEventListener('touchmove',function(e){
+                e.preventDefault();
+            }, false);
+        }
     },
 
     _onTouchStart : function(e) {
@@ -150,7 +159,7 @@ var Scroll = Class.create({
             s = s0 + t*v0/2
             ;
 
-        if( s > 0 || s < maxScrollTop {
+        if( s > 0 || s < maxScrollTop) {
             var sign = s > 0 ? 1 : -1,
                 edge = s > 0 ? 0 : maxScrollTop
                 ;
@@ -184,7 +193,6 @@ var Scroll = Class.create({
         }
     }
 });
-
 
 return function(element) {
     return new Scroll(element);

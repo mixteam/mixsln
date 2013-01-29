@@ -7,17 +7,29 @@
     "author" : "zhuxun <zhuxun.jb@taobao.com>",
     "homepage": "https://github.com/organizations/mixteam",
     "repository" : {
-        "type": "git",
-        "url": "git@github.com:mixteam/mixsln.git"
+        "type" : "git",
+        "url" : "git@github.com:mixteam/mixsln.git"
     },
     "dependencies" : {
-        "reset" : "mix/core/0.3.0/base/reset/reset",
-        "class" : "mix/core/0.3.0/base/class/class",
-        "message" : "mix/core/0.3.0/base/message/message",
-        "history" : "mix/core/0.3.0/url/history/history",
-        "router" : "mix/core/0.3.0/url/router/router"
+        "reset" : "mix/core/0.3.0/base/reset",
+        "class" : "mix/core/0.3.0/base/class",
+        "message" : "mix/core/0.3.0/base/message",
+        "router" : "mix/core/0.3.0/url/router",
+        "navigate" : "mix/core/0.3.0/url/navigate"
     },
     "output" : {
-        "sln.js" : "*"
+        "app.js" : {
+            "includes" : [
+                "mix/core/0.3.0/cjs",
+                "mix/core/0.3.0/base/reset",
+                "mix/core/0.3.0/base/class",
+                "mix/core/0.3.0/base/message",
+                "mix/core/0.3.0/url/router",
+                "mix/core/0.3.0/url/navigate",
+                "./modules/gesture",
+                "./modules/scroll",
+                "./app"
+            ]
+        }
     }
 }

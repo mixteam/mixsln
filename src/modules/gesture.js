@@ -64,7 +64,7 @@ function copyEvents(type, src, copies) {
     if (src) {
         if (copies) {
             Object.each(copies, function (p) {
-                ev[p] = touch[p];
+                ev[p] = src[p];
             });
         } else {
             Object.extend(ev, src);
@@ -74,7 +74,7 @@ function copyEvents(type, src, copies) {
     return ev;
 }
 
-var Gestrue = Class.create(function() {
+var Gestrue = Class.create({
     initialize : function(element) {
         var that = this
             ;
@@ -83,10 +83,10 @@ var Gestrue = Class.create(function() {
         that._myGestures = {};
         that._lastTapTime = NaN;
 
-        that._onStart = Function.bind(that._onStart, that);
-        that._onDoing = Function.bind(that._onDoing, that);
-        that._onEnd = Function.bind(that._onEnd, that);
-        that._onTap = Function.bind(that._onTap, that);
+        that._onStart = that._onStart.bind(that);
+        that._onDoing = that._onDoing.bind(that);
+        that._onEnd = that._onEnd.bind(that);
+        that._onTap = that._onTap.bind(that);
 
         element.addEventListener('touchstart', that._onStart, false);
         element.addEventListener('tap', that._onTap, false);
@@ -194,7 +194,7 @@ var Gestrue = Class.create(function() {
 
     _onEnd : function(e) {
         var that = this,
-            el = that._el
+            el = that._el,
             myGestures = that._myGestures,
             ev
             ;
@@ -206,8 +206,9 @@ var Gestrue = Class.create(function() {
         }
 
         for (var i = 0; i < e.changedTouches.length; i++) {
-            var gesture = myGestures[e.changedTouches[i].identifier],
-                touch = e.changedTouches[i]
+            var touch = e.changedTouches[i],
+                id = touch.identifier,
+                gesture = myGestures[id]
                 ;
 
             if (!gesture)
@@ -245,7 +246,7 @@ var Gestrue = Class.create(function() {
                 el.dispatchEvent(ev);
             }
 
-            delete myGestures[e.changedTouches[i].identifier];
+            delete myGestures[id];
         }
 
         if (Object.keys(myGestures).length == 0) {

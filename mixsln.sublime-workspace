@@ -4,6 +4,54 @@
 		"selected_items":
 		[
 			[
+				"m",
+				"matchs"
+			],
+			[
+				"tr",
+				"transform"
+			],
+			[
+				"tra",
+				"translateY"
+			],
+			[
+				"_o",
+				"_originalY"
+			],
+			[
+				"el",
+				"element"
+			],
+			[
+				"_",
+				"_el"
+			],
+			[
+				"ev",
+				"events"
+			],
+			[
+				"to",
+				"touches"
+			],
+			[
+				"dis",
+				"distance"
+			],
+			[
+				"ge",
+				"gesture"
+			],
+			[
+				"pr",
+				"pressingHandler"
+			],
+			[
+				"ch",
+				"changedTouches"
+			],
+			[
 				"fr",
 				"fromIndex"
 			],
@@ -44,20 +92,8 @@
 				"underscore"
 			],
 			[
-				"m",
-				"moduleId"
-			],
-			[
 				"fin",
 				"findNS"
-			],
-			[
-				"ch",
-				"chunkName"
-			],
-			[
-				"pr",
-				"perlParam"
 			],
 			[
 				"sp",
@@ -300,14 +336,6 @@
 				"router"
 			],
 			[
-				"tra",
-				"transitionDuration"
-			],
-			[
-				"tr",
-				"transitionEnd"
-			],
-			[
 				"isT",
 				"isTransitionEnd"
 			],
@@ -456,10 +484,6 @@
 				"beginNode"
 			],
 			[
-				"el",
-				"element"
-			],
-			[
 				"remove",
 				"removeFragment"
 			],
@@ -490,35 +514,35 @@
 			[
 				"cont",
 				"context"
-			],
-			[
-				"_com",
-				"_components"
-			],
-			[
-				"bind",
-				"binded"
-			],
-			[
-				"st",
-				"states"
-			],
-			[
-				"read",
-				"readyHandler"
-			],
-			[
-				"han",
-				"handler"
-			],
-			[
-				"ha",
-				"handler"
 			]
 		]
 	},
 	"buffers":
 	[
+		{
+			"file": "package.json",
+			"settings":
+			{
+				"buffer_size": 669,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/modules/scroll.js",
+			"settings":
+			{
+				"buffer_size": 6173,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/modules/gesture.js",
+			"settings":
+			{
+				"buffer_size": 9200,
+				"line_ending": "Unix"
+			}
+		}
 	],
 	"build_system": "",
 	"command_palette":
@@ -564,6 +588,10 @@
 	},
 	"file_history":
 	[
+		"/D/workspace/taobao/etao/mix/mixsln/mixsln.sublime-project",
+		"/D/workspace/taobao/etao/mix/mixsln/src/sln.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/gesture.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/scroll.js",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/cjs.js",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/dist/mix.js",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/mvc/view/view.js",
@@ -687,11 +715,7 @@
 		"/D/workspace/taobao/etao/w_Wireless/base/styles/doc/assets/css/compdocs.css",
 		"/E/Program Files/TortoiseGit/11.ppk",
 		"/E/Program Files/TortoiseGit/private.ppk",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/core/ui/component/src/component.js",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/core/ui/module/src/module.js",
-		"/D/workspace/taobao/etao/w_Wireless/base/styles/component/innernav/less/innernav.less",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/demos/helloworld/apps/hellomix/src/view.js",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/projinit/examples/hellomix/src/view.js"
+		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/core/ui/component/src/component.js"
 	],
 	"find":
 	{
@@ -709,6 +733,21 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"currentY",
+			"originalY",
+			"getMaxScrollTop",
+			"scrollTo",
+			"\"",
+			"element",
+			"elementel",
+			"element",
+			"\"",
+			"that._copyEvents",
+			"copyEvents",
+			"calc",
+			"touchRecord",
+			"ele",
+			"myGestures",
 			"_scope",
 			"resolveId",
 			"_scope",
@@ -821,22 +860,7 @@
 			"ins",
 			"viewPath",
 			"configs",
-			"this",
-			"undef",
-			"build",
-			"document",
-			"window",
-			"window.history",
-			"window.location",
-			"_matchUrl",
-			"history",
-			"his",
-			"that",
-			"root",
-			"appPath",
-			"maxStateLen",
-			".id",
-			"_updateHash"
+			"this"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -844,6 +868,8 @@
 		"regex": false,
 		"replace_history":
 		[
+			"'",
+			"copyEvents",
 			"scope",
 			"hashParam.page",
 			"hashParam.name",
@@ -912,8 +938,93 @@
 	"groups":
 	[
 		{
+			"selected": 0,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "package.json",
+					"settings":
+					{
+						"buffer_size": 669,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								347,
+								347
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/modules/scroll.js",
+					"settings":
+					{
+						"buffer_size": 6173,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								195,
+								195
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/modules/gesture.js",
+					"settings":
+					{
+						"buffer_size": 9200,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3228,
+								3228
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1479.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
 			]
 		}
 	],
@@ -976,7 +1087,7 @@
 		[
 			[
 				"",
-				"/D/workspace/taobao/etao/Mobile_In_X/mixteam/mixteam.sublime-project"
+				"/D/workspace/taobao/etao/mix/mixsln/mixsln.sublime-project"
 			]
 		],
 		"width": 380.0
