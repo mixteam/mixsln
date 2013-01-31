@@ -92,6 +92,10 @@ var Gestrue = Class.create({
         element.addEventListener('tap', that._onTap, false);
     },
 
+    getElement : function() {
+        return that._el;
+    },
+
     _onStart : function(e) {
         var that = this,
             el = that._el,

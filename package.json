@@ -20,6 +20,15 @@
     "output" : {
         "app.js" : {
             "includes" : [
+                "./modules/gesture",
+                "./modules/scroll",
+                "./app"
+            ]
+        },
+
+        "app.all.js" : {
+            "main" : "./app",
+            "includes" : [
                 "mix/core/0.3.0/cjs",
                 "mix/core/0.3.0/base/reset",
                 "mix/core/0.3.0/base/class",

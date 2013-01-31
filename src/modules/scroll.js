@@ -4,10 +4,17 @@ require('reset');
 
 var win = window,
     doc = win.document,
+    navigator = win.navigator,
+
     Class = require('class'),
     gestrue = require('./gesture'),
     MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/,
     MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/,
+
+    appVersion = navigator.appVersion,
+    isAndroid = (/android/gi).test(appVersion),
+    isIOS = (/iphone|ipad/gi).test(appVersion),
+    has3d = 'WebKitCSSMatrix' in window && 'm11' in new WebKitCSSMatrix(),
     prevented = false
     ;
 
@@ -16,20 +23,17 @@ function quadratic2cubicBezier(a, b) {
         [(b / 3 + (a + b) / 3 - a) / (b - a), (b * b / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a)]];
 }
 
-function waitTransition(element, propertyName, callback) {
-    function eventHandler(e){
-        if(e.srcElement !== element || e.propertyName != propertyName) {
-            return;
-        }
-        callback();
-        element.removeEventListener('webkitTransitionEnd', eventHandler, false);
-    }
+function getMaxScrollTop(el) {
+    var parentEl = el.parentNode,
+        parentStyle = getComputedStyle(parentEl)
+        ;
 
-    element.addEventListener('webkitTransitionEnd', eventHandler, false);
-}
 
-function getMaxScrollTop(element) {
-    return 0 - element.scrollHeight + element.parentNode.offsetHeight;
+    return 0 - el.scrollHeight + parentEl.offsetHeight - 
+                parseInt(parentStyle.paddingTop) - 
+                parseInt(parentStyle.paddingBottom) - 
+                parseInt(parentStyle.marginTop) - 
+                parseInt(parentStyle.marginBottom);
 }
 
 function getTransformY(el) {
@@ -48,6 +52,45 @@ function getTransformY(el) {
     return 0;
 }
 
+function getTranslate(x, y) {
+    if (false) {
+        return 'translate3d(' + x + 'px, ' + y + 'px, 0)';
+    } else {
+        return 'translate(' + x + 'px, ' + y + 'px)';
+    }
+}
+
+function waitTransition(el, propertyName, callback) {
+    var parentEl = el.parentNode;
+
+    function eventHandler(e){
+        if(e.srcElement !== el || e.propertyName != propertyName) {
+            return;
+        }
+
+        // el.style.webkitBackfaceVisibility = 'initial';
+        // el.style.webkitTransformStyle = 'flat';
+        el.style.webkitTransition = 'none';
+        el.removeEventListener('webkitTransitionEnd', eventHandler, false);
+
+        callback && callback();
+    }
+
+    el.addEventListener('webkitTransitionEnd', eventHandler, false);
+}
+
+function doTransition(el, time, timeFunction, delay, x, y, callback) {
+    var propertyName = '-webkit-transform',
+        parentEl = el.parentNode;
+
+    // el.style.webkitBackfaceVisibility = 'hidden';
+    // el.style.webkitTransformStyle = 'preserve-3d';
+    el.style.webkitTransition = [propertyName, time, timeFunction, delay].join(' ');
+    el.style.webkitTransform = getTranslate(x, y);
+
+    waitTransition(el, propertyName, callback);
+}
+
 var Scroll = Class.create({
     initialize : function(element) {
         var that = this
@@ -64,6 +107,8 @@ var Scroll = Class.create({
         that._onPanEnd = that._onPanEnd.bind(that);
         that._onFlick = that._onFlick.bind(that);
 
+        element.style.webkitBackfaceVisibility = 'hidden';
+        element.style.webkitTransformStyle = 'preserve-3d';
         element.addEventListener('touchstart', that._onTouchStart, false);
         element.addEventListener('panstart', that._onPanStart, false);
         element.addEventListener('pan', that._onPan, false);
@@ -78,6 +123,10 @@ var Scroll = Class.create({
         }
     },
 
+    getElement : function() {
+        return that._el;
+    },
+
     _onTouchStart : function(e) {
         var that = this,
             el = that._el
@@ -85,6 +134,8 @@ var Scroll = Class.create({
 
         el.style.webkitTransition = 'none';
         el.style.webkitTransform = getComputedStyle(el).webkitTransform;
+        el.style.height = 'auto';
+        el.style.height = el.offsetHeight + 'px';
     },
 
     _onPanStart : function(e) {
@@ -106,11 +157,11 @@ var Scroll = Class.create({
         currentY = that._currentY = originalY + e.displacementY;
         
         if(currentY > 0) {
-            el.style.webkitTransform = 'translate3d(0,' + (currentY / 2) + 'px,0)';
+            el.style.webkitTransform = getTranslate(0, currentY / 2);
         } else if(currentY < maxScrollTop) {
-            el.style.webkitTransform = 'translate3d(0,' + ((maxScrollTop - currentY) / 2 + currentY) + 'px,0)';
+            el.style.webkitTransform = getTranslate(0, (maxScrollTop - currentY) / 2 + currentY);
         } else {
-            el.style.webkitTransform = 'translate3d(0,' + currentY + 'px,0)';
+            el.style.webkitTransform = getTranslate(0, currentY);
         }
     },
 
@@ -131,11 +182,11 @@ var Scroll = Class.create({
         }
 
         if (translateY != null) {
-            el.style.webkitTransition = '-webkit-transform 0.4s ease-out 0s';
-            el.style.webkitTransform = 'translate3d(0,' + translateY + ',0)';
-            waitTransition(el, '-webkit-transform', function(){
-                el.style.webkitTransition = 'none';
-            });
+            doTransition(el, '0.4s', 'ease-out', '0s', 0, translateY);
+
+            // el.style.webkitTransition = '-webkit-transform 0.4s ease-out 0s';
+            // el.style.webkitTransform = getTranslate(0, translateY);
+            // waitTransition(el, '-webkit-transform');
         }
     },
 
@@ -168,28 +219,55 @@ var Scroll = Class.create({
             t = (sign * Math.sqrt(2*a*(s-s0)+v0*v0)-v0)/a;
             v = v0 - a * t;
             
-            el.style.webkitTransition = '-webkit-transform ' + t.toFixed(0) + 'ms cubic-bezier('+quadratic2cubicBezier(-v0/a,-v0/a+t)+') 0s';
-            el.style.webkitTransform = 'translate3d(0,' + s.toFixed(0) + 'px,0)';
-            waitTransition(el, '-webkit-transform', function(){
-                v0 = v;
-                s0 = s;
-                a = 0.0045*(v0 / Math.abs(v0));
-                t = v0/a;
-                s = s0 + t*v0/2;
+            doTransition(
+                el, 
+                t.toFixed(0) + 'ms', 'cubic-bezier(' + quadratic2cubicBezier(-v0/a, -v0/a+t) + ')', '0s',
+                0, s.toFixed(0), 
+                function() {
+                    v0 = v;
+                    s0 = s;
+                    a = 0.0045*(v0 / Math.abs(v0));
+                    t = v0/a;
+                    s = s0 + t*v0/2;
 
-                el.style.webkitTransition = '-webkit-transform ' + t.toFixed(0) + 'ms cubic-bezier('+quadratic2cubicBezier(-t,0)+') 0s';
-                el.style.webkitTransform = 'translate3d(0,' + s.toFixed(0) + 'px,0)';
-                waitTransition(el, '-webkit-transform',function(){
-                    el.style.webkitTransition = '-webkit-transform 0.4s ease-out 0s';
-                    el.style.webkitTransform = 'translate3d(0,' + edge + 'px,0)';
-                    waitTransition(el, '-webkit-transform', function(){
-                        el.style.webkitTransition = 'none';
-                    });
-                });
-            });
+                    doTransition(
+                        el,
+                        t.toFixed(0) + 'ms', 'cubic-bezier(' + quadratic2cubicBezier(-t, 0) + ')', '0s',
+                        0, s.toFixed(0),
+                        function() {
+                            doTransition(el, '0.4s', 'ease-out', '0s', 0, edge);
+                        }
+                    );
+                }
+            );
+
+            // el.style.webkitTransition = '-webkit-transform ' + t.toFixed(0) + 'ms cubic-bezier(' + quadratic2cubicBezier(-v0/a, -v0/a+t) + ') 0s';
+            // el.style.webkitTransform = getTranslate(0, s.toFixed(0));
+            // waitTransition(el, '-webkit-transform', function(){
+            //     v0 = v;
+            //     s0 = s;
+            //     a = 0.0045*(v0 / Math.abs(v0));
+            //     t = v0/a;
+            //     s = s0 + t*v0/2;
+
+            //     el.style.webkitTransition = '-webkit-transform ' + t.toFixed(0) + 'ms cubic-bezier(' + quadratic2cubicBezier(-t, 0) + ') 0s';
+            //     el.style.webkitTransform = getTranslate(0, s.toFixed(0));
+            //     waitTransition(el, '-webkit-transform', function(){
+            //         el.style.webkitTransition = '-webkit-transform 0.4s ease-out 0s';
+            //         el.style.webkitTransform = getTranslate(0, edge);
+            //         waitTransition(el, '-webkit-transform', function(){
+            //             el.style.webkitTransition = 'none';
+            //         });
+            //     });
+            // });
         } else {
-            el.style.webkitTransition = '-webkit-transform ' + t.toFixed(0) + 'ms cubic-bezier('+ quadratic2cubicBezier(-t,0) + ') 0s';
-            el.style.webkitTransform = 'translate3d(0,' + s.toFixed(0) + 'px,0)';
+            doTransition(
+                el,
+                t.toFixed(0) + 'ms', 'cubic-bezier(' + quadratic2cubicBezier(-t, 0) + ')', '0s',
+                0, s.toFixed(0)
+            );
+            // el.style.webkitTransition = '-webkit-transform ' + t.toFixed(0) + 'ms cubic-bezier(' + quadratic2cubicBezier(-t, 0) + ') 0s';
+            // el.style.webkitTransform = getTranslate(0, s.toFixed(0));
         }
     }
 });

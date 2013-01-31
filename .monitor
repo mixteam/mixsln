@@ -1,0 +1,6 @@
+[spm build]
+./package.json
+./src/app.js
+./src/modules/gesture.js
+./src/modules/scroll.js
+./src/modules/page.js
