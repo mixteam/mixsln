@@ -31,19 +31,34 @@
 			scrollEl.innerHTML = '<ol>' + html  + '</ol>';
 		},
 
-		ready : function(state) {
-			var that = this
+		_increaseCount : function(e) {
+			var that = this,
+				count = that._listCount
 				;
 
-			document.querySelector('.navibar .function')
-				.addEventListener('click', function(e) {
-					app.navigate.forward(that._listCount +  50);
-					e.preventDefault();
-					return false;
-				});
+			app.navigate.forward(count +  50);
+			e.preventDefault();
+			return false;
+		},
+
+		ready : function(state) {
+			var that = this,
+				button = document.createElement('button')
+				;
+
+			button.className = 'increase';
+			button.innerText = '加50条';
+			button.addEventListener('click', that._increaseCount.bind(that));
+
+			document.querySelector('.navibar').appendChild(button);
 		},
 
 		unload : function() {
+			var that = this,
+				button = document.querySelector('.navibar .increase')
+				;
+
+			button.parseNode.removeChild(button);
 
 		},
 
