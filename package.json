@@ -37,6 +37,7 @@
                 "mix/core/0.3.0/url/navigate",
                 "./modules/gesture",
                 "./modules/scroll",
+                "./modules/page",
                 "./app"
             ]
         }

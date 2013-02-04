@@ -684,22 +684,16 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
     win = window, doc = win.document, his = win.history, loc = win.location;
     var Navigate = Class.create({
         Implements: Message,
-        initialize: function(options, globalRouter) {
+        initialize: function(options) {
             var that = this;
             Message.prototype.initialize.call(that, "navigate");
-            that._options = Object.extend({
-                stateLimit: 100
-            }, options || {});
-            that._states = [];
-            that._stateIdx = 0;
             that._move = null;
             that._datas = null;
             that._routes = {};
-            if (globalRouter === true) {
-                that._router = Router.singleton;
-            } else {
-                that._router = new Router();
-            }
+            that._states = [];
+            that._stateIdx = 0;
+            that._stateLimit = options.stateLimit || 100;
+            that._router = options.useRouter;
         },
         _convertParams: function(routeText) {
             return routeText.replace(NAMED_REGEXP, "(P<$1>[^\\/]*?)").replace(SPLAT_REGEXP, "(P<$1>.*?)");
@@ -732,7 +726,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             return true;
         },
         _pushState: function(name, fragment, params, args) {
-            var that = this, options = that._options, stateLimit = options.stateLimit, states = that._states, stateIdx = that._stateIdx, stateLen = states.length, move = that._move, datas = that._datas, prev = states[stateIdx - 1], next = states[stateIdx + 1], cur = {
+            var that = this, states = that._states, stateIdx = that._stateIdx, stateLimit = that._stateLimit, stateLen = states.length, move = that._move, datas = that._datas, prev = states[stateIdx - 1], next = states[stateIdx + 1], cur = {
                 name: name,
                 fragment: fragment,
                 params: params,
@@ -775,17 +769,13 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             that.trigger(move, cur);
             return cur;
         },
-        getRouter: function() {
-            return this._router;
-        },
         getState: function() {
-            return this._states[this._stateIdx];
-        },
-        getStateSize: function() {
-            return this._states.length;
+            var that = this;
+            return that._states[that._stateIdx];
         },
         getStateIndex: function() {
-            return this._stateIdx;
+            var that = this;
+            return that._stateIdx;
         },
         addRoute: function(name, routeText, options) {
             var that = this, callback, routeNames, routeReg;
@@ -846,7 +836,9 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             his.back();
         }
     });
-    Navigate.singleton = new Navigate({}, true);
+    Navigate.singleton = new Navigate({
+        useRouter: Router.singleton
+    });
     module.exports = Navigate;
 });
 
@@ -1190,54 +1182,89 @@ define("#mix/sln/0.1.0/modules/scroll-debug", [ "./gesture-debug", "mix/core/0.3
     };
 });
 
-define("#mix/sln/0.1.0/app-debug", [ "./modules/gesture-debug", "./modules/scroll-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/class-debug", "mix/sln/0.1.0/app-debug" ], function(require, exports, module) {
-    var win = window, doc = win.document, reset = require("mix/core/0.3.0/base/reset-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, gesture = require("./modules/gesture-debug"), scroll = require("./modules/scroll-debug"), pages = {}, components = {
-        "x-back": [],
-        "x-scroll": []
-    }, app = {
+define("#mix/sln/0.1.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, pages = {}, curApp = null;
+    var AppPage = Class.create({
+        Implements: Message,
+        initialize: function(name, options) {
+            var that = this;
+            Message.prototype.initialize.call(this, "app." + name);
+            that._appname = name;
+            that._bindRoutes(options.routes);
+            pages[name] = that;
+        },
+        _bindRoutes: function(routes) {
+            var that = this, appname = that._appname;
+            Object.each(routes, function(route, routeName) {
+                var routeText = route.text, routeCallback = route.callback;
+                if (routeName === "default") {
+                    route["default"] = true;
+                }
+                route.callback = function() {
+                    if (Object.isTypeof(routeCallback, "string")) {
+                        routeCallback = that[routeCallback];
+                    }
+                    routeCallback.apply(that, arguments);
+                    // lazy callback
+                    route.callback = routeCallback.bind(that);
+                };
+                navigate.addRoute(appname + "." + routeName, routeText, route);
+            });
+        },
+        ready: function(state) {},
+        unload: function() {}
+    });
+    navigate.on("forward backward", function(state) {
+        var appName = state.name.split(".")[0];
+        if (curApp !== appName) {
+            var lastPage = pages[curApp], curPage = pages[appName];
+            curApp = appName;
+            lastPage && lastPage.unload();
+            curPage && curPage.ready(state);
+        }
+    });
+    return AppPage;
+});
+
+define("#mix/sln/0.1.0/app-debug", [ "./modules/gesture-debug", "./modules/scroll-debug", "./modules/page-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.1.0/app-debug" ], function(require, exports, module) {
+    var win = window, doc = win.document, reset = require("mix/core/0.3.0/base/reset-debug"), Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, gesture = require("./modules/gesture-debug"), scroll = require("./modules/scroll-debug"), AppPage = require("./modules/page-debug"), app = {
         theme: "ios",
         routePrefix: 0,
         // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
         routePrefixSep: "/"
     };
-    function initPage(page) {
-        var name = page.name, routes = page.routes;
-        pages[name] = page;
-        Object.each(routes, function(route, routeName) {
-            var routeText = route.text;
-            if (app.routePrefix === 1) {
-                routeText = name + routePrefixSep + routeText;
-            } else if (Object.isTypeof(app.routePrefix, "string")) {
-                routeText = routePrefix + routePrefixSep + routeText;
+    function initXback() {
+        var backsEl = doc.querySelector('*[is="x-back"]');
+        backsEl.style.visibility = "hidden";
+        backsEl.addEventListener("click", function(e) {
+            navigate.backward();
+            e.preventDefault();
+            return false;
+        });
+        navigate.on("forward backward", function(state) {
+            var visibility = "";
+            if (navigate.getStateIndex() < 1) {
+                visibility = "hidden";
             }
-            navigate.addRoute(routeName, routeText, route);
+            backsEl.style.visibility !== visibility && (backsEl.style.visibility = visibility);
         });
     }
-    function initComponents() {
-        var backsEl = doc.querySelectorAll('*[is="x-back"]'), scrollsEl = doc.querySelectorAll('*[is="x-scroll"]'), xBack = components["x-back"], xScroll = components["x-scroll"];
-        Object.each(backsEl, function(el) {
-            el.style.visibility = "hidden";
-            el.addEventListener("click", function(e) {
-                navigate.backward();
-                e.preventDefault();
-                return false;
-            });
-            xBack.push(el);
-        });
-        Object.each(scrollsEl, function(el) {
-            xScroll.push(scroll(el));
-        });
+    function initXScroll() {
+        var scrollsEl = doc.querySelector('*[is="x-scroll"]');
+        app.ui.scroll(scrollsEl);
     }
     Object.extend(app, {
         init: function(page) {
-            var that = this;
-            if (Object.isTypeof(page, "array")) {
-                Object.each(page, function(p) {
-                    initPage(p);
-                });
-            } else {
-                initPage(page);
-            }
+            var that = this, name = page.name, routes = page.routes || {};
+            delete page.name;
+            delete page.routes;
+            var appPage = new AppPage(name, {
+                routePrefix: app.routePrefix,
+                routePrefixSep: app.routePrefixSep,
+                routes: routes
+            });
+            Object.extend(appPage, page);
         },
         router: router,
         navigate: navigate,
@@ -1246,18 +1273,8 @@ define("#mix/sln/0.1.0/app-debug", [ "./modules/gesture-debug", "./modules/scrol
             scroll: scroll
         }
     });
-    navigate.on("forward backward", function() {
-        var visibility = "";
-        if (navigate.getStateIndex() < 1) {
-            visibility = "hidden";
-        }
-        Object.each(components["x-back"], function(comp) {
-            if (comp instanceof HTMLElement && comp.style.visibility !== visibility) {
-                comp.style.visibility = visibility;
-            }
-        });
-    });
-    initComponents();
+    initXback();
+    initXScroll();
     win["app"] = app;
 });
 

@@ -338,54 +338,44 @@ define("#mix/sln/0.1.0/modules/scroll-debug", [ "./gesture-debug", "mix/core/0.3
     };
 });
 
-define("#mix/sln/0.1.0/app-debug", [ "./modules/gesture-debug", "./modules/scroll-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/class-debug", "mix/sln/0.1.0/app-debug" ], function(require, exports, module) {
-    var win = window, doc = win.document, reset = require("mix/core/0.3.0/base/reset-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, gesture = require("./modules/gesture-debug"), scroll = require("./modules/scroll-debug"), pages = {}, components = {
-        "x-back": [],
-        "x-scroll": []
-    }, app = {
+define("#mix/sln/0.1.0/app-debug", [ "./modules/gesture-debug", "./modules/scroll-debug", "./modules/page-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.1.0/app-debug" ], function(require, exports, module) {
+    var win = window, doc = win.document, reset = require("mix/core/0.3.0/base/reset-debug"), Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, gesture = require("./modules/gesture-debug"), scroll = require("./modules/scroll-debug"), AppPage = require("./modules/page-debug"), app = {
         theme: "ios",
         routePrefix: 0,
         // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
         routePrefixSep: "/"
     };
-    function initPage(page) {
-        var name = page.name, routes = page.routes;
-        pages[name] = page;
-        Object.each(routes, function(route, routeName) {
-            var routeText = route.text;
-            if (app.routePrefix === 1) {
-                routeText = name + routePrefixSep + routeText;
-            } else if (Object.isTypeof(app.routePrefix, "string")) {
-                routeText = routePrefix + routePrefixSep + routeText;
+    function initXback() {
+        var backsEl = doc.querySelector('*[is="x-back"]');
+        backsEl.style.visibility = "hidden";
+        backsEl.addEventListener("click", function(e) {
+            navigate.backward();
+            e.preventDefault();
+            return false;
+        });
+        navigate.on("forward backward", function(state) {
+            var visibility = "";
+            if (navigate.getStateIndex() < 1) {
+                visibility = "hidden";
             }
-            navigate.addRoute(routeName, routeText, route);
+            backsEl.style.visibility !== visibility && (backsEl.style.visibility = visibility);
         });
     }
-    function initComponents() {
-        var backsEl = doc.querySelectorAll('*[is="x-back"]'), scrollsEl = doc.querySelectorAll('*[is="x-scroll"]'), xBack = components["x-back"], xScroll = components["x-scroll"];
-        Object.each(backsEl, function(el) {
-            el.style.visibility = "hidden";
-            el.addEventListener("click", function(e) {
-                navigate.backward();
-                e.preventDefault();
-                return false;
-            });
-            xBack.push(el);
-        });
-        Object.each(scrollsEl, function(el) {
-            xScroll.push(scroll(el));
-        });
+    function initXScroll() {
+        var scrollsEl = doc.querySelector('*[is="x-scroll"]');
+        app.ui.scroll(scrollsEl);
     }
     Object.extend(app, {
         init: function(page) {
-            var that = this;
-            if (Object.isTypeof(page, "array")) {
-                Object.each(page, function(p) {
-                    initPage(p);
-                });
-            } else {
-                initPage(page);
-            }
+            var that = this, name = page.name, routes = page.routes || {};
+            delete page.name;
+            delete page.routes;
+            var appPage = new AppPage(name, {
+                routePrefix: app.routePrefix,
+                routePrefixSep: app.routePrefixSep,
+                routes: routes
+            });
+            Object.extend(appPage, page);
         },
         router: router,
         navigate: navigate,
@@ -394,18 +384,8 @@ define("#mix/sln/0.1.0/app-debug", [ "./modules/gesture-debug", "./modules/scrol
             scroll: scroll
         }
     });
-    navigate.on("forward backward", function() {
-        var visibility = "";
-        if (navigate.getStateIndex() < 1) {
-            visibility = "hidden";
-        }
-        Object.each(components["x-back"], function(comp) {
-            if (comp instanceof HTMLElement && comp.style.visibility !== visibility) {
-                comp.style.visibility = visibility;
-            }
-        });
-    });
-    initComponents();
+    initXback();
+    initXScroll();
     win["app"] = app;
 });
 

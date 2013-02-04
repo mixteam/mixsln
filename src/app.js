@@ -8,11 +8,7 @@ var win = window,
 	navigate = require('navigate').singleton,
 	gesture = require('./modules/gesture'),
 	scroll = require('./modules/scroll'),
-	pages = {}, 
-	components = {
-		'x-back' : [],
-		'x-scroll' : []
-	},
+	AppPage = require('./modules/page'),
 	app = {
 		theme : 'ios',
 		routePrefix : 0, // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
@@ -20,42 +16,53 @@ var win = window,
 	}
 	;
 
-	function initComponents() {
-		var backsEl = doc.querySelectorAll('*[is="x-back"]'),
-			scrollsEl = doc.querySelectorAll('*[is="x-scroll"]'),
-			xBack = components['x-back'],
-			xScroll = components['x-scroll']
+	function initXback() {
+		var backsEl = doc.querySelector('*[is="x-back"]')
 			;
 
-		Object.each(backsEl, function(el) {
-			el.style.visibility = 'hidden';
-
-			el.addEventListener('click', function(e) {
-				navigate.backward();
-				e.preventDefault();
-				return false;
-			});
-
-			xBack.push(el);
+		backsEl.style.visibility = 'hidden';
+		backsEl.addEventListener('click', function(e) {
+			navigate.backward();
+			e.preventDefault();
+			return false;
 		});
 
-		Object.each(scrollsEl, function(el) {
-			xScroll.push(scroll(el));
+		navigate.on('forward backward', function(state) {
+			var visibility = ''
+				;
+
+			if (navigate.getStateIndex() < 1) {
+				visibility = 'hidden';
+			}
+
+			(backsEl.style.visibility !== visibility) &&
+					(backsEl.style.visibility = visibility);
 		});
+	}
+
+	function initXScroll() {
+		var scrollsEl = doc.querySelector('*[is="x-scroll"]')
+
+		app.ui.scroll(scrollsEl);
 	}
 
 	Object.extend(app, {
 		init : function(page) {
-			var that = this
+			var that = this,
+				name = page.name,
+				routes = page.routes || {}
 				;
 
-			if (Object.isTypeof(page, 'array')) {
-				Object.each(page, function(p) {
-					initPage(p);
-				});
-			} else {
-				initPage(page);
-			}
+			delete page.name;
+			delete page.routes;
+
+			var appPage = new AppPage(name, {
+				routePrefix : app.routePrefix,
+				routePrefixSep : app.routePrefixSep,
+				routes : routes
+			});
+			
+			Object.extend(appPage, page);
 		},
 
 		router : router,
@@ -67,27 +74,10 @@ var win = window,
 		}
 	});
 
-
-	navigate.on('forward backward', function() {
-		var visibility = ''
-			;
-
-		if (navigate.getStateIndex() < 1) {
-			visibility = 'hidden';
-		}
-
-		Object.each(components['x-back'], function(comp) {
-			if (comp instanceof HTMLElement && 
-					comp.style.visibility !== visibility) {
-				comp.style.visibility = visibility;
-			}
-		});
-	});
-
-	initComponents();
+	initXback();
+	initXScroll();
 
 	win['app'] = app;
-
 });
 
 require('mix/sln/0.1.0/app');
