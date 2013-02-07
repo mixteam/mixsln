@@ -23,6 +23,7 @@ body * {
 }
 
 .navibar {
+    position: relative;
     width: 100%;
     height: 50px;
     line-height: 50px;
@@ -51,14 +52,22 @@ body * {
 }
 
 .viewport {
-    height: 100%;
+    margin-top: -50px;
+    padding-top: 50px;
     box-sizing: border-box;
-    overflow: hidden;
     background: rgba(0, 0, 0, 0.5);
 }
 
 .viewport .scrollport {
-    position: relative;
     background: white;
+    outline: solid rgba(0, 0, 0, 0.7) 1px;
+}
+
+.viewport .transitionport {
+    background-color: white;
+}
+
+.viewport .transitionport div {
+    background-color: white;
     outline: solid rgba(0, 0, 0, 0.7) 1px;
 }

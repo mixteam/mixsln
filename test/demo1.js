@@ -1,5 +1,5 @@
 (function(app, undef) {
-	var scrollEl = document.querySelector('.scrollport')
+	var comps = app.components
 		;
 
 	app.init({
@@ -21,6 +21,7 @@
 		_fillContent : function () {
 			var that = this,
 				count = that._listCount,
+				viewport = app.getViewport(),
 				html = ''
 				;
 
@@ -28,7 +29,7 @@
 				html += '<li>这里有' + count + '条记录哦~~~！！！！</li>';
 			}
 
-			scrollEl.innerHTML = '<ol>' + html  + '</ol>';
+			viewport.innerHTML = '<ol>' + html  + '</ol>';
 		},
 
 		_increaseCount : function(e) {

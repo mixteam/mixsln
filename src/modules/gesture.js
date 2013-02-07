@@ -87,13 +87,28 @@ var Gestrue = Class.create({
         that._onDoing = that._onDoing.bind(that);
         that._onEnd = that._onEnd.bind(that);
         that._onTap = that._onTap.bind(that);
-
-        element.addEventListener('touchstart', that._onStart, false);
-        element.addEventListener('tap', that._onTap, false);
     },
 
     getElement : function() {
         return that._el;
+    },
+
+    enable : function() {
+        var that = this,
+            el = that._el
+            ;
+
+        el.addEventListener('touchstart', that._onStart, false);
+        el.addEventListener('tap', that._onTap, false);
+    },
+
+    disable : function() {
+        var that = this,
+            el = that._el
+            ;
+
+        el.removeEventListener('touchstart', that._onStart);
+        el.removeEventListener('tap', that._onTap);
     },
 
     _onStart : function(e) {
@@ -254,8 +269,8 @@ var Gestrue = Class.create({
         }
 
         if (Object.keys(myGestures).length == 0) {
-            doc.body.removeEventListener('touchend', that._onEnd, false);
-            doc.body.removeEventListener('touchmove', that._onDoing, false);
+            doc.body.removeEventListener('touchend', that._onEnd);
+            doc.body.removeEventListener('touchmove', that._onDoing);
         }
     },
 
@@ -277,9 +292,7 @@ var Gestrue = Class.create({
     }
 });
 
-return function(element) {
-    return new Gestrue(element);
-}
+return Gestrue;
 
 });
 

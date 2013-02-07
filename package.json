@@ -11,33 +11,36 @@
         "url" : "git@github.com:mixteam/mixsln.git"
     },
     "dependencies" : {
+        "cjs" : "mix/core/0.3.0/cjs",
         "reset" : "mix/core/0.3.0/base/reset",
         "class" : "mix/core/0.3.0/base/class",
         "message" : "mix/core/0.3.0/base/message",
         "router" : "mix/core/0.3.0/url/router",
-        "navigate" : "mix/core/0.3.0/url/navigate"
+        "navigate" : "mix/core/0.3.0/url/navigate",
+
+        "gesture" : "mix/sln/0.1.0/modules/gesture",
+        "transform" : "mix/sln/0.1.0/modules/transform",
+        "scroll" : "mix/sln/0.1.0/modules/scroll",
+        "transition" : "mix/sln/0.1.0/modules/transition",
+        "page" : "mix/sln/0.1.0/modules/page"
     },
     "output" : {
-        "app.js" : {
-            "includes" : [
-                "./modules/gesture",
-                "./modules/scroll",
-                "./app"
-            ]
-        },
+        "*/*.js" : ".",
 
-        "app.all.js" : {
+        "app.js" : {
             "main" : "./app",
             "includes" : [
-                "mix/core/0.3.0/cjs",
-                "mix/core/0.3.0/base/reset",
-                "mix/core/0.3.0/base/class",
-                "mix/core/0.3.0/base/message",
-                "mix/core/0.3.0/url/router",
-                "mix/core/0.3.0/url/navigate",
-                "./modules/gesture",
-                "./modules/scroll",
-                "./modules/page",
+                "cjs",
+                "reset",
+                "class",
+                "message",
+                "router",
+                "navigate",
+                "gesture",
+                "transform",
+                "scroll",
+                "transition",
+                "page",
                 "./app"
             ]
         }

@@ -2,5 +2,7 @@
 ./package.json
 ./src/app.js
 ./src/modules/gesture.js
+./src/modules/transform.js
 ./src/modules/scroll.js
+./src/modules/transition.js
 ./src/modules/page.js

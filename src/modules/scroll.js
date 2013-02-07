@@ -7,21 +7,10 @@ var win = window,
     navigator = win.navigator,
 
     Class = require('class'),
-    gestrue = require('./gesture'),
-    MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/,
-    MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/,
-
-    appVersion = navigator.appVersion,
-    isAndroid = (/android/gi).test(appVersion),
-    isIOS = (/iphone|ipad/gi).test(appVersion),
-    has3d = 'WebKitCSSMatrix' in window && 'm11' in new WebKitCSSMatrix(),
+    Gesture = require('gesture'),
+    transform = require('transform'),
     prevented = false
     ;
-
-function quadratic2cubicBezier(a, b) {
-    return [[(a / 3 + (a + b) / 3 - a) / (b - a), (a * a / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a)],
-        [(b / 3 + (a + b) / 3 - a) / (b - a), (b * b / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a)]];
-}
 
 function getMaxScrollTop(el) {
     var parentEl = el.parentNode,
@@ -36,60 +25,24 @@ function getMaxScrollTop(el) {
                 parseInt(parentStyle.marginBottom);
 }
 
-function getTransformY(el) {
-    var transform, matchs;
-
-    transform = getComputedStyle(el).webkitTransform;
-
-    if (transform !== 'none') {
-        if((matchs = transform.match(/^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/))) {
-            return parseInt(matchs[2]) || 0;
-        } else if((matchs = transform.match(/^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/))) {
-            return parseInt(matchs[2])||0;
-        }
-    }
-
-    return 0;
-}
-
-function getTranslate(x, y) {
-    if (false) {
-        return 'translate3d(' + x + 'px, ' + y + 'px, 0)';
-    } else {
-        return 'translate(' + x + 'px, ' + y + 'px)';
+var STYLE = {
+    element : {
+        'position' : 'relative',
+        '-webkit-backface-visibility' : 'hidden',
+        '-webkit-transform-style' : 'preserve-3d'
     }
 }
 
-function waitTransition(el, propertyName, callback) {
-    var parentEl = el.parentNode;
+Object.each(STYLE, function(styles, key) {
+    var cssText = ''
+        ;
 
-    function eventHandler(e){
-        if(e.srcElement !== el || e.propertyName != propertyName) {
-            return;
-        }
+    Object.each(styles, function(value, name){
+        cssText += name + ':' + value + ';';
+    });
 
-        // el.style.webkitBackfaceVisibility = 'initial';
-        // el.style.webkitTransformStyle = 'flat';
-        el.style.webkitTransition = 'none';
-        el.removeEventListener('webkitTransitionEnd', eventHandler, false);
-
-        callback && callback();
-    }
-
-    el.addEventListener('webkitTransitionEnd', eventHandler, false);
-}
-
-function doTransition(el, time, timeFunction, delay, x, y, callback) {
-    var propertyName = '-webkit-transform',
-        parentEl = el.parentNode;
-
-    // el.style.webkitBackfaceVisibility = 'hidden';
-    // el.style.webkitTransformStyle = 'preserve-3d';
-    el.style.webkitTransition = [propertyName, time, timeFunction, delay].join(' ');
-    el.style.webkitTransform = getTranslate(x, y);
-
-    waitTransition(el, propertyName, callback);
-}
+    STYLE[key].cssText = cssText;
+});
 
 var Scroll = Class.create({
     initialize : function(element) {
@@ -97,34 +50,60 @@ var Scroll = Class.create({
             ;
 
         that._el = element;
-        that._gesture = gestrue(element);
+        that._gesture = new Gesture(element);
         that._originalY = null;
         that._currentY = null;
 
+        that._preventBodyTouch = that._preventBodyTouch.bind(that);
         that._onTouchStart = that._onTouchStart.bind(that);
         that._onPanStart = that._onPanStart.bind(that);
         that._onPan = that._onPan.bind(that);
         that._onPanEnd = that._onPanEnd.bind(that);
         that._onFlick = that._onFlick.bind(that);
 
-        element.style.webkitBackfaceVisibility = 'hidden';
-        element.style.webkitTransformStyle = 'preserve-3d';
-        element.addEventListener('touchstart', that._onTouchStart, false);
-        element.addEventListener('panstart', that._onPanStart, false);
-        element.addEventListener('pan', that._onPan, false);
-        element.addEventListener('panend', that._onPanEnd, false);
-        element.addEventListener('flick', that._onFlick, false);
+        element.style.cssText = STYLE.element.cssText;
 
         if (!prevented) {
             prevented = true;
-            doc.body.addEventListener('touchmove',function(e){
-                e.preventDefault();
-            }, false);
+            doc.body.addEventListener('touchmove', that._preventBodyTouch, false);
         }
     },
 
     getElement : function() {
-        return that._el;
+        return this._el;
+    },
+
+    enable : function() {
+        var that = this,
+            el = that._el
+            ;
+
+        that._gesture.enable();
+
+        el.addEventListener('touchstart', that._onTouchStart, false);
+        el.addEventListener('panstart', that._onPanStart, false);
+        el.addEventListener('pan', that._onPan, false);
+        el.addEventListener('panend', that._onPanEnd, false);
+        el.addEventListener('flick', that._onFlick, false);
+    },
+
+    disable : function() {
+        var that = this,
+            el = that._el
+            ;
+
+        that._gesture.disable();
+
+        el.removeEventListener('touchstart', that._onTouchStart);
+        el.removeEventListener('panstart', that._onPanStart);
+        el.removeEventListener('pan', that._onPan);
+        el.removeEventListener('panend', that._onPanEnd);
+        el.removeEventListener('flick', that._onFlick);
+    },
+
+    _preventBodyTouch : function(e) {
+        e.preventDefault();
+        return false;
     },
 
     _onTouchStart : function(e) {
@@ -143,7 +122,7 @@ var Scroll = Class.create({
             el = that._el
             ;
 
-        that._originalY = getTransformY(el);
+        that._originalY = transform.getY(el);
     },
 
     _onPan : function(e) {
@@ -157,11 +136,11 @@ var Scroll = Class.create({
         currentY = that._currentY = originalY + e.displacementY;
         
         if(currentY > 0) {
-            el.style.webkitTransform = getTranslate(0, currentY / 2);
+            el.style.webkitTransform = transform.getTranslate(0, currentY / 2);
         } else if(currentY < maxScrollTop) {
-            el.style.webkitTransform = getTranslate(0, (maxScrollTop - currentY) / 2 + currentY);
+            el.style.webkitTransform = transform.getTranslate(0, (maxScrollTop - currentY) / 2 + currentY);
         } else {
-            el.style.webkitTransform = getTranslate(0, currentY);
+            el.style.webkitTransform = transform.getTranslate(0, currentY);
         }
     },
 
@@ -182,11 +161,7 @@ var Scroll = Class.create({
         }
 
         if (translateY != null) {
-            doTransition(el, '0.4s', 'ease-out', '0s', 0, translateY);
-
-            // el.style.webkitTransition = '-webkit-transform 0.4s ease-out 0s';
-            // el.style.webkitTransform = getTranslate(0, translateY);
-            // waitTransition(el, '-webkit-transform');
+            transform.start(el, '0.4s', 'ease-out', '0s', 0, translateY);
         }
     },
 
@@ -200,7 +175,7 @@ var Scroll = Class.create({
         if(currentY < maxScrollTop || currentY > 0)
             return;
 
-        var s0 = getTransformY(el), v0 = e.valocityY;
+        var s0 = transform.getY(el), v0 = e.valocityY;
 
         if(v0 > 1.5) v0 = 1.5;
         if(v0 < -1.5) v0 = -1.5;
@@ -219,9 +194,9 @@ var Scroll = Class.create({
             t = (sign * Math.sqrt(2*a*(s-s0)+v0*v0)-v0)/a;
             v = v0 - a * t;
             
-            doTransition(
+            transform.start(
                 el, 
-                t.toFixed(0) + 'ms', 'cubic-bezier(' + quadratic2cubicBezier(-v0/a, -v0/a+t) + ')', '0s',
+                t.toFixed(0) + 'ms', 'cubic-bezier(' + transform.getBezier(-v0/a, -v0/a+t) + ')', '0s',
                 0, s.toFixed(0), 
                 function() {
                     v0 = v;
@@ -230,50 +205,25 @@ var Scroll = Class.create({
                     t = v0/a;
                     s = s0 + t*v0/2;
 
-                    doTransition(
+                    transform.start(
                         el,
-                        t.toFixed(0) + 'ms', 'cubic-bezier(' + quadratic2cubicBezier(-t, 0) + ')', '0s',
+                        t.toFixed(0) + 'ms', 'cubic-bezier(' + transform.getBezier(-t, 0) + ')', '0s',
                         0, s.toFixed(0),
                         function() {
-                            doTransition(el, '0.4s', 'ease-out', '0s', 0, edge);
+                            transform.start(el, '0.4s', 'ease-out', '0s', 0, edge);
                         }
                     );
                 }
             );
-
-            // el.style.webkitTransition = '-webkit-transform ' + t.toFixed(0) + 'ms cubic-bezier(' + quadratic2cubicBezier(-v0/a, -v0/a+t) + ') 0s';
-            // el.style.webkitTransform = getTranslate(0, s.toFixed(0));
-            // waitTransition(el, '-webkit-transform', function(){
-            //     v0 = v;
-            //     s0 = s;
-            //     a = 0.0045*(v0 / Math.abs(v0));
-            //     t = v0/a;
-            //     s = s0 + t*v0/2;
-
-            //     el.style.webkitTransition = '-webkit-transform ' + t.toFixed(0) + 'ms cubic-bezier(' + quadratic2cubicBezier(-t, 0) + ') 0s';
-            //     el.style.webkitTransform = getTranslate(0, s.toFixed(0));
-            //     waitTransition(el, '-webkit-transform', function(){
-            //         el.style.webkitTransition = '-webkit-transform 0.4s ease-out 0s';
-            //         el.style.webkitTransform = getTranslate(0, edge);
-            //         waitTransition(el, '-webkit-transform', function(){
-            //             el.style.webkitTransition = 'none';
-            //         });
-            //     });
-            // });
         } else {
-            doTransition(
+            transform.start(
                 el,
-                t.toFixed(0) + 'ms', 'cubic-bezier(' + quadratic2cubicBezier(-t, 0) + ')', '0s',
+                t.toFixed(0) + 'ms', 'cubic-bezier(' + transform.getBezier(-t, 0) + ')', '0s',
                 0, s.toFixed(0)
             );
-            // el.style.webkitTransition = '-webkit-transform ' + t.toFixed(0) + 'ms cubic-bezier(' + quadratic2cubicBezier(-t, 0) + ') 0s';
-            // el.style.webkitTransform = getTranslate(0, s.toFixed(0));
         }
     }
 });
 
-return function(element) {
-    return new Scroll(element);
-}
-
+return Scroll;
 });
