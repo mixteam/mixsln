@@ -3,7 +3,9 @@ define("#mix/sln/0.1.0/modules/scroll-debug", [ "mix/core/0.3.0/base/reset-debug
     var win = window, doc = win.document, navigator = win.navigator, Class = require("mix/core/0.3.0/base/class-debug"), Gesture = require("mix/sln/0.1.0/modules/gesture-debug"), transform = require("mix/sln/0.1.0/modules/transform-debug"), prevented = false;
     function getMaxScrollTop(el) {
         var parentEl = el.parentNode, parentStyle = getComputedStyle(parentEl);
-        return 0 - el.scrollHeight + parentEl.offsetHeight - parseInt(parentStyle.paddingTop) - parseInt(parentStyle.paddingBottom) - parseInt(parentStyle.marginTop) - parseInt(parentStyle.marginBottom);
+        var maxTop = 0 - el.scrollHeight + parentEl.offsetHeight - parseInt(parentStyle.paddingTop) - parseInt(parentStyle.paddingBottom);
+        if (maxTop > 0) maxTop = 0;
+        return maxTop;
     }
     var STYLE = {
         element: {

@@ -727,7 +727,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             return true;
         },
         _pushState: function(name, fragment, params, args) {
-            var that = this, states = that._states, stateIdx = that._stateIdx, stateLimit = that._stateLimit, stateLen = states.length, move = that._move, datas = that._datas, prev = states[stateIdx - 1], next = states[stateIdx + 1], cur = {
+            var that = this, states = that._states, stateIdx = that._stateIdx, stateLimit = that._stateLimit, stateLen = states.length, move = that._move, transition = that._transition, datas = that._datas, prev = states[stateIdx - 1], next = states[stateIdx + 1], cur = {
                 name: name,
                 fragment: fragment,
                 params: params,
@@ -735,9 +735,9 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             };
             if (move == null) {
                 if (!datas && that._stateEquals(prev, cur)) {
-                    move = "backward";
+                    transition = move = "backward";
                 } else {
-                    move = "forward";
+                    transition = move = "forward";
                 }
             }
             if (move === "backward") {
@@ -763,6 +763,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
                 }
             }
             cur.move = move;
+            cur.transition = transition;
             datas && (cur.datas = datas);
             that._move = null;
             that._datas = null;
@@ -813,6 +814,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
         forward: function(fragment, options) {
             var that = this, states = that._states, stateIdx = that._stateIdx, cur = states[stateIdx] || {}, args = [];
             that._move = "forward";
+            that._transition = "forward";
             options || (options = {});
             if (fragment) {
                 if (options.datas || cur.fragment !== fragment) {
@@ -824,16 +826,24 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
                     if (options.datas) {
                         that._datas = Object.clone(options.datas);
                     }
+                    if (options.transition === "backward") {
+                        that._transition = "backward";
+                    }
                     that._router.navigate(fragment + (args.length ? ARGS_SPLITER + args.join("&") : ""));
                 }
             } else {
                 his.forward();
             }
         },
-        backward: function() {
+        backward: function(options) {
             var that = this, stateIdx = that._stateIdx;
             if (stateIdx === 0) return;
             that._move = "backward";
+            that._transition = "backward";
+            options || (options = {});
+            if (options.transition === "forward") {
+                that._transition = "forward";
+            }
             his.back();
         }
     });
@@ -1044,7 +1054,7 @@ define("#mix/sln/0.1.0/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debu
 });
 
 define("#mix/sln/0.1.0/modules/transform-debug", [], function(require, exports, module) {
-    var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/, MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/, appVersion = navigator.appVersion, isAndroid = /android/gi.test(appVersion), isIOS = /iphone|ipad/gi.test(appVersion), has3d = "WebKitCSSMatrix" in window && "m11" in new WebKitCSSMatrix();
+    var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/, MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/, TRANSITION_NAME = "-webkit-transform", appVersion = navigator.appVersion, isAndroid = /android/gi.test(appVersion), isIOS = /iphone|ipad/gi.test(appVersion), has3d = "WebKitCSSMatrix" in window && "m11" in new WebKitCSSMatrix();
     function quadratic2cubicBezier(a, b) {
         return [ [ (a / 3 + (a + b) / 3 - a) / (b - a), (a * a / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a) ], [ (b / 3 + (a + b) / 3 - a) / (b - a), (b * b / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a) ] ];
     }
@@ -1087,22 +1097,23 @@ define("#mix/sln/0.1.0/modules/transform-debug", [], function(require, exports, 
             return "translate(" + x + ", " + y + ")";
         }
     }
-    function waitTransition(el, propertyName, callback) {
-        var parentEl = el.parentNode;
-        function eventHandler(e) {
-            if (e.srcElement !== el || e.propertyName != propertyName) {
+    function waitTransition(el, time, callback) {
+        var isEnd = false;
+        function transitionEnd(e) {
+            if (isEnd || e && (e.srcElement !== el || e.propertyName !== TRANSITION_NAME)) {
                 return;
             }
+            isEnd = true;
             el.style.webkitTransition = "none";
-            el.removeEventListener("webkitTransitionEnd", eventHandler, false);
+            el.removeEventListener("webkitTransitionEnd", transitionEnd, false);
             callback && setTimeout(callback, 50);
         }
-        el.addEventListener("webkitTransitionEnd", eventHandler, false);
+        el.addEventListener("webkitTransitionEnd", transitionEnd, false);
+        setTimeout(transitionEnd, parseFloat(time) * 1e3);
     }
     function doTransition(el, time, timeFunction, delay, x, y, callback) {
-        var propertyName = "-webkit-transform", parentEl = el.parentNode;
-        waitTransition(el, propertyName, callback);
-        el.style.webkitTransition = [ propertyName, time, timeFunction, delay ].join(" ");
+        waitTransition(el, time, callback);
+        el.style.webkitTransition = [ TRANSITION_NAME, time, timeFunction, delay ].join(" ");
         el.style.webkitTransform = getTranslate(x, y);
     }
     exports.getY = getTransformY;
@@ -1117,7 +1128,10 @@ define("#mix/sln/0.1.0/modules/scroll-debug", [ "mix/core/0.3.0/base/reset-debug
     var win = window, doc = win.document, navigator = win.navigator, Class = require("mix/core/0.3.0/base/class-debug"), Gesture = require("mix/sln/0.1.0/modules/gesture-debug"), transform = require("mix/sln/0.1.0/modules/transform-debug"), prevented = false;
     function getMaxScrollTop(el) {
         var parentEl = el.parentNode, parentStyle = getComputedStyle(parentEl);
-        return 0 - el.scrollHeight + parentEl.offsetHeight - parseInt(parentStyle.paddingTop) - parseInt(parentStyle.paddingBottom) - parseInt(parentStyle.marginTop) - parseInt(parentStyle.marginBottom);
+        console.log(el.scrollHeight, parentEl.offsetHeight, parentStyle.paddingTop, parentStyle.paddingBottom, parentStyle.marginTop, parentStyle.marginBottom);
+        var maxTop = 0 - el.scrollHeight + parentEl.offsetHeight - parseInt(parentStyle.paddingTop) - parseInt(parentStyle.paddingBottom);
+        if (maxTop > 0) maxTop = 0;
+        return maxTop;
     }
     var STYLE = {
         element: {
@@ -1318,7 +1332,7 @@ define("#mix/sln/0.1.0/modules/transition-debug", [ "mix/core/0.3.0/base/reset-d
             that._notActivePort = lastActivePort;
             originY = transform.getY(el);
             originX = "-33.33%";
-            transform.start(el, "1s", "ease-in-out", 0, originX, originY, function() {
+            transform.start(el, "0.4s", "ease", 0, originX, originY, function() {
                 el.style.webkitTransform = transform.getTranslate(0, 0);
                 activePort.style.display = "block";
                 lastActivePort.style.display = "none";
@@ -1331,7 +1345,7 @@ define("#mix/sln/0.1.0/modules/transition-debug", [ "mix/core/0.3.0/base/reset-d
             that._notActivePort = lastActivePort;
             originY = transform.getY(el);
             originX = "33.33%";
-            transform.start(el, "1s", "ease-in-out", 0, originX, originY, function() {
+            transform.start(el, "0.4s", "ease", 0, originX, originY, function() {
                 el.style.webkitTransform = transform.getTranslate(0, 0);
                 activePort.style.display = "block";
                 lastActivePort.style.display = "none";
@@ -1347,12 +1361,16 @@ define("#mix/sln/0.1.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton;
     var AppPage = Class.create({
         Implements: Message,
-        initialize: function(name, options) {
-            var that = this;
-            Message.prototype.initialize.call(this, "app." + name);
-            that._appname = name;
+        initialize: function(options) {
+            var that = this, name = that.name;
+            Message.prototype.initialize.call(that, "app." + name);
+            that._options = options;
             that._isReady = false;
-            that._bindRoutes(options.routes);
+            that._bindEvents();
+            that._bindRoutes();
+        },
+        _bindEvents: function() {
+            var that = this;
             that.on("ready", function(state) {
                 if (!that._isReady) {
                     that._isReady = true;
@@ -1366,27 +1384,21 @@ define("#mix/sln/0.1.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
                 }
             });
         },
-        _bindRoutes: function(routes) {
-            var that = this, appname = that._appname;
-            Object.each(routes, function(route, routeName) {
-                var routeText = route.text, routeCallback = route.callback;
-                if (routeName === "default") {
-                    route["default"] = true;
-                }
-                route.callback = function() {
-                    if (Object.isTypeof(routeCallback, "string")) {
-                        routeCallback = that[routeCallback];
-                    }
-                    if (!that._isReady) {
-                        that.once("ready", function() {
-                            routeCallback.apply(that, arguments);
-                        });
-                    } else {
-                        routeCallback.apply(that, arguments);
-                    }
+        _bindRoutes: function() {
+            var that = this, name = that.name, route = that.route;
+            if (Object.isTypeof(route, "string")) {
+                route = {
+                    name: "anonymous",
+                    text: route
                 };
-                navigate.addRoute(appname + "." + routeName, routeText, route);
-            });
+            }
+            navigate.addRoute(name + "." + route.name, route.text, route);
+        },
+        getTitle: function() {
+            return this.title;
+        },
+        setTitle: function(title) {
+            this.title = title;
         },
         ready: function(state) {},
         unload: function() {}
@@ -1435,13 +1447,13 @@ define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/cor
             xBack = comps["xBack"] = {
                 _module: el,
                 _isEnabled: false,
-                _isAutoHide: el.getAttribute("autoHide") === "true" ? true : false,
+                _isAutoHide: false,
                 enable: function() {
                     var that = this, module = that._module;
                     if (module && !that._isEnabled) {
                         that._isEnabled = true;
                         module.addEventListener("click", preventClick, false);
-                        that.autoHide(that._isAutoHide);
+                        that.autoHide(el.getAttribute("autoHide") === "true" ? true : false);
                     }
                 },
                 disable: function() {
@@ -1449,12 +1461,12 @@ define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/cor
                     if (module && that._isEnabled) {
                         that._isEnabled = false;
                         el.removeEventListener("click", preventClick);
-                        that.autoHide = false;
+                        that.autoHide(false);
                     }
                 },
                 autoHide: function(is) {
                     var that = this, module = that._module;
-                    if (module) {
+                    if (module && that._isAutoHide !== is) {
                         that._isAutoHide = is;
                         if (is) {
                             changeVisibility();
@@ -1467,6 +1479,66 @@ define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/cor
                 }
             };
             xBack.enable();
+        }
+    }
+    function initXHeader(el) {
+        var comps = app.components, xHeader;
+        el || (el = doc.querySelector('*[is="x-header"]'));
+        if (el) {
+            el.className += (el.className ? " " : "") + "headerport";
+            function setContent(el, content) {
+                if (content != null) {
+                    var isType = Object.isTypeof(content);
+                    if (isType === "string") {
+                        el.innerHTML = content;
+                    } else {
+                        if (isType !== "array") {
+                            content = [ content ];
+                        }
+                        el.innerHTML = "";
+                        Object.each(content, function(item) {
+                            el.appendChild(item);
+                        });
+                    }
+                }
+            }
+            xHeader = comps["xHeader"] = {
+                _module: el,
+                _isEnabled: false,
+                enable: function() {
+                    if (this._module && !this._isEnabled) {
+                        this._isEnabled = true;
+                    }
+                },
+                disable: function() {
+                    if (this._module && this._isEnabled) {
+                        this._isEnabled = false;
+                    }
+                },
+                change: function(contents, movement) {
+                    var that = this, isEnabled = that._isEnabled, module = that._module, wrap;
+                    if (isEnabled && module) {
+                        wrap = module.querySelector(".wrap");
+                        wrap.style.cssText = "-webkit-transform: translate(" + (movement === "backward" ? "-" : "") + "50px, 0); opacity: 0;";
+                        that.set(contents);
+                        setTimeout(function() {
+                            wrap.style.cssText = "-webkit-transition:0.4s ease; -webkit-transition-property: -webkit-transform opacity; -webkit-transform: translate(0, 0); opacity: 1;";
+                            setTimeout(function() {
+                                wrap.style.cssText = "";
+                            }, 400);
+                        }, 10);
+                    }
+                },
+                set: function(contents) {
+                    var that = this, isEnabled = that._isEnabled, module = that._module, center = contents.center, left = contents.left, right = contents.right;
+                    if (isEnabled && module) {
+                        setContent(module.querySelector(".center"), center);
+                        setContent(module.querySelector(".left"), left);
+                        setContent(module.querySelector(".right"), right);
+                    }
+                }
+            };
+            xHeader.enable();
         }
     }
     function initXScroll(el) {
@@ -1553,37 +1625,69 @@ define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/cor
         }
     }
     function initNavigateAction() {
-        var curApp = null, comps = app.components, xTransition = comps["xTransition"];
-        function switchAppPage(state) {
-            var appName = state.name.split(".")[0];
-            if (curApp !== appName) {
-                var lastPage = pages[curApp], curPage = pages[appName];
-                curApp = appName;
-                lastPage && lastPage.trigger("unload");
-                curPage && curPage.trigger("ready", state);
+        var curApp = null, comps = app.components, xBack = comps["xBack"], xHeader = comps["xHeader"], xTransition = comps["xTransition"];
+        function switchAppPage(appName, state) {
+            var lastPage = pages[curApp], curPage = pages[appName];
+            curApp = appName;
+            lastPage && lastPage.trigger("unload");
+            curPage && curPage.trigger("ready", state);
+        }
+        function parseButtons(page) {
+            var buttons = [];
+            Object.each(page.header.buttons, function(button) {
+                if (button.type === "backStack") {
+                    xBack._module.innerText = button.text;
+                    xBack.autoHide(button.autoHide);
+                } else if (button.type === "rightExtra") {
+                    var el = document.createElement("button");
+                    el.innerText = button.text;
+                    el.addEventListener("click", button.handler, false);
+                    buttons.push(el);
+                }
+            });
+            return buttons;
+        }
+        function setHeader(appName, state) {
+            var lastPage = pages[curApp], curPage = pages[appName], buttons = parseButtons(curPage);
+            if (!lastPage) {
+                xHeader.set({
+                    center: curPage.getTitle(),
+                    right: buttons
+                });
+            } else {
+                xHeader.change({
+                    center: curPage.getTitle(),
+                    right: buttons
+                }, state.transition);
             }
         }
-        function doTransition(state) {
-            var module = xTransition._module;
-            module.once(state.move + "TransitionEnd", function() {
-                switchAppPage(state);
+        function doTransition(appName, state) {
+            xTransition._module.once(state.transition + "TransitionEnd", function() {
+                switchAppPage(appName, state);
             });
-            module[state.move]();
+            xTransition._module[state.transition]();
         }
-        navigate.on("forward backward", xTransition ? doTransition : switchAppPage);
+        function handler(state) {
+            var appName = state.name.split(".")[0];
+            if (curApp !== appName) {
+                setHeader(appName, state);
+                if (xTransition) {
+                    doTransition(appName, state);
+                } else {
+                    switchAppPage(appName, state);
+                }
+            }
+        }
+        navigate.on("forward backward", handler);
     }
     Object.extend(app, {
-        init: function(page) {
-            var that = this, name = page.name, routes = page.routes || {};
-            delete page.name;
-            delete page.routes;
-            var appPage = new AppPage(name, {
+        init: function(properties) {
+            var that = this, name = properties.name;
+            var Page = AppPage.extend(properties), page = new Page({
                 routePrefix: app.routePrefix,
-                routePrefixSep: app.routePrefixSep,
-                routes: routes
+                routePrefixSep: app.routePrefixSep
             });
-            Object.extend(appPage, page);
-            pages[name] = appPage;
+            return pages[name] = page;
         },
         getViewport: function() {
             var comps = app.components;
@@ -1604,6 +1708,7 @@ define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/cor
         }
     });
     initXback();
+    initXHeader();
     initXScroll();
     initXTransition();
     initXViewport();

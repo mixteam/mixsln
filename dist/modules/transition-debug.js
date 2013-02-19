@@ -75,7 +75,7 @@ define("#mix/sln/0.1.0/modules/transition-debug", [ "mix/core/0.3.0/base/reset-d
             that._notActivePort = lastActivePort;
             originY = transform.getY(el);
             originX = "-33.33%";
-            transform.start(el, "1s", "ease-in-out", 0, originX, originY, function() {
+            transform.start(el, "0.4s", "ease", 0, originX, originY, function() {
                 el.style.webkitTransform = transform.getTranslate(0, 0);
                 activePort.style.display = "block";
                 lastActivePort.style.display = "none";
@@ -88,7 +88,7 @@ define("#mix/sln/0.1.0/modules/transition-debug", [ "mix/core/0.3.0/base/reset-d
             that._notActivePort = lastActivePort;
             originY = transform.getY(el);
             originX = "33.33%";
-            transform.start(el, "1s", "ease-in-out", 0, originX, originY, function() {
+            transform.start(el, "0.4s", "ease", 0, originX, originY, function() {
                 el.style.webkitTransform = transform.getTranslate(0, 0);
                 activePort.style.display = "block";
                 lastActivePort.style.display = "none";

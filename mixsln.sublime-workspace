@@ -4,12 +4,108 @@
 		"selected_items":
 		[
 			[
-				"app",
-				"appname"
+				"inline",
+				"inline-block"
+			],
+			[
+				"wi",
+				"width"
+			],
+			[
+				"se",
+				"section	Tag"
+			],
+			[
+				"n",
+				"navigate"
+			],
+			[
+				"pa",
+				"params"
+			],
+			[
+				"rote",
+				"route"
+			],
+			[
+				"call",
+				"callback"
 			],
 			[
 				"ro",
 				"route"
+			],
+			[
+				"_i",
+				"_isInit"
+			],
+			[
+				"pro",
+				"properties"
+			],
+			[
+				"route",
+				"routePrefix"
+			],
+			[
+				"tr",
+				"transitionEnd"
+			],
+			[
+				"tra",
+				"transition"
+			],
+			[
+				"or",
+				"originY"
+			],
+			[
+				"tran",
+				"transform"
+			],
+			[
+				"get",
+				"getTranslate"
+			],
+			[
+				"_",
+				"_notActivePort"
+			],
+			[
+				"com",
+				"comps"
+			],
+			[
+				"scr",
+				"scrollport"
+			],
+			[
+				"class",
+				"className"
+			],
+			[
+				"init",
+				"initXScroll"
+			],
+			[
+				"cl",
+				"className"
+			],
+			[
+				"ca",
+				"className"
+			],
+			[
+				"doc",
+				"doc"
+			],
+			[
+				"_is",
+				"_isEnableTransition"
+			],
+			[
+				"app",
+				"appname"
 			],
 			[
 				"st",
@@ -24,20 +120,12 @@
 				"components"
 			],
 			[
-				"com",
-				"comps"
-			],
-			[
 				"p",
 				"padding-top"
 			],
 			[
 				"mar",
 				"margin-top"
-			],
-			[
-				"_is",
-				"_isEnabled"
 			],
 			[
 				"in",
@@ -64,10 +152,6 @@
 				"createElement"
 			],
 			[
-				"get",
-				"getStateIndex"
-			],
-			[
 				"ex",
 				"extend"
 			],
@@ -86,10 +170,6 @@
 			[
 				"GE",
 				"Gestrue"
-			],
-			[
-				"_",
-				"_preventBodyTouch"
 			],
 			[
 				"pr",
@@ -122,10 +202,6 @@
 			[
 				"scl",
 				"scrollsEl"
-			],
-			[
-				"doc",
-				"document"
 			],
 			[
 				"cur",
@@ -188,24 +264,8 @@
 				"arguments"
 			],
 			[
-				"or",
-				"originalY"
-			],
-			[
-				"pro",
-				"propertyName"
-			],
-			[
 				"doTr",
 				"doTransition"
-			],
-			[
-				"tran",
-				"translate"
-			],
-			[
-				"tr",
-				"translateY"
 			],
 			[
 				"modu",
@@ -216,15 +276,7 @@
 				"text-align"
 			],
 			[
-				"pa",
-				"padding-top"
-			],
-			[
 				"nav",
-				"navibar"
-			],
-			[
-				"n",
 				"navibar"
 			],
 			[
@@ -238,10 +290,6 @@
 			[
 				"m",
 				"matchs"
-			],
-			[
-				"tra",
-				"translateY"
 			],
 			[
 				"_o",
@@ -432,10 +480,6 @@
 				"article"
 			],
 			[
-				"se",
-				"section"
-			],
-			[
 				"hea",
 				"header"
 			],
@@ -470,50 +514,6 @@
 			[
 				"con",
 				"controId"
-			],
-			[
-				"script",
-				"scripts"
-			],
-			[
-				"navi",
-				"navigatorView"
-			],
-			[
-				"rout",
-				"router"
-			],
-			[
-				"isT",
-				"isTransitionEnd"
-			],
-			[
-				"view",
-				"viewport"
-			],
-			[
-				"vi",
-				"viewport"
-			],
-			[
-				"html",
-				"setNaviRightHtml"
-			],
-			[
-				"on",
-				"onclick"
-			],
-			[
-				"J_",
-				"J_pop_highlight"
-			],
-			[
-				"is",
-				"isIgnore"
-			],
-			[
-				"for",
-				"forward"
 			]
 		]
 	},
@@ -523,7 +523,7 @@
 			"file": "package.json",
 			"settings":
 			{
-				"buffer_size": 1309,
+				"buffer_size": 1395,
 				"line_ending": "Windows"
 			}
 		},
@@ -531,7 +531,7 @@
 			"file": "test/demo1.css",
 			"settings":
 			{
-				"buffer_size": 1086,
+				"buffer_size": 1491,
 				"line_ending": "Windows"
 			}
 		},
@@ -539,15 +539,23 @@
 			"file": "test/demo1.html",
 			"settings":
 			{
-				"buffer_size": 1156,
+				"buffer_size": 1349,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "test/demo1.js",
+			"file": "test/list.js",
 			"settings":
 			{
-				"buffer_size": 1516,
+				"buffer_size": 1274,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "test/detail.js",
+			"settings":
+			{
+				"buffer_size": 797,
 				"line_ending": "Windows"
 			}
 		},
@@ -555,7 +563,7 @@
 			"file": "src/app.js",
 			"settings":
 			{
-				"buffer_size": 5468,
+				"buffer_size": 6538,
 				"line_ending": "Windows"
 			}
 		},
@@ -563,31 +571,23 @@
 			"file": "src/modules/page.js",
 			"settings":
 			{
-				"buffer_size": 1509,
+				"buffer_size": 1305,
 				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/modules/gesture.js",
-			"settings":
-			{
-				"buffer_size": 9494,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/modules/scroll.js",
-			"settings":
-			{
-				"buffer_size": 10062,
-				"line_ending": "Unix"
 			}
 		},
 		{
 			"file": "src/modules/transition.js",
 			"settings":
 			{
-				"buffer_size": 2574,
+				"buffer_size": 3547,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/modules/transform.js",
+			"settings":
+			{
+				"buffer_size": 2849,
 				"line_ending": "Windows"
 			}
 		}
@@ -636,12 +636,13 @@
 	},
 	"file_history":
 	[
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
-		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
+		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transition",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.html",
@@ -762,8 +763,7 @@
 		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/projinit/examples/app/src/{{name}}View.js",
 		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/projinit/examples/app/entry.js",
 		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/projinit/examples/helloworld/seajsConf.js",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/test/apps/index/src/indexView.js",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/projinit/examples/hellomix/entry.js"
+		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/test/apps/index/src/indexView.js"
 	],
 	"find":
 	{
@@ -781,6 +781,20 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"_appname",
+			"navigate",
+			"waitTransition",
+			"doTransition",
+			"getTranslate",
+			"getTransformY",
+			"quadratic2cubicBezier",
+			"getTranslate",
+			"doTransition",
+			"getTranslate",
+			"getTransformY",
+			"waitTransition",
+			"quadratic2cubicBezier",
+			"getTransformY",
 			"AppPage",
 			"app-debug",
 			"})();",
@@ -894,21 +908,7 @@
 			"Message",
 			"require",
 			"less.mode",
-			"require",
-			"toString",
-			"fsExt",
-			"$",
-			"setDom",
-			"UPERCASE_REGEXP",
-			"component",
-			"comp",
-			"less",
-			"comp",
-			"_initVars",
-			"Nav.",
-			"__domId",
-			"before",
-			"rootTmpl"
+			"require"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -916,6 +916,10 @@
 		"regex": false,
 		"replace_history":
 		[
+			"transform.start",
+			"transform.getTranslate",
+			"transform.getY",
+			"transform.getBezier",
 			"'",
 			"copyEvents",
 			"scope",
@@ -986,7 +990,7 @@
 	"groups":
 	[
 		{
-			"selected": 8,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -994,15 +998,15 @@
 					"file": "package.json",
 					"settings":
 					{
-						"buffer_size": 1309,
+						"buffer_size": 1395,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								865,
-								865
+								372,
+								372
 							]
 						],
 						"settings":
@@ -1022,15 +1026,15 @@
 					"file": "test/demo1.css",
 					"settings":
 					{
-						"buffer_size": 1086,
+						"buffer_size": 1491,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								250,
-								250
+								688,
+								688
 							]
 						],
 						"settings":
@@ -1040,7 +1044,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 51.0,
+						"translation.y": 306.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1050,15 +1054,15 @@
 					"file": "test/demo1.html",
 					"settings":
 					{
-						"buffer_size": 1156,
+						"buffer_size": 1349,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								965,
-								965
+								378,
+								378
 							]
 						],
 						"settings":
@@ -1073,18 +1077,18 @@
 				},
 				{
 					"buffer": 3,
-					"file": "test/demo1.js",
+					"file": "test/list.js",
 					"settings":
 					{
-						"buffer_size": 1516,
+						"buffer_size": 1274,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								402,
-								402
+								259,
+								269
 							]
 						],
 						"settings":
@@ -1093,25 +1097,25 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 408.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 4,
-					"file": "src/app.js",
+					"file": "test/detail.js",
 					"settings":
 					{
-						"buffer_size": 5468,
+						"buffer_size": 797,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4512,
-								4512
+								623,
+								623
 							]
 						],
 						"settings":
@@ -1120,25 +1124,25 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 3264.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 5,
-					"file": "src/modules/page.js",
+					"file": "src/app.js",
 					"settings":
 					{
-						"buffer_size": 1509,
+						"buffer_size": 6538,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								932,
-								932
+								2343,
+								2343
 							]
 						],
 						"settings":
@@ -1147,81 +1151,52 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 459.0,
+						"translation.y": 4363.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 6,
-					"file": "src/modules/gesture.js",
+					"file": "src/modules/page.js",
 					"settings":
 					{
-						"buffer_size": 9494,
+						"buffer_size": 1305,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2324,
-								2324
+								507,
+								507
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1271.0,
+						"translation.y": 561.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 7,
-					"file": "src/modules/scroll.js",
-					"settings":
-					{
-						"buffer_size": 10062,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3557,
-								3557
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1734.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 8,
 					"file": "src/modules/transition.js",
 					"settings":
 					{
-						"buffer_size": 2574,
+						"buffer_size": 3547,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								752,
-								752
+								2573,
+								2573
 							]
 						],
 						"settings":
@@ -1229,7 +1204,35 @@
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 1736.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "src/modules/transform.js",
+					"settings":
+					{
+						"buffer_size": 2849,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2326,
+								2326
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1020.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

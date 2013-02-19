@@ -17,12 +17,15 @@ function getMaxScrollTop(el) {
         parentStyle = getComputedStyle(parentEl)
         ;
 
-
-    return 0 - el.scrollHeight + parentEl.offsetHeight - 
+    var maxTop = 0 - el.scrollHeight + parentEl.offsetHeight - 
                 parseInt(parentStyle.paddingTop) - 
-                parseInt(parentStyle.paddingBottom) - 
+                parseInt(parentStyle.paddingBottom)/* - 
                 parseInt(parentStyle.marginTop) - 
-                parseInt(parentStyle.marginBottom);
+                parseInt(parentStyle.marginBottom)*/;
+
+    if (maxTop > 0) maxTop = 0;
+    
+    return maxTop;
 }
 
 var STYLE = {

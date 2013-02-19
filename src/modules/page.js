@@ -11,15 +11,22 @@ var win = window,
 var AppPage = Class.create({
 	Implements : Message,
 
-	initialize : function(name, options) {
-		var that = this
+	initialize : function(options) {
+		var that = this,
+			name = that.name
 			;
 
-		Message.prototype.initialize.call(this, 'app.' + name);
+		Message.prototype.initialize.call(that, 'app.' + name);
 
-		that._appname = name;
+		that._options = options;
 		that._isReady = false;
-		that._bindRoutes(options.routes);
+		that._bindEvents();
+		that._bindRoutes();
+	},
+
+	_bindEvents : function() {
+		var that = this
+			;
 
 		that.on('ready', function(state) {
 			if (!that._isReady) {
@@ -33,41 +40,31 @@ var AppPage = Class.create({
 				that._isReady = false;
 				that.unload();
 			}
-		})
+		});
 	},
 
-	_bindRoutes : function(routes) {
+	_bindRoutes : function() {
 		var that = this,
-			appname = that._appname
+			name = that.name,
+			route = that.route
 			;
 
-		Object.each(routes, function(route, routeName) {
-			var routeText = route.text,
-				routeCallback = route.callback
-				;
-
-			if (routeName === 'default') {
-				route['default'] = true;
+		if (Object.isTypeof(route, 'string')) {
+			route = {
+				name : 'anonymous',
+				text : route
 			}
+		}
 
+		navigate.addRoute(name + '.' + route.name, route.text, route);
+	},
 
-			route.callback = function() {
-				if (Object.isTypeof(routeCallback, 'string')) {
-					routeCallback = that[routeCallback];
-				}
+	getTitle : function() {
+		return this.title;	//over rewite
+	},
 
-				if (!that._isReady) {
-					that.once('ready', function() {
-						routeCallback.apply(that, arguments);
-					});
-				} else {
-					routeCallback.apply(that, arguments);
-				}
-				
-			}
-
-			navigate.addRoute(appname + '.' + routeName, routeText, route);
-		});
+	setTitle : function(title) {
+		this.title = title;
 	},
 
 	ready : function(state) {/*implement*/},

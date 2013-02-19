@@ -18,15 +18,25 @@
 </head>
 <body>
 <div id="wrapper">
-    <header class="navibar">
-        <button class="back" is="x-back" autoHide="true">返回</button>
-        <span>HTML5 app</span>
+    <header is="x-header">
+        <div class="wrap">
+        	<section class="center">
+        	</section>
+        	<section class="left">
+        		<button class="back" is="x-back" autoHide="false">返回</button>
+        	</section>
+        	<section class="right"></section>
+        </div>
     </header>
     <section is="x-viewport" enableScroll="true" enableTransition="true">
 
     </section>
 </div>
 <script src="../dist/app-debug.js" type="text/javascript"></script>
-<script src="./demo1.js" type="text/javascript"></script>
+<script src="./list.js" type="text/javascript"></script>
+<script src="./detail.js" type="text/javascript"></script>
+<script type="text/javascript">
+	app.router.start();
+</script>
 </body>
 </html>

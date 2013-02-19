@@ -22,52 +22,120 @@ body * {
     height: 100%;
 }
 
-.navibar {
+.headerport {
+    -webkit-box-shadow:inset 0 1px 1px white;
+    background: -webkit-linear-gradient(top,rgb(110,132,161) 0%,rgb(137,155,178) 50%,rgb(127,148,176) 50%,rgb(180,191,205) 100%);
+    border-bottom:solid 1px rgb(33,39,48);
+    height:43px;
+
     position: relative;
     width: 100%;
-    height: 50px;
-    line-height: 50px;
     z-index: 9;
-    background: #CCC;
-    text-align: center;
-    font-size: 18px;
+    font-size:22px;
+    font-weight:bold;
+    color:white;
 }
 
-.navibar button {
-    display: inline-block;
-    position: absolute;
+.headerport .wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: none;
+}
+
+.headerport:after {
+    display: block;
+    content: ' ';
+    clear: both;
+    visibility: hidden;
+}
+
+.headerport section {
+    position: relative;
+    height: 100%;
+    display: -webkit-box;
+    -webkit-box-pack: center;
+    -webkit-box-align: center;
+}
+
+.headerport .center {
+    width: 100%;
+    float: left;
+}
+
+.headerport .left {
+    float: left;
+    top: -100%;
+    padding: 0 10px;
+}
+
+.headerport .right {
+    float: right;
+    top: -100%;
+    padding: 0 10px;
+}
+
+.headerport button {
     top: 0;
-    width: 80px;
-    height: 30px;
-    margin: 10px;
+    display: inline-block;
     text-align: center;
+    position: relative;
+    color: white;
+    height: 31px;
+    background-color: transparent;
+    background: -webkit-linear-gradient(top,rgb(74,108,155) 0%,rgb(72,106,154) 50%,rgb(88,119,162) 51%,rgb(137,160,190) 100%);
+    border-bottom:solid 1px rgb(55,80,117);
+    border-top:solid 1px rgb(48,54,62);
+    border-right:solid 1px rgb(48,54,62);
+    border-left:solid 1px rgb(48,54,62);
+    text-shadow: rgba(0,0,0,0.4) 0 -2px 1px;
+    -webkit-box-shadow:0 1px 1px rgba(255,255,255,0.6);
+    border-radius: 4.5px;
 }
 
-.navibar .back {
-    left: 0;
+.headerport button.back {
+    margin-left: 15px;
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
-.navibar .increase {
-    right: 0;
+.headerport button.back::before {
+    content: "";
+    color:white;
+    height:31px;
+    display:block;
+    position:absolute;
+    left:-13px;
+    top:-1px;
+    width:13px;
+    margin-top:0px;
+    margin-bottom:0px;
+    background-color:Transparent;
+    background-image:url('data:image/svg+xml;utf8,<svg height="31" width="100%" version="1.1" xmlns="http://www.w3.org/2000/svg"><g><defs><linearGradient id="gradient1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="rgb(74,108,155)"/><stop offset="50%" stop-color="rgb(72,106,154)"/><stop offset="51%" stop-color="rgb(88,119,162)"/><stop offset="100%" stop-color="rgb(137,160,190)"/></linearGradient><linearGradient id="gradient2" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="rgb(55,80,117)"/><stop offset="69%" stop-color="rgb(55,80,117)"/><stop offset="100%" stop-color="rgb(48,54,62)"/></linearGradient><filter id="Gaussian_Blur"><feGaussianBlur in="SourceGraphic" stdDeviation="1" /></filter></defs><path fill="white" style="stroke-width:1;filter:url(#Gaussian_Blur)"  d="M0 16 C 12 2 14 2 15 2 L50 2 L50 30 L15 30 C14 30 12 30 0 16 Z" /><path fill="url(#gradient1)" stroke="url(#gradient2)" style="stroke-width:1;" d="M0 16 C 12 0 13 0 15 0 L15 31 C13 31 12 31 0 15" /></g></svg>');
+    text-shadow: rgba(0,0,0,0.4) 0 -2px 1px;
 }
 
 .viewport {
-    margin-top: -50px;
-    padding-top: 50px;
+    margin-top: -43px;
+    padding-top: 43px;
     box-sizing: border-box;
-    background: rgba(0, 0, 0, 0.5);
+    background: url('bg.jpg');
 }
 
 .viewport .scrollport {
-    background: white;
+    background-color: white;
     outline: solid rgba(0, 0, 0, 0.7) 1px;
+    min-height: 100%;
 }
 
 .viewport .transitionport {
-    background-color: white;
+    
 }
 
 .viewport .transitionport div {
     background-color: white;
     outline: solid rgba(0, 0, 0, 0.7) 1px;
+    min-height: 100%;
 }

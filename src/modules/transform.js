@@ -1,6 +1,7 @@
 define(function(require, exports, module) {
 var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/,
 	MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/,
+    TRANSITION_NAME = '-webkit-transform',
 
     appVersion = navigator.appVersion,
     isAndroid = (/android/gi).test(appVersion),
@@ -63,29 +64,30 @@ function getTranslate(x, y) {
     }
 }
 
-function waitTransition(el, propertyName, callback) {
-    var parentEl = el.parentNode;
+function waitTransition(el, time, callback) {
+    var isEnd = false;
 
-    function eventHandler(e){
-        if(e.srcElement !== el || e.propertyName != propertyName) {
+    function transitionEnd(e){
+        if(isEnd || 
+            e && (e.srcElement !== el || e.propertyName !== TRANSITION_NAME)) {
             return;
         }
 
+        isEnd = true;
         el.style.webkitTransition = 'none';
-        el.removeEventListener('webkitTransitionEnd', eventHandler, false);
+        el.removeEventListener('webkitTransitionEnd', transitionEnd, false);
 
-        callback && setTimeout(callback, 50);
+        callback && setTimeout(callback, 50);   // 延迟执行callback。解决立即取消动画造成的bug
     }
 
-    el.addEventListener('webkitTransitionEnd', eventHandler, false);
+    el.addEventListener('webkitTransitionEnd', transitionEnd, false);
+    setTimeout(transitionEnd, parseFloat(time) * 1000);
+
 }
 
 function doTransition(el, time, timeFunction, delay, x, y, callback) {
-    var propertyName = '-webkit-transform',
-        parentEl = el.parentNode;
-
-	waitTransition(el, propertyName, callback);
-    el.style.webkitTransition = [propertyName, time, timeFunction, delay].join(' ');
+	waitTransition(el, time, callback);
+    el.style.webkitTransition = [TRANSITION_NAME, time, timeFunction, delay].join(' ');
     el.style.webkitTransform = getTranslate(x, y);
 
 }

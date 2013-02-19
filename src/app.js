@@ -67,7 +67,7 @@ var win = window,
 			xBack = comps['xBack'] = {
 				_module : el,
 				_isEnabled : false,
-				_isAutoHide : el.getAttribute('autoHide') === 'true' ? true : false,
+				_isAutoHide : false,
 
 				enable : function() {
 					var that = this,
@@ -77,7 +77,7 @@ var win = window,
 					if (module && !that._isEnabled) {
 						that._isEnabled = true;
 						module.addEventListener('click', preventClick, false);
-						that.autoHide(that._isAutoHide);
+						that.autoHide(el.getAttribute('autoHide') === 'true'?true:false);
 					}
 				},
 
@@ -89,7 +89,7 @@ var win = window,
 					if (module && that._isEnabled) {
 						that._isEnabled = false;
 						el.removeEventListener('click', preventClick);
-						that.autoHide = false;
+						that.autoHide(false)
 					}
 				},
 
@@ -98,7 +98,7 @@ var win = window,
 						module = that._module
 						;
 
-					if (module) {
+					if (module && that._isAutoHide !== is) {
 						that._isAutoHide = is;
 
 						if (is) {
@@ -113,6 +113,92 @@ var win = window,
 			};
 
 			xBack.enable();
+		}
+	}
+
+	function initXHeader(el) {
+		var comps = app.components,
+			xHeader
+			;
+
+		el || (el = doc.querySelector('*[is="x-header"]'));
+
+		if (el) {
+			el.className += (el.className?' ':'') + 'headerport';
+
+			function setContent(el, content) {
+				if (content != null) {
+					var isType = Object.isTypeof(content);
+					if (isType === 'string') {
+						el.innerHTML = content;
+					} else  {
+						if (isType !== 'array') {
+							content = [content];
+						}
+
+						el.innerHTML = '';
+						Object.each(content, function(item) {
+							el.appendChild(item);
+						});
+					}
+				}
+			}
+
+			xHeader = comps['xHeader'] = {
+				_module : el,
+				_isEnabled : false,
+
+				enable : function() {
+					if (this._module && !this._isEnabled) {
+						this._isEnabled = true;
+					}
+				},
+
+				disable : function() {
+					if (this._module && this._isEnabled) {
+						this._isEnabled = false;
+					}
+				},
+
+				change : function(contents, movement) {
+					var that = this,
+						isEnabled = that._isEnabled,
+						module = that._module,
+						wrap
+						;
+
+					if (isEnabled && module) {
+						wrap = module.querySelector('.wrap');
+						wrap.style.cssText = '-webkit-transform: translate(' + (movement === 'backward'?'-':'') + '50px, 0); opacity: 0;';
+						that.set(contents);
+						setTimeout(function() {
+							wrap.style.cssText = '-webkit-transition:0.4s ease; -webkit-transition-property: -webkit-transform opacity; -webkit-transform: translate(0, 0); opacity: 1;';
+							setTimeout(function() {
+								wrap.style.cssText = '';
+							}, 400)
+						}, 10);
+
+					}
+				},
+
+				set : function(contents) {
+					var that = this,
+						isEnabled = that._isEnabled,
+						module = that._module,
+						center = contents.center,
+						left = contents.left,
+						right = contents.right
+						;
+
+					if (isEnabled && module) {
+						setContent(module.querySelector('.center'), center);
+						setContent(module.querySelector('.left'), left);
+						setContent(module.querySelector('.right'), right);
+					}
+				}
+			};
+
+			xHeader.enable();
 		}
 	}
 
@@ -244,57 +330,100 @@ var win = window,
 	function initNavigateAction() {
 		var curApp = null,
 			comps = app.components,
+			xBack = comps['xBack'],
+			xHeader = comps['xHeader'],
 			xTransition = comps['xTransition']
 			;
 
-		function switchAppPage(state) {
+		function switchAppPage(appName, state) {
+			var lastPage = pages[curApp],
+				curPage = pages[appName]
+				;
+
+			curApp = appName;
+			lastPage && lastPage.trigger('unload');
+			curPage && curPage.trigger('ready', state);
+		}
+
+		function parseButtons(page) {
+			var buttons = []
+				;
+
+			Object.each(page.header.buttons, function(button) {
+				if (button.type === 'backStack') {
+					xBack._module.innerText = button.text;
+					xBack.autoHide(button.autoHide);
+				} else if (button.type === 'rightExtra') {
+					var el = document.createElement('button')
+						;
+
+					el.innerText = button.text;
+					el.addEventListener('click', button.handler, false);
+					buttons.push(el);
+				}
+			});
+
+			return buttons;
+
+		}
+
+		function setHeader(appName, state) {
+			var lastPage = pages[curApp],
+				curPage = pages[appName],
+				buttons = parseButtons(curPage)
+				;
+
+			if (!lastPage) {
+				xHeader.set({
+					center: curPage.getTitle(),
+					right: buttons
+				});
+			} else {
+				xHeader.change({
+					center: curPage.getTitle(),
+					right: buttons
+				}, state.transition);
+			}
+		}
+
+		function doTransition(appName, state) {
+			xTransition._module.once(state.transition + 'TransitionEnd', function() {
+				switchAppPage(appName, state);
+			});
+			xTransition._module[state.transition]();
+		}
+
+		function handler(state) {
 			var appName = state.name.split('.')[0]
 				;
 
 			if (curApp !== appName) {
-				var lastPage = pages[curApp],
-					curPage = pages[appName]
-					;
 
-				curApp = appName;
-				lastPage && lastPage.trigger('unload');
-				curPage && curPage.trigger('ready', state);
+				setHeader(appName, state);
+
+				if (xTransition) {
+					doTransition(appName, state);
+				} else {
+					switchAppPage(appName, state);
+				}
 			}
 		}
-
-		function doTransition(state) {
-			var module = xTransition._module
-				;
-
-			module.once(state.move + 'TransitionEnd', function() {
-				switchAppPage(state);
-			});
-			module[state.move]();
-			//switchAppPage(state);
-		}
 			
-		navigate.on('forward backward', xTransition?doTransition:switchAppPage);
+		navigate.on('forward backward', handler);
 	}
 
 	Object.extend(app, {
-		init : function(page) {
+		init : function(properties) {
 			var that = this,
-				name = page.name,
-				routes = page.routes || {}
-				;
+				name = properties.name;
 
-			delete page.name;
-			delete page.routes;
+			var Page = AppPage.extend(properties),
+				page = new Page({
+					routePrefix : app.routePrefix,
+					routePrefixSep : app.routePrefixSep
+				});
 
-			var appPage = new AppPage(name, {
-				routePrefix : app.routePrefix,
-				routePrefixSep : app.routePrefixSep,
-				routes : routes
-			});
-			
-			Object.extend(appPage, page);
-
-			pages[name] = appPage;
+			return (pages[name] = page);
 		},
 
 		getViewport : function() {
@@ -320,6 +449,7 @@ var win = window,
 	});
 
 	initXback();
+	initXHeader();
 	initXScroll();
 	initXTransition();
 	initXViewport();
