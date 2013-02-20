@@ -12,6 +12,8 @@ var win = window,
 	Scroll = require('scroll'),
 	Transition = require('transition'),
 	AppPage = require('page'),
+	xBase = require('xBase'),
+	xBack = require('xBack'),
 
 	app = {
 		theme : 'ios',
@@ -39,82 +41,6 @@ var win = window,
 
 	pages = {}
 	;
-
-	function initXback(el) {
-		var comps = app.components,
-			xBack
-			;
-
-		el || (el = doc.querySelector('*[is="x-back"]'));
-
-		if (el) {
-			function preventClick(e) {
-				navigate.backward();
-				e.preventDefault();
-				return false;
-			}
-
-			function changeVisibility() {
-				var el = xBack._module,
-					visibility = navigate.getStateIndex() < 1 ? 'hidden' : ''
-					;
-
-				if (el.style.visibility !== visibility) {
-					el.style.visibility = visibility;
-				}
-			}
-
-			xBack = comps['xBack'] = {
-				_module : el,
-				_isEnabled : false,
-				_isAutoHide : false,
-
-				enable : function() {
-					var that = this,
-						module = that._module
-						;
-
-					if (module && !that._isEnabled) {
-						that._isEnabled = true;
-						module.addEventListener('click', preventClick, false);
-						that.autoHide(el.getAttribute('autoHide') === 'true'?true:false);
-					}
-				},
-
-				disable : function() {
-					var that = this,
-						module = that._module
-						;
-
-					if (module && that._isEnabled) {
-						that._isEnabled = false;
-						el.removeEventListener('click', preventClick);
-						that.autoHide(false)
-					}
-				},
-
-				autoHide : function(is) {
-					var that = this,
-						module = that._module
-						;
-
-					if (module && that._isAutoHide !== is) {
-						that._isAutoHide = is;
-
-						if (is) {
-							changeVisibility();
-							navigate.on('forward backward', changeVisibility);
-						} else {
-							module.style.visibility = '';
-							navigate.off('forward backward', changeVisibility);
-						}
-					}
-				}
-			};
-
-			xBack.enable();
-		}
-	}
 
 	function initXHeader(el) {
 		var comps = app.components,
@@ -351,8 +277,8 @@ var win = window,
 
 			Object.each(page.header.buttons, function(button) {
 				if (button.type === 'backStack') {
-					xBack._module.innerText = button.text;
-					xBack.autoHide(button.autoHide);
+					//xBack._module.innerText = button.text;
+					//xBack.autoHide(button.autoHide);
 				} else if (button.type === 'rightExtra') {
 					var el = document.createElement('button')
 						;
@@ -448,12 +374,13 @@ var win = window,
 		}
 	});
 
-	initXback();
 	initXHeader();
 	initXScroll();
 	initXTransition();
 	initXViewport();
 	initNavigateAction();
+
+	xBase.parseXComponents();
 
 	win['app'] = app;
 });

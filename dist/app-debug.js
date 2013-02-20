@@ -573,6 +573,43 @@ define("#mix/core/0.3.0/base/message-debug", [ "mix/core/0.3.0/base/reset-debug"
     module.exports = Message;
 });
 
+define("#mix/core/0.3.0/base/util-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var Class = require("mix/core/0.3.0/base/class-debug");
+    // List of HTML entities for escaping.
+    var htmlEscapes = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#x27;",
+        "/": "&#x2F;"
+    }, isNumber = /^[-+]?\d\d*\.?\d\d*/;
+    // Regex containing the keys listed immediately above.
+    var htmlEscaper = /[&<>"'\/]/g;
+    var Util = Class.create({
+        initialize: function() {},
+        // Escape a string for HTML interpolation.
+        escape: function(string) {
+            return ("" + string).replace(htmlEscaper, function(match) {
+                return htmlEscapes[match];
+            });
+        },
+        str2val: function(str) {
+            str += "";
+            if (str === "true" || str === "false") {
+                return str === "true" ? true : false;
+            } else if (isNumber.test(str)) {
+                return parseFloat(str);
+            } else {
+                return str;
+            }
+        }
+    });
+    Util.singleton = new Util();
+    module.exports = Util;
+});
+
 // --------------------------------
 // Thanks to:
 //	-http://backbonejs.org
@@ -1128,7 +1165,6 @@ define("#mix/sln/0.1.0/modules/scroll-debug", [ "mix/core/0.3.0/base/reset-debug
     var win = window, doc = win.document, navigator = win.navigator, Class = require("mix/core/0.3.0/base/class-debug"), Gesture = require("mix/sln/0.1.0/modules/gesture-debug"), transform = require("mix/sln/0.1.0/modules/transform-debug"), prevented = false;
     function getMaxScrollTop(el) {
         var parentEl = el.parentNode, parentStyle = getComputedStyle(parentEl);
-        console.log(el.scrollHeight, parentEl.offsetHeight, parentStyle.paddingTop, parentStyle.paddingBottom, parentStyle.marginTop, parentStyle.marginBottom);
         var maxTop = 0 - el.scrollHeight + parentEl.offsetHeight - parseInt(parentStyle.paddingTop) - parseInt(parentStyle.paddingBottom);
         if (maxTop > 0) maxTop = 0;
         return maxTop;
@@ -1406,9 +1442,153 @@ define("#mix/sln/0.1.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
     return AppPage;
 });
 
-define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/sln/0.1.0/modules/gesture-debug", "mix/sln/0.1.0/modules/scroll-debug", "mix/sln/0.1.0/modules/transition-debug", "mix/sln/0.1.0/modules/page-debug", "mix/sln/0.1.0/app-debug" ], function(require, exports, module) {
+define("#mix/sln/0.1.0/components/xBase-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Gesture = require("mix/sln/0.1.0/modules/gesture-debug"), Scroll = require("mix/sln/0.1.0/modules/scroll-debug"), Transition = require("mix/sln/0.1.0/modules/transition-debug"), AppPage = require("mix/sln/0.1.0/modules/page-debug"), app = {
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), components = {}, xBase = Class.create({
+        initialize: function(name, module) {
+            var that = this;
+            that._module = module;
+            that._isEnable = false;
+        },
+        getModule: function() {
+            return this._module;
+        },
+        enable: function() {
+            // overwrite
+            var that = this, module = that._module;
+            if (module && !that._isEnabled) {
+                that._isEnabled = true;
+                return true;
+            }
+        },
+        disable: function() {
+            // overwrite
+            var that = this, module = that._module;
+            if (module && that._isEnabled) {
+                that._isEnabled = false;
+                return true;
+            }
+        }
+    });
+    function createXComponent(name, properties) {
+        var _init, _enable, _disable, extentions, xComponent, component;
+        if (properties.hasOwnProperty("init")) {
+            _init = properties.init;
+            delete properties.init;
+        }
+        if (properties.hasOwnProperty("enable")) {
+            _enable = properties.enable;
+            delete properties.enable;
+        }
+        if (properties.hasOwnProperty("disable")) {
+            _disable = properties.disable;
+            delete properties.disable;
+        }
+        extentions = Object.extend({
+            initialize: function(module) {
+                var that = this;
+                xComponent.superclass.initialize.call(that, name, module);
+                _init && _init.call(that);
+            }
+        }, properties);
+        if (_enable) {
+            extentions.enable = function() {
+                var is;
+                if (xComponent.superclass.enable.call(this)) {
+                    is = _enable.call(this);
+                    is == null || (is = true);
+                }
+                return is;
+            };
+        }
+        if (_disable) {
+            extentions.disable = function() {
+                var is;
+                if (xComponent.superclass.disable.call(this)) {
+                    is = _disable.call(this);
+                    is == null || (is = true);
+                }
+                return is;
+            };
+        }
+        xComponent = xBase.extend(extentions);
+        component = components[name] = {
+            name: name,
+            klass: xComponent,
+            count: 0,
+            instance: [],
+            map: {}
+        };
+        xComponent.create = function(el) {
+            var cid = name + "-" + Date.now() + "-" + (component.count + 1), instance;
+            el.setAttribute("cid", cid);
+            instance = new xComponent(el);
+            component.instance.push(instance);
+            component.map[cid] = component.length - 1;
+            return instance;
+        };
+        return xComponent;
+    }
+    function parseXComponents() {
+        Object.each(components, function(component, name) {
+            var elements = doc.querySelectorAll('*[is="' + name + '"]');
+            Object.each(elements, function(el) {
+                if (!el.getAttribute("cid")) {
+                    component.klass.create(el).enable();
+                }
+            });
+        });
+    }
+    xBase.createXComponent = createXComponent;
+    xBase.parseXComponents = parseXComponents;
+    return xBase;
+});
+
+define("#mix/sln/0.1.0/components/xBack-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/util-debug", "mix/core/0.3.0/url/navigate-debug", "mix/sln/0.1.0/components/xBase-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var Class = require("mix/core/0.3.0/base/class-debug"), util = require("mix/core/0.3.0/base/util-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, xBase = require("mix/sln/0.1.0/components/xBase-debug"), xName = "x-back", xBack = xBase.createXComponent(xName, {
+        init: function() {
+            var that = this;
+            that._isAutoHide = false;
+            that._changeVisibility = that._changeVisibility.bind(that);
+            that._clickHandler = that._clickHandler.bind(that);
+        },
+        enable: function() {
+            var that = this, module = that._module, isAutoHide = util.str2val(module.getAttribute("autoHide"));
+            module.addEventListener("click", that._clickHandler, false);
+            that.autoHide(isAutoHide);
+        },
+        disable: function() {
+            var that = this, module = that._module;
+            module.removeEventListener("click", that._clickHandler, false);
+            that.autoHide(false);
+        },
+        autoHide: function(is) {
+            var that = this, module = that._module;
+            if (module && that._isAutoHide !== is) {
+                is ? navigate.on("forward backward", that._changeVisibility) : navigate.off("forward backward", that._changeVisibility);
+                that._isAutoHide = is;
+                that._changeVisibility();
+            }
+        },
+        _clickHandler: function(e) {
+            navigate.backward();
+            e.preventDefault();
+            return false;
+        },
+        _changeVisibility: function() {
+            var module = that._module, isEnabled = that._isEnabled, visibility = navigate.getStateIndex() < 1 && isEnabled ? "hidden" : "";
+            if (module.style.visibility !== visibility) {
+                module.style.visibility = visibility;
+            }
+        }
+    });
+    return xBack;
+});
+
+define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/sln/0.1.0/modules/gesture-debug", "mix/sln/0.1.0/modules/scroll-debug", "mix/sln/0.1.0/modules/transition-debug", "mix/sln/0.1.0/modules/page-debug", "mix/sln/0.1.0/components/xBase-debug", "mix/sln/0.1.0/components/xBack-debug", "mix/sln/0.1.0/app-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Gesture = require("mix/sln/0.1.0/modules/gesture-debug"), Scroll = require("mix/sln/0.1.0/modules/scroll-debug"), Transition = require("mix/sln/0.1.0/modules/transition-debug"), AppPage = require("mix/sln/0.1.0/modules/page-debug"), xBase = require("mix/sln/0.1.0/components/xBase-debug"), xBack = require("mix/sln/0.1.0/components/xBack-debug"), app = {
         theme: "ios",
         routePrefix: 0,
         // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
@@ -1429,58 +1609,6 @@ define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/cor
             }
         }
     }, pages = {};
-    function initXback(el) {
-        var comps = app.components, xBack;
-        el || (el = doc.querySelector('*[is="x-back"]'));
-        if (el) {
-            function preventClick(e) {
-                navigate.backward();
-                e.preventDefault();
-                return false;
-            }
-            function changeVisibility() {
-                var el = xBack._module, visibility = navigate.getStateIndex() < 1 ? "hidden" : "";
-                if (el.style.visibility !== visibility) {
-                    el.style.visibility = visibility;
-                }
-            }
-            xBack = comps["xBack"] = {
-                _module: el,
-                _isEnabled: false,
-                _isAutoHide: false,
-                enable: function() {
-                    var that = this, module = that._module;
-                    if (module && !that._isEnabled) {
-                        that._isEnabled = true;
-                        module.addEventListener("click", preventClick, false);
-                        that.autoHide(el.getAttribute("autoHide") === "true" ? true : false);
-                    }
-                },
-                disable: function() {
-                    var that = this, module = that._module;
-                    if (module && that._isEnabled) {
-                        that._isEnabled = false;
-                        el.removeEventListener("click", preventClick);
-                        that.autoHide(false);
-                    }
-                },
-                autoHide: function(is) {
-                    var that = this, module = that._module;
-                    if (module && that._isAutoHide !== is) {
-                        that._isAutoHide = is;
-                        if (is) {
-                            changeVisibility();
-                            navigate.on("forward backward", changeVisibility);
-                        } else {
-                            module.style.visibility = "";
-                            navigate.off("forward backward", changeVisibility);
-                        }
-                    }
-                }
-            };
-            xBack.enable();
-        }
-    }
     function initXHeader(el) {
         var comps = app.components, xHeader;
         el || (el = doc.querySelector('*[is="x-header"]'));
@@ -1635,10 +1763,7 @@ define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/cor
         function parseButtons(page) {
             var buttons = [];
             Object.each(page.header.buttons, function(button) {
-                if (button.type === "backStack") {
-                    xBack._module.innerText = button.text;
-                    xBack.autoHide(button.autoHide);
-                } else if (button.type === "rightExtra") {
+                if (button.type === "backStack") {} else if (button.type === "rightExtra") {
                     var el = document.createElement("button");
                     el.innerText = button.text;
                     el.addEventListener("click", button.handler, false);
@@ -1707,12 +1832,12 @@ define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/cor
             }
         }
     });
-    initXback();
     initXHeader();
     initXScroll();
     initXTransition();
     initXViewport();
     initNavigateAction();
+    xBase.parseXComponents();
     win["app"] = app;
 });
 

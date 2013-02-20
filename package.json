@@ -15,6 +15,7 @@
         "reset" : "mix/core/0.3.0/base/reset",
         "class" : "mix/core/0.3.0/base/class",
         "message" : "mix/core/0.3.0/base/message",
+        "util" : "mix/core/0.3.0/base/util",
         "router" : "mix/core/0.3.0/url/router",
         "navigate" : "mix/core/0.3.0/url/navigate",
 
@@ -22,7 +23,10 @@
         "transform" : "mix/sln/0.1.0/modules/transform",
         "scroll" : "mix/sln/0.1.0/modules/scroll",
         "transition" : "mix/sln/0.1.0/modules/transition",
-        "page" : "mix/sln/0.1.0/modules/page"
+        "page" : "mix/sln/0.1.0/modules/page",
+
+        "xBase" : "mix/sln/0.1.0/components/xBase",
+        "xBack" : "mix/sln/0.1.0/components/xBack"
     },
     "output" : {
         "*/*.js" : ".",
@@ -34,6 +38,7 @@
                 "reset",
                 "class",
                 "message",
+                "util",
                 "router",
                 "navigate",
                 "gesture",
@@ -41,6 +46,8 @@
                 "scroll",
                 "transition",
                 "page",
+                "xBase",
+                "xBack",
                 "./app"
             ]
         }

@@ -121,7 +121,7 @@ body * {
     margin-top: -43px;
     padding-top: 43px;
     box-sizing: border-box;
-    background: url('bg.jpg');
+    background: url('bg1.jpg') transparent repeat 0 0;
 }
 
 .viewport .scrollport {
