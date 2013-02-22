@@ -7,20 +7,6 @@ define("#mix/sln/0.1.0/modules/scroll-debug", [ "mix/core/0.3.0/base/reset-debug
         if (maxTop > 0) maxTop = 0;
         return maxTop;
     }
-    var STYLE = {
-        element: {
-            position: "relative",
-            "-webkit-backface-visibility": "hidden",
-            "-webkit-transform-style": "preserve-3d"
-        }
-    };
-    Object.each(STYLE, function(styles, key) {
-        var cssText = "";
-        Object.each(styles, function(value, name) {
-            cssText += name + ":" + value + ";";
-        });
-        STYLE[key].cssText = cssText;
-    });
     var Scroll = Class.create({
         initialize: function(element) {
             var that = this;
@@ -34,7 +20,6 @@ define("#mix/sln/0.1.0/modules/scroll-debug", [ "mix/core/0.3.0/base/reset-debug
             that._onPan = that._onPan.bind(that);
             that._onPanEnd = that._onPanEnd.bind(that);
             that._onFlick = that._onFlick.bind(that);
-            element.style.cssText = STYLE.element.cssText;
             if (!prevented) {
                 prevented = true;
                 doc.body.addEventListener("touchmove", that._preventBodyTouch, false);

@@ -45,7 +45,7 @@
 
 					e.preventDefault();
 
-					app.navigate.forward('detail/' + el.parentNode.id.split('-')[1]);
+					app.forward('detail/' + el.parentNode.id.split('-')[1]);
 				}, false);
 			});
 		},

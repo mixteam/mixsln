@@ -1,6 +1,6 @@
 define("#mix/sln/0.1.0/components/xBack-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/util-debug", "mix/core/0.3.0/url/navigate-debug", "mix/sln/0.1.0/components/xBase-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class-debug"), util = require("mix/core/0.3.0/base/util-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, xBase = require("mix/sln/0.1.0/components/xBase-debug"), xName = "x-back", xBack = xBase.createXComponent(xName, {
+    var Class = require("mix/core/0.3.0/base/class-debug"), util = require("mix/core/0.3.0/base/util-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, xBase = require("mix/sln/0.1.0/components/xBase-debug"), xName = "x-back", className = "x-button " + xName, xBack = xBase.create(xName, className, {
         init: function() {
             var that = this;
             that._isAutoHide = false;
@@ -19,11 +19,16 @@ define("#mix/sln/0.1.0/components/xBack-debug", [ "mix/core/0.3.0/base/reset-deb
         },
         autoHide: function(is) {
             var that = this, module = that._module;
+            if (is === null) {}
             if (module && that._isAutoHide !== is) {
                 is ? navigate.on("forward backward", that._changeVisibility) : navigate.off("forward backward", that._changeVisibility);
                 that._isAutoHide = is;
                 that._changeVisibility();
             }
+        },
+        setText: function(text) {
+            var that = this, module = that._module;
+            module.innerText = text;
         },
         _clickHandler: function(e) {
             navigate.backward();
@@ -31,7 +36,7 @@ define("#mix/sln/0.1.0/components/xBack-debug", [ "mix/core/0.3.0/base/reset-deb
             return false;
         },
         _changeVisibility: function() {
-            var module = that._module, isEnabled = that._isEnabled, visibility = navigate.getStateIndex() < 1 && isEnabled ? "hidden" : "";
+            var that = this, module = that._module, isEnabled = that._isEnabled, visibility = navigate.getStateIndex() < 1 && isEnabled ? "hidden" : "";
             if (module.style.visibility !== visibility) {
                 module.style.visibility = visibility;
             }

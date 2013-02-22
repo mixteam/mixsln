@@ -7,7 +7,8 @@ var Class = require('class'),
 	xBase = require('xBase'),
 
 	xName = 'x-back',
-	xBack = xBase.createXComponent(xName, {
+	className = 'x-button ' + xName,
+	xBack = xBase.create(xName, className, {
 		init : function() {
 			var that = this
 				;
@@ -41,12 +42,24 @@ var Class = require('class'),
 				module = that._module
 				;
 
+			if (is === null) {
+				
+			}
+
 			if (module && that._isAutoHide !== is) {
 				is ? navigate.on('forward backward', that._changeVisibility) :
 						navigate.off('forward backward', that._changeVisibility);
 				that._isAutoHide = is;
 				that._changeVisibility();
 			}
+		},
+
+		setText : function(text) {
+			var that = this,
+				module = that._module
+				;
+
+			module.innerText = text;
 		},
 
 		_clickHandler : function(e) {
@@ -56,7 +69,8 @@ var Class = require('class'),
 		},
 
 		_changeVisibility : function() {
-			var module = that._module,
+			var that = this,
+				module = that._module,
 				isEnabled = that._isEnabled,
 				visibility = navigate.getStateIndex() < 1 && isEnabled ? 'hidden' : ''
 				;

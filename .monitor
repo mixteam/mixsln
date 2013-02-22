@@ -4,5 +4,10 @@
 ./src/modules/gesture.js
 ./src/modules/transform.js
 ./src/modules/scroll.js
-./src/modules/transition.js
 ./src/modules/page.js
+./src/components/xBase.js
+./src/components/xBack.js
+./src/components/xScroll.js
+./src/components/xTitlebar.js
+./src/components/xTransition.js
+./src/components/xViewport.js

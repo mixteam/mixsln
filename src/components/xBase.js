@@ -11,6 +11,7 @@ var win = window,
 			var that = this
 				;
 
+			that._name = name;
 			that._module = module;
 			that._isEnable = false;
 		},
@@ -43,9 +44,19 @@ var win = window,
 	});
 	;
 
-function createXComponent(name, properties) {
+function createXComponent(xName, className, properties) {
 
-	var _init, _enable, _disable, extentions, xComponent, component;
+	var _init, _extends, _implements, _enable, _disable, extentions, xComponent, component;
+
+	if (arguments.length === 2) {
+		properties = className;
+		className = xName;
+	}
+
+	if (properties.hasOwnProperty('Implements')) {
+		_implements = properties.Implements;
+		delete properties.Implments;
+	}
 
 	if (properties.hasOwnProperty('init')) {
 		_init = properties.init;
@@ -63,11 +74,14 @@ function createXComponent(name, properties) {
 	}
 
 	extentions = Object.extend({
+		Extends : xBase,
+		Implements : _implements,
+
 		initialize : function(module) {
 			var that = this
 				;
 
-			xComponent.superclass.initialize.call(that, name, module);
+			xComponent.superclass.initialize.call(that, xName, module);
 			_init && _init.call(that);
 		}
 	}, properties);
@@ -98,29 +112,51 @@ function createXComponent(name, properties) {
 		}
 	}
 
-	xComponent = xBase.extend(extentions);
+	xComponent = Class.create(extentions);
 
-	component = components[name] = {
-		name : name,
+	component = components[xName] = {
+		name : xName,
 		klass : xComponent,
 		count : 0,
-		instance : [],
+		instances : [],
 		map : {}
 	}
 
 	xComponent.create = function(el) {
-		var cid = name + '-' + Date.now() + '-' + (component.count + 1),
+		var cid = xName + '-' + Date.now() + '-' + (component.count + 1),
+			instances = component.instances,
+			map = component.map,
 			instance
 			;
 
 		el.setAttribute('cid', cid);
+		el.className += (el.className?' ':'') + className;
+
 		instance = new xComponent(el);
-		component.instance.push(instance);
-		component.map[cid] = component.length - 1;
+
+		instances.push(instance);
+		map[cid] = instances.length - 1;
+
 		return instance;
 	}
 
 	return xComponent;
+}
+
+function getXComponent(cid) {
+	var name, component, matched;
+
+	if ((matched = cid.match(/^(x-[^-]+)/))) {
+		name = matched[1];
+	}
+
+	component = components[name];
+
+	if (cid === name) {
+		return component.instances;
+	} else {
+		return component.instances[component.map[cid]];
+	}
 }
 
 function parseXComponents() {
@@ -136,8 +172,9 @@ function parseXComponents() {
 	});
 }
 
-xBase.createXComponent = createXComponent;
-xBase.parseXComponents = parseXComponents;
+xBase.create = createXComponent;
+xBase.get = getXComponent;
+xBase.parse = parseXComponents;
 
 return xBase;
 });

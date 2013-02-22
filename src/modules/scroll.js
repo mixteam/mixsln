@@ -28,25 +28,6 @@ function getMaxScrollTop(el) {
     return maxTop;
 }
 
-var STYLE = {
-    element : {
-        'position' : 'relative',
-        '-webkit-backface-visibility' : 'hidden',
-        '-webkit-transform-style' : 'preserve-3d'
-    }
-}
-
-Object.each(STYLE, function(styles, key) {
-    var cssText = ''
-        ;
-
-    Object.each(styles, function(value, name){
-        cssText += name + ':' + value + ';';
-    });
-
-    STYLE[key].cssText = cssText;
-});
-
 var Scroll = Class.create({
     initialize : function(element) {
         var that = this
@@ -63,8 +44,6 @@ var Scroll = Class.create({
         that._onPan = that._onPan.bind(that);
         that._onPanEnd = that._onPanEnd.bind(that);
         that._onFlick = that._onFlick.bind(that);
-
-        element.style.cssText = STYLE.element.cssText;
 
         if (!prevented) {
             prevented = true;

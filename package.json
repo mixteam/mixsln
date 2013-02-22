@@ -22,11 +22,14 @@
         "gesture" : "mix/sln/0.1.0/modules/gesture",
         "transform" : "mix/sln/0.1.0/modules/transform",
         "scroll" : "mix/sln/0.1.0/modules/scroll",
-        "transition" : "mix/sln/0.1.0/modules/transition",
         "page" : "mix/sln/0.1.0/modules/page",
 
         "xBase" : "mix/sln/0.1.0/components/xBase",
-        "xBack" : "mix/sln/0.1.0/components/xBack"
+        "xBack" : "mix/sln/0.1.0/components/xBack",
+        "xScroll" : "mix/sln/0.1.0/components/xScroll",
+        "xTransition" : "mix/sln/0.1.0/components/xTransition",
+        "xTitlebar" : "mix/sln/0.1.0/components/xTitlebar",
+        "xViewport" : "mix/sln/0.1.0/components/xViewport"
     },
     "output" : {
         "*/*.js" : ".",
@@ -41,13 +44,16 @@
                 "util",
                 "router",
                 "navigate",
-                "gesture",
-                "transform",
-                "scroll",
-                "transition",
-                "page",
-                "xBase",
-                "xBack",
+                "./modules/gesture",
+                "./modules/transform",
+                "./modules/scroll",
+                "./modules/page",
+                "./components/xBase",
+                "./components/xBack",
+                "./components/xScroll",
+                "./components/xTransition",
+                "./components/xTitlebar",
+                "./components/xViewport",
                 "./app"
             ]
         }

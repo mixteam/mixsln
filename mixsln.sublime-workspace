@@ -4,6 +4,94 @@
 		"selected_items":
 		[
 			[
+				"comp",
+				"component"
+			],
+			[
+				"re",
+				"return"
+			],
+			[
+				"com",
+				"component"
+			],
+			[
+				"c",
+				"component"
+			],
+			[
+				"cl",
+				"_clickHandler"
+			],
+			[
+				"e",
+				"extentions"
+			],
+			[
+				"ini",
+				"initXComponents"
+			],
+			[
+				"el",
+				"elements"
+			],
+			[
+				"cre",
+				"createXComponent"
+			],
+			[
+				"xB",
+				"xBack"
+			],
+			[
+				"bo",
+				"border-radius"
+			],
+			[
+				"mo",
+				"module"
+			],
+			[
+				"app",
+				"appendChild"
+			],
+			[
+				"st",
+				"string"
+			],
+			[
+				"but",
+				"buttons"
+			],
+			[
+				"h",
+				"handler"
+			],
+			[
+				"_is",
+				"_isAutoHide"
+			],
+			[
+				"for",
+				"forward"
+			],
+			[
+				"webkit-t",
+				"webkit-transition"
+			],
+			[
+				"cur",
+				"curPage"
+			],
+			[
+				"ap",
+				"appName"
+			],
+			[
+				"tr",
+				"tranlate"
+			],
+			[
 				"inline",
 				"inline-block"
 			],
@@ -48,10 +136,6 @@
 				"routePrefix"
 			],
 			[
-				"tr",
-				"transitionEnd"
-			],
-			[
 				"tra",
 				"transition"
 			],
@@ -72,10 +156,6 @@
 				"_notActivePort"
 			],
 			[
-				"com",
-				"comps"
-			],
-			[
 				"scr",
 				"scrollport"
 			],
@@ -88,28 +168,12 @@
 				"initXScroll"
 			],
 			[
-				"cl",
-				"className"
-			],
-			[
 				"ca",
 				"className"
 			],
 			[
 				"doc",
 				"doc"
-			],
-			[
-				"_is",
-				"_isEnableTransition"
-			],
-			[
-				"app",
-				"appname"
-			],
-			[
-				"st",
-				"state"
 			],
 			[
 				"x",
@@ -144,10 +208,6 @@
 				"preserve-3d"
 			],
 			[
-				"re",
-				"relative"
-			],
-			[
 				"crea",
 				"createElement"
 			],
@@ -157,10 +217,6 @@
 			],
 			[
 				"compoent",
-				"Component"
-			],
-			[
-				"comp",
 				"Component"
 			],
 			[
@@ -204,20 +260,12 @@
 				"scrollsEl"
 			],
 			[
-				"cur",
-				"curPage"
-			],
-			[
 				"initX",
 				"initXback"
 			],
 			[
 				"rou",
 				"routePrefixSep"
-			],
-			[
-				"ap",
-				"appPage"
 			],
 			[
 				"x-",
@@ -248,10 +296,6 @@
 				"single"
 			],
 			[
-				"mo",
-				"mode"
-			],
-			[
 				"pase",
 				"parseInt"
 			],
@@ -280,10 +324,6 @@
 				"navibar"
 			],
 			[
-				"c",
-				"count"
-			],
-			[
 				"bac",
 				"backContros"
 			],
@@ -294,10 +334,6 @@
 			[
 				"_o",
 				"_originalY"
-			],
-			[
-				"el",
-				"element"
 			],
 			[
 				"ev",
@@ -352,10 +388,6 @@
 				"renderHelloLevel"
 			],
 			[
-				"h",
-				"handlers"
-			],
-			[
 				"_h",
 				"_html"
 			],
@@ -394,10 +426,6 @@
 			[
 				"padd",
 				"padding"
-			],
-			[
-				"bo",
-				"border-radius"
 			],
 			[
 				"bor",
@@ -486,34 +514,6 @@
 			[
 				"opt",
 				"options"
-			],
-			[
-				"fu",
-				"fullname"
-			],
-			[
-				"op",
-				"options"
-			],
-			[
-				"padding",
-				"padding-top"
-			],
-			[
-				"moni",
-				"monitor"
-			],
-			[
-				"eve",
-				"eventSplitter"
-			],
-			[
-				"cac",
-				"cache"
-			],
-			[
-				"con",
-				"controId"
 			]
 		]
 	},
@@ -523,7 +523,7 @@
 			"file": "package.json",
 			"settings":
 			{
-				"buffer_size": 1395,
+				"buffer_size": 1619,
 				"line_ending": "Windows"
 			}
 		},
@@ -531,7 +531,7 @@
 			"file": "test/demo1.css",
 			"settings":
 			{
-				"buffer_size": 1491,
+				"buffer_size": 3822,
 				"line_ending": "Windows"
 			}
 		},
@@ -539,23 +539,7 @@
 			"file": "test/demo1.html",
 			"settings":
 			{
-				"buffer_size": 1349,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "test/list.js",
-			"settings":
-			{
-				"buffer_size": 1274,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "test/detail.js",
-			"settings":
-			{
-				"buffer_size": 797,
+				"buffer_size": 1364,
 				"line_ending": "Windows"
 			}
 		},
@@ -563,31 +547,23 @@
 			"file": "src/app.js",
 			"settings":
 			{
-				"buffer_size": 6538,
+				"buffer_size": 8189,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "src/modules/page.js",
+			"file": "src/components/xBack.js",
 			"settings":
 			{
-				"buffer_size": 1305,
+				"buffer_size": 1607,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "src/modules/transition.js",
+			"file": "src/components/xBase.js",
 			"settings":
 			{
-				"buffer_size": 3547,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/modules/transform.js",
-			"settings":
-			{
-				"buffer_size": 2849,
+				"buffer_size": 2630,
 				"line_ending": "Windows"
 			}
 		}
@@ -636,14 +612,22 @@
 	},
 	"file_history":
 	[
+		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xComponent.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xComponents.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xComponents",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
+		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
+		"/D/workspace/taobao/etao/mix/mixsln/assets/common.css",
+		"/D/workspace/taobao/etao/mix/mixsln/assets/default (1).css",
+		"/D/workspace/taobao/etao/mix/mixsln/test/detail.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transition.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
 		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
-		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transition",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.html",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/sln.all-debug.js",
@@ -755,15 +739,7 @@
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/docs/assets/less/bootstrap/responsive.less",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/docs/assets/less/bootstrap/accordion.less",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/docs/assets/less/bootstrap/variables-custom.less",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/core/ui/README.md",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/core/util/README.md",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/core/base/README.md",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/projinit/src/projinit.js",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/projinit/README.md",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/projinit/examples/app/src/{{name}}View.js",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/projinit/examples/app/entry.js",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/projinit/examples/helloworld/seajsConf.js",
-		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/tools/test/apps/index/src/indexView.js"
+		"/D/workspace/taobao/etao/Mobile_In_X/mixteam/core/ui/README.md"
 	],
 	"find":
 	{
@@ -781,6 +757,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"compnents",
+			"{\n",
 			"_appname",
 			"navigate",
 			"waitTransition",
@@ -906,8 +884,6 @@
 			"compFile",
 			"root",
 			"Message",
-			"require",
-			"less.mode",
 			"require"
 		],
 		"highlight": true,
@@ -916,6 +892,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"components",
 			"transform.start",
 			"transform.getTranslate",
 			"transform.getY",
@@ -990,7 +967,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 2,
 			"sheets":
 			[
 				{
@@ -998,15 +975,15 @@
 					"file": "package.json",
 					"settings":
 					{
-						"buffer_size": 1395,
+						"buffer_size": 1619,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								372,
-								372
+								701,
+								701
 							]
 						],
 						"settings":
@@ -1026,15 +1003,15 @@
 					"file": "test/demo1.css",
 					"settings":
 					{
-						"buffer_size": 1491,
+						"buffer_size": 3822,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								688,
-								688
+								2244,
+								2244
 							]
 						],
 						"settings":
@@ -1044,7 +1021,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 306.0,
+						"translation.y": 714.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1054,20 +1031,22 @@
 					"file": "test/demo1.html",
 					"settings":
 					{
-						"buffer_size": 1349,
+						"buffer_size": 1364,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								378,
-								378
+								699,
+								699
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/HTML5/Syntaxes/HTML 5.tmLanguage"
+							"syntax": "Packages/HTML5/Syntaxes/HTML 5.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -1077,18 +1056,18 @@
 				},
 				{
 					"buffer": 3,
-					"file": "test/list.js",
+					"file": "src/app.js",
 					"settings":
 					{
-						"buffer_size": 1274,
+						"buffer_size": 8189,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								259,
-								269
+								619,
+								619
 							]
 						],
 						"settings":
@@ -1097,106 +1076,25 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 5223.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 4,
-					"file": "test/detail.js",
+					"file": "src/components/xBack.js",
 					"settings":
 					{
-						"buffer_size": 797,
+						"buffer_size": 1607,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								623,
-								623
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "src/app.js",
-					"settings":
-					{
-						"buffer_size": 6538,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2343,
-								2343
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 4363.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "src/modules/page.js",
-					"settings":
-					{
-						"buffer_size": 1305,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								507,
-								507
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 561.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "src/modules/transition.js",
-					"settings":
-					{
-						"buffer_size": 3547,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2573,
-								2573
+								92,
+								92
 							]
 						],
 						"settings":
@@ -1204,35 +1102,34 @@
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 1736.0,
+						"translation.y": 336.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 8,
-					"file": "src/modules/transform.js",
+					"buffer": 5,
+					"file": "src/components/xBase.js",
 					"settings":
 					{
-						"buffer_size": 2849,
+						"buffer_size": 2630,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2326,
-								2326
+								2079,
+								2079
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1020.0,
+						"translation.y": 1288.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
