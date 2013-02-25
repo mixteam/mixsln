@@ -5,71 +5,90 @@ var win = window,
     doc = win.document,
     Class = require('class'),
     Message = require('message'),
-    navigate = require('navigate').singleton
-    ;
+    navigate = require('navigate').singleton,
 
-var AppPage = Class.create({
-	Implements : Message,
-
-	initialize : function(options) {
-		var that = this,
-			name = that.name
-			;
-
-		Message.prototype.initialize.call(that, 'app.' + name);
-
-		that._options = options;
-		that._isReady = false;
-		that._bindEvents();
-		that._bindRoutes();
+    STATUS = {
+		'UNKOWN' : 0,
+		'UNLOADED' : 0,
+		'READY' : 1,
+		'COMPILED' : 2,
 	},
+	AppPage = Class.create({
+		Implements : Message,
 
-	_bindEvents : function() {
-		var that = this
-			;
+		initialize : function(options) {
+			var that = this,
+				name = that.name
+				;
 
-		that.on('ready', function(state) {
-			if (!that._isReady) {
-				that._isReady = true;
-				that.ready(state);
+			Message.prototype.initialize.call(that, 'app.' + name);
+
+			that._options = options;
+			that._status = STATUS.UNKOWN;
+
+			that.ready = that.ready.bind(that);
+			that.unload = that.unload.bind(that);
+
+			that.on('ready', that.ready);
+			that.on('unloaded', that.unload);
+		},
+
+		getStatus : function(status) {
+			return this._status;
+		},
+
+		setStatus : function(status) {
+			this._status = status;
+		},
+
+		getTitle : function() {
+			//can overrewite
+			return this.title;
+		},
+
+		setTitle : function(title) {
+			this.title = title;
+		},
+
+		loadTemplate : function(url, callback) {
+			// can overwrite
+			var that = this
+				;
+
+			if (arguments.length === 1) {
+				callback = arguments[0];
+				url = that.template;
+			} 
+
+			url && app.loadFile(url, callback);
+		},
+
+		compileTemplate : function(text, callback) {
+			// can overwrite
+			var that = this,
+				engine;
+
+			if ((engine = win['Mustache'])) {
+				that.compiledTemplate = engine.compile(text);
+				callback(that.compiledTemplate);
 			}
-		});
+		},
 
-		that.on('unload', function() {
-			if (that._isReady) {
-				that._isReady = false;
-				that.unload();
-			}
-		});
-	},
+		renderTemplate : function(datas, callback) {
+			// can overwrite
+			var that = this,
+				compiledTemplate = that.compiledTemplate,
+				content = compiledTemplate(datas)
+				;
 
-	_bindRoutes : function() {
-		var that = this,
-			name = that.name,
-			route = that.route
-			;
+			callback(content);
+		},
 
-		if (Object.isTypeof(route, 'string')) {
-			route = {
-				name : 'anonymous',
-				text : route
-			}
-		}
+		ready : function(navigation) {/*implement*/},
+		unload : function() {/*implement*/}
+	});
 
-		navigate.addRoute(name + '.' + route.name, route.text, route);
-	},
-
-	getTitle : function() {
-		return this.title;	//over rewite
-	},
-
-	setTitle : function(title) {
-		this.title = title;
-	},
-
-	ready : function(state) {/*implement*/},
-	unload : function() {/*implement*/}
-});
+AppPage.STATUS = STATUS;
 
 return AppPage;
 

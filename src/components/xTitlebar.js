@@ -1,20 +1,10 @@
 define(function(require, exports, module) {
 
-TEMPLATE = [
-'<div>',
-	'<section class="center"></section>',
-	'<section class="left"></section>',
-	'<section class="right"></section>',
-'</div>'
-].join('');
-
 require('reset');
 var win = window,
 	doc = win.document,
 
 	Class = require('class'),
-	navigate = require('navigate').singleton,
-	util = require('util').singleton,
 	xBase = require('xBase'),
 	xBack = require('xBack'),
 
@@ -57,24 +47,6 @@ var win = window,
 			that.xback.disable();
 		},
 
-		_setContent : function(el, content) {
-			if (content != null) {
-				var isType = Object.isTypeof(content);
-				if (isType === 'string') {
-					el.innerHTML = content;
-				} else  {
-					if (isType !== 'array') {
-						content = [content];
-					}
-
-					el.innerHTML = '';
-					Object.each(content, function(item) {
-						el.appendChild(item);
-					});
-				}
-			}
-		},
-
 		change : function(contents, movement) {
 			var that = this,
 				isEnabled = that._isEnabled,
@@ -108,12 +80,31 @@ var win = window,
 				;
 
 			if (isEnabled) {
-				that._setContent(center, contents.center);
-				that._setContent(left, contents.left);
-				that._setContent(right, contents.right);
+				setContent(center, contents.center);
+				setContent(left, contents.left);
+				setContent(right, contents.right);
 			}
 		}
 	});
+
+
+	function setContent(el, content) {
+		if (content != null) {
+			var isType = Object.isTypeof(content);
+			if (isType === 'string') {
+				el.innerHTML = content;
+			} else  {
+				if (isType !== 'array') {
+					content = [content];
+				}
+
+				el.innerHTML = '';
+				Object.each(content, function(item) {
+					el.appendChild(item);
+				});
+			}
+		}
+	}
 
 	return xTitlebar;
 });

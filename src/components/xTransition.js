@@ -25,8 +25,8 @@ var win = window,
 			
 	        Message.prototype.initialize.call(that, 'transition');
 
-	        activePort = doc.createElement('div');
-	        inactivePort = doc.createElement('div');
+	        activePort = that._activePort = doc.createElement('div');
+	        inactivePort = that._inactivePort = doc.createElement('div');
 			activePort.className = 'active';
 			inactivePort.className = 'inactive';
 			activePort.innerHTML = orginHtml;
@@ -37,20 +37,22 @@ var win = window,
 		},
 
 		getViewport : function() {
-			var that = this,
-				module = that._module
+			var that = this
 				;
 
-			return module.querySelector('.active');
+			return that._activePort;
 		},
 
 		action : function(type) {
 			var that = this,
 				isEnabled = that._isEnabled,
 				module = that._module,
-				lastActivePort = module.querySelector('.active'),
-				activePort = module.querySelector('.inactive'),
+				lastActivePort = that._activePort,
+				activePort = that._inactivePort,
 				originX, originY;
+
+			that._activePort = activePort;
+			that._inactivePort = lastActivePort;
 
 			if (isEnabled) {
 				originY = transform.getY(module);

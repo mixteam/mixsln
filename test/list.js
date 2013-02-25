@@ -3,65 +3,81 @@
 		name : 'list',
 		title : '商品列表',
 		route : 'list\\/?',
-
-		header : {
-			template : 'titlebar',
-
-			buttons : [
-				{
-					type : 'backStack',
-					text : '返回',
-					autoHide : true
-				},
-				{
-					type : 'rightExtra',
-					text : '加50条',
-					handler : function(e) {
-						listApp.increase();
-					}
+		template : './list.tpl',
+		buttons : [
+			{
+				type : 'backStack',
+				text : '返回',
+				autoHide : true
+			},
+			{
+				type : 'rightExtra',
+				text : '加50条',
+				handler : function(e) {
+					listApp.increase();
 				}
-			]
-		},
-
+			}
+		],
+		_navigation : null,
 		_listCount : 50,
 
-		_fillContent : function () {
+		_loadDatas : function(callback) {
 			var that = this,
 				count = that._listCount,
-				viewport = app.getViewport(),
-				html = ''
+				datas = {count : count, list : []}
 				;
 
-			for (var i = 1; i <= count; i++) {
-				html += '<li id="pid-' + i + '"><a href="javascript:void(0)">共有' + count + '个商品，这是第' + i + '个</a></li>';
+			for (var i = 0; i < count; i++)  {
+				datas.list.push(i + 1);
 			}
 
-			viewport.innerHTML = '<ol>' + html  + '</ol>';
+			callback(datas);
+		},
 
+		_fillContent : function() {
+			var that = this,
+				navigation = that._navigation;
+
+			that._loadDatas(function(datas) {
+				navigation.fill(datas, function() {
+					that._bindEvents();
+				});
+			});	
+		},
+
+		_bindEvents : function() {
+			var that = this,
+				navigation = that._navigation,
+				viewport = app.getViewport()
+				;
+
+			// implement super.ready
 			Object.each(viewport.querySelectorAll('li a'), function(anchor) {
 				anchor.addEventListener('click', function(e) {
 					var el = this
 						;
-
 					e.preventDefault();
-
-					app.forward('detail/' + el.parentNode.id.split('-')[1]);
+					navigation.push('detail/' + el.parentNode.id.split('-')[1]);
 				}, false);
 			});
 		},
 
-		ready : function(state) {
-			// implement super.ready
-			this._fillContent();
+		ready : function(navigation) {
+			// implement super.load
+			var that = this
+				;
+
+			that._navigation = navigation;
+			that._fillContent();
 		},
 
 		unload : function() {
 			// implement super.unload
 		},
 
-
 		increase : function() {
-			var that = this;
+			var that = this,
+				navigation = that._navigation;
 
 			that._listCount += 50;
 			that._fillContent();

@@ -29,7 +29,9 @@
         "xScroll" : "mix/sln/0.1.0/components/xScroll",
         "xTransition" : "mix/sln/0.1.0/components/xTransition",
         "xTitlebar" : "mix/sln/0.1.0/components/xTitlebar",
-        "xViewport" : "mix/sln/0.1.0/components/xViewport"
+        "xViewport" : "mix/sln/0.1.0/components/xViewport",
+
+        "cNavigation" : "mix/sln/0.1.0/controllers/cNavigation"
     },
     "output" : {
         "*/*.js" : ".",
@@ -54,6 +56,7 @@
                 "./components/xTransition",
                 "./components/xTitlebar",
                 "./components/xViewport",
+                "./controllers/cNavigation",
                 "./app"
             ]
         }

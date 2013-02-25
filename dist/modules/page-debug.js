@@ -1,49 +1,60 @@
 define("#mix/sln/0.1.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton;
-    var AppPage = Class.create({
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, STATUS = {
+        UNKOWN: 0,
+        UNLOADED: 0,
+        READY: 1,
+        COMPILED: 2
+    }, AppPage = Class.create({
         Implements: Message,
         initialize: function(options) {
             var that = this, name = that.name;
             Message.prototype.initialize.call(that, "app." + name);
             that._options = options;
-            that._isReady = false;
-            that._bindEvents();
-            that._bindRoutes();
+            that._status = STATUS.UNKOWN;
+            that.ready = that.ready.bind(that);
+            that.unload = that.unload.bind(that);
+            that.on("ready", that.ready);
+            that.on("unloaded", that.unload);
         },
-        _bindEvents: function() {
-            var that = this;
-            that.on("ready", function(state) {
-                if (!that._isReady) {
-                    that._isReady = true;
-                    that.ready(state);
-                }
-            });
-            that.on("unload", function() {
-                if (that._isReady) {
-                    that._isReady = false;
-                    that.unload();
-                }
-            });
+        getStatus: function(status) {
+            return this._status;
         },
-        _bindRoutes: function() {
-            var that = this, name = that.name, route = that.route;
-            if (Object.isTypeof(route, "string")) {
-                route = {
-                    name: "anonymous",
-                    text: route
-                };
-            }
-            navigate.addRoute(name + "." + route.name, route.text, route);
+        setStatus: function(status) {
+            this._status = status;
         },
         getTitle: function() {
+            //can overrewite
             return this.title;
         },
         setTitle: function(title) {
             this.title = title;
         },
-        ready: function(state) {},
+        loadTemplate: function(url, callback) {
+            // can overwrite
+            var that = this;
+            if (arguments.length === 1) {
+                callback = arguments[0];
+                url = that.template;
+            }
+            url && app.loadFile(url, callback);
+        },
+        compileTemplate: function(text, callback) {
+            // can overwrite
+            var that = this, engine;
+            if (engine = win["Mustache"]) {
+                that.compiledTemplate = engine.compile(text);
+                callback(that.compiledTemplate);
+            }
+        },
+        renderTemplate: function(datas, callback) {
+            // can overwrite
+            var that = this, compiledTemplate = that.compiledTemplate, content = compiledTemplate(datas);
+            callback(content);
+        },
+        ready: function(navigation) {},
         unload: function() {}
     });
+    AppPage.STATUS = STATUS;
     return AppPage;
 });

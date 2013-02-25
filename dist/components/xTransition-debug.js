@@ -7,8 +7,8 @@ define("#mix/sln/0.1.0/components/xTransition-debug", [ "mix/core/0.3.0/base/res
         init: function() {
             var that = this, module = that._module, orginHtml = module.innerHTML, activePort, inactivePort;
             Message.prototype.initialize.call(that, "transition");
-            activePort = doc.createElement("div");
-            inactivePort = doc.createElement("div");
+            activePort = that._activePort = doc.createElement("div");
+            inactivePort = that._inactivePort = doc.createElement("div");
             activePort.className = "active";
             inactivePort.className = "inactive";
             activePort.innerHTML = orginHtml;
@@ -17,11 +17,13 @@ define("#mix/sln/0.1.0/components/xTransition-debug", [ "mix/core/0.3.0/base/res
             module.appendChild(inactivePort);
         },
         getViewport: function() {
-            var that = this, module = that._module;
-            return module.querySelector(".active");
+            var that = this;
+            return that._activePort;
         },
         action: function(type) {
-            var that = this, isEnabled = that._isEnabled, module = that._module, lastActivePort = module.querySelector(".active"), activePort = module.querySelector(".inactive"), originX, originY;
+            var that = this, isEnabled = that._isEnabled, module = that._module, lastActivePort = that._activePort, activePort = that._inactivePort, originX, originY;
+            that._activePort = activePort;
+            that._inactivePort = lastActivePort;
             if (isEnabled) {
                 originY = transform.getY(module);
                 originX = (type === "forward" ? "-" : "") + "33.33%";

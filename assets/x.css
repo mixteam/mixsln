@@ -75,7 +75,7 @@
     background: -webkit-linear-gradient(top,rgb(110,132,161) 0%,rgb(137,155,178) 50%,rgb(127,148,176) 50%,rgb(180,191,205) 100%);
     border-bottom:solid 1px rgb(33,39,48);
     height:43px;
-
+    box-sizing: border-box;
     position: relative;
     width: 100%;
     z-index: 9;

@@ -1282,51 +1282,62 @@ define("#mix/sln/0.1.0/modules/scroll-debug", [ "mix/core/0.3.0/base/reset-debug
 
 define("#mix/sln/0.1.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton;
-    var AppPage = Class.create({
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, STATUS = {
+        UNKOWN: 0,
+        UNLOADED: 0,
+        READY: 1,
+        COMPILED: 2
+    }, AppPage = Class.create({
         Implements: Message,
         initialize: function(options) {
             var that = this, name = that.name;
             Message.prototype.initialize.call(that, "app." + name);
             that._options = options;
-            that._isReady = false;
-            that._bindEvents();
-            that._bindRoutes();
+            that._status = STATUS.UNKOWN;
+            that.ready = that.ready.bind(that);
+            that.unload = that.unload.bind(that);
+            that.on("ready", that.ready);
+            that.on("unloaded", that.unload);
         },
-        _bindEvents: function() {
-            var that = this;
-            that.on("ready", function(state) {
-                if (!that._isReady) {
-                    that._isReady = true;
-                    that.ready(state);
-                }
-            });
-            that.on("unload", function() {
-                if (that._isReady) {
-                    that._isReady = false;
-                    that.unload();
-                }
-            });
+        getStatus: function(status) {
+            return this._status;
         },
-        _bindRoutes: function() {
-            var that = this, name = that.name, route = that.route;
-            if (Object.isTypeof(route, "string")) {
-                route = {
-                    name: "anonymous",
-                    text: route
-                };
-            }
-            navigate.addRoute(name + "." + route.name, route.text, route);
+        setStatus: function(status) {
+            this._status = status;
         },
         getTitle: function() {
+            //can overrewite
             return this.title;
         },
         setTitle: function(title) {
             this.title = title;
         },
-        ready: function(state) {},
+        loadTemplate: function(url, callback) {
+            // can overwrite
+            var that = this;
+            if (arguments.length === 1) {
+                callback = arguments[0];
+                url = that.template;
+            }
+            url && app.loadFile(url, callback);
+        },
+        compileTemplate: function(text, callback) {
+            // can overwrite
+            var that = this, engine;
+            if (engine = win["Mustache"]) {
+                that.compiledTemplate = engine.compile(text);
+                callback(that.compiledTemplate);
+            }
+        },
+        renderTemplate: function(datas, callback) {
+            // can overwrite
+            var that = this, compiledTemplate = that.compiledTemplate, content = compiledTemplate(datas);
+            callback(content);
+        },
+        ready: function(navigation) {},
         unload: function() {}
     });
+    AppPage.STATUS = STATUS;
     return AppPage;
 });
 
@@ -1535,8 +1546,8 @@ define("#mix/sln/0.1.0/components/xTransition-debug", [ "mix/core/0.3.0/base/res
         init: function() {
             var that = this, module = that._module, orginHtml = module.innerHTML, activePort, inactivePort;
             Message.prototype.initialize.call(that, "transition");
-            activePort = doc.createElement("div");
-            inactivePort = doc.createElement("div");
+            activePort = that._activePort = doc.createElement("div");
+            inactivePort = that._inactivePort = doc.createElement("div");
             activePort.className = "active";
             inactivePort.className = "inactive";
             activePort.innerHTML = orginHtml;
@@ -1545,11 +1556,13 @@ define("#mix/sln/0.1.0/components/xTransition-debug", [ "mix/core/0.3.0/base/res
             module.appendChild(inactivePort);
         },
         getViewport: function() {
-            var that = this, module = that._module;
-            return module.querySelector(".active");
+            var that = this;
+            return that._activePort;
         },
         action: function(type) {
-            var that = this, isEnabled = that._isEnabled, module = that._module, lastActivePort = module.querySelector(".active"), activePort = module.querySelector(".inactive"), originX, originY;
+            var that = this, isEnabled = that._isEnabled, module = that._module, lastActivePort = that._activePort, activePort = that._inactivePort, originX, originY;
+            that._activePort = activePort;
+            that._inactivePort = lastActivePort;
             if (isEnabled) {
                 originY = transform.getY(module);
                 originX = (type === "forward" ? "-" : "") + "33.33%";
@@ -1574,10 +1587,9 @@ define("#mix/sln/0.1.0/components/xTransition-debug", [ "mix/core/0.3.0/base/res
     return xTransition;
 });
 
-define("#mix/sln/0.1.0/components/xTitlebar-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/util-debug", "mix/sln/0.1.0/components/xBase-debug", "mix/sln/0.1.0/components/xBack-debug" ], function(require, exports, module) {
-    TEMPLATE = [ "<div>", '<section class="center"></section>', '<section class="left"></section>', '<section class="right"></section>', "</div>" ].join("");
+define("#mix/sln/0.1.0/components/xTitlebar-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/sln/0.1.0/components/xBase-debug", "mix/sln/0.1.0/components/xBack-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, util = require("mix/core/0.3.0/base/util-debug").singleton, xBase = require("mix/sln/0.1.0/components/xBase-debug"), xBack = require("mix/sln/0.1.0/components/xBack-debug"), xName = "x-titlebar", className = xName, xTitlebar = xBase.create(xName, className, {
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), xBase = require("mix/sln/0.1.0/components/xBase-debug"), xBack = require("mix/sln/0.1.0/components/xBack-debug"), xName = "x-titlebar", className = xName, xTitlebar = xBase.create(xName, className, {
         init: function() {
             var that = this, module = that._module, wrap, center, left, right, button;
             wrap = doc.createElement("div");
@@ -1600,22 +1612,6 @@ define("#mix/sln/0.1.0/components/xTitlebar-debug", [ "mix/core/0.3.0/base/reset
             var that = this;
             that.xback.disable();
         },
-        _setContent: function(el, content) {
-            if (content != null) {
-                var isType = Object.isTypeof(content);
-                if (isType === "string") {
-                    el.innerHTML = content;
-                } else {
-                    if (isType !== "array") {
-                        content = [ content ];
-                    }
-                    el.innerHTML = "";
-                    Object.each(content, function(item) {
-                        el.appendChild(item);
-                    });
-                }
-            }
-        },
         change: function(contents, movement) {
             var that = this, isEnabled = that._isEnabled, module = that._module, wrap = module.querySelector("div");
             if (isEnabled) {
@@ -1634,12 +1630,28 @@ define("#mix/sln/0.1.0/components/xTitlebar-debug", [ "mix/core/0.3.0/base/reset
         set: function(contents) {
             var that = this, isEnabled = that._isEnabled, module = that._module, center = module.querySelector("div > section:first-child"), left = module.querySelector("div > section:nth-child(2)"), right = module.querySelector("div > section:last-child");
             if (isEnabled) {
-                that._setContent(center, contents.center);
-                that._setContent(left, contents.left);
-                that._setContent(right, contents.right);
+                setContent(center, contents.center);
+                setContent(left, contents.left);
+                setContent(right, contents.right);
             }
         }
     });
+    function setContent(el, content) {
+        if (content != null) {
+            var isType = Object.isTypeof(content);
+            if (isType === "string") {
+                el.innerHTML = content;
+            } else {
+                if (isType !== "array") {
+                    content = [ content ];
+                }
+                el.innerHTML = "";
+                Object.each(content, function(item) {
+                    el.appendChild(item);
+                });
+            }
+        }
+    }
     return xTitlebar;
 });
 
@@ -1700,86 +1712,196 @@ define("#mix/sln/0.1.0/components/xViewport-debug", [ "mix/core/0.3.0/base/reset
     return xViewport;
 });
 
-define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/sln/0.1.0/modules/gesture-debug", "mix/sln/0.1.0/modules/scroll-debug", "mix/sln/0.1.0/modules/page-debug", "mix/sln/0.1.0/components/xBase-debug", "mix/sln/0.1.0/components/xBack-debug", "mix/sln/0.1.0/components/xScroll-debug", "mix/sln/0.1.0/components/xTransition-debug", "mix/sln/0.1.0/components/xTitlebar-debug", "mix/sln/0.1.0/components/xViewport-debug", "mix/sln/0.1.0/app-debug" ], function(require, exports, module) {
+define("#mix/sln/0.1.0/controllers/cNavigation-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/sln/0.1.0/modules/page-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Gesture = require("mix/sln/0.1.0/modules/gesture-debug"), Scroll = require("mix/sln/0.1.0/modules/scroll-debug"), AppPage = require("mix/sln/0.1.0/modules/page-debug"), xBase = require("mix/sln/0.1.0/components/xBase-debug"), xBack = require("mix/sln/0.1.0/components/xBack-debug"), xScroll = require("mix/sln/0.1.0/components/xScroll-debug"), xTransition = require("mix/sln/0.1.0/components/xTransition-debug"), xTitlebar = require("mix/sln/0.1.0/components/xTitlebar-debug"), xViewport = require("mix/sln/0.1.0/components/xViewport-debug"), app = {
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, AppPage = require("mix/sln/0.1.0/modules/page-debug"), pages = {}, status = AppPage.STATUS, NavigationController = Class.create({
+        initialize: function(state) {
+            var that = this, name = state.name.split(".");
+            that._appName = name[0];
+            that._routeName = name[1];
+            that._state = state;
+        },
+        getAppName: function() {
+            return this._appName;
+        },
+        getRouteName: function() {
+            return this._routeName;
+        },
+        getState: function() {
+            return this._state;
+        },
+        getParameter: function(name) {
+            return this._state.params[name];
+        },
+        getArgument: function(name) {
+            return this._state.args[name];
+        },
+        getData: function(name) {
+            return this._state.datas[name];
+        },
+        push: function(fragment, options) {
+            navigate.forward(fragment, options);
+        },
+        pull: function() {
+            navigate.backward();
+        },
+        fill: function(datas, callback) {
+            var that = this, appName = that._appName, page = pages[appName];
+            function _fill() {
+                page.renderTemplate(datas, function(content) {
+                    app.fillViewport(content);
+                    callback && callback();
+                });
+            }
+            if (!page.compiledTemplate) {
+                page.once("compiled", _fill);
+            } else {
+                _fill();
+            }
+        },
+        ready: function() {
+            var that = this, appName = that._appName, page = pages[appName];
+            if (page.getStatus() < status.READY) {
+                page.setStatus(status.READY);
+                page.trigger("ready", that);
+            }
+        },
+        compile: function() {
+            var that = this, appName = that._appName, page = pages[appName];
+            function _compiled() {
+                if (page.getStatus() < status.COMPILED) {
+                    page.setStatus(status.COMPILED);
+                    page.trigger("compiled");
+                }
+            }
+            if (!page.compiledTemplate) {
+                page.loadTemplate(function(text) {
+                    page.compileTemplate(text, function() {
+                        _compiled();
+                    });
+                });
+            } else {
+                _compiled();
+            }
+        },
+        unload: function() {
+            var that = this, appName = that._appName, page = pages[appName];
+            if (page.getStatus() > status.UNLOADED) {
+                page.setStatus(status.UNLOADED);
+                page.trigger("unloaded");
+            }
+        }
+    });
+    function bindRoutes(page) {
+        var name = page.name, route = page.route;
+        if (Object.isTypeof(route, "string")) {
+            route = {
+                name: "anonymous",
+                text: route
+            };
+        }
+        navigate.addRoute(name + "." + route.name, route.text, route);
+    }
+    NavigationController.addPage = function(page) {
+        var name = page.name, route = page.route;
+        if (Object.isTypeof(route, "string")) {
+            route = {
+                name: "anonymous",
+                text: route
+            };
+        }
+        navigate.addRoute(name + "." + route.name, route.text, route);
+        pages[name] = page;
+    };
+    NavigationController.getPage = function(name) {
+        return pages[name];
+    };
+    NavigationController.listen = function(handler) {
+        navigate.on("forward backward", handler);
+    };
+    return NavigationController;
+});
+
+define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/sln/0.1.0/modules/page-debug", "mix/sln/0.1.0/controllers/cNavigation-debug", "mix/sln/0.1.0/components/xBase-debug", "mix/sln/0.1.0/components/xBack-debug", "mix/sln/0.1.0/components/xScroll-debug", "mix/sln/0.1.0/components/xTransition-debug", "mix/sln/0.1.0/components/xTitlebar-debug", "mix/sln/0.1.0/components/xViewport-debug", "mix/sln/0.1.0/app-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, AppPage = require("mix/sln/0.1.0/modules/page-debug"), Navigation = require("mix/sln/0.1.0/controllers/cNavigation-debug"), xBase = require("mix/sln/0.1.0/components/xBase-debug"), xBack = require("mix/sln/0.1.0/components/xBack-debug"), xScroll = require("mix/sln/0.1.0/components/xScroll-debug"), xTransition = require("mix/sln/0.1.0/components/xTransition-debug"), xTitlebar = require("mix/sln/0.1.0/components/xTitlebar-debug"), xViewport = require("mix/sln/0.1.0/components/xViewport-debug"), app = {
         theme: "ios",
         routePrefix: 0,
         // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
         routePrefixSep: "/"
-    }, pages = {};
-    function initNavigateController() {
-        var curApp = null, xviewport = app.queryComponent('*[is="x-viewport"]'), xtitlebar = xviewport.xtitlebar, xtransition = xviewport.xtransition;
+    };
+    function initNavigation() {
+        var curNav, xviewport = app.queryComponent('*[is="x-viewport"]'), xtitlebar = xviewport.xtitlebar, xtransition = xviewport.xtransition;
         xback = xtitlebar.xback;
-        function switchAppPage(appName, state) {
-            var lastPage = pages[curApp], curPage = pages[appName];
-            curApp = appName;
-            lastPage && lastPage.trigger("unload");
-            curPage && curPage.trigger("ready", state);
-        }
-        function parseButtons(page) {
+        function parseButtons(meta) {
             var buttons = [];
-            Object.each(page.header.buttons, function(button) {
-                if (button.type === "backStack") {
-                    xback.setText(button.text);
-                    xback.autoHide(button.autoHide);
-                } else if (button.type === "rightExtra") {
-                    var el = document.createElement("button");
-                    el.className = "x-button";
-                    el.innerText = button.text;
-                    el.addEventListener("click", button.handler, false);
-                    buttons.push(el);
+            Object.each(meta, function(item) {
+                var type = item.type, button;
+                switch (type) {
+                  case "backStack":
+                    xback.setText(item.text);
+                    xback.autoHide(item.autoHide);
+                    break;
+
+                  case "rightExtra":
+                    button = document.createElement("button");
+                    button.className = "x-button";
+                    button.innerText = item.text;
+                    button.addEventListener("click", item.handler, false);
+                    buttons.push(button);
+                    break;
+
+                  default:
+                    break;
                 }
             });
             return buttons;
         }
-        function setTitlebar(appName, state) {
-            var lastPage = pages[curApp], curPage = pages[appName], buttons = parseButtons(curPage);
-            if (!lastPage) {
-                xtitlebar.set({
-                    center: curPage.getTitle(),
-                    right: buttons
-                });
-            } else {
-                xtitlebar.change({
-                    center: curPage.getTitle(),
-                    right: buttons
-                }, state.transition);
-            }
+        function setTitlebar(navigation) {
+            var appName = navigation.getAppName(), transition = navigation.getState().transition, page = app.getPage(appName), title = page.getTitle(), buttons = parseButtons(page.buttons);
+            xtitlebar.change({
+                center: title,
+                right: buttons
+            }, transition);
         }
-        function doTransition(appName, state) {
-            xtransition.once(state.transition + "TransitionEnd", function() {
-                switchAppPage(appName, state);
-            });
-            xtransition[state.transition]();
+        function doTransition(navigation) {
+            var transition = navigation.getState().transition;
+            xtransition[transition]();
+        }
+        function switchNavigation(newNav) {
+            if (curNav) {
+                curNav.unload();
+            }
+            curNav = newNav;
+            newNav.ready();
+            newNav.compile();
         }
         function handler(state) {
-            var appName = state.name.split(".")[0];
-            if (curApp !== appName) {
-                setTitlebar(appName, state);
-                if (xtransition) {
-                    doTransition(appName, state);
-                } else {
-                    switchAppPage(appName, state);
-                }
-            }
+            var navigation = new Navigation(state);
+            doTransition(navigation);
+            switchNavigation(navigation);
+            setTitlebar(navigation);
         }
-        navigate.on("forward backward", handler);
+        Navigation.listen(handler);
     }
     Object.extend(app, {
         init: function(properties) {
-            var that = this, name = properties.name;
             var Page = AppPage.extend(properties), page = new Page({
                 routePrefix: app.routePrefix,
                 routePrefixSep: app.routePrefixSep
             });
-            return pages[name] = page;
+            Navigation.addPage(page);
+            return page;
         },
         getPage: function(name) {
-            return pages[name];
+            return Navigation.getPage(name);
         },
         getViewport: function() {
             return this.queryComponent('*[is="x-viewport"]').getViewport();
+        },
+        fillViewport: function(content) {
+            var that = this, viewport = that.getViewport();
+            viewport.innerHTML = content;
         },
         getComponent: function(cid) {
             if (arguments[0] instanceof HTMLElement) {
@@ -1788,24 +1910,23 @@ define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/cor
             return xBase.get(cid);
         },
         queryComponent: function(selector) {
-            var el = doc.querySelector(selector), cid = el.getAttribute("cid");
-            if (cid) {
-                return xBase.get(cid);
-            }
+            var el = doc.querySelector(selector);
+            return this.getComponent(el);
+        },
+        loadFile: function(url, callback) {
+            var xhr = new win.XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && (xhr.status >= 200 && xhr.status < 300 || xhr.status === 304)) {
+                    callback(xhr.responseText);
+                }
+            };
+            xhr.open("GET", url, true);
+            xhr.send();
         },
         start: function() {
             xBase.parse();
-            initNavigateController();
+            initNavigation();
             router.start();
-        },
-        forward: function() {
-            navigate.forward();
-        },
-        backward: function() {
-            navigate.backward();
-        },
-        navigate: function(fragment, options) {
-            navigate.forward(fragment, options);
         }
     });
     win["app"] = app;

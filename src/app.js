@@ -7,10 +7,8 @@ var win = window,
 
 	Class = require('class'),
 	router = require('router').singleton,
-	navigate = require('navigate').singleton,
-	Gesture = require('gesture'),
-	Scroll = require('scroll'),
 	AppPage = require('page'),
+	Navigation = require('cNavigation'),
 	xBase = require('xBase'),
 	xBack = require('xBack'),
 	xScroll = require('xScroll'),
@@ -22,116 +20,111 @@ var win = window,
 		theme : 'ios',
 		routePrefix : 0, // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
 		routePrefixSep : '\/'
-	},
-	pages = {}
+	}
 	;
 
-	function initNavigateController() {
-		var curApp = null,
+	function initNavigation() {
+		var curNav,
 			xviewport = app.queryComponent('*[is="x-viewport"]'),
 			xtitlebar = xviewport.xtitlebar,
 			xtransition = xviewport.xtransition
 			xback = xtitlebar.xback
 			;
 
-		function switchAppPage(appName, state) {
-			var lastPage = pages[curApp],
-				curPage = pages[appName]
-				;
-
-			curApp = appName;
-			lastPage && lastPage.trigger('unload');
-			curPage && curPage.trigger('ready', state);
-		}
-
-		function parseButtons(page) {
+		function parseButtons(meta) {
 			var buttons = []
 				;
 
-			Object.each(page.header.buttons, function(button) {
-				if (button.type === 'backStack') {
-					xback.setText(button.text);
-					xback.autoHide(button.autoHide);
-				} else if (button.type === 'rightExtra') {
-					var el = document.createElement('button')
-						;
+			Object.each(meta, function(item) {
+				var type = item.type, button;
 
-					el.className = 'x-button';
-					el.innerText = button.text;
-					el.addEventListener('click', button.handler, false);
-					buttons.push(el);
+				switch (type) {
+					case 'backStack':
+						xback.setText(item.text);
+						xback.autoHide(item.autoHide);
+						break;
+					case 'rightExtra':
+						button = document.createElement('button');
+						button.className = 'x-button';
+						button.innerText = item.text;
+						button.addEventListener('click', item.handler, false);
+						buttons.push(button);
+						break;
+					default:
+						break;
 				}
 			});
 
 			return buttons;
-
 		}
 
-		function setTitlebar(appName, state) {
-			var lastPage = pages[curApp],
-				curPage = pages[appName],
-				buttons = parseButtons(curPage)
+		function setTitlebar(navigation) {
+			var appName = navigation.getAppName(),
+				transition = navigation.getState().transition,
+				page = app.getPage(appName),
+				title = page.getTitle(),
+				buttons = parseButtons(page.buttons)
 				;
 
-			if (!lastPage) {
-				xtitlebar.set({
-					center: curPage.getTitle(),
-					right: buttons
-				});
-			} else {
-				xtitlebar.change({
-					center: curPage.getTitle(),
-					right: buttons
-				}, state.transition);
-			}
+			xtitlebar.change({
+				center: title,
+				right: buttons
+			}, transition);
 		}
 
-		function doTransition(appName, state) {
-			xtransition.once(state.transition + 'TransitionEnd', function() {
-				switchAppPage(appName, state);
-			});
-			xtransition[state.transition]();
+		function doTransition(navigation) {
+			var transition = navigation.getState().transition;
+			xtransition[transition]();
+		}
+
+		function switchNavigation(newNav) {
+			if (curNav) {
+				curNav.unload();
+			}
+			curNav = newNav;
+			
+			newNav.ready();
+			newNav.compile();
 		}
 
 		function handler(state) {
-			var appName = state.name.split('.')[0]
+			var navigation = new Navigation(state)
 				;
 
-			if (curApp !== appName) {
-
-				setTitlebar(appName, state);
-
-				if (xtransition) {
-					doTransition(appName, state);
-				} else {
-					switchAppPage(appName, state);
-				}
-			}
+			doTransition(navigation);
+			switchNavigation(navigation);
+			setTitlebar(navigation);
 		}
 			
-		navigate.on('forward backward', handler);
+		Navigation.listen(handler);
 	}
 
 	Object.extend(app, {
 		init : function(properties) {
-			var that = this,
-				name = properties.name;
-
 			var Page = AppPage.extend(properties),
 				page = new Page({
 					routePrefix : app.routePrefix,
 					routePrefixSep : app.routePrefixSep
 				});
 
-			return (pages[name] = page);
+			Navigation.addPage(page);
+			return page;
 		},
 
 		getPage : function(name) {
-			return pages[name];
+			return Navigation.getPage(name);
 		},
 
 		getViewport : function() {
 			return this.queryComponent('*[is="x-viewport"]').getViewport();
+		},
+
+		fillViewport : function(content) {
+			var that = this,
+				viewport = that.getViewport()
+				;
+
+			viewport.innerHTML = content;
 		},
 
 		getComponent : function(cid) {
@@ -143,31 +136,30 @@ var win = window,
 		},
 
 		queryComponent : function(selector) {
-			var el = doc.querySelector(selector),
-				cid = el.getAttribute('cid')
+			var el = doc.querySelector(selector)
+				;
+			
+			return this.getComponent(el);
+		},
+
+		loadFile : function(url, callback) {
+			var xhr = new win.XMLHttpRequest()
 				;
 
-			if (cid) {
-				return xBase.get(cid);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4 &&
+						((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304)) {
+					callback(xhr.responseText);
+				}
 			}
+			xhr.open('GET', url, true);
+			xhr.send();
 		},
 
 		start : function() {
 			xBase.parse();
-			initNavigateController();
+			initNavigation();
 			router.start();
-		},
-
-		forward : function() {
-			navigate.forward();
-		},
-
-		backward : function() {
-			navigate.backward();
-		},
-
-		navigate : function(fragment, options) {
-			navigate.forward(fragment, options);
 		}
 	});
 

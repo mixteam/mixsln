@@ -11,3 +11,4 @@
 ./src/components/xTitlebar.js
 ./src/components/xTransition.js
 ./src/components/xViewport.js
+./src/controllers/cNavigation.js
