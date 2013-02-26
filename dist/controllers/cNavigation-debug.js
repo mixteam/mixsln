@@ -3,27 +3,18 @@ define("#mix/sln/0.1.0/controllers/cNavigation-debug", [ "mix/core/0.3.0/base/re
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, AppPage = require("mix/sln/0.1.0/modules/page-debug"), pages = {}, status = AppPage.STATUS, NavigationController = Class.create({
         initialize: function(state) {
             var that = this, name = state.name.split(".");
-            that._appName = name[0];
-            that._routeName = name[1];
-            that._state = state;
-        },
-        getAppName: function() {
-            return this._appName;
-        },
-        getRouteName: function() {
-            return this._routeName;
-        },
-        getState: function() {
-            return this._state;
+            that.appName = name[0];
+            that.routeName = name[1];
+            that.state = state;
         },
         getParameter: function(name) {
-            return this._state.params[name];
+            return this.state.params[name];
         },
         getArgument: function(name) {
-            return this._state.args[name];
+            return this.state.args[name];
         },
         getData: function(name) {
-            return this._state.datas[name];
+            return this.state.datas[name];
         },
         push: function(fragment, options) {
             navigate.forward(fragment, options);
@@ -32,7 +23,7 @@ define("#mix/sln/0.1.0/controllers/cNavigation-debug", [ "mix/core/0.3.0/base/re
             navigate.backward();
         },
         fill: function(datas, callback) {
-            var that = this, appName = that._appName, page = pages[appName];
+            var page = pages[this.appName];
             function _fill() {
                 page.renderTemplate(datas, function(content) {
                     app.fillViewport(content);
@@ -46,17 +37,17 @@ define("#mix/sln/0.1.0/controllers/cNavigation-debug", [ "mix/core/0.3.0/base/re
             }
         },
         ready: function() {
-            var that = this, appName = that._appName, page = pages[appName];
-            if (page.getStatus() < status.READY) {
-                page.setStatus(status.READY);
-                page.trigger("ready", that);
+            var page = pages[this.appName];
+            if (page.status < status.READY) {
+                page.status = status.READY;
+                page.trigger("ready", this);
             }
         },
         compile: function() {
-            var that = this, appName = that._appName, page = pages[appName];
+            var page = pages[this.appName];
             function _compiled() {
-                if (page.getStatus() < status.COMPILED) {
-                    page.setStatus(status.COMPILED);
+                if (page.status < status.COMPILED) {
+                    page.status = status.COMPILED;
                     page.trigger("compiled");
                 }
             }
@@ -71,9 +62,9 @@ define("#mix/sln/0.1.0/controllers/cNavigation-debug", [ "mix/core/0.3.0/base/re
             }
         },
         unload: function() {
-            var that = this, appName = that._appName, page = pages[appName];
-            if (page.getStatus() > status.UNLOADED) {
-                page.setStatus(status.UNLOADED);
+            var that = this, page = pages[that.appName];
+            if (page.status > status.UNLOADED) {
+                page.status = status.UNLOADED;
                 page.trigger("unloaded");
             }
         }

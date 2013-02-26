@@ -24,6 +24,7 @@ define("#mix/sln/0.1.0/components/xTransition-debug", [ "mix/core/0.3.0/base/res
             var that = this, isEnabled = that._isEnabled, module = that._module, lastActivePort = that._activePort, activePort = that._inactivePort, originX, originY;
             that._activePort = activePort;
             that._inactivePort = lastActivePort;
+            activePort.innerHTML = "";
             if (isEnabled) {
                 originY = transform.getY(module);
                 originX = (type === "forward" ? "-" : "") + "33.33%";

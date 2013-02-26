@@ -24,7 +24,7 @@ var win = window,
 			Message.prototype.initialize.call(that, 'app.' + name);
 
 			that._options = options;
-			that._status = STATUS.UNKOWN;
+			that.status = STATUS.UNKOWN;
 
 			that.ready = that.ready.bind(that);
 			that.unload = that.unload.bind(that);
@@ -33,21 +33,9 @@ var win = window,
 			that.on('unloaded', that.unload);
 		},
 
-		getStatus : function(status) {
-			return this._status;
-		},
-
-		setStatus : function(status) {
-			this._status = status;
-		},
-
 		getTitle : function() {
 			//can overrewite
 			return this.title;
-		},
-
-		setTitle : function(title) {
-			this.title = title;
 		},
 
 		loadTemplate : function(url, callback) {

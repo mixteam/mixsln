@@ -1,8 +1,8 @@
 (function(app, undef) {
 	var listApp = app.init({
 		name : 'list',
-		title : '商品列表',
-		route : 'list\\/?',
+		title : '搜索列表',
+		route : 'list\\/(P<word>[^\\/]+)\\/?',
 		template : './list.tpl',
 		buttons : [
 			{
@@ -12,26 +12,32 @@
 			},
 			{
 				type : 'rightExtra',
-				text : '加50条',
+				text : '下一页',
 				handler : function(e) {
-					listApp.increase();
+					listApp.nextPage();
 				}
 			}
 		],
 		_navigation : null,
-		_listCount : 50,
+		_searchWord : null,
+		_searchPage : 1,
 
 		_loadDatas : function(callback) {
 			var that = this,
-				count = that._listCount,
-				datas = {count : count, list : []}
+				searchWord = that._searchWord,
+				searchPage = that._searchPage,
+				url = 'http://s.wapa.taobao.com/search_turn_page_iphone.htm?q=' + encodeURIComponent(searchWord) + '&sst=1&wlsort=5&abtest=5&page=' + searchPage
 				;
 
-			for (var i = 0; i < count; i++)  {
-				datas.list.push(i + 1);
-			}
-
-			callback(datas);
+			$.ajax({
+				type : 'GET',
+				url : url,
+				dataType : 'jsonp',
+				success : function(json) {
+					json.searchWord = searchWord;
+					callback(json);
+				}
+			});
 		},
 
 		_fillContent : function() {
@@ -48,18 +54,28 @@
 		_bindEvents : function() {
 			var that = this,
 				navigation = that._navigation,
-				viewport = app.getViewport()
+				viewport = $(app.getViewport())
 				;
 
 			// implement super.ready
-			Object.each(viewport.querySelectorAll('li a'), function(anchor) {
-				anchor.addEventListener('click', function(e) {
-					var el = this
-						;
-					e.preventDefault();
-					navigation.push('detail/' + el.parentNode.id.split('-')[1]);
-				}, false);
+			viewport.find('#J_SearchList').on('click', 'a', function(e) {
+				var el = this
+					;
+				e.preventDefault();
+				navigation.push('detail/' + el.getAttribute('dataid') + '/');
 			});
+
+			viewport.find('#J_topSearchForm').on('submit', function(e) {
+				var word = viewport.find('#J_topSearchForm .c-form-search input').val()
+					;
+
+				e.preventDefault();
+				navigation.push('list/' + encodeURIComponent(word) + '/');
+			});
+		},
+
+		getTitle : function() {
+			return '"' + this._searchWord + '" 的搜索列表'
 		},
 
 		ready : function(navigation) {
@@ -68,6 +84,8 @@
 				;
 
 			that._navigation = navigation;
+			that._searchWord = decodeURIComponent(navigation.getParameter('word'));
+			that._searchPage = 1;
 			that._fillContent();
 		},
 
@@ -75,11 +93,11 @@
 			// implement super.unload
 		},
 
-		increase : function() {
+		nextPage : function() {
 			var that = this,
 				navigation = that._navigation;
 
-			that._listCount += 50;
+			that._searchPage++;
 			that._fillContent();
 		}
 	});

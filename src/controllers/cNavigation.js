@@ -16,33 +16,21 @@ var win = window,
 				name = state.name.split('.')
 				;
 
-			that._appName = name[0];
-			that._routeName = name[1];
-			that._state = state;
-		},
-
-		getAppName : function() {
-			return this._appName;
-		},
-
-		getRouteName : function() {
-			return this._routeName;
-		},
-
-		getState : function() {
-			return this._state;
+			that.appName = name[0];
+			that.routeName = name[1];
+			that.state = state;
 		},
 
 		getParameter : function(name) {
-			return this._state.params[name];
+			return this.state.params[name];
 		},
 
 		getArgument : function(name) {
-			return this._state.args[name];
+			return this.state.args[name];
 		},
 
 		getData : function(name) {
-			return this._state.datas[name];
+			return this.state.datas[name];
 		},
 
 		push : function(fragment, options) {
@@ -54,9 +42,7 @@ var win = window,
 		},
 
 		fill : function(datas, callback) {
-			var that = this,
-				appName = that._appName,
-				page = pages[appName]
+			var page = pages[this.appName]
 				;
 
 			function _fill(){
@@ -74,27 +60,23 @@ var win = window,
 		},
 
 		ready : function() {
-			var that = this,
-				appName = that._appName,
-				page = pages[appName]
+			var page = pages[this.appName]
 				;
 
 
-			if (page.getStatus() < status.READY) {
-				page.setStatus(status.READY);
-				page.trigger('ready', that);
+			if (page.status < status.READY) {
+				page.status = status.READY;
+				page.trigger('ready', this);
 			}
 		},
 
 		compile : function() {
-			var that = this,
-				appName = that._appName,
-				page = pages[appName]
+			var page = pages[this.appName]
 				;
 
 			function _compiled() {
-				if (page.getStatus() < status.COMPILED) {
-					page.setStatus(status.COMPILED);
+				if (page.status < status.COMPILED) {
+					page.status = status.COMPILED;
 					page.trigger('compiled');
 				}
 			}
@@ -113,12 +95,11 @@ var win = window,
 
 		unload : function() {
 			var that = this,
-				appName = that._appName,
-				page = pages[appName]
+				page = pages[that.appName]
 				;
 
-			if (page.getStatus() > status.UNLOADED) {
-				page.setStatus(status.UNLOADED);
+			if (page.status > status.UNLOADED) {
+				page.status = status.UNLOADED;
 				page.trigger('unloaded');
 			}
 		}

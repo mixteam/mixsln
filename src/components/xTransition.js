@@ -54,6 +54,8 @@ var win = window,
 			that._activePort = activePort;
 			that._inactivePort = lastActivePort;
 
+			activePort.innerHTML = '';
+
 			if (isEnabled) {
 				originY = transform.getY(module);
 				originX = (type === 'forward'?'-':'') + '33.33%';

@@ -1293,24 +1293,15 @@ define("#mix/sln/0.1.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
             var that = this, name = that.name;
             Message.prototype.initialize.call(that, "app." + name);
             that._options = options;
-            that._status = STATUS.UNKOWN;
+            that.status = STATUS.UNKOWN;
             that.ready = that.ready.bind(that);
             that.unload = that.unload.bind(that);
             that.on("ready", that.ready);
             that.on("unloaded", that.unload);
         },
-        getStatus: function(status) {
-            return this._status;
-        },
-        setStatus: function(status) {
-            this._status = status;
-        },
         getTitle: function() {
             //can overrewite
             return this.title;
-        },
-        setTitle: function(title) {
-            this.title = title;
         },
         loadTemplate: function(url, callback) {
             // can overwrite
@@ -1563,6 +1554,7 @@ define("#mix/sln/0.1.0/components/xTransition-debug", [ "mix/core/0.3.0/base/res
             var that = this, isEnabled = that._isEnabled, module = that._module, lastActivePort = that._activePort, activePort = that._inactivePort, originX, originY;
             that._activePort = activePort;
             that._inactivePort = lastActivePort;
+            activePort.innerHTML = "";
             if (isEnabled) {
                 originY = transform.getY(module);
                 originX = (type === "forward" ? "-" : "") + "33.33%";
@@ -1717,27 +1709,18 @@ define("#mix/sln/0.1.0/controllers/cNavigation-debug", [ "mix/core/0.3.0/base/re
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, AppPage = require("mix/sln/0.1.0/modules/page-debug"), pages = {}, status = AppPage.STATUS, NavigationController = Class.create({
         initialize: function(state) {
             var that = this, name = state.name.split(".");
-            that._appName = name[0];
-            that._routeName = name[1];
-            that._state = state;
-        },
-        getAppName: function() {
-            return this._appName;
-        },
-        getRouteName: function() {
-            return this._routeName;
-        },
-        getState: function() {
-            return this._state;
+            that.appName = name[0];
+            that.routeName = name[1];
+            that.state = state;
         },
         getParameter: function(name) {
-            return this._state.params[name];
+            return this.state.params[name];
         },
         getArgument: function(name) {
-            return this._state.args[name];
+            return this.state.args[name];
         },
         getData: function(name) {
-            return this._state.datas[name];
+            return this.state.datas[name];
         },
         push: function(fragment, options) {
             navigate.forward(fragment, options);
@@ -1746,7 +1729,7 @@ define("#mix/sln/0.1.0/controllers/cNavigation-debug", [ "mix/core/0.3.0/base/re
             navigate.backward();
         },
         fill: function(datas, callback) {
-            var that = this, appName = that._appName, page = pages[appName];
+            var page = pages[this.appName];
             function _fill() {
                 page.renderTemplate(datas, function(content) {
                     app.fillViewport(content);
@@ -1760,17 +1743,17 @@ define("#mix/sln/0.1.0/controllers/cNavigation-debug", [ "mix/core/0.3.0/base/re
             }
         },
         ready: function() {
-            var that = this, appName = that._appName, page = pages[appName];
-            if (page.getStatus() < status.READY) {
-                page.setStatus(status.READY);
-                page.trigger("ready", that);
+            var page = pages[this.appName];
+            if (page.status < status.READY) {
+                page.status = status.READY;
+                page.trigger("ready", this);
             }
         },
         compile: function() {
-            var that = this, appName = that._appName, page = pages[appName];
+            var page = pages[this.appName];
             function _compiled() {
-                if (page.getStatus() < status.COMPILED) {
-                    page.setStatus(status.COMPILED);
+                if (page.status < status.COMPILED) {
+                    page.status = status.COMPILED;
                     page.trigger("compiled");
                 }
             }
@@ -1785,9 +1768,9 @@ define("#mix/sln/0.1.0/controllers/cNavigation-debug", [ "mix/core/0.3.0/base/re
             }
         },
         unload: function() {
-            var that = this, appName = that._appName, page = pages[appName];
-            if (page.getStatus() > status.UNLOADED) {
-                page.setStatus(status.UNLOADED);
+            var that = this, page = pages[that.appName];
+            if (page.status > status.UNLOADED) {
+                page.status = status.UNLOADED;
                 page.trigger("unloaded");
             }
         }
@@ -1858,14 +1841,14 @@ define("#mix/sln/0.1.0/app-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/cor
             return buttons;
         }
         function setTitlebar(navigation) {
-            var appName = navigation.getAppName(), transition = navigation.getState().transition, page = app.getPage(appName), title = page.getTitle(), buttons = parseButtons(page.buttons);
+            var appName = navigation.appName, transition = navigation.state.transition, page = app.getPage(appName), title = page.getTitle(), buttons = parseButtons(page.buttons);
             xtitlebar.change({
                 center: title,
                 right: buttons
             }, transition);
         }
         function doTransition(navigation) {
-            var transition = navigation.getState().transition;
+            var transition = navigation.state.transition;
             xtransition[transition]();
         }
         function switchNavigation(newNav) {

@@ -59,8 +59,8 @@ var win = window,
 		}
 
 		function setTitlebar(navigation) {
-			var appName = navigation.getAppName(),
-				transition = navigation.getState().transition,
+			var appName = navigation.appName,
+				transition = navigation.state.transition,
 				page = app.getPage(appName),
 				title = page.getTitle(),
 				buttons = parseButtons(page.buttons)
@@ -73,7 +73,7 @@ var win = window,
 		}
 
 		function doTransition(navigation) {
-			var transition = navigation.getState().transition;
+			var transition = navigation.state.transition;
 			xtransition[transition]();
 		}
 
