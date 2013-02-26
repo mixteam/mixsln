@@ -6,7 +6,7 @@
     color: white;
     height: 31px;
     background-color: transparent;
-    background: -webkit-linear-gradient(top,rgb(74,108,155) 0%,rgb(72,106,154) 50%,rgb(88,119,162) 51%,rgb(137,160,190) 100%);
+    background: -webkit-gradient(linear, left top, left bottom, from(rgb(74,108,155)), to(rgb(137,160,190)), color-stop(0.5, rgb(72,106,154)), color-stop(0.51, rgb(88,119,162)));
     border-bottom:solid 1px rgb(55,80,117);
     border-top:solid 1px rgb(48,54,62);
     border-right:solid 1px rgb(48,54,62);
@@ -16,6 +16,7 @@
     border-radius: 4.5px;
     padding: 6px;
     margin: 2px;
+    font-size: 13px;
 }
 
 .x-back {
@@ -41,6 +42,10 @@
     text-shadow: rgba(0,0,0,0.4) 0 -2px 1px;
 }
 
+.x-loading {
+    background: url(http://a.tbcdn.cn/mw/base/styles/component/more/images/loading.gif) center center no-repeat;
+}
+
 .x-scroll {
     position: relative;
     -webkit-backface-visibility: hidden;
@@ -59,6 +64,7 @@
     display: block;
     -webkit-box-sizing: border-box;
     width: 33.33%;
+    min-height: 100%;
     position: relative;
     left: 33.33%;
 }
@@ -74,14 +80,14 @@
 
 .x-titlebar {
     -webkit-box-shadow:inset 0 1px 1px white;
-    background: -webkit-linear-gradient(top,rgb(110,132,161) 0%,rgb(137,155,178) 50%,rgb(127,148,176) 50%,rgb(180,191,205) 100%);
+    background: -webkit-gradient(linear, left top, left bottom, from(rgb(110,132,161)), to(rgb(180,191,205)), color-stop(0.5, rgb(137,155,178)), color-stop(0.51, rgb(127,148,176)));
     border-bottom:solid 1px rgb(33,39,48);
     height:43px;
     box-sizing: border-box;
     position: relative;
     width: 100%;
     z-index: 9;
-    font-size:22px;
+    font-size:18px;
     font-weight:bold;
     color:white;
 }
