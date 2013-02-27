@@ -5,8 +5,8 @@ var win = window,
 	doc = win.document,
 
 	Class = require('class'),
-	xBase = require('xBase'),
-	xBack = require('xBack'),
+	xBase = require('./xBase'),
+	xBack = require('./xBack'),
 
 	xName = 'x-titlebar',
 	className = xName,

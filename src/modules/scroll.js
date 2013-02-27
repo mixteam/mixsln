@@ -7,8 +7,8 @@ var win = window,
     navigator = win.navigator,
 
     Class = require('class'),
-    Gesture = require('gesture'),
-    transform = require('transform'),
+    Gesture = require('./gesture'),
+    transform = require('./transform'),
     prevented = false
     ;
 
@@ -51,10 +51,6 @@ var Scroll = Class.create({
         }
     },
 
-    getElement : function() {
-        return this._el;
-    },
-
     enable : function() {
         var that = this,
             el = that._el
@@ -83,6 +79,15 @@ var Scroll = Class.create({
         el.removeEventListener('flick', that._onFlick);
     },
 
+    refresh : function() {
+        var that = this,
+            el = that._el
+            ;
+
+        el.style.height = 'auto';
+        el.style.height = el.offsetHeight + 'px';
+    },
+
     _preventBodyTouch : function(e) {
         e.preventDefault();
         return false;
@@ -95,8 +100,8 @@ var Scroll = Class.create({
 
         el.style.webkitTransition = 'none';
         el.style.webkitTransform = getComputedStyle(el).webkitTransform;
-        el.style.height = 'auto';
-        el.style.height = el.offsetHeight + 'px';
+        //el.style.height = 'auto';
+        //el.style.height = el.offsetHeight + 'px';
     },
 
     _onPanStart : function(e) {

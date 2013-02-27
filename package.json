@@ -1,7 +1,7 @@
 {
     "name" : "mix/sln",
     "root" : "#",
-    "version" : "0.1.0",
+    "version" : "0.2.0",
     "description" : "the solution for mixjs",
     "license" : "MIT",
     "author" : "zhuxun <zhuxun.jb@taobao.com>",
@@ -11,7 +11,6 @@
         "url" : "git@github.com:mixteam/mixsln.git"
     },
     "dependencies" : {
-        "cjs" : "mix/core/0.3.0/cjs",
         "reset" : "mix/core/0.3.0/base/reset",
         "class" : "mix/core/0.3.0/base/class",
         "message" : "mix/core/0.3.0/base/message",
@@ -19,33 +18,12 @@
         "router" : "mix/core/0.3.0/url/router",
         "navigate" : "mix/core/0.3.0/url/navigate",
 
-        "gesture" : "mix/sln/0.1.0/modules/gesture",
-        "transform" : "mix/sln/0.1.0/modules/transform",
-        "scroll" : "mix/sln/0.1.0/modules/scroll",
-        "page" : "mix/sln/0.1.0/modules/page",
-
-        "xBase" : "mix/sln/0.1.0/components/xBase",
-        "xBack" : "mix/sln/0.1.0/components/xBack",
-        "xScroll" : "mix/sln/0.1.0/components/xScroll",
-        "xTransition" : "mix/sln/0.1.0/components/xTransition",
-        "xTitlebar" : "mix/sln/0.1.0/components/xTitlebar",
-        "xViewport" : "mix/sln/0.1.0/components/xViewport",
-
-        "cNavigation" : "mix/sln/0.1.0/controllers/cNavigation"
+        "app" : "mix/sln/0.2.0/app"
     },
     "output" : {
-        "*/*.js" : ".",
-
         "app.js" : {
             "main" : "./app",
             "includes" : [
-                "cjs",
-                "reset",
-                "class",
-                "message",
-                "util",
-                "router",
-                "navigate",
                 "./modules/gesture",
                 "./modules/transform",
                 "./modules/scroll",

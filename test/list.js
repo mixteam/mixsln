@@ -30,7 +30,6 @@
 				;
 
 			$.ajax({
-				type : 'GET',
 				url : url,
 				dataType : 'jsonp',
 				success : function(json) {

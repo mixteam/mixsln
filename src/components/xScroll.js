@@ -1,10 +1,13 @@
 define(function(require, exports, module) {
 
 require('reset');
-var Class = require('class'),
+var win = window,
+	doc = win.document,
+
+	Class = require('class'),
 	navigate = require('navigate').singleton,
-	Scroll = require('scroll'),
-	xBase = require('xBase'),
+	Scroll = require('../modules/scroll'),
+	xBase = require('./xBase'),
 
 	xName = 'x-scroll',
 	className = xName,
@@ -33,8 +36,16 @@ var Class = require('class'),
 			scroller.disable();
 		},
 
+		refresh : function() {
+			var that = this,
+				scroller = that._scroller
+				;
+
+			scroller.refresh();
+		},
+
 		getViewport : function() {
-			return this._scroller.getElement();
+			return this._module;
 		}
 	});
 

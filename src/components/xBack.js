@@ -4,7 +4,7 @@ require('reset');
 var Class = require('class'),
 	util = require('util').singleton,
 	navigate = require('navigate').singleton,
-	xBase = require('xBase'),
+	xBase = require('./xBase'),
 
 	xName = 'x-back',
 	className = 'x-button ' + xName,

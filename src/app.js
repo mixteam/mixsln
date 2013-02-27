@@ -7,14 +7,14 @@ var win = window,
 
 	Class = require('class'),
 	router = require('router').singleton,
-	AppPage = require('page'),
-	Navigation = require('cNavigation'),
-	xBase = require('xBase'),
-	xBack = require('xBack'),
-	xScroll = require('xScroll'),
-	xTransition = require('xTransition'),
-	xTitlebar = require('xTitlebar'),
-	xViewport = require('xViewport'),
+	AppPage = require('./modules/page'),
+	Navigation = require('./controllers/cNavigation'),
+	xBase = require('./components/xBase'),
+	xBack = require('./components/xBack'),
+	xScroll = require('./components/xScroll'),
+	xTransition = require('./components/xTransition'),
+	xTitlebar = require('./components/xTitlebar'),
+	xViewport = require('./components/xViewport'),
 
 	app = {
 		theme : 'ios',
@@ -166,4 +166,4 @@ var win = window,
 	win['app'] = app;
 });
 
-require('mix/sln/0.1.0/app');
+require('app');

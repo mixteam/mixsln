@@ -7,8 +7,8 @@ var win = window,
     Class = require('class'),
 	Message = require('message'),
 	navigate = require('navigate').singleton,	
-    transform = require('transform')
-	xBase = require('xBase'),
+    transform = require('../modules/transform')
+	xBase = require('./xBase'),
 
 	xName = 'x-transition',
 	className = xName,
