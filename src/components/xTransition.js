@@ -19,11 +19,17 @@ var win = window,
 			var that = this,
 				module = that._module,
 				orginHtml = module.innerHTML,
+				transitionPort = module.children[0],
 				activePort, inactivePort
 				;
 
 			
 	        Message.prototype.initialize.call(that, 'transition');
+
+	        if (!transitionPort) {
+	        	transitionPort = doc.createElement('div');
+	        	module.appendChild(transitionPort);
+	        }
 
 	        activePort = that._activePort = doc.createElement('div');
 	        inactivePort = that._inactivePort = doc.createElement('div');
@@ -31,9 +37,9 @@ var win = window,
 			inactivePort.className = 'inactive';
 			activePort.innerHTML = orginHtml;
 
-			module.innerHTML = '';
-	        module.appendChild(activePort);
-	        module.appendChild(inactivePort);
+			transitionPort.innerHTML = '';
+	        transitionPort.appendChild(activePort);
+	        transitionPort.appendChild(inactivePort);
 		},
 
 		getViewport : function() {
@@ -47,6 +53,7 @@ var win = window,
 			var that = this,
 				isEnabled = that._isEnabled,
 				module = that._module,
+				transitionPort = module.children[0],
 				lastActivePort = that._activePort,
 				activePort = that._inactivePort,
 				originX, originY;
@@ -57,11 +64,11 @@ var win = window,
 			activePort.innerHTML = '';
 
 			if (isEnabled) {
-				originY = transform.getY(module);
+				originY = transform.getY(transitionPort);
 				originX = (type === 'forward'?'-':'') + '33.33%';
 
-				transform.start(module, '0.4s', 'ease', 0, originX, originY, function() {
-					module.style.webkitTransform = transform.getTranslate(0, 0);
+				transform.start(transitionPort, '0.4s', 'ease', 0, originX, originY, function() {
+					transitionPort.style.webkitTransform = transform.getTranslate(0, 0);
 					activePort.className = 'active';
 					lastActivePort.className = 'inactive';
 					that.trigger(type + 'TransitionEnd');

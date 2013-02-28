@@ -72,11 +72,11 @@ var Scroll = Class.create({
 
         that._gesture.disable();
 
-        el.removeEventListener('touchstart', that._onTouchStart);
-        el.removeEventListener('panstart', that._onPanStart);
-        el.removeEventListener('pan', that._onPan);
-        el.removeEventListener('panend', that._onPanEnd);
-        el.removeEventListener('flick', that._onFlick);
+        el.removeEventListener('touchstart', that._onTouchStart, false);
+        el.removeEventListener('panstart', that._onPanStart, false);
+        el.removeEventListener('pan', that._onPan, false);
+        el.removeEventListener('panend', that._onPanEnd, false);
+        el.removeEventListener('flick', that._onFlick, false);
     },
 
     refresh : function() {
@@ -85,7 +85,7 @@ var Scroll = Class.create({
             ;
 
         el.style.height = 'auto';
-        el.style.height = el.offsetHeight + 'px';
+        //el.style.height = el.offsetHeight + 'px';
     },
 
     _preventBodyTouch : function(e) {
@@ -100,8 +100,6 @@ var Scroll = Class.create({
 
         el.style.webkitTransition = 'none';
         el.style.webkitTransform = getComputedStyle(el).webkitTransform;
-        //el.style.height = 'auto';
-        //el.style.height = el.offsetHeight + 'px';
     },
 
     _onPanStart : function(e) {

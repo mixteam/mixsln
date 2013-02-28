@@ -4,6 +4,26 @@
 		"selected_items":
 		[
 			[
+				"tr",
+				"transitionport"
+			],
+			[
+				"t",
+				"transitionport"
+			],
+			[
+				"tran",
+				"transition"
+			],
+			[
+				"get",
+				"getViewport"
+			],
+			[
+				"sc",
+				"scrollport"
+			],
+			[
 				"J_",
 				"J_detailCont"
 			],
@@ -26,10 +46,6 @@
 			[
 				"_s",
 				"_searchPage"
-			],
-			[
-				"get",
-				"getStatus"
 			],
 			[
 				"ac",
@@ -156,10 +172,6 @@
 				"extends"
 			],
 			[
-				"sc",
-				"scroller"
-			],
-			[
 				"re",
 				"return"
 			],
@@ -216,10 +228,6 @@
 				"appName"
 			],
 			[
-				"tr",
-				"tranlate"
-			],
-			[
 				"inline",
 				"inline-block"
 			],
@@ -266,10 +274,6 @@
 			[
 				"or",
 				"originY"
-			],
-			[
-				"tran",
-				"transform"
 			],
 			[
 				"scr",
@@ -346,10 +350,6 @@
 			[
 				"fun",
 				"function"
-			],
-			[
-				"t",
-				"transitionEl"
 			],
 			[
 				"b",
@@ -523,7 +523,7 @@
 			"file": "package.json",
 			"settings":
 			{
-				"buffer_size": 2115,
+				"buffer_size": 1292,
 				"line_ending": "Windows"
 			}
 		},
@@ -531,8 +531,64 @@
 			"file": "test/demo1.html",
 			"settings":
 			{
-				"buffer_size": 1467,
+				"buffer_size": 1525,
 				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/app.js",
+			"settings":
+			{
+				"buffer_size": 3561,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "test/list.js",
+			"settings":
+			{
+				"buffer_size": 2203,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/modules/scroll.js",
+			"settings":
+			{
+				"buffer_size": 5998,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/controllers/cNavigation.js",
+			"settings":
+			{
+				"buffer_size": 2774,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/components/xScroll.js",
+			"settings":
+			{
+				"buffer_size": 1023,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "assets/x.css",
+			"settings":
+			{
+				"buffer_size": 6648,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/modules/gesture.js",
+			"settings":
+			{
+				"buffer_size": 9508,
+				"line_ending": "Unix"
 			}
 		}
 	],
@@ -580,17 +636,21 @@
 	},
 	"file_history":
 	[
-		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/controllers/cNavigation.js",
-		"/D/workspace/taobao/etao/mix/mixsln/assets/x.css",
-		"/D/workspace/taobao/etao/mix/mixsln/src/components/xScroll.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
-		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
-		"/D/workspace/taobao/etao/mix/mixsln/lib/iscroll-lite.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xViewport.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTransition.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
+		"/D/workspace/taobao/etao/mix/mixsln/dist/mix-sln-debug.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/controllers/cNavigation.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xBack.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xScroll.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTitlebar.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
+		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
+		"/D/workspace/taobao/etao/mix/mixsln/assets/x.css",
+		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
+		"/D/workspace/taobao/etao/mix/mixsln/lib/iscroll-lite.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/list.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/test/default.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/test/default.js",
@@ -601,10 +661,8 @@
 		"/D/workspace/taobao/etao/mix/mixsln/lib/zepto.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/detail.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
-		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTitlebar.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xBase.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.css",
-		"/D/workspace/taobao/etao/mix/mixsln/src/components/xBack.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/controllers/navigateController.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/ios.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTitleBar.js",
@@ -619,7 +677,6 @@
 		"/D/workspace/taobao/etao/mix/mixsln/assets/default (1).css",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transition",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/sln.all-debug.js",
@@ -706,8 +763,7 @@
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/mvc/controller/src/controller.js",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/ui/template/src/template.js",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/ui/component/src/component.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/mvc/view/src/view.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/ui/module/src/module.js"
+		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/mvc/view/src/view.js"
 	],
 	"find":
 	{
@@ -715,7 +771,7 @@
 	},
 	"find_in_files":
 	{
-		"height": 90.0,
+		"height": 0.0,
 		"where_history":
 		[
 		]
@@ -725,6 +781,9 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"module",
+			"doc",
+			"transform",
 			"minheight",
 			"prevent",
 			"curAppName",
@@ -849,10 +908,7 @@
 			"z-index",
 			"'",
 			"',",
-			"#naviview.",
-			"#naviview > ",
-			"Naview",
-			"$"
+			"#naviview."
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -939,7 +995,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 8,
 			"sheets":
 			[
 				{
@@ -947,15 +1003,15 @@
 					"file": "package.json",
 					"settings":
 					{
-						"buffer_size": 2115,
+						"buffer_size": 1292,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1194,
-								1194
+								663,
+								663
 							]
 						],
 						"settings":
@@ -965,7 +1021,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 204.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -975,15 +1031,15 @@
 					"file": "test/demo1.html",
 					"settings":
 					{
-						"buffer_size": 1467,
+						"buffer_size": 1525,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1017,
-								1017
+								124,
+								124
 							]
 						],
 						"settings":
@@ -992,6 +1048,198 @@
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/app.js",
+					"settings":
+					{
+						"buffer_size": 3561,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								541,
+								541
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "test/list.js",
+					"settings":
+					{
+						"buffer_size": 2203,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								545,
+								545
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/modules/scroll.js",
+					"settings":
+					{
+						"buffer_size": 5998,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4044,
+								4044
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2274.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/controllers/cNavigation.js",
+					"settings":
+					{
+						"buffer_size": 2774,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								644,
+								644
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 41.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "src/components/xScroll.js",
+					"settings":
+					{
+						"buffer_size": 1023,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								816,
+								816
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 204.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "assets/x.css",
+					"settings":
+					{
+						"buffer_size": 6648,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3847,
+								3847
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1662.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "src/modules/gesture.js",
+					"settings":
+					{
+						"buffer_size": 9508,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6015,
+								6015
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2808.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

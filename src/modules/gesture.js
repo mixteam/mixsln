@@ -107,8 +107,8 @@ var Gestrue = Class.create({
             el = that._el
             ;
 
-        el.removeEventListener('touchstart', that._onStart);
-        el.removeEventListener('tap', that._onTap);
+        el.removeEventListener('touchstart', that._onStart, false);
+        el.removeEventListener('tap', that._onTap, false);
     },
 
     _onStart : function(e) {

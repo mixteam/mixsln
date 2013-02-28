@@ -48,7 +48,9 @@ var win = window,
 			function _fill(){
 				page.renderTemplate(datas, function(content) {
 					app.fillViewport(content);
-					app.queryComponent('*[is="x-viewport"]').xscroll.refresh();
+					setTimeout(function() {
+						app.queryComponent('*[is="x-viewport"]').xscroll.refresh();
+					}, 1);
 					callback && callback();
 				});
 			}

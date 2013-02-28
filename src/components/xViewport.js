@@ -28,9 +28,6 @@ var win = window,
 			header = doc.createElement('header');
 			section = doc.createElement('section');
 			footer = doc.createElement('footer');
-			subport = doc.createElement('div');
-
-			section.appendChild(subport);
 
 			module.appendChild(header);
 			module.appendChild(section);
@@ -41,7 +38,7 @@ var win = window,
 			var that = this,
 				module = that._module,
 				header = module.querySelector('header'),
-				subport = module.querySelector('section > div')
+				sectionport = module.querySelector('section')
 				;
 
 				that._isEnableTitlebar = util.str2val(module.getAttribute('enableTitlebar'));
@@ -57,13 +54,13 @@ var win = window,
 
 			if (that._isEnableScroll) {
 				module.className += ' enableScroll';
-				that.xscroll = xScroll.create(subport);
+				that.xscroll = xScroll.create(sectionport);
 				that.xscroll.enable();
 			}
 
 			if (that._isEnableTransition) {
 				module.className += ' enableTransition';
-				that.xtransition = xTransition.create(subport);
+				that.xtransition = xTransition.create(sectionport);
 				that.xtransition.enable();
 			}
 		},

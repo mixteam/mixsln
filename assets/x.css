@@ -46,38 +46,6 @@
     background: url(http://a.tbcdn.cn/mw/base/styles/component/more/images/loading.gif) center center no-repeat;
 }
 
-.x-scroll {
-    position: relative;
-    -webkit-backface-visibility: hidden;
-    -webkit-transform-style: preserve-3d;
-}
-
-.x-transition {
-    position: relative;
-    -webkit-backface-visibility: hidden;
-    -webkit-transform-style: preserve-3d;
-    width: 300%;
-    left: -100%;
-}
-
-.x-transition .active{
-    display: block;
-    -webkit-box-sizing: border-box;
-    width: 33.33%;
-    min-height: 100%;
-    position: relative;
-    left: 33.33%;
-}
-
-.x-transition .inactive{
-    display: none;
-    -webkit-box-sizing: border-box;
-    width: 33.33%;
-    position: relative;
-    left: 33.33%;
-}
-
-
 .x-titlebar {
     -webkit-box-shadow:inset 0 1px 1px white;
     background: -webkit-gradient(linear, left top, left bottom, from(rgb(110,132,161)), to(rgb(180,191,205)), color-stop(0.5, rgb(137,155,178)), color-stop(0.51, rgb(127,148,176)));
@@ -147,6 +115,37 @@
     float: right;
     top: -100%;
     padding: 0 10px;
+}
+
+.x-scroll > div{
+    position: relative;
+    -webkit-backface-visibility: hidden;
+    -webkit-transform-style: preserve-3d;
+}
+
+.x-transition > div{
+    position: relative;
+    -webkit-backface-visibility: hidden;
+    -webkit-transform-style: preserve-3d;
+    width: 300%;
+    left: -100%;
+}
+
+.x-transition .active{
+    display: block;
+    -webkit-box-sizing: border-box;
+    width: 33.33%;
+    min-height: 100%;
+    position: relative;
+    left: 33.33%;
+}
+
+.x-transition .inactive{
+    display: none;
+    -webkit-box-sizing: border-box;
+    width: 33.33%;
+    position: relative;
+    left: 33.33%;
 }
 
 .x-viewport {

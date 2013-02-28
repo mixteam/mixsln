@@ -14,10 +14,16 @@ var win = window,
 	xScroll = xBase.create(xName, className, {
 		init : function() {
 			var that = this,
-				module = that._module
+				module = that._module,
+				scrollport = module.children[0]
 				;
 
-			that._scroller = new Scroll(module);
+			if (!scrollport) {
+				scrollport = doc.createElement('div');
+				module.appendChild(scrollport);
+			}
+
+			that._scroller = new Scroll(scrollport);
 		},
 
 		enable : function() {
@@ -45,7 +51,7 @@ var win = window,
 		},
 
 		getViewport : function() {
-			return this._module;
+			return this._module.children[0];
 		}
 	});
 

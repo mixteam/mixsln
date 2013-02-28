@@ -69,8 +69,8 @@ define("#mix/sln/0.2.0/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debu
         },
         disable: function() {
             var that = this, el = that._el;
-            el.removeEventListener("touchstart", that._onStart);
-            el.removeEventListener("tap", that._onTap);
+            el.removeEventListener("touchstart", that._onStart, false);
+            el.removeEventListener("tap", that._onTap, false);
         },
         _onStart: function(e) {
             var that = this, el = that._el, myGestures = that._myGestures;
@@ -307,16 +307,15 @@ define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
         disable: function() {
             var that = this, el = that._el;
             that._gesture.disable();
-            el.removeEventListener("touchstart", that._onTouchStart);
-            el.removeEventListener("panstart", that._onPanStart);
-            el.removeEventListener("pan", that._onPan);
-            el.removeEventListener("panend", that._onPanEnd);
-            el.removeEventListener("flick", that._onFlick);
+            el.removeEventListener("touchstart", that._onTouchStart, false);
+            el.removeEventListener("panstart", that._onPanStart, false);
+            el.removeEventListener("pan", that._onPan, false);
+            el.removeEventListener("panend", that._onPanEnd, false);
+            el.removeEventListener("flick", that._onFlick, false);
         },
         refresh: function() {
             var that = this, el = that._el;
             el.style.height = "auto";
-            el.style.height = el.offsetHeight + "px";
         },
         _preventBodyTouch: function(e) {
             e.preventDefault();
@@ -614,8 +613,12 @@ define("#mix/sln/0.2.0/components/xScroll-debug", [ "../modules/scroll-debug", "
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Scroll = require("../modules/scroll-debug"), xBase = require("./xBase-debug"), xName = "x-scroll", className = xName, xScroll = xBase.create(xName, className, {
         init: function() {
-            var that = this, module = that._module;
-            that._scroller = new Scroll(module);
+            var that = this, module = that._module, scrollport = module.children[0];
+            if (!scrollport) {
+                scrollport = doc.createElement("div");
+                module.appendChild(scrollport);
+            }
+            that._scroller = new Scroll(scrollport);
         },
         enable: function() {
             var that = this, scroller = that._scroller;
@@ -630,7 +633,7 @@ define("#mix/sln/0.2.0/components/xScroll-debug", [ "../modules/scroll-debug", "
             scroller.refresh();
         },
         getViewport: function() {
-            return this._module;
+            return this._module.children[0];
         }
     });
     return xScroll;
@@ -642,31 +645,35 @@ define("#mix/sln/0.2.0/components/xTransition-debug", [ "../modules/transform-de
     xBase = require("./xBase-debug"), xName = "x-transition", className = xName, xTransition = xBase.create(xName, className, {
         Implements: Message,
         init: function() {
-            var that = this, module = that._module, orginHtml = module.innerHTML, activePort, inactivePort;
+            var that = this, module = that._module, orginHtml = module.innerHTML, transitionPort = module.children[0], activePort, inactivePort;
             Message.prototype.initialize.call(that, "transition");
+            if (!transitionPort) {
+                transitionPort = doc.createElement("div");
+                module.appendChild(transitionPort);
+            }
             activePort = that._activePort = doc.createElement("div");
             inactivePort = that._inactivePort = doc.createElement("div");
             activePort.className = "active";
             inactivePort.className = "inactive";
             activePort.innerHTML = orginHtml;
-            module.innerHTML = "";
-            module.appendChild(activePort);
-            module.appendChild(inactivePort);
+            transitionPort.innerHTML = "";
+            transitionPort.appendChild(activePort);
+            transitionPort.appendChild(inactivePort);
         },
         getViewport: function() {
             var that = this;
             return that._activePort;
         },
         action: function(type) {
-            var that = this, isEnabled = that._isEnabled, module = that._module, lastActivePort = that._activePort, activePort = that._inactivePort, originX, originY;
+            var that = this, isEnabled = that._isEnabled, module = that._module, transitionPort = module.children[0], lastActivePort = that._activePort, activePort = that._inactivePort, originX, originY;
             that._activePort = activePort;
             that._inactivePort = lastActivePort;
             activePort.innerHTML = "";
             if (isEnabled) {
-                originY = transform.getY(module);
+                originY = transform.getY(transitionPort);
                 originX = (type === "forward" ? "-" : "") + "33.33%";
-                transform.start(module, "0.4s", "ease", 0, originX, originY, function() {
-                    module.style.webkitTransform = transform.getTranslate(0, 0);
+                transform.start(transitionPort, "0.4s", "ease", 0, originX, originY, function() {
+                    transitionPort.style.webkitTransform = transform.getTranslate(0, 0);
                     activePort.className = "active";
                     lastActivePort.className = "inactive";
                     that.trigger(type + "TransitionEnd");
@@ -765,14 +772,12 @@ define("#mix/sln/0.2.0/components/xViewport-debug", [ "./xBase-debug", "./xTitle
             header = doc.createElement("header");
             section = doc.createElement("section");
             footer = doc.createElement("footer");
-            subport = doc.createElement("div");
-            section.appendChild(subport);
             module.appendChild(header);
             module.appendChild(section);
             module.appendChild(footer);
         },
         enable: function() {
-            var that = this, module = that._module, header = module.querySelector("header"), subport = module.querySelector("section > div");
+            var that = this, module = that._module, header = module.querySelector("header"), sectionport = module.querySelector("section");
             that._isEnableTitlebar = util.str2val(module.getAttribute("enableTitlebar"));
             that._isEnableScroll = util.str2val(module.getAttribute("enableScroll"));
             that._isEnableTransition = util.str2val(module.getAttribute("enableTransition"));
@@ -783,12 +788,12 @@ define("#mix/sln/0.2.0/components/xViewport-debug", [ "./xBase-debug", "./xTitle
             }
             if (that._isEnableScroll) {
                 module.className += " enableScroll";
-                that.xscroll = xScroll.create(subport);
+                that.xscroll = xScroll.create(sectionport);
                 that.xscroll.enable();
             }
             if (that._isEnableTransition) {
                 module.className += " enableTransition";
-                that.xtransition = xTransition.create(subport);
+                that.xtransition = xTransition.create(sectionport);
                 that.xtransition.enable();
             }
         },
@@ -840,7 +845,9 @@ define("#mix/sln/0.2.0/controllers/cNavigation-debug", [ "../modules/page-debug"
             function _fill() {
                 page.renderTemplate(datas, function(content) {
                     app.fillViewport(content);
-                    app.queryComponent('*[is="x-viewport"]').xscroll.refresh();
+                    setTimeout(function() {
+                        app.queryComponent('*[is="x-viewport"]').xscroll.refresh();
+                    }, 1);
                     callback && callback();
                 });
             }
