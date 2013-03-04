@@ -372,18 +372,16 @@ define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
             var a = .0015 * (v0 / Math.abs(v0)), t = v0 / a, s = s0 + t * v0 / 2;
             if (s > 0 || s < maxScrollTop) {
                 var sign = s > 0 ? 1 : -1, edge = s > 0 ? 0 : maxScrollTop;
-                s = edge;
+                s = (s - edge) / 2 + edge;
                 t = (sign * Math.sqrt(2 * a * (s - s0) + v0 * v0) - v0) / a;
                 v = v0 - a * t;
                 transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-v0 / a, -v0 / a + t) + ")", "0s", 0, s.toFixed(0), function() {
                     v0 = v;
                     s0 = s;
-                    a = .0045 * (v0 / Math.abs(v0));
-                    t = v0 / a;
-                    s = s0 + t * v0 / 2;
-                    transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0), function() {
-                        transform.start(scroller, "0.4s", "ease-out", "0s", 0, edge);
-                    });
+                    //a = 0.0045*(v0 / Math.abs(v0));
+                    t = -v0 / a;
+                    s = edge;
+                    transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0));
                 });
             } else {
                 transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0));
