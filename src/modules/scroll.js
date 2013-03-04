@@ -37,7 +37,8 @@ var Scroll = Class.create({
         that._scroller = element.children[0];
         that._gesture = new Gesture(that._scroller);
         that._originalY = null;
-        that._currentY = null;
+        that._scrollTop = null;
+        that._scrollHeight = null;
         that._refreshed = false;
 
         that._preventBodyTouch = that._preventBodyTouch.bind(that);
@@ -106,7 +107,7 @@ var Scroll = Class.create({
         if (that._refreshed) {
             that._refreshed = false;
             scroller.style.height = 'auto';
-            scroller.style.height = scroller.offsetHeight + 'px';
+            scroller.style.height = that._scrollHeight = scroller.offsetHeight + 'px';
         }
     },
 
@@ -123,34 +124,33 @@ var Scroll = Class.create({
             scroller = that._scroller,
             maxScrollTop = getMaxScrollTop(scroller),
             originalY = that._originalY,
-            currentY
+            scrollTop = that._scrollTop = originalY + e.displacementY
             ;
 
-        currentY = that._currentY = originalY + e.displacementY;
         
-        if(currentY > 0) {
-            scroller.style.webkitTransform = transform.getTranslate(0, currentY / 2);
-        } else if(currentY < maxScrollTop) {
-            scroller.style.webkitTransform = transform.getTranslate(0, (maxScrollTop - currentY) / 2 + currentY);
+        if(scrollTop > 0) {
+            scroller.style.webkitTransform = transform.getTranslate(0, scrollTop / 2);
+        } else if(scrollTop < maxScrollTop) {
+            scroller.style.webkitTransform = transform.getTranslate(0, (maxScrollTop - scrollTop) / 2 + scrollTop);
         } else {
-            scroller.style.webkitTransform = transform.getTranslate(0, currentY);
+            scroller.style.webkitTransform = transform.getTranslate(0, scrollTop);
         }
     },
 
     _onPanEnd : function(e) {
         var that = this,
             scroller = that._scroller,
-            currentY = that._currentY,
+            scrollTop = that._scrollTop,
             maxScrollTop = getMaxScrollTop(scroller),
             translateY = null
             ;
 
-        if(currentY > 0) {
-            translateY = 0;
+        if(scrollTop > 0) {
+            scrollTop = translateY = 0;
         }
 
-        if(currentY < maxScrollTop) {
-            translateY = maxScrollTop;
+        if(scrollTop < maxScrollTop) {
+            scrollTop = translateY = maxScrollTop;
         }
 
         if (translateY != null) {
@@ -161,11 +161,11 @@ var Scroll = Class.create({
     _onFlick : function(e) {
         var that = this,
             scroller = that._scroller,
-            currentY = that._currentY,
+            scrollTop = that._scrollTop,
             maxScrollTop = getMaxScrollTop(scroller)
             ;
 
-        if(currentY < maxScrollTop || currentY > 0)
+        if(scrollTop < maxScrollTop || scrollTop > 0)
             return;
 
         var s0 = transform.getY(scroller), v0 = e.valocityY;
@@ -174,8 +174,8 @@ var Scroll = Class.create({
         if(v0 < -1.5) v0 = -1.5;
         
         var a = 0.0015 * (v0 / Math.abs(v0)),
-            t = v0/a,
-            s = s0 + t*v0/2
+            t = v0 / a,
+            s = s0 + t * v0 / 2
             ;
 
         if( s > 0 || s < maxScrollTop) {
@@ -194,13 +194,13 @@ var Scroll = Class.create({
                 function() {
                     v0 = v;
                     s0 = s;
-                    //a = 0.0045*(v0 / Math.abs(v0));
+                    a = 0.0045 * (v0 / Math.abs(v0));
                     t = -v0 / a;
                     s = edge;
 
                     transform.start(
                         scroller,
-                        t.toFixed(0) + 'ms', 'cubic-bezier(' + transform.getBezier(-t, 0) + ')', '0s',
+                        (0-t).toFixed(0) + 'ms', 'cubic-bezier(' + transform.getBezier(-t, 0) + ')', '0s',
                         0, s.toFixed(0)
                     );
                 }

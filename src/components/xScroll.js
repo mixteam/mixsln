@@ -52,6 +52,37 @@ var win = window,
 
 		getViewport : function() {
 			return this._module.children[0];
+		},
+
+		getScrollHeight : function() {
+			var that = this,
+				scroller = that._scroller
+				;
+
+			return scroller._scrollHeight;
+		},
+
+		getScrollTop : function() {
+			var that = this,
+				scroller = that._scroller
+				;
+
+			return scroller._scrollTop;
+		},
+
+		scrollTo : function(top) {
+			var that = this,
+				module = that._module,
+				scrollport = module.children[0]
+				;
+
+		},
+
+		scrollToElement : function(element) {
+			var that = this,
+				module = that._module,
+				scrollport = module.children[0]
+				;
 		}
 	});
 
