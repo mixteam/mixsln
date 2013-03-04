@@ -280,69 +280,79 @@ define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
     var Scroll = Class.create({
         initialize: function(element) {
             var that = this;
-            that._el = element;
-            that._gesture = new Gesture(element);
+            that._wrap = element;
+            that._scroller = element.children[0];
+            that._gesture = new Gesture(that._scroller);
             that._originalY = null;
             that._currentY = null;
+            that._refreshed = false;
             that._preventBodyTouch = that._preventBodyTouch.bind(that);
             that._onTouchStart = that._onTouchStart.bind(that);
             that._onPanStart = that._onPanStart.bind(that);
             that._onPan = that._onPan.bind(that);
             that._onPanEnd = that._onPanEnd.bind(that);
             that._onFlick = that._onFlick.bind(that);
+        },
+        enable: function() {
+            var that = this, scroller = that._scroller;
+            that._gesture.enable();
+            scroller.addEventListener("touchstart", that._onTouchStart, false);
+            scroller.addEventListener("panstart", that._onPanStart, false);
+            scroller.addEventListener("pan", that._onPan, false);
+            scroller.addEventListener("panend", that._onPanEnd, false);
+            scroller.addEventListener("flick", that._onFlick, false);
             if (!prevented) {
                 prevented = true;
                 doc.body.addEventListener("touchmove", that._preventBodyTouch, false);
             }
         },
-        enable: function() {
-            var that = this, el = that._el;
-            that._gesture.enable();
-            el.addEventListener("touchstart", that._onTouchStart, false);
-            el.addEventListener("panstart", that._onPanStart, false);
-            el.addEventListener("pan", that._onPan, false);
-            el.addEventListener("panend", that._onPanEnd, false);
-            el.addEventListener("flick", that._onFlick, false);
-        },
         disable: function() {
-            var that = this, el = that._el;
+            var that = this, scroller = that._scroller;
             that._gesture.disable();
-            el.removeEventListener("touchstart", that._onTouchStart, false);
-            el.removeEventListener("panstart", that._onPanStart, false);
-            el.removeEventListener("pan", that._onPan, false);
-            el.removeEventListener("panend", that._onPanEnd, false);
-            el.removeEventListener("flick", that._onFlick, false);
+            scroller.removeEventListener("touchstart", that._onTouchStart, false);
+            scroller.removeEventListener("panstart", that._onPanStart, false);
+            scroller.removeEventListener("pan", that._onPan, false);
+            scroller.removeEventListener("panend", that._onPanEnd, false);
+            scroller.removeEventListener("flick", that._onFlick, false);
+            if (prevented) {
+                prevented = false;
+                doc.body.removeEventListener("touchmove", that._preventBodyTouch, false);
+            }
         },
         refresh: function() {
-            var that = this, el = that._el;
-            el.style.height = "auto";
+            this._refreshed = true;
         },
         _preventBodyTouch: function(e) {
             e.preventDefault();
             return false;
         },
         _onTouchStart: function(e) {
-            var that = this, el = that._el;
-            el.style.webkitTransition = "none";
-            el.style.webkitTransform = getComputedStyle(el).webkitTransform;
+            var that = this, scroller = that._scroller;
+            scroller.style.webkitTransition = "none";
+            scroller.style.webkitTransform = getComputedStyle(scroller).webkitTransform;
+            if (that._refreshed) {
+                that._refreshed = false;
+                scroller.style.height = "auto";
+                scroller.style.height = scroller.offsetHeight + "px";
+            }
         },
         _onPanStart: function(e) {
-            var that = this, el = that._el;
-            that._originalY = transform.getY(el);
+            var that = this, scroller = that._scroller;
+            that._originalY = transform.getY(scroller);
         },
         _onPan: function(e) {
-            var that = this, el = that._el, maxScrollTop = getMaxScrollTop(el), originalY = that._originalY, currentY;
+            var that = this, scroller = that._scroller, maxScrollTop = getMaxScrollTop(scroller), originalY = that._originalY, currentY;
             currentY = that._currentY = originalY + e.displacementY;
             if (currentY > 0) {
-                el.style.webkitTransform = transform.getTranslate(0, currentY / 2);
+                scroller.style.webkitTransform = transform.getTranslate(0, currentY / 2);
             } else if (currentY < maxScrollTop) {
-                el.style.webkitTransform = transform.getTranslate(0, (maxScrollTop - currentY) / 2 + currentY);
+                scroller.style.webkitTransform = transform.getTranslate(0, (maxScrollTop - currentY) / 2 + currentY);
             } else {
-                el.style.webkitTransform = transform.getTranslate(0, currentY);
+                scroller.style.webkitTransform = transform.getTranslate(0, currentY);
             }
         },
         _onPanEnd: function(e) {
-            var that = this, el = that._el, currentY = that._currentY, maxScrollTop = getMaxScrollTop(el), translateY = null;
+            var that = this, scroller = that._scroller, currentY = that._currentY, maxScrollTop = getMaxScrollTop(scroller), translateY = null;
             if (currentY > 0) {
                 translateY = 0;
             }
@@ -350,13 +360,13 @@ define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
                 translateY = maxScrollTop;
             }
             if (translateY != null) {
-                transform.start(el, "0.4s", "ease-out", "0s", 0, translateY);
+                transform.start(scroller, "0.4s", "ease-out", "0s", 0, translateY);
             }
         },
         _onFlick: function(e) {
-            var that = this, el = that._el, currentY = that._currentY, maxScrollTop = getMaxScrollTop(el);
+            var that = this, scroller = that._scroller, currentY = that._currentY, maxScrollTop = getMaxScrollTop(scroller);
             if (currentY < maxScrollTop || currentY > 0) return;
-            var s0 = transform.getY(el), v0 = e.valocityY;
+            var s0 = transform.getY(scroller), v0 = e.valocityY;
             if (v0 > 1.5) v0 = 1.5;
             if (v0 < -1.5) v0 = -1.5;
             var a = .0015 * (v0 / Math.abs(v0)), t = v0 / a, s = s0 + t * v0 / 2;
@@ -365,18 +375,18 @@ define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
                 s = edge;
                 t = (sign * Math.sqrt(2 * a * (s - s0) + v0 * v0) - v0) / a;
                 v = v0 - a * t;
-                transform.start(el, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-v0 / a, -v0 / a + t) + ")", "0s", 0, s.toFixed(0), function() {
+                transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-v0 / a, -v0 / a + t) + ")", "0s", 0, s.toFixed(0), function() {
                     v0 = v;
                     s0 = s;
                     a = .0045 * (v0 / Math.abs(v0));
                     t = v0 / a;
                     s = s0 + t * v0 / 2;
-                    transform.start(el, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0), function() {
-                        transform.start(el, "0.4s", "ease-out", "0s", 0, edge);
+                    transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0), function() {
+                        transform.start(scroller, "0.4s", "ease-out", "0s", 0, edge);
                     });
                 });
             } else {
-                transform.start(el, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0));
+                transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0));
             }
         }
     });
@@ -618,7 +628,7 @@ define("#mix/sln/0.2.0/components/xScroll-debug", [ "../modules/scroll-debug", "
                 scrollport = doc.createElement("div");
                 module.appendChild(scrollport);
             }
-            that._scroller = new Scroll(scrollport);
+            that._scroller = new Scroll(module);
         },
         enable: function() {
             var that = this, scroller = that._scroller;
@@ -772,45 +782,55 @@ define("#mix/sln/0.2.0/components/xViewport-debug", [ "./xBase-debug", "./xTitle
             header = doc.createElement("header");
             section = doc.createElement("section");
             footer = doc.createElement("footer");
+            subport = doc.createElement("div");
+            section.appendChild(subport);
             module.appendChild(header);
             module.appendChild(section);
             module.appendChild(footer);
+            that.xtitlebar = xTitlebar.create(header);
+            that.xscroll = xScroll.create(section);
+            that.xtransition = xTransition.create(section);
         },
         enable: function() {
-            var that = this, module = that._module, header = module.querySelector("header"), sectionport = module.querySelector("section");
+            var that = this, module = that._module;
             that._isEnableTitlebar = util.str2val(module.getAttribute("enableTitlebar"));
             that._isEnableScroll = util.str2val(module.getAttribute("enableScroll"));
             that._isEnableTransition = util.str2val(module.getAttribute("enableTransition"));
             if (that._isEnableTitlebar) {
                 module.className += " enableTitlebar";
-                that.xtitlebar = xTitlebar.create(header);
                 that.xtitlebar.enable();
             }
             if (that._isEnableScroll) {
                 module.className += " enableScroll";
-                that.xscroll = xScroll.create(sectionport);
                 that.xscroll.enable();
             }
             if (that._isEnableTransition) {
                 module.className += " enableTransition";
-                that.xtransition = xTransition.create(sectionport);
                 that.xtransition.enable();
             }
         },
         disable: function() {
-            var that = this, xscroll = that.xscroll, xtransition = that.xtransition;
-            xscroll && xscroll.disable();
-            xtransition && xtransition.disable();
+            var that = this, xtitlebar = that.xtitlebar, xscroll = that.xscroll, xtransition = that.xtransition, isEnableTitlebar = that._isEnableTitlebar;
+            isEnableScroll = that._isEnableScroll;
+            isEnableTransition = that._isEnableTransition;
+            if (isEnableTitlebar) {
+                module.className = module.className.replace("enableTitlebar", "");
+                that.xtitlebar.disable();
+            }
+            if (isEnableScroll) {
+                module.className = module.className.replace("enableScroll", "");
+                that.xscroll.disable();
+            }
+            if (isEnableTransition) {
+                module.className = module.className.replace("enableTransition", "");
+                that.xtransition.disable();
+            }
+            module.className = module.className.replace(/\s{2,}/, "");
         },
         getViewport: function() {
             var that = this, module = that._module;
-            if (that._isEnableTransition) {
-                return that.xtransition.getViewport();
-            } else if (that._isEnableScroll) {
-                return that.xscroll.getViewport();
-            } else {
-                return module.querySelector("section > div");
-            }
+            //if (that._isEnableTransition) {
+            return that.xtransition.getViewport();
         }
     });
     return xViewport;
@@ -841,13 +861,13 @@ define("#mix/sln/0.2.0/controllers/cNavigation-debug", [ "../modules/page-debug"
             navigate.backward();
         },
         fill: function(datas, callback) {
-            var page = pages[this.appName];
+            var page = pages[this.appName], xviewport = app.queryComponent('*[is="x-viewport"]');
             function _fill() {
                 page.renderTemplate(datas, function(content) {
                     app.fillViewport(content);
-                    setTimeout(function() {
-                        app.queryComponent('*[is="x-viewport"]').xscroll.refresh();
-                    }, 1);
+                    if (xviewport.xscroll) {
+                        xviewport.xscroll.refresh();
+                    }
                     callback && callback();
                 });
             }

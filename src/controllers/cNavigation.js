@@ -42,15 +42,16 @@ var win = window,
 		},
 
 		fill : function(datas, callback) {
-			var page = pages[this.appName]
+			var page = pages[this.appName],
+				xviewport = app.queryComponent('*[is="x-viewport"]')
 				;
 
 			function _fill(){
 				page.renderTemplate(datas, function(content) {
 					app.fillViewport(content);
-					setTimeout(function() {
-						app.queryComponent('*[is="x-viewport"]').xscroll.refresh();
-					}, 1);
+					if (xviewport.xscroll) {
+						xviewport.xscroll.refresh();
+					}
 					callback && callback();
 				});
 			}

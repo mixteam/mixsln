@@ -28,51 +28,69 @@ var win = window,
 			header = doc.createElement('header');
 			section = doc.createElement('section');
 			footer = doc.createElement('footer');
+			subport = doc.createElement('div');
 
+			section.appendChild(subport);
 			module.appendChild(header);
 			module.appendChild(section);
 			module.appendChild(footer);
+
+			that.xtitlebar = xTitlebar.create(header);
+			that.xscroll = xScroll.create(section);
+			that.xtransition = xTransition.create(section);
 		},
 
 		enable : function() {
 			var that = this,
-				module = that._module,
-				header = module.querySelector('header'),
-				sectionport = module.querySelector('section')
+				module = that._module
 				;
 
-				that._isEnableTitlebar = util.str2val(module.getAttribute('enableTitlebar'));
-				that._isEnableScroll = util.str2val(module.getAttribute('enableScroll'));
-				that._isEnableTransition = util.str2val(module.getAttribute('enableTransition'));
-				;
+			that._isEnableTitlebar = util.str2val(module.getAttribute('enableTitlebar'));
+			that._isEnableScroll = util.str2val(module.getAttribute('enableScroll'));
+			that._isEnableTransition = util.str2val(module.getAttribute('enableTransition'));
 
 			if (that._isEnableTitlebar) {
 				module.className += ' enableTitlebar';
-				that.xtitlebar = xTitlebar.create(header);
 				that.xtitlebar.enable();
 			}
 
 			if (that._isEnableScroll) {
 				module.className += ' enableScroll';
-				that.xscroll = xScroll.create(sectionport);
 				that.xscroll.enable();
 			}
 
 			if (that._isEnableTransition) {
 				module.className += ' enableTransition';
-				that.xtransition = xTransition.create(sectionport);
 				that.xtransition.enable();
 			}
 		},
 
 		disable : function() {
 			var that = this,
+				xtitlebar = that.xtitlebar,
 				xscroll = that.xscroll,
-				xtransition = that.xtransition
+				xtransition = that.xtransition,
+				isEnableTitlebar = that._isEnableTitlebar
+				isEnableScroll = that._isEnableScroll
+				isEnableTransition = that._isEnableTransition
 				;
 
-			xscroll && xscroll.disable();
-			xtransition && xtransition.disable();
+			if (isEnableTitlebar) {
+				module.className = module.className.replace('enableTitlebar', '');
+				that.xtitlebar.disable();
+			}
+
+			if (isEnableScroll) {
+				module.className = module.className.replace('enableScroll', '');
+				that.xscroll.disable();
+			}
+
+			if (isEnableTransition) {
+				module.className = module.className.replace('enableTransition', '');
+				that.xtransition.disable();
+			}
+
+			module.className = module.className.replace(/\s{2,}/, '');
 		},
 
 		getViewport : function() {
@@ -80,13 +98,13 @@ var win = window,
 				module = that._module
 				;
 
-			if (that._isEnableTransition) {
+			//if (that._isEnableTransition) {
 				return that.xtransition.getViewport();
-			} else if (that._isEnableScroll) {
-				return that.xscroll.getViewport();
-			} else {
-				return module.querySelector('section > div');
-			}
+			//} else if (that._isEnableScroll) {
+				//return that.xscroll.getViewport();
+			//} else {
+				//return module.querySelector('section > div');
+			//}
 		}
 	});
 

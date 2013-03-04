@@ -23,7 +23,7 @@ var win = window,
 				module.appendChild(scrollport);
 			}
 
-			that._scroller = new Scroll(scrollport);
+			that._scroller = new Scroll(module);
 		},
 
 		enable : function() {

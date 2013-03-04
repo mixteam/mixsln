@@ -4,6 +4,34 @@
 		"selected_items":
 		[
 			[
+				"x-t",
+				"x-titlebar"
+			],
+			[
+				"x",
+				"x-transition"
+			],
+			[
+				"en",
+				"enableTransition"
+			],
+			[
+				"isE",
+				"_isEnableTitlebar"
+			],
+			[
+				"cre",
+				"create"
+			],
+			[
+				"inner",
+				"innerHTML"
+			],
+			[
+				"el",
+				"element"
+			],
+			[
 				"tr",
 				"transitionport"
 			],
@@ -160,10 +188,6 @@
 				"createElement"
 			],
 			[
-				"x",
-				"xscroll"
-			],
-			[
 				"xsc",
 				"xscroll"
 			],
@@ -186,14 +210,6 @@
 			[
 				"ini",
 				"initXComponents"
-			],
-			[
-				"el",
-				"elements"
-			],
-			[
-				"cre",
-				"createXComponent"
 			],
 			[
 				"bo",
@@ -498,22 +514,6 @@
 			[
 				"hash",
 				"hashParam"
-			],
-			[
-				"art",
-				"articleEl"
-			],
-			[
-				"load",
-				"loadContent"
-			],
-			[
-				"padd",
-				"padding"
-			],
-			[
-				"bor",
-				"border"
 			]
 		]
 	},
@@ -531,7 +531,15 @@
 			"file": "test/demo1.html",
 			"settings":
 			{
-				"buffer_size": 1525,
+				"buffer_size": 1595,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "assets/x.css",
+			"settings":
+			{
+				"buffer_size": 7223,
 				"line_ending": "Windows"
 			}
 		},
@@ -544,10 +552,10 @@
 			}
 		},
 		{
-			"file": "test/list.js",
+			"file": "src/components/xScroll.js",
 			"settings":
 			{
-				"buffer_size": 2203,
+				"buffer_size": 1019,
 				"line_ending": "Windows"
 			}
 		},
@@ -555,39 +563,7 @@
 			"file": "src/modules/scroll.js",
 			"settings":
 			{
-				"buffer_size": 5998,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/controllers/cNavigation.js",
-			"settings":
-			{
-				"buffer_size": 2774,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/components/xScroll.js",
-			"settings":
-			{
-				"buffer_size": 1023,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "assets/x.css",
-			"settings":
-			{
-				"buffer_size": 6648,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/modules/gesture.js",
-			"settings":
-			{
-				"buffer_size": 9508,
+				"buffer_size": 6548,
 				"line_ending": "Unix"
 			}
 		}
@@ -636,19 +612,24 @@
 	},
 	"file_history":
 	[
+		"/D/workspace/taobao/etao/H5/w_Wireless/base/styles/component/form/js/autocomplete.js",
+		"/D/workspace/taobao/etao/H5/w_Wireless/base/styles/component/float/js/notification.js",
+		"/D/workspace/doc/charge_phone_tms.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xViewport.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTransition.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/controllers/cNavigation.js",
+		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
+		"/D/workspace/taobao/etao/mix/mixsln/scroll.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xScroll.js",
+		"/D/workspace/taobao/etao/mix/mixsln/assets/x.css",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/mix-sln-debug.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/controllers/cNavigation.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xBack.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/components/xScroll.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTitlebar.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
-		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
-		"/D/workspace/taobao/etao/mix/mixsln/assets/x.css",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
 		"/D/workspace/taobao/etao/mix/mixsln/lib/iscroll-lite.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/list.tpl",
@@ -675,7 +656,6 @@
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xComponents.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xComponents",
 		"/D/workspace/taobao/etao/mix/mixsln/assets/default (1).css",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transition",
@@ -759,11 +739,7 @@
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/mvc/orm/orm.js",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/router/package.json",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/history/src/history.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/router/src/router.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/mvc/controller/src/controller.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/ui/template/src/template.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/ui/component/src/component.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/mvc/view/src/view.js"
+		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/router/src/router.js"
 	],
 	"find":
 	{
@@ -781,6 +757,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"el",
 			"module",
 			"doc",
 			"transform",
@@ -907,8 +884,7 @@
 			"HelloView",
 			"z-index",
 			"'",
-			"',",
-			"#naviview."
+			"',"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -916,6 +892,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"scroller",
 			"curAppName",
 			"switchAppPage",
 			"switchPageView",
@@ -995,7 +972,7 @@
 	"groups":
 	[
 		{
-			"selected": 8,
+			"selected": 2,
 			"sheets":
 			[
 				{
@@ -1031,15 +1008,15 @@
 					"file": "test/demo1.html",
 					"settings":
 					{
-						"buffer_size": 1525,
+						"buffer_size": 1595,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								124,
-								124
+								403,
+								403
 							]
 						],
 						"settings":
@@ -1054,6 +1031,34 @@
 				},
 				{
 					"buffer": 2,
+					"file": "assets/x.css",
+					"settings":
+					{
+						"buffer_size": 7223,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								560,
+								560
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
 					"file": "src/app.js",
 					"settings":
 					{
@@ -1064,8 +1069,8 @@
 						"selection":
 						[
 							[
-								541,
-								541
+								3181,
+								3181
 							]
 						],
 						"settings":
@@ -1074,162 +1079,52 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "test/list.js",
-					"settings":
-					{
-						"buffer_size": 2203,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								545,
-								545
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2091.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 4,
-					"file": "src/modules/scroll.js",
+					"file": "src/components/xScroll.js",
 					"settings":
 					{
-						"buffer_size": 5998,
+						"buffer_size": 1019,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4044,
-								4044
+								584,
+								584
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2274.0,
+						"translation.y": 102.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 5,
-					"file": "src/controllers/cNavigation.js",
+					"file": "src/modules/scroll.js",
 					"settings":
 					{
-						"buffer_size": 2774,
+						"buffer_size": 6548,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								644,
-								644
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 41.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "src/components/xScroll.js",
-					"settings":
-					{
-						"buffer_size": 1023,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								816,
-								816
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 204.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "assets/x.css",
-					"settings":
-					{
-						"buffer_size": 6648,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3847,
-								3847
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/CSS/CSS.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1662.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "src/modules/gesture.js",
-					"settings":
-					{
-						"buffer_size": 9508,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6015,
-								6015
+								1509,
+								1509
 							]
 						],
 						"settings":
@@ -1239,7 +1134,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2808.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
