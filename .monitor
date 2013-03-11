@@ -10,3 +10,9 @@
 ./src/plugins/init.js
 ./src/plugins/lazyload.js
 ./src/plugins/scrollpos.js
+
+#[copy ".\lib\cjs-debug.js"+".\lib\mix-debug.js"+".\dist\app-debug.js" "mixsln-debug.js"]
+#./dist/app-debug.js
+
+#[copy ".\lib\cjs.js"+".\lib\mix.js"+".\dist\app.js" "mixsln.js"]
+#./dist/app.js
