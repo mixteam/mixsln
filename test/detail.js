@@ -1,17 +1,16 @@
 (function(app, undef) {
 
-	var detailApp = app.init({
+	var detailApp = app.page.define({
 		name : 'detail',
 		title : '商品详情',
 		route : 'detail\\/(P<pid>\\d+)\\/?',
 		buttons : [
 			{
-				type : 'backStack',
-				text : '搜索',
-				autoHide : true
+				type : 'back',
+				text : '搜索'
 			},
 			{
-				type : 'rightExtra',
+				type : 'func',
 				text : '查看评论',
 				handler : function(e) {
 					alert('TODO');
@@ -49,13 +48,13 @@
 		ready : function(navigation) {
 			var that = this,
 				pid = this._pid = navigation.getParameter('pid'),
-				viewport = $(app.getViewport())
+				content = $(app.component.getActiveContent())
 				;
 
 			// implement super.ready
-			navigation.fill({}, function() {
-				viewport.find('#J_searchForm').on('submit', function(e) {
-					var word = viewport.find('#J_searchForm .bton-keyword').val()
+			that.fill({}, function() {
+				content.find('#J_searchForm').on('submit', function(e) {
+					var word = content.find('#J_searchForm .bton-keyword').val()
 						;
 
 					e.preventDefault();

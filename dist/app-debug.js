@@ -1,27 +1,3 @@
-/*
-Copyright (c) 2012 Shanda Interactive Entertainment Limited
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-//Enable Gesture Events on a element
-//Supported GestureEvents: pan/panstart/panend,flick,tap,dualtouch,doubletap,press/pressend
 define("#mix/sln/0.2.0/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, events = [ "screenX", "screenY", "clientX", "clientY", "pageX", "pageY" ], Class = require("mix/core/0.3.0/base/class-debug");
@@ -256,7 +232,7 @@ define("#mix/sln/0.2.0/modules/transform-debug", [], function(require, exports, 
         el.addEventListener("webkitTransitionEnd", transitionEnd, false);
         setTimeout(transitionEnd, parseFloat(time) * 1e3);
     }
-    function doTransition(el, time, timeFunction, delay, x, y, callback) {
+    function startTransition(el, time, timeFunction, delay, x, y, callback) {
         waitTransition(el, time, callback);
         el.style.webkitTransition = [ TRANSITION_NAME, time, timeFunction, delay ].join(" ");
         el.style.webkitTransform = getTranslate(x, y);
@@ -265,12 +241,12 @@ define("#mix/sln/0.2.0/modules/transform-debug", [], function(require, exports, 
     exports.getX = getTransformX;
     exports.getTranslate = getTranslate;
     exports.getBezier = quadratic2cubicBezier;
-    exports.start = doTransition;
+    exports.start = startTransition;
 });
 
 define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, navigator = win.navigator, Class = require("mix/core/0.3.0/base/class-debug"), Gesture = require("./gesture-debug"), transform = require("./transform-debug"), prevented = false;
+    var win = window, doc = win.document, navigator = win.navigator, Class = require("mix/core/0.3.0/base/class-debug"), Gesture = require("./gesture-debug"), Transform = require("./transform-debug"), prevented = false;
     function getMaxScrollTop(el) {
         var parentEl = el.parentNode, parentStyle = getComputedStyle(parentEl);
         var maxTop = 0 - el.scrollHeight + parentEl.offsetHeight - parseInt(parentStyle.paddingTop) - parseInt(parentStyle.paddingBottom);
@@ -284,8 +260,10 @@ define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
             that._scroller = element.children[0];
             that._gesture = new Gesture(that._scroller);
             that._originalY = null;
-            that._scrollTop = null;
+            that._currentY = null;
             that._scrollHeight = null;
+            that._scrollEndHandler = null;
+            that._scrollEndCancel = false;
             that._refreshed = false;
             that._preventBodyTouch = that._preventBodyTouch.bind(that);
             that._onTouchStart = that._onTouchStart.bind(that);
@@ -293,6 +271,7 @@ define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
             that._onPan = that._onPan.bind(that);
             that._onPanEnd = that._onPanEnd.bind(that);
             that._onFlick = that._onFlick.bind(that);
+            that._onScrollEnd = that._onScrollEnd.bind(that);
         },
         enable: function() {
             var that = this, scroller = that._scroller;
@@ -323,6 +302,23 @@ define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
         refresh: function() {
             this._refreshed = true;
         },
+        getHeight: function() {
+            return this._scroller.offsetHeight;
+        },
+        getTop: function() {
+            return -Transform.getY(this._scroller);
+        },
+        to: function(top) {
+            var that = this, scroller = that._scroller, maxScrollTop = getMaxScrollTop(scroller);
+            top = -top;
+            if (top < maxScrollTop) {
+                top = maxScrollTop;
+            } else if (top > 0) {
+                top = 0;
+            }
+            scroller.style.webkitTransform = Transform.getTranslate(0, top);
+            that._onScrollEnd();
+        },
         _preventBodyTouch: function(e) {
             e.preventDefault();
             return false;
@@ -333,40 +329,44 @@ define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
             scroller.style.webkitTransform = getComputedStyle(scroller).webkitTransform;
             if (that._refreshed) {
                 that._refreshed = false;
+                that._scrollHeight = scroller.offsetHeight;
                 scroller.style.height = "auto";
-                scroller.style.height = that._scrollHeight = scroller.offsetHeight + "px";
+                scroller.style.height = that._scrollHeight + "px";
             }
         },
         _onPanStart: function(e) {
             var that = this, scroller = that._scroller;
-            that._originalY = transform.getY(scroller);
+            that._originalY = Transform.getY(scroller);
         },
         _onPan: function(e) {
-            var that = this, scroller = that._scroller, maxScrollTop = getMaxScrollTop(scroller), originalY = that._originalY, scrollTop = that._scrollTop = originalY + e.displacementY;
-            if (scrollTop > 0) {
-                scroller.style.webkitTransform = transform.getTranslate(0, scrollTop / 2);
-            } else if (scrollTop < maxScrollTop) {
-                scroller.style.webkitTransform = transform.getTranslate(0, (maxScrollTop - scrollTop) / 2 + scrollTop);
+            var that = this, scroller = that._scroller, maxScrollTop = getMaxScrollTop(scroller), originalY = that._originalY, currentY = that._currentY = originalY + e.displacementY;
+            if (currentY > 0) {
+                scroller.style.webkitTransform = Transform.getTranslate(0, currentY / 2);
+            } else if (currentY < maxScrollTop) {
+                scroller.style.webkitTransform = Transform.getTranslate(0, (maxScrollTop - currentY) / 2 + currentY);
             } else {
-                scroller.style.webkitTransform = transform.getTranslate(0, scrollTop);
+                scroller.style.webkitTransform = Transform.getTranslate(0, currentY);
             }
         },
         _onPanEnd: function(e) {
-            var that = this, scroller = that._scroller, scrollTop = that._scrollTop, maxScrollTop = getMaxScrollTop(scroller), translateY = null;
-            if (scrollTop > 0) {
-                scrollTop = translateY = 0;
+            var that = this, scroller = that._scroller, currentY = that._currentY, maxScrollTop = getMaxScrollTop(scroller), translateY = null;
+            if (currentY > 0) {
+                translateY = 0;
             }
-            if (scrollTop < maxScrollTop) {
-                scrollTop = translateY = maxScrollTop;
+            if (currentY < maxScrollTop) {
+                translateY = maxScrollTop;
             }
             if (translateY != null) {
-                transform.start(scroller, "0.4s", "ease-out", "0s", 0, translateY);
+                Transform.start(scroller, "0.4s", "ease-out", "0s", 0, translateY, that._onScrollEnd);
+            } else {
+                that._onScrollEnd();
             }
         },
         _onFlick: function(e) {
-            var that = this, scroller = that._scroller, scrollTop = that._scrollTop, maxScrollTop = getMaxScrollTop(scroller);
-            if (scrollTop < maxScrollTop || scrollTop > 0) return;
-            var s0 = transform.getY(scroller), v0 = e.valocityY;
+            var that = this, scroller = that._scroller, currentY = that._currentY, maxScrollTop = getMaxScrollTop(scroller);
+            that._scrollEndCancel = true;
+            if (currentY < maxScrollTop || currentY > 0) return;
+            var s0 = Transform.getY(scroller), v0 = e.valocityY;
             if (v0 > 1.5) v0 = 1.5;
             if (v0 < -1.5) v0 = -1.5;
             var a = .0015 * (v0 / Math.abs(v0)), t = v0 / a, s = s0 + t * v0 / 2;
@@ -375,35 +375,185 @@ define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
                 s = (s - edge) / 2 + edge;
                 t = (sign * Math.sqrt(2 * a * (s - s0) + v0 * v0) - v0) / a;
                 v = v0 - a * t;
-                transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-v0 / a, -v0 / a + t) + ")", "0s", 0, s.toFixed(0), function() {
+                Transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + Transform.getBezier(-v0 / a, -v0 / a + t) + ")", "0s", 0, s.toFixed(0), function() {
                     v0 = v;
                     s0 = s;
                     a = .0045 * (v0 / Math.abs(v0));
                     t = -v0 / a;
                     s = edge;
-                    transform.start(scroller, (0 - t).toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0));
+                    Transform.start(scroller, (0 - t).toFixed(0) + "ms", "cubic-bezier(" + Transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0), that._onScrollEnd);
                 });
             } else {
-                transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0));
+                Transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + Transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0), that._onScrollEnd);
             }
+        },
+        _onScrollEnd: function() {
+            var that = this;
+            that._scrollEndCancel = false;
+            setTimeout(function() {
+                if (!that._scrollEndCancel) {
+                    that._scrollEndHandler && that._scrollEndHandler();
+                }
+            }, 10);
         }
     });
     return Scroll;
 });
 
-define("#mix/sln/0.2.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
+define("#mix/sln/0.2.0/modules/component-debug", [ "./scroll-debug", "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, STATUS = {
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Scroll = require("./scroll-debug"), Transform = require("./transform-debug"), components = {}, emptyFunc = function() {}, extendFns = function(el, fns) {
+        el.fn || (el.fn = {});
+        Object.extend(el.fn, fns);
+    }, Compontent = Class.create({
+        Implements: Message,
+        initialize: function() {
+            Message.prototype.initialize.call(this, "component");
+        },
+        get: function(name) {
+            return components[name];
+        },
+        initViewport: function(el) {
+            components["viewport"] = el;
+            el.setAttribute("id", "viewport-" + Date.now());
+        },
+        initTitlebar: function(el) {
+            var viewport = components["viewport"];
+            viewport.className += " enableTitlebar";
+            components["titlebar"] = el;
+            extendFns(el, {
+                change: function(text, movement) {
+                    var that = this, wrap = el.querySelector("ul"), title = wrap.querySelector("li:first-child");
+                    function handler(e) {
+                        wrap.className = "";
+                        wrap.removeEventListener("webkitTransitionEnd", handler);
+                    }
+                    title.innerHTML = text;
+                    wrap.className = movement;
+                    setTimeout(function() {
+                        wrap.className += " transition";
+                        wrap.addEventListener("webkitTransitionEnd", handler, false);
+                    }, 1);
+                }
+            });
+        },
+        initBtn: function(name, el) {
+            components[name] = el;
+            var that = this;
+            extendFns(el, {
+                setText: function(text) {
+                    el.innerText = text;
+                },
+                show: function() {
+                    el.style.visibility = "";
+                },
+                hide: function() {
+                    el.style.visibility = "hidden";
+                }
+            });
+            el.addEventListener("click", function(e) {
+                that.trigger(name + "Click");
+                e.preventDefault();
+                return false;
+            });
+            return el;
+        },
+        initBackBtn: function(el) {
+            this.initBtn("backBtn", el);
+        },
+        initFuncBtn: function(el) {
+            this.initBtn("funcBtn", el);
+        },
+        initContent: function(el) {
+            components["content"] = el;
+            var active = el.querySelector("div > .active"), inactive = el.querySelector("div > .inactive");
+            extendFns(el, {
+                getActive: function() {
+                    return active;
+                },
+                getInactive: function() {
+                    return inactive;
+                },
+                switchActive: function() {
+                    swap = inactive;
+                    inactive = active;
+                    active = swap;
+                },
+                setClass: function() {
+                    active.className = "active";
+                    inactive.className = "inactive";
+                }
+            });
+        },
+        getActiveContent: function() {
+            return components["content"].fn.getActive();
+        },
+        initScroll: function(el) {
+            components["scroll"] = el;
+            var that = this, children = el.children[0], scroller = new Scroll(el), viewport = components["viewport"];
+            viewport.className += " enableScroll";
+            el.className += " scroll";
+            scroller._scrollEndHandler = function() {
+                that.trigger("scrollEnd");
+            };
+            scroller.enable();
+            extendFns(el, {
+                refresh: function() {
+                    scroller.refresh();
+                },
+                getScrollHeight: function() {
+                    return scroller.getHeight();
+                },
+                getScrollTop: function() {
+                    return scroller.getTop();
+                },
+                scrollTo: function(top) {
+                    scroller.to(top);
+                }
+            });
+        },
+        initTransition: function(el) {
+            components["transition"] = el;
+            var that = this, viewport = components["viewport"], content = components["content"];
+            viewport.className += " enableTransition";
+            el.className += " transition";
+            function action(type) {
+                var wrap = el.querySelector("div"), active, originX, originY;
+                content.fn.switchActive();
+                active = content.fn.getActive(), active.innerHTML = "";
+                originY = Transform.getY(wrap);
+                originX = (type === "forward" ? "-" : "") + "33.33%";
+                Transform.start(wrap, "0.4s", "ease", 0, originX, originY, function() {
+                    wrap.style.webkitTransform = Transform.getTranslate(0, 0);
+                    content.fn.setClass();
+                    that.trigger(type + "TransitionEnd");
+                });
+            }
+            extendFns(el, {
+                forward: function() {
+                    action("forward");
+                },
+                backward: function() {
+                    action("backward");
+                }
+            });
+        }
+    });
+    return new Compontent();
+});
+
+define("#mix/sln/0.2.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), STATUS = {
         UNKOWN: 0,
         UNLOADED: 0,
         READY: 1,
         COMPILED: 2
-    }, AppPage = Class.create({
+    }, pages = {}, Page = Class.create({
         Implements: Message,
-        initialize: function(options) {
+        initialize: function() {
             var that = this, name = that.name;
             Message.prototype.initialize.call(that, "app." + name);
-            that._options = options;
             that.status = STATUS.UNKOWN;
             that.ready = that.ready.bind(that);
             that.unload = that.unload.bind(that);
@@ -436,421 +586,43 @@ define("#mix/sln/0.2.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
             var that = this, compiledTemplate = that.compiledTemplate, content = compiledTemplate(datas);
             callback(content);
         },
+        fill: function(datas, callback) {
+            var that = this;
+            function _fill() {
+                that.renderTemplate(datas, function(content) {
+                    that.trigger("rendered", content);
+                    callback && callback();
+                });
+            }
+            if (!that.compiledTemplate) {
+                that.once("compiled", _fill);
+            } else {
+                _fill();
+            }
+        },
         ready: function(navigation) {},
         unload: function() {}
     });
-    AppPage.STATUS = STATUS;
-    return AppPage;
+    Page.STATUS = STATUS;
+    Page.fn = {};
+    Page.define = function(properties) {
+        var cPage = Page.extend(properties), page;
+        cPage.implement(Page.fn);
+        page = new cPage();
+        return pages[page.name] = page;
+    };
+    Page.get = function(name) {
+        return pages[name];
+    };
+    Page.each = function(callback) {
+        Object.each(pages, callback);
+    };
+    return Page;
 });
 
-define("#mix/sln/0.2.0/components/xBase-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.2.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), components = {}, xBase = Class.create({
-        initialize: function(name, module) {
-            var that = this;
-            that._name = name;
-            that._module = module;
-            that._isEnable = false;
-        },
-        getModule: function() {
-            return this._module;
-        },
-        enable: function() {
-            // overwrite
-            var that = this, module = that._module;
-            if (module && !that._isEnabled) {
-                that._isEnabled = true;
-                return true;
-            }
-        },
-        disable: function() {
-            // overwrite
-            var that = this, module = that._module;
-            if (module && that._isEnabled) {
-                that._isEnabled = false;
-                return true;
-            }
-        }
-    });
-    function createXComponent(xName, className, properties) {
-        var _init, _extends, _implements, _enable, _disable, extentions, xComponent, component;
-        if (arguments.length === 2) {
-            properties = className;
-            className = xName;
-        }
-        if (properties.hasOwnProperty("Implements")) {
-            _implements = properties.Implements;
-            delete properties.Implments;
-        }
-        if (properties.hasOwnProperty("init")) {
-            _init = properties.init;
-            delete properties.init;
-        }
-        if (properties.hasOwnProperty("enable")) {
-            _enable = properties.enable;
-            delete properties.enable;
-        }
-        if (properties.hasOwnProperty("disable")) {
-            _disable = properties.disable;
-            delete properties.disable;
-        }
-        extentions = Object.extend({
-            Extends: xBase,
-            Implements: _implements,
-            initialize: function(module) {
-                var that = this;
-                xComponent.superclass.initialize.call(that, xName, module);
-                _init && _init.call(that);
-            }
-        }, properties);
-        if (_enable) {
-            extentions.enable = function() {
-                var is;
-                if (xComponent.superclass.enable.call(this)) {
-                    is = _enable.call(this);
-                    is == null || (is = true);
-                }
-                return is;
-            };
-        }
-        if (_disable) {
-            extentions.disable = function() {
-                var is;
-                if (xComponent.superclass.disable.call(this)) {
-                    is = _disable.call(this);
-                    is == null || (is = true);
-                }
-                return is;
-            };
-        }
-        xComponent = Class.create(extentions);
-        component = components[xName] = {
-            name: xName,
-            klass: xComponent,
-            count: 0,
-            instances: [],
-            map: {}
-        };
-        xComponent.create = function(el) {
-            var cid = xName + "-" + Date.now() + "-" + (component.count + 1), instances = component.instances, map = component.map, instance;
-            el.setAttribute("cid", cid);
-            el.className += (el.className ? " " : "") + className;
-            instance = new xComponent(el);
-            instances.push(instance);
-            map[cid] = instances.length - 1;
-            return instance;
-        };
-        return xComponent;
-    }
-    function getXComponent(cid) {
-        var name, component, matched;
-        if (matched = cid.match(/^(x-[^-]+)/)) {
-            name = matched[1];
-        }
-        component = components[name];
-        if (cid === name) {
-            return component.instances;
-        } else {
-            return component.instances[component.map[cid]];
-        }
-    }
-    function parseXComponents() {
-        Object.each(components, function(component, name) {
-            var elements = doc.querySelectorAll('*[is="' + name + '"]');
-            Object.each(elements, function(el) {
-                if (!el.getAttribute("cid")) {
-                    component.klass.create(el).enable();
-                }
-            });
-        });
-    }
-    xBase.create = createXComponent;
-    xBase.get = getXComponent;
-    xBase.parse = parseXComponents;
-    return xBase;
-});
-
-define("#mix/sln/0.2.0/components/xBack-debug", [ "./xBase-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/util-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class-debug"), util = require("mix/core/0.3.0/base/util-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, xBase = require("./xBase-debug"), xName = "x-back", className = "x-button " + xName, xBack = xBase.create(xName, className, {
-        init: function() {
-            var that = this;
-            that._isAutoHide = false;
-            that._changeVisibility = that._changeVisibility.bind(that);
-            that._clickHandler = that._clickHandler.bind(that);
-        },
-        enable: function() {
-            var that = this, module = that._module, isAutoHide = util.str2val(module.getAttribute("autoHide"));
-            module.addEventListener("click", that._clickHandler, false);
-            that.autoHide(isAutoHide);
-        },
-        disable: function() {
-            var that = this, module = that._module;
-            module.removeEventListener("click", that._clickHandler, false);
-            that.autoHide(false);
-        },
-        autoHide: function(is) {
-            var that = this, module = that._module;
-            if (is === null) {}
-            if (module && that._isAutoHide !== is) {
-                is ? navigate.on("forward backward", that._changeVisibility) : navigate.off("forward backward", that._changeVisibility);
-                that._isAutoHide = is;
-                that._changeVisibility();
-            }
-        },
-        setText: function(text) {
-            var that = this, module = that._module;
-            module.innerText = text;
-        },
-        _clickHandler: function(e) {
-            navigate.backward();
-            e.preventDefault();
-            return false;
-        },
-        _changeVisibility: function() {
-            var that = this, module = that._module, isEnabled = that._isEnabled, visibility = navigate.getStateIndex() < 1 && isEnabled ? "hidden" : "";
-            if (module.style.visibility !== visibility) {
-                module.style.visibility = visibility;
-            }
-        }
-    });
-    return xBack;
-});
-
-define("#mix/sln/0.2.0/components/xScroll-debug", [ "../modules/scroll-debug", "../modules/gesture-debug", "../modules/transform-debug", "./xBase-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Scroll = require("../modules/scroll-debug"), xBase = require("./xBase-debug"), xName = "x-scroll", className = xName, xScroll = xBase.create(xName, className, {
-        init: function() {
-            var that = this, module = that._module, scrollport = module.children[0];
-            if (!scrollport) {
-                scrollport = doc.createElement("div");
-                module.appendChild(scrollport);
-            }
-            that._scroller = new Scroll(module);
-        },
-        enable: function() {
-            var that = this, scroller = that._scroller;
-            scroller.enable();
-        },
-        disable: function() {
-            var that = this, scroller = that._scroller;
-            scroller.disable();
-        },
-        refresh: function() {
-            var that = this, scroller = that._scroller;
-            scroller.refresh();
-        },
-        getViewport: function() {
-            return this._module.children[0];
-        },
-        getScrollHeight: function() {
-            var that = this, scroller = that._scroller;
-            return scroller._scrollHeight;
-        },
-        getScrollTop: function() {
-            var that = this, scroller = that._scroller;
-            return scroller._scrollTop;
-        },
-        scrollTo: function(top) {
-            var that = this, module = that._module, scrollport = module.children[0];
-        },
-        scrollToElement: function(element) {
-            var that = this, module = that._module, scrollport = module.children[0];
-        }
-    });
-    return xScroll;
-});
-
-define("#mix/sln/0.2.0/components/xTransition-debug", [ "../modules/transform-debug", "./xBase-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, transform = require("../modules/transform-debug");
-    xBase = require("./xBase-debug"), xName = "x-transition", className = xName, xTransition = xBase.create(xName, className, {
-        Implements: Message,
-        init: function() {
-            var that = this, module = that._module, orginHtml = module.innerHTML, transitionPort = module.children[0], activePort, inactivePort;
-            Message.prototype.initialize.call(that, "transition");
-            if (!transitionPort) {
-                transitionPort = doc.createElement("div");
-                module.appendChild(transitionPort);
-            }
-            activePort = that._activePort = doc.createElement("div");
-            inactivePort = that._inactivePort = doc.createElement("div");
-            activePort.className = "active";
-            inactivePort.className = "inactive";
-            activePort.innerHTML = orginHtml;
-            transitionPort.innerHTML = "";
-            transitionPort.appendChild(activePort);
-            transitionPort.appendChild(inactivePort);
-        },
-        getViewport: function() {
-            var that = this;
-            return that._activePort;
-        },
-        action: function(type) {
-            var that = this, isEnabled = that._isEnabled, module = that._module, transitionPort = module.children[0], lastActivePort = that._activePort, activePort = that._inactivePort, originX, originY;
-            that._activePort = activePort;
-            that._inactivePort = lastActivePort;
-            activePort.innerHTML = "";
-            if (isEnabled) {
-                originY = transform.getY(transitionPort);
-                originX = (type === "forward" ? "-" : "") + "33.33%";
-                transform.start(transitionPort, "0.4s", "ease", 0, originX, originY, function() {
-                    transitionPort.style.webkitTransform = transform.getTranslate(0, 0);
-                    activePort.className = "active";
-                    lastActivePort.className = "inactive";
-                    that.trigger(type + "TransitionEnd");
-                });
-            } else {
-                activePort.className = "active";
-                lastActivePort.className = "inactive";
-            }
-        },
-        forward: function() {
-            this.action("forward");
-        },
-        backward: function() {
-            this.action("backward");
-        }
-    });
-    return xTransition;
-});
-
-define("#mix/sln/0.2.0/components/xTitlebar-debug", [ "./xBase-debug", "./xBack-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/util-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), xBase = require("./xBase-debug"), xBack = require("./xBack-debug"), xName = "x-titlebar", className = xName, xTitlebar = xBase.create(xName, className, {
-        init: function() {
-            var that = this, module = that._module, wrap, center, left, right, button;
-            wrap = doc.createElement("div");
-            center = doc.createElement("section");
-            left = doc.createElement("section");
-            right = doc.createElement("section");
-            button = doc.createElement("button");
-            left.appendChild(button);
-            wrap.appendChild(center);
-            wrap.appendChild(left);
-            wrap.appendChild(right);
-            module.appendChild(wrap);
-        },
-        enable: function() {
-            var that = this, module = that._module, button = module.querySelector("div > section:nth-child(2) button");
-            that.xback = xBack.create(button);
-            that.xback.enable();
-        },
-        disable: function() {
-            var that = this;
-            that.xback.disable();
-        },
-        change: function(contents, movement) {
-            var that = this, isEnabled = that._isEnabled, module = that._module, wrap = module.querySelector("div");
-            if (isEnabled) {
-                function handler(e) {
-                    wrap.className = "";
-                    wrap.removeEventListener("webkitTransitionEnd", handler);
-                }
-                wrap.className = movement;
-                that.set(contents);
-                setTimeout(function() {
-                    wrap.className += " transition";
-                    wrap.addEventListener("webkitTransitionEnd", handler, false);
-                }, 1);
-            }
-        },
-        set: function(contents) {
-            var that = this, isEnabled = that._isEnabled, module = that._module, center = module.querySelector("div > section:first-child"), left = module.querySelector("div > section:nth-child(2)"), right = module.querySelector("div > section:last-child");
-            if (isEnabled) {
-                setContent(center, contents.center);
-                setContent(left, contents.left);
-                setContent(right, contents.right);
-            }
-        }
-    });
-    function setContent(el, content) {
-        if (content != null) {
-            var isType = Object.isTypeof(content);
-            if (isType === "string") {
-                el.innerHTML = content;
-            } else {
-                if (isType !== "array") {
-                    content = [ content ];
-                }
-                el.innerHTML = "";
-                Object.each(content, function(item) {
-                    el.appendChild(item);
-                });
-            }
-        }
-    }
-    return xTitlebar;
-});
-
-define("#mix/sln/0.2.0/components/xViewport-debug", [ "./xBase-debug", "./xTitlebar-debug", "./xBack-debug", "./xScroll-debug", "../modules/scroll-debug", "../modules/gesture-debug", "../modules/transform-debug", "./xTransition-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/util-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, util = require("mix/core/0.3.0/base/util-debug").singleton, xBase = require("./xBase-debug"), xTitlebar = require("./xTitlebar-debug"), xScroll = require("./xScroll-debug"), xTransition = require("./xTransition-debug"), xName = "x-viewport", className = xName, xViewport = xBase.create(xName, className, {
-        init: function() {
-            var that = this, module = that._module, header, section, footer, subport;
-            that._isEnableTitlebar = false;
-            that._isEnableScroll = false;
-            that._isEnableTransition = false;
-            header = doc.createElement("header");
-            section = doc.createElement("section");
-            footer = doc.createElement("footer");
-            subport = doc.createElement("div");
-            section.appendChild(subport);
-            module.appendChild(header);
-            module.appendChild(section);
-            module.appendChild(footer);
-            that.xtitlebar = xTitlebar.create(header);
-            that.xscroll = xScroll.create(section);
-            that.xtransition = xTransition.create(section);
-        },
-        enable: function() {
-            var that = this, module = that._module;
-            that._isEnableTitlebar = util.str2val(module.getAttribute("enableTitlebar"));
-            that._isEnableScroll = util.str2val(module.getAttribute("enableScroll"));
-            that._isEnableTransition = util.str2val(module.getAttribute("enableTransition"));
-            if (that._isEnableTitlebar) {
-                module.className += " enableTitlebar";
-                that.xtitlebar.enable();
-            }
-            if (that._isEnableScroll) {
-                module.className += " enableScroll";
-                that.xscroll.enable();
-            }
-            if (that._isEnableTransition) {
-                module.className += " enableTransition";
-                that.xtransition.enable();
-            }
-        },
-        disable: function() {
-            var that = this, xtitlebar = that.xtitlebar, xscroll = that.xscroll, xtransition = that.xtransition, isEnableTitlebar = that._isEnableTitlebar;
-            isEnableScroll = that._isEnableScroll;
-            isEnableTransition = that._isEnableTransition;
-            if (isEnableTitlebar) {
-                module.className = module.className.replace("enableTitlebar", "");
-                that.xtitlebar.disable();
-            }
-            if (isEnableScroll) {
-                module.className = module.className.replace("enableScroll", "");
-                that.xscroll.disable();
-            }
-            if (isEnableTransition) {
-                module.className = module.className.replace("enableTransition", "");
-                that.xtransition.disable();
-            }
-            module.className = module.className.replace(/\s{2,}/, "");
-        },
-        getViewport: function() {
-            var that = this, module = that._module;
-            //if (that._isEnableTransition) {
-            return that.xtransition.getViewport();
-        }
-    });
-    return xViewport;
-});
-
-define("#mix/sln/0.2.0/controllers/cNavigation-debug", [ "../modules/page-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, AppPage = require("../modules/page-debug"), pages = {}, status = AppPage.STATUS, NavigationController = Class.create({
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Page = require("./page-debug"), STATUS = Page.STATUS, Navigation = Class.create({
         initialize: function(state) {
             var that = this, name = state.name.split(".");
             that.appName = name[0];
@@ -869,38 +641,21 @@ define("#mix/sln/0.2.0/controllers/cNavigation-debug", [ "../modules/page-debug"
         push: function(fragment, options) {
             navigate.forward(fragment, options);
         },
-        pull: function() {
+        pop: function() {
             navigate.backward();
         },
-        fill: function(datas, callback) {
-            var page = pages[this.appName], xviewport = app.queryComponent('*[is="x-viewport"]');
-            function _fill() {
-                page.renderTemplate(datas, function(content) {
-                    app.fillViewport(content);
-                    if (xviewport.xscroll) {
-                        xviewport.xscroll.refresh();
-                    }
-                    callback && callback();
-                });
-            }
-            if (!page.compiledTemplate) {
-                page.once("compiled", _fill);
-            } else {
-                _fill();
-            }
-        },
         ready: function() {
-            var page = pages[this.appName];
-            if (page.status < status.READY) {
-                page.status = status.READY;
+            var page = Page.get(this.appName);
+            if (page.status < STATUS.READY) {
+                page.status = STATUS.READY;
                 page.trigger("ready", this);
             }
         },
         compile: function() {
-            var page = pages[this.appName];
+            var page = Page.get(this.appName);
             function _compiled() {
-                if (page.status < status.COMPILED) {
-                    page.status = status.COMPILED;
+                if (page.status < STATUS.COMPILED) {
+                    page.status = STATUS.COMPILED;
                     page.trigger("compiled");
                 }
             }
@@ -915,134 +670,133 @@ define("#mix/sln/0.2.0/controllers/cNavigation-debug", [ "../modules/page-debug"
             }
         },
         unload: function() {
-            var that = this, page = pages[that.appName];
-            if (page.status > status.UNLOADED) {
-                page.status = status.UNLOADED;
+            var that = this, page = Page.get(this.appName);
+            if (page.status > STATUS.UNLOADED) {
+                page.status = STATUS.UNLOADED;
                 page.trigger("unloaded");
             }
         }
     });
-    function bindRoutes(page) {
-        var name = page.name, route = page.route;
-        if (Object.isTypeof(route, "string")) {
-            route = {
-                name: "anonymous",
-                text: route
-            };
-        }
-        navigate.addRoute(name + "." + route.name, route.text, route);
-    }
-    NavigationController.addPage = function(page) {
-        var name = page.name, route = page.route;
-        if (Object.isTypeof(route, "string")) {
-            route = {
-                name: "anonymous",
-                text: route
-            };
-        }
-        navigate.addRoute(name + "." + route.name, route.text, route);
-        pages[name] = page;
-    };
-    NavigationController.getPage = function(name) {
-        return pages[name];
-    };
-    NavigationController.listen = function(handler) {
-        navigate.on("forward backward", handler);
-    };
-    return NavigationController;
+    return Navigation;
 });
 
-define("#mix/sln/0.2.0/app-debug", [ "./modules/page-debug", "./controllers/cNavigation-debug", "./components/xBase-debug", "./components/xBack-debug", "./components/xScroll-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./components/xTransition-debug", "./components/xTitlebar-debug", "./components/xViewport-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/util-debug", "mix/sln/0.2.0/app-debug" ], function(require, exports, module) {
+define("#mix/sln/0.2.0/app-debug", [ "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.2.0/app-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, AppPage = require("./modules/page-debug"), Navigation = require("./controllers/cNavigation-debug"), xBase = require("./components/xBase-debug"), xBack = require("./components/xBack-debug"), xScroll = require("./components/xScroll-debug"), xTransition = require("./components/xTransition-debug"), xTitlebar = require("./components/xTitlebar-debug"), xViewport = require("./components/xViewport-debug"), app = {
-        theme: "ios",
-        routePrefix: 0,
-        // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
-        routePrefixSep: "/"
-    };
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Page = require("./modules/page-debug"), Component = require("./modules/component-debug"), Navigation = require("./modules/navigation-debug");
+    app = {};
+    function initComponent() {
+        var viewport = app.config.viewport, titlebar = viewport.querySelector("header.titlebar"), backBtn = titlebar.querySelector("button.back"), funcBtn = titlebar.querySelector("button.func");
+        content = viewport.querySelector("section.content"), toolbar = viewport.querySelector("footer.toolbar");
+        Component.initViewport(viewport);
+        if (app.config.enableTitlebar) {
+            Component.initTitlebar(titlebar);
+            Component.initBackBtn(backBtn);
+            Component.initFuncBtn(funcBtn);
+        }
+        Component.initContent(content);
+        if (app.config.enableScroll) {
+            Component.initScroll(content);
+        }
+        if (app.config.enableTransition) {
+            Component.initTransition(content);
+        }
+        if (app.config.enableToolbar) {
+            Component.initToolbar();
+        }
+    }
     function initNavigation() {
-        var curNav, xviewport = app.queryComponent('*[is="x-viewport"]'), xtitlebar = xviewport.xtitlebar, xtransition = xviewport.xtransition;
-        xback = xtitlebar.xback;
-        function parseButtons(meta) {
-            var buttons = [];
-            Object.each(meta, function(item) {
-                var type = item.type, button;
+        var curNav, titlebar = Component.get("titlebar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), funcBtnHandler = null, content = Component.get("content"), transition = Component.get("transition");
+        Component.on("backBtnClick", function(el) {
+            navigate.backward();
+        });
+        Component.on("funcBtnClick", function(el) {
+            funcBtnHandler && funcBtnHandler(el);
+        });
+        function setButtons(navigation) {
+            var appName = navigation.appName, page = Page.get(appName), buttons = page.buttons;
+            backBtn.fn.hide();
+            funcBtn.fn.hide();
+            buttons && Object.each(buttons, function(item) {
+                var type = item.type;
                 switch (type) {
-                  case "backStack":
-                    xback.setText(item.text);
-                    xback.autoHide(item.autoHide);
+                  case "back":
+                    backBtn.fn.setText(item.text);
+                    if (navigate.getStateIndex() >= 1) {
+                        backBtn.fn.show();
+                    }
                     break;
 
-                  case "rightExtra":
-                    button = document.createElement("button");
-                    button.className = "x-button";
-                    button.innerText = item.text;
-                    button.addEventListener("click", item.handler, false);
-                    buttons.push(button);
+                  case "func":
+                    funcBtn.fn.setText(item.text);
+                    funcBtnHandler = item.handler;
+                    funcBtn.fn.show();
                     break;
 
                   default:
                     break;
                 }
             });
-            return buttons;
         }
         function setTitlebar(navigation) {
-            var appName = navigation.appName, transition = navigation.state.transition, page = app.getPage(appName), title = page.getTitle(), buttons = parseButtons(page.buttons);
-            xtitlebar.change({
-                center: title,
-                right: buttons
-            }, transition);
-        }
-        function doTransition(navigation) {
-            var transition = navigation.state.transition;
-            xtransition[transition]();
+            var appName = navigation.appName, transition = navigation.state.transition, page = Page.get(appName), title = page.getTitle();
+            titlebar.fn.change(title, transition);
         }
         function switchNavigation(newNav) {
-            if (curNav) {
-                curNav.unload();
+            if (app.config.enableTransition) {
+                transition.fn[newNav.state.transition]();
+            } else {
+                content.fn.switchActive();
+                content.fn.setClass();
             }
-            curNav = newNav;
+            curNav && curNav.unload();
             newNav.ready();
             newNav.compile();
+            curNav = newNav;
         }
-        function handler(state) {
+        navigate.on("forward backward", function(state) {
             var navigation = new Navigation(state);
-            doTransition(navigation);
             switchNavigation(navigation);
-            setTitlebar(navigation);
-        }
-        Navigation.listen(handler);
+            if (app.config.enableTitlebar) {
+                setButtons(navigation);
+                setTitlebar(navigation);
+            }
+        });
+        Page.each(function(page) {
+            var name = page.name, route = page.route;
+            if (!route) {
+                route = {
+                    name: "default",
+                    "default": true
+                };
+            } else if (Object.isTypeof(route, "string")) {
+                route = {
+                    name: "anonymous",
+                    text: route
+                };
+            }
+            navigate.addRoute(name + "." + route.name, route.text, route);
+            page.on("rendered", function(html) {
+                var scroll = Component.get("scroll"), active = Component.getActiveContent();
+                active && (active.innerHTML = html);
+                scroll && scroll.fn.refresh();
+            });
+        });
     }
     Object.extend(app, {
-        init: function(properties) {
-            var Page = AppPage.extend(properties), page = new Page({
-                routePrefix: app.routePrefix,
-                routePrefixSep: app.routePrefixSep
-            });
-            Navigation.addPage(page);
-            return page;
+        config: {
+            viewport: null,
+            theme: "iOS",
+            routePrefix: 0,
+            // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
+            routePrefixSep: "/",
+            enableTitlebar: false,
+            enableScroll: false,
+            enableTransition: false,
+            enableToolbar: false
         },
-        getPage: function(name) {
-            return Navigation.getPage(name);
-        },
-        getViewport: function() {
-            return this.queryComponent('*[is="x-viewport"]').getViewport();
-        },
-        fillViewport: function(content) {
-            var that = this, viewport = that.getViewport();
-            viewport.innerHTML = content;
-        },
-        getComponent: function(cid) {
-            if (arguments[0] instanceof HTMLElement) {
-                cid = arguments[0].getAttribute("cid");
-            }
-            return xBase.get(cid);
-        },
-        queryComponent: function(selector) {
-            var el = doc.querySelector(selector);
-            return this.getComponent(el);
-        },
+        page: Page,
+        component: Component,
+        plugin: {},
         loadFile: function(url, callback) {
             var xhr = new win.XMLHttpRequest();
             xhr.onreadystatechange = function() {
@@ -1054,8 +808,9 @@ define("#mix/sln/0.2.0/app-debug", [ "./modules/page-debug", "./controllers/cNav
             xhr.send();
         },
         start: function() {
-            xBase.parse();
+            initComponent();
             initNavigation();
+            app.plugin.init && app.plugin.init();
             router.start();
         }
     });

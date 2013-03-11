@@ -56,7 +56,7 @@
 						<div class="list-item">
 							<div class="p">
 								<a href="#" dataid="{{itemNumId}}">
-									<img class="p-pic" src="{{img}}">
+									<img class="p-pic" src="http://a.tbcdn.cn/mw/app/searchlist/h5/images/error.png" data-src="{{img}}">
 								</a>
 							</div>
 							<div class="d">

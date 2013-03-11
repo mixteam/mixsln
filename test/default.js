@@ -1,18 +1,13 @@
 (function(app, undef) {
 
-	var detailApp = app.init({
+	var detailApp = app.page.define({
 		name : 'default',
 		title : '请搜索商品',
-		route : {
-			name : 'default',
-			'default' : true
-		},
 		template : './default.tpl',
 		buttons : [
 			{
-				type : 'backStack',
-				text : '返回',
-				autoHide : true
+				type : 'back',
+				text : '返回'
 			}
 		],
 
@@ -20,13 +15,13 @@
 
 		ready : function(navigation) {
 			var that = this,
-				viewport = $(app.getViewport())
+				content = $(app.getContentElement())
 				;
 
 			// implement super.ready
 			navigation.fill({}, function() {
-				viewport.find('#J_searchForm').on('submit', function(e) {
-					var word = viewport.find('#J_searchForm .bton-keyword').val()
+				content.find('#J_searchForm').on('submit', function(e) {
+					var word = content.find('#J_searchForm .bton-keyword').val()
 						;
 
 					e.preventDefault();

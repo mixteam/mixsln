@@ -7,140 +7,169 @@ var win = window,
 
 	Class = require('class'),
 	router = require('router').singleton,
-	AppPage = require('./modules/page'),
-	Navigation = require('./controllers/cNavigation'),
-	xBase = require('./components/xBase'),
-	xBack = require('./components/xBack'),
-	xScroll = require('./components/xScroll'),
-	xTransition = require('./components/xTransition'),
-	xTitlebar = require('./components/xTitlebar'),
-	xViewport = require('./components/xViewport'),
+	navigate = require('navigate').singleton,
 
-	app = {
-		theme : 'ios',
-		routePrefix : 0, // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
-		routePrefixSep : '\/'
-	}
+	Page = require('./modules/page'),
+	Component = require('./modules/component'),
+	Navigation = require('./modules/navigation')
+
+	app = {}
 	;
+
+	function initComponent() {
+		var viewport = app.config.viewport,
+			titlebar = viewport.querySelector('header.titlebar'),
+			backBtn = titlebar.querySelector('button.back'),
+			funcBtn = titlebar.querySelector('button.func')
+			content = viewport.querySelector('section.content'),
+			toolbar = viewport.querySelector('footer.toolbar')
+			;
+
+		Component.initViewport(viewport);
+
+		if (app.config.enableTitlebar) {
+			Component.initTitlebar(titlebar);
+			Component.initBackBtn(backBtn);
+			Component.initFuncBtn(funcBtn);
+		}
+
+		Component.initContent(content);
+
+		if (app.config.enableScroll) {
+			Component.initScroll(content);
+		}
+
+		if (app.config.enableTransition) {
+			Component.initTransition(content);
+		}
+
+		if (app.config.enableToolbar) {
+			Component.initToolbar();
+		}
+
+	}
 
 	function initNavigation() {
 		var curNav,
-			xviewport = app.queryComponent('*[is="x-viewport"]'),
-			xtitlebar = xviewport.xtitlebar,
-			xtransition = xviewport.xtransition
-			xback = xtitlebar.xback
+			titlebar = Component.get('titlebar'),
+			backBtn = Component.get('backBtn'),
+			funcBtn = Component.get('funcBtn'),
+			funcBtnHandler = null,
+			content = Component.get('content'),
+			transition = Component.get('transition')
 			;
 
-		function parseButtons(meta) {
-			var buttons = []
+		Component.on('backBtnClick', function (el) {
+			navigate.backward();
+		});
+		Component.on('funcBtnClick', function(el) {
+			funcBtnHandler && funcBtnHandler(el);
+		});
+
+		function setButtons(navigation) {
+			var appName = navigation.appName,
+				page = Page.get(appName),
+				buttons = page.buttons
 				;
 
-			Object.each(meta, function(item) {
-				var type = item.type, button;
+			backBtn.fn.hide();
+			funcBtn.fn.hide();
+
+			buttons && Object.each(buttons, function(item) {
+				var type = item.type;
 
 				switch (type) {
-					case 'backStack':
-						xback.setText(item.text);
-						xback.autoHide(item.autoHide);
+					case 'back':
+						backBtn.fn.setText(item.text);
+						if (navigate.getStateIndex() >= 1) {
+							backBtn.fn.show();
+						}
 						break;
-					case 'rightExtra':
-						button = document.createElement('button');
-						button.className = 'x-button';
-						button.innerText = item.text;
-						button.addEventListener('click', item.handler, false);
-						buttons.push(button);
+					case 'func':
+						funcBtn.fn.setText(item.text);
+						funcBtnHandler = item.handler;
+						funcBtn.fn.show();
 						break;
 					default:
 						break;
 				}
 			});
-
-			return buttons;
 		}
 
 		function setTitlebar(navigation) {
 			var appName = navigation.appName,
 				transition = navigation.state.transition,
-				page = app.getPage(appName),
-				title = page.getTitle(),
-				buttons = parseButtons(page.buttons)
+				page = Page.get(appName),
+				title = page.getTitle()
 				;
 
-			xtitlebar.change({
-				center: title,
-				right: buttons
-			}, transition);
-		}
-
-		function doTransition(navigation) {
-			var transition = navigation.state.transition;
-			xtransition[transition]();
+			titlebar.fn.change(title, transition);
 		}
 
 		function switchNavigation(newNav) {
-			if (curNav) {
-				curNav.unload();
+			if (app.config.enableTransition) {
+				transition.fn[newNav.state.transition]();		
+			} else {
+				content.fn.switchActive();
+				content.fn.setClass();
 			}
-			curNav = newNav;
-			
+
+			curNav && curNav.unload();
 			newNav.ready();
 			newNav.compile();
+			curNav = newNav;
 		}
 
-		function handler(state) {
+		navigate.on('forward backward', function (state) {
 			var navigation = new Navigation(state)
 				;
 
-			doTransition(navigation);
 			switchNavigation(navigation);
-			setTitlebar(navigation);
-		}
 			
-		Navigation.listen(handler);
+			if (app.config.enableTitlebar) {
+				setButtons(navigation);
+				setTitlebar(navigation);
+			}
+		});
+
+		Page.each(function(page) {
+			var name = page.name,
+				route = page.route
+				;
+
+			if (!route) {
+				route = {name : 'default', 'default' : true}
+			} else if (Object.isTypeof(route, 'string')) {
+				route = {name : 'anonymous', text : route}
+			}
+
+			navigate.addRoute(name + '.' + route.name, route.text, route);
+
+			page.on('rendered', function(html) {
+				var scroll = Component.get('scroll'),
+					active = Component.getActiveContent()
+					;
+
+				active && (active.innerHTML = html);
+				scroll && scroll.fn.refresh();
+			});
+		});
 	}
 
 	Object.extend(app, {
-		init : function(properties) {
-			var Page = AppPage.extend(properties),
-				page = new Page({
-					routePrefix : app.routePrefix,
-					routePrefixSep : app.routePrefixSep
-				});
-
-			Navigation.addPage(page);
-			return page;
+		config : {
+			viewport : null,
+			theme : 'iOS',
+			routePrefix : 0, // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
+			routePrefixSep : '\/',
+			enableTitlebar : false,
+			enableScroll : false,
+			enableTransition : false,
+			enableToolbar : false
 		},
-
-		getPage : function(name) {
-			return Navigation.getPage(name);
-		},
-
-		getViewport : function() {
-			return this.queryComponent('*[is="x-viewport"]').getViewport();
-		},
-
-		fillViewport : function(content) {
-			var that = this,
-				viewport = that.getViewport()
-				;
-
-			viewport.innerHTML = content;
-		},
-
-		getComponent : function(cid) {
-			if (arguments[0] instanceof HTMLElement) {
-				cid = arguments[0].getAttribute('cid');
-			}
-
-			return xBase.get(cid);
-		},
-
-		queryComponent : function(selector) {
-			var el = doc.querySelector(selector)
-				;
-			
-			return this.getComponent(el);
-		},
+		page : Page,
+		component : Component,
+		plugin : {},
 
 		loadFile : function(url, callback) {
 			var xhr = new win.XMLHttpRequest()
@@ -157,8 +186,9 @@ var win = window,
 		},
 
 		start : function() {
-			xBase.parse();
+			initComponent();
 			initNavigation();
+			app.plugin.init && app.plugin.init();
 			router.start();
 		}
 	});

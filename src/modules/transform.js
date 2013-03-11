@@ -76,7 +76,6 @@ function waitTransition(el, time, callback) {
         isEnd = true;
         el.style.webkitTransition = 'none';
         el.removeEventListener('webkitTransitionEnd', transitionEnd, false);
-
         callback && setTimeout(callback, 50);   // 延迟执行callback。解决立即取消动画造成的bug
     }
 
@@ -85,7 +84,7 @@ function waitTransition(el, time, callback) {
 
 }
 
-function doTransition(el, time, timeFunction, delay, x, y, callback) {
+function startTransition(el, time, timeFunction, delay, x, y, callback) {
 	waitTransition(el, time, callback);
     el.style.webkitTransition = [TRANSITION_NAME, time, timeFunction, delay].join(' ');
     el.style.webkitTransform = getTranslate(x, y);
@@ -96,5 +95,5 @@ exports.getY = getTransformY;
 exports.getX = getTransformX;
 exports.getTranslate = getTranslate;
 exports.getBezier = quadratic2cubicBezier;
-exports.start = doTransition;
+exports.start = startTransition;
 })

@@ -21,20 +21,17 @@
         "app" : "mix/sln/0.2.0/app"
     },
     "output" : {
+        "plugins/*" : ".",
+
         "app.js" : {
             "main" : "./app",
             "includes" : [
                 "./modules/gesture",
                 "./modules/transform",
                 "./modules/scroll",
+                "./modules/component.js",
                 "./modules/page",
-                "./components/xBase",
-                "./components/xBack",
-                "./components/xScroll",
-                "./components/xTransition",
-                "./components/xTitlebar",
-                "./components/xViewport",
-                "./controllers/cNavigation",
+                "./modules/navigation.js",
                 "./app"
             ]
         }

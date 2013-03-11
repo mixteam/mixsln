@@ -5,7 +5,6 @@ var win = window,
     doc = win.document,
     Class = require('class'),
     Message = require('message'),
-    navigate = require('navigate').singleton,
 
     STATUS = {
 		'UNKOWN' : 0,
@@ -13,17 +12,17 @@ var win = window,
 		'READY' : 1,
 		'COMPILED' : 2,
 	},
-	AppPage = Class.create({
+	pages = {},
+	Page = Class.create({
 		Implements : Message,
 
-		initialize : function(options) {
+		initialize : function() {
 			var that = this,
 				name = that.name
 				;
 
 			Message.prototype.initialize.call(that, 'app.' + name);
 
-			that._options = options;
 			that.status = STATUS.UNKOWN;
 
 			that.ready = that.ready.bind(that);
@@ -72,12 +71,50 @@ var win = window,
 			callback(content);
 		},
 
+		fill : function(datas, callback) {
+			var that = this
+				;
+
+			function _fill() {
+				that.renderTemplate(datas, function(content) {
+					that.trigger('rendered', content);
+					callback && callback();
+				});
+			}
+
+			if (!that.compiledTemplate) {
+				that.once('compiled', _fill);
+			} else {
+				_fill();
+			}
+		},
+
 		ready : function(navigation) {/*implement*/},
 		unload : function() {/*implement*/}
 	});
 
-AppPage.STATUS = STATUS;
+Page.STATUS = STATUS;
 
-return AppPage;
+Page.fn = {};
+
+Page.define = function(properties) {
+	var cPage = Page.extend(properties),
+		page
+		;
+
+	cPage.implement(Page.fn);
+	page = new cPage();
+	return (pages[page.name] = page);
+}
+
+Page.get = function(name) {
+	return pages[name];
+}
+
+Page.each = function(callback) {
+	Object.each(pages, callback);
+}
+
+return Page;
 
 });

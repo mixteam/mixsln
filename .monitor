@@ -5,10 +5,8 @@
 ./src/modules/transform.js
 ./src/modules/scroll.js
 ./src/modules/page.js
-./src/components/xBase.js
-./src/components/xBack.js
-./src/components/xScroll.js
-./src/components/xTitlebar.js
-./src/components/xTransition.js
-./src/components/xViewport.js
-./src/controllers/cNavigation.js
+./src/modules/component.js
+./src/modules/navigation.js
+./src/plugins/init.js
+./src/plugins/lazyload.js
+./src/plugins/scrollpos.js

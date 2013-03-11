@@ -8,7 +8,7 @@ var win = window,
 
     Class = require('class'),
     Gesture = require('./gesture'),
-    transform = require('./transform'),
+    Transform = require('./transform'),
     prevented = false
     ;
 
@@ -37,8 +37,10 @@ var Scroll = Class.create({
         that._scroller = element.children[0];
         that._gesture = new Gesture(that._scroller);
         that._originalY = null;
-        that._scrollTop = null;
+        that._currentY = null;
         that._scrollHeight = null;
+        that._scrollEndHandler = null;
+        that._scrollEndCancel = false;
         that._refreshed = false;
 
         that._preventBodyTouch = that._preventBodyTouch.bind(that);
@@ -47,6 +49,7 @@ var Scroll = Class.create({
         that._onPan = that._onPan.bind(that);
         that._onPanEnd = that._onPanEnd.bind(that);
         that._onFlick = that._onFlick.bind(that);
+        that._onScrollEnd = that._onScrollEnd.bind(that);
     },
 
     enable : function() {
@@ -91,6 +94,32 @@ var Scroll = Class.create({
         this._refreshed = true;
     },
 
+    getHeight : function() {
+        return this._scroller.offsetHeight;
+    },
+
+    getTop : function() {
+        return -Transform.getY(this._scroller);
+    },
+
+    to : function(top) {
+        var that = this,
+            scroller = that._scroller,
+            maxScrollTop = getMaxScrollTop(scroller)
+            ;
+
+        top = -top;
+
+        if (top < maxScrollTop) {
+            top = maxScrollTop;
+        } else if (top > 0) {
+            top = 0;
+        }
+
+        scroller.style.webkitTransform = Transform.getTranslate(0, top);
+        that._onScrollEnd();
+    },
+
     _preventBodyTouch : function(e) {
         e.preventDefault();
         return false;
@@ -106,8 +135,9 @@ var Scroll = Class.create({
 
         if (that._refreshed) {
             that._refreshed = false;
+            that._scrollHeight = scroller.offsetHeight;
             scroller.style.height = 'auto';
-            scroller.style.height = that._scrollHeight = scroller.offsetHeight + 'px';
+            scroller.style.height = that._scrollHeight + 'px';
         }
     },
 
@@ -116,7 +146,7 @@ var Scroll = Class.create({
             scroller = that._scroller
             ;
 
-        that._originalY = transform.getY(scroller);
+        that._originalY = Transform.getY(scroller);
     },
 
     _onPan : function(e) {
@@ -124,51 +154,55 @@ var Scroll = Class.create({
             scroller = that._scroller,
             maxScrollTop = getMaxScrollTop(scroller),
             originalY = that._originalY,
-            scrollTop = that._scrollTop = originalY + e.displacementY
+            currentY = that._currentY = originalY + e.displacementY
             ;
 
         
-        if(scrollTop > 0) {
-            scroller.style.webkitTransform = transform.getTranslate(0, scrollTop / 2);
-        } else if(scrollTop < maxScrollTop) {
-            scroller.style.webkitTransform = transform.getTranslate(0, (maxScrollTop - scrollTop) / 2 + scrollTop);
+        if(currentY > 0) {
+            scroller.style.webkitTransform = Transform.getTranslate(0, currentY / 2);
+        } else if(currentY < maxScrollTop) {
+            scroller.style.webkitTransform = Transform.getTranslate(0, (maxScrollTop - currentY) / 2 + currentY);
         } else {
-            scroller.style.webkitTransform = transform.getTranslate(0, scrollTop);
+            scroller.style.webkitTransform = Transform.getTranslate(0, currentY);
         }
     },
 
     _onPanEnd : function(e) {
         var that = this,
             scroller = that._scroller,
-            scrollTop = that._scrollTop,
+            currentY = that._currentY,
             maxScrollTop = getMaxScrollTop(scroller),
             translateY = null
             ;
 
-        if(scrollTop > 0) {
-            scrollTop = translateY = 0;
+        if(currentY > 0) {
+            translateY = 0;
         }
 
-        if(scrollTop < maxScrollTop) {
-            scrollTop = translateY = maxScrollTop;
+        if(currentY < maxScrollTop) {
+            translateY = maxScrollTop;
         }
 
         if (translateY != null) {
-            transform.start(scroller, '0.4s', 'ease-out', '0s', 0, translateY);
+            Transform.start(scroller, '0.4s', 'ease-out', '0s', 0, translateY, that._onScrollEnd);
+        } else {
+            that._onScrollEnd();
         }
     },
 
     _onFlick : function(e) {
         var that = this,
             scroller = that._scroller,
-            scrollTop = that._scrollTop,
+            currentY = that._currentY,
             maxScrollTop = getMaxScrollTop(scroller)
             ;
 
-        if(scrollTop < maxScrollTop || scrollTop > 0)
+        that._scrollEndCancel = true;
+
+        if(currentY < maxScrollTop || currentY > 0)
             return;
 
-        var s0 = transform.getY(scroller), v0 = e.valocityY;
+        var s0 = Transform.getY(scroller), v0 = e.valocityY;
 
         if(v0 > 1.5) v0 = 1.5;
         if(v0 < -1.5) v0 = -1.5;
@@ -187,9 +221,9 @@ var Scroll = Class.create({
             t = (sign * Math.sqrt(2*a*(s-s0)+v0*v0)-v0)/a;
             v = v0 - a * t;
             
-            transform.start(
+            Transform.start(
                 scroller, 
-                t.toFixed(0) + 'ms', 'cubic-bezier(' + transform.getBezier(-v0/a, -v0/a+t) + ')', '0s',
+                t.toFixed(0) + 'ms', 'cubic-bezier(' + Transform.getBezier(-v0/a, -v0/a+t) + ')', '0s',
                 0, s.toFixed(0), 
                 function() {
                     v0 = v;
@@ -198,20 +232,35 @@ var Scroll = Class.create({
                     t = -v0 / a;
                     s = edge;
 
-                    transform.start(
+                    Transform.start(
                         scroller,
-                        (0-t).toFixed(0) + 'ms', 'cubic-bezier(' + transform.getBezier(-t, 0) + ')', '0s',
-                        0, s.toFixed(0)
+                        (0-t).toFixed(0) + 'ms', 'cubic-bezier(' + Transform.getBezier(-t, 0) + ')', '0s',
+                        0, s.toFixed(0),
+                        that._onScrollEnd
                     );
                 }
             );
         } else {
-            transform.start(
+            Transform.start(
                 scroller,
-                t.toFixed(0) + 'ms', 'cubic-bezier(' + transform.getBezier(-t, 0) + ')', '0s',
-                0, s.toFixed(0)
+                t.toFixed(0) + 'ms', 'cubic-bezier(' + Transform.getBezier(-t, 0) + ')', '0s',
+                0, s.toFixed(0),
+                that._onScrollEnd
             );
         }
+    },
+
+    _onScrollEnd : function() {
+        var that = this
+            ;
+
+        that._scrollEndCancel = false;
+        setTimeout(function() {
+            if (!that._scrollEndCancel) {
+                that._scrollEndHandler && that._scrollEndHandler();
+                
+            }
+        }, 10);
     }
 });
 

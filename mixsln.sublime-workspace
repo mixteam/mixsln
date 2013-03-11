@@ -4,16 +4,72 @@
 		"selected_items":
 		[
 			[
-				"x-t",
-				"x-titlebar"
+				"bac",
+				"backBtn"
 			],
 			[
-				"x",
-				"x-transition"
+				"func",
+				"funcBtn"
+			],
+			[
+				"sw",
+				"switch"
+			],
+			[
+				"in",
+				"inactive"
+			],
+			[
+				"ac",
+				"active"
+			],
+			[
+				"exn",
+				"extendFns"
+			],
+			[
+				"cl",
+				"clickHandler"
+			],
+			[
+				"con",
+				"content"
 			],
 			[
 				"en",
 				"enableTransition"
+			],
+			[
+				"ini",
+				"init"
+			],
+			[
+				"que",
+				"querySelector"
+			],
+			[
+				"x",
+				"xscroll"
+			],
+			[
+				"get",
+				"getContent"
+			],
+			[
+				"mo",
+				"modules"
+			],
+			[
+				"ena",
+				"enableTitlebar"
+			],
+			[
+				"scroll",
+				"scrollHeight"
+			],
+			[
+				"x-t",
+				"x-titlebar"
 			],
 			[
 				"isE",
@@ -44,10 +100,6 @@
 				"transition"
 			],
 			[
-				"get",
-				"getViewport"
-			],
-			[
 				"sc",
 				"scrollport"
 			],
@@ -74,10 +126,6 @@
 			[
 				"_s",
 				"_searchPage"
-			],
-			[
-				"ac",
-				"activePort"
 			],
 			[
 				"comp",
@@ -136,10 +184,6 @@
 				"properties"
 			],
 			[
-				"in",
-				"innerHTML"
-			],
-			[
 				"xt",
 				"xtitlebar"
 			],
@@ -148,16 +192,8 @@
 				"xviewport"
 			],
 			[
-				"que",
-				"queryComponent"
-			],
-			[
 				"xB",
 				"xBase"
-			],
-			[
-				"mo",
-				"module"
 			],
 			[
 				"fo",
@@ -200,16 +236,8 @@
 				"return"
 			],
 			[
-				"cl",
-				"_clickHandler"
-			],
-			[
 				"e",
 				"extentions"
-			],
-			[
-				"ini",
-				"initXComponents"
 			],
 			[
 				"bo",
@@ -432,10 +460,6 @@
 				"text-align"
 			],
 			[
-				"bac",
-				"backContros"
-			],
-			[
 				"_o",
 				"_originalY"
 			],
@@ -490,30 +514,6 @@
 			[
 				"_h",
 				"_html"
-			],
-			[
-				"font-",
-				"font-style"
-			],
-			[
-				"pad",
-				"padding"
-			],
-			[
-				"list",
-				"list-style"
-			],
-			[
-				"has",
-				"hasMarked"
-			],
-			[
-				"fig",
-				"figcaption"
-			],
-			[
-				"hash",
-				"hashParam"
 			]
 		]
 	},
@@ -523,7 +523,7 @@
 			"file": "package.json",
 			"settings":
 			{
-				"buffer_size": 1292,
+				"buffer_size": 1088,
 				"line_ending": "Windows"
 			}
 		},
@@ -531,40 +531,24 @@
 			"file": "test/demo1.html",
 			"settings":
 			{
-				"buffer_size": 1595,
+				"buffer_size": 1954,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "assets/x.css",
+			"file": "test/list.js",
 			"settings":
 			{
-				"buffer_size": 7223,
+				"buffer_size": 2173,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "src/app.js",
+			"file": "test/detail.js",
 			"settings":
 			{
-				"buffer_size": 3561,
+				"buffer_size": 2520,
 				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/components/xScroll.js",
-			"settings":
-			{
-				"buffer_size": 1019,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/modules/scroll.js",
-			"settings":
-			{
-				"buffer_size": 6548,
-				"line_ending": "Unix"
 			}
 		}
 	],
@@ -612,37 +596,40 @@
 	},
 	"file_history":
 	[
+		"/D/workspace/taobao/etao/mix/mixsln/assets/x.css",
+		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/navigation.js",
+		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTransition.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xBack.js",
+		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
+		"/D/workspace/taobao/etao/mix/mixsln/test/detail.js",
+		"/D/workspace/taobao/etao/mix/mixsln/test/default.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
+		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
+		"/D/workspace/taobao/etao/mix/mixsln/src/controllers/cNavigation.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xScroll.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTitlebar.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xViewport.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/components/xBase.js",
+		"/D/workspace/taobao/etao/mix/mixsln/lib/mix-debug.js",
+		"/D/workspace/taobao/etao/mix/mixsln/lib/iscroll-lite.js",
+		"/D/workspace/taobao/etao/mix/mixsln/scroll.js",
 		"/D/workspace/taobao/etao/H5/w_Wireless/base/styles/component/form/js/autocomplete.js",
 		"/D/workspace/taobao/etao/H5/w_Wireless/base/styles/component/float/js/notification.js",
 		"/D/workspace/doc/charge_phone_tms.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/components/xViewport.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTransition.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/controllers/cNavigation.js",
-		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
-		"/D/workspace/taobao/etao/mix/mixsln/scroll.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/components/xScroll.js",
-		"/D/workspace/taobao/etao/mix/mixsln/assets/x.css",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/mix-sln-debug.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/components/xBack.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTitlebar.js",
-		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
-		"/D/workspace/taobao/etao/mix/mixsln/lib/iscroll-lite.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/list.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/test/default.tpl",
-		"/D/workspace/taobao/etao/mix/mixsln/test/default.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.html",
-		"/D/workspace/taobao/etao/mix/mixsln/test/detail.js",
 		"/D/workspace/taobao/etao/mix/mixsln/assets/base.css",
 		"/D/workspace/taobao/etao/mix/mixsln/test/searchData.js",
 		"/D/workspace/taobao/etao/mix/mixsln/lib/zepto.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/detail.tpl",
-		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
-		"/D/workspace/taobao/etao/mix/mixsln/src/components/xBase.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.css",
 		"/D/workspace/taobao/etao/mix/mixsln/src/controllers/navigateController.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/ios.tpl",
@@ -657,7 +644,6 @@
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xComponents",
 		"/D/workspace/taobao/etao/mix/mixsln/assets/default (1).css",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transition",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/sln.all-debug.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/app.all-debug.js",
@@ -737,9 +723,7 @@
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/mvc/model/model.js",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/base/util/README.md",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/mvc/orm/orm.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/router/package.json",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/history/src/history.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/router/src/router.js"
+		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/router/package.json"
 	],
 	"find":
 	{
@@ -757,6 +741,14 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"navigate",
+			"activePort",
+			"lastActivePort",
+			".x-",
+			"xtransition",
+			"xback",
+			"xtitlebar",
+			"currentY",
 			"el",
 			"module",
 			"doc",
@@ -876,15 +868,7 @@
 			"router",
 			"navigator",
 			"router",
-			"dialog",
-			"$",
-			"normal",
-			"router",
-			"IndexView",
-			"HelloView",
-			"z-index",
-			"'",
-			"',"
+			"dialog"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -892,6 +876,13 @@
 		"regex": false,
 		"replace_history":
 		[
+			"active",
+			"lastActive",
+			".",
+			"transition",
+			"back",
+			"titlebar",
+			"scrollTop",
 			"scroller",
 			"curAppName",
 			"switchAppPage",
@@ -980,15 +971,15 @@
 					"file": "package.json",
 					"settings":
 					{
-						"buffer_size": 1292,
+						"buffer_size": 1088,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								663,
-								663
+								1032,
+								1032
 							]
 						],
 						"settings":
@@ -1008,130 +999,75 @@
 					"file": "test/demo1.html",
 					"settings":
 					{
-						"buffer_size": 1595,
+						"buffer_size": 1954,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								403,
-								403
+								1213,
+								1213
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/HTML5/Syntaxes/HTML 5.tmLanguage"
+							"syntax": "Packages/HTML5/Syntaxes/HTML 5.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 416.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 2,
-					"file": "assets/x.css",
+					"file": "test/list.js",
 					"settings":
 					{
-						"buffer_size": 7223,
+						"buffer_size": 2173,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								560,
-								560
+								1739,
+								1739
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/CSS/CSS.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 1056.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 3,
-					"file": "src/app.js",
+					"file": "test/detail.js",
 					"settings":
 					{
-						"buffer_size": 3561,
+						"buffer_size": 2520,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3181,
-								3181
+								0,
+								0
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
 							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 2091.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "src/components/xScroll.js",
-					"settings":
-					{
-						"buffer_size": 1019,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								584,
-								584
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 102.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "src/modules/scroll.js",
-					"settings":
-					{
-						"buffer_size": 6548,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1509,
-								1509
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
