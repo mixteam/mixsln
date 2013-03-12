@@ -121,8 +121,9 @@ var win = window,
 				},
 
 				setClass : function() {
-					active.className = 'active';
 					inactive.className = 'inactive';
+					active.className = 'active';
+					
 				}
 			});
 		},
@@ -185,14 +186,15 @@ var win = window,
 
 				content.fn.switchActive();
 				active = content.fn.getActive(),
-
 				active.innerHTML = '';
+
 				originY = Transform.getY(wrap);
 				originX = (type === 'forward'?'-':'') + '33.33%';
 
 				Transform.start(wrap, '0.4s', 'ease', 0, originX, originY, function() {
-					wrap.style.webkitTransform = Transform.getTranslate(0, 0);
 					content.fn.setClass();
+					originY = Transform.getY(wrap);
+					wrap.style.webkitTransform = Transform.getTranslate(0, originY);
 					that.trigger(type  + 'TransitionEnd');
 				});
 			}

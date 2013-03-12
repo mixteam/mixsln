@@ -19,33 +19,13 @@ var win = window,
 			that.state = state;
 		},
 
-		getParameter : function(name) {
-			return this.state.params[name];
-		},
-
-		getArgument : function(name) {
-			return this.state.args[name];
-		},
-
-		getData : function(name) {
-			return this.state.datas[name];
-		},
-
-		push : function(fragment, options) {
-			navigate.forward(fragment, options);
-		},
-
-		pop : function() {
-			navigate.backward();
-		},
-
 		ready : function() {
 			var page = Page.get(this.appName)
 				;
 
 			if (page.status < STATUS.READY) {
 				page.status = STATUS.READY;
-				page.trigger('ready', this);
+				page.trigger('ready');
 			}
 		},
 
@@ -82,6 +62,30 @@ var win = window,
 			}
 		}
 	});
+
+Object.extend(Navigation, {
+	_cur : null,
+
+	getParameter : function(name) {
+		return this._cur.state.params[name];
+	},
+
+	getArgument : function(name) {
+		return this._cur.state.args[name];
+	},
+
+	getData : function(name) {
+		return this._cur.state.datas[name];
+	},
+
+	push : function(fragment, options) {
+		navigate.forward(fragment, options);
+	},
+
+	pop : function() {
+		navigate.backward();
+	}
+})
 
 return Navigation;
 });

@@ -80,7 +80,7 @@ function waitTransition(el, time, callback) {
     }
 
     el.addEventListener('webkitTransitionEnd', transitionEnd, false);
-    setTimeout(transitionEnd, parseFloat(time) * 1000);
+    //setTimeout(transitionEnd, parseFloat(time) * 1000);
 
 }
 

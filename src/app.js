@@ -50,8 +50,7 @@ var win = window,
 	}
 
 	function initNavigation() {
-		var curNav,
-			titlebar = Component.get('titlebar'),
+		var titlebar = Component.get('titlebar'),
 			backBtn = Component.get('backBtn'),
 			funcBtn = Component.get('funcBtn'),
 			funcBtnHandler = null,
@@ -106,18 +105,21 @@ var win = window,
 			titlebar.fn.change(title, transition);
 		}
 
-		function switchNavigation(newNav) {
+		function switchNavigation(navigation) {
 			if (app.config.enableTransition) {
-				transition.fn[newNav.state.transition]();		
+				transition.fn[navigation.state.transition]();
 			} else {
 				content.fn.switchActive();
 				content.fn.setClass();
 			}
 
-			curNav && curNav.unload();
-			newNav.ready();
-			newNav.compile();
-			curNav = newNav;
+			if (app.navigation._cur) {
+				app.navigation._cur.unload();
+			}
+			app.navigation._cur = navigation;
+			navigation.ready();
+			navigation.compile();
+			
 		}
 
 		navigate.on('forward backward', function (state) {
@@ -169,8 +171,9 @@ var win = window,
 		},
 		page : Page,
 		component : Component,
+		navigation : Navigation,
 		plugin : {},
-
+		
 		loadFile : function(url, callback) {
 			var xhr = new win.XMLHttpRequest()
 				;

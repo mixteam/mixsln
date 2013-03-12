@@ -4,12 +4,140 @@
 		"selected_items":
 		[
 			[
-				"bac",
-				"backBtn"
+				"sc",
+				"scroll"
+			],
+			[
+				"for",
+				"forwardTransitionEnd"
+			],
+			[
+				"tr",
+				"_transitonEnd"
+			],
+			[
+				"max",
+				"maxScrollTop"
+			],
+			[
+				"_sc",
+				"_scroller"
+			],
+			[
+				"_s",
+				"_scroller"
+			],
+			[
+				"getS",
+				"getScrollHeight"
+			],
+			[
+				"pl",
+				"plugins"
+			],
+			[
+				"data",
+				"dataAttr"
+			],
+			[
+				"scroll",
+				"scrollpos"
+			],
+			[
+				"l",
+				"lazyload"
+			],
+			[
+				"op",
+				"options"
+			],
+			[
+				"item",
+				"itemHeight"
+			],
+			[
+				"view",
+				"viewHeightPatch"
+			],
+			[
+				"doc",
+				"documentElement"
+			],
+			[
+				"com",
+				"component"
+			],
+			[
+				"off",
+				"offsetHeight"
+			],
+			[
+				"li",
+				"listItems"
+			],
+			[
+				"scr",
+				"scrollTop"
+			],
+			[
+				"lis",
+				"listHeight"
+			],
+			[
+				"_l",
+				"_lazyLoad"
+			],
+			[
+				"list",
+				"listItems"
+			],
+			[
+				"re",
+				"resetPos"
+			],
+			[
+				"scroo",
+				"_scrollPos"
+			],
+			[
+				"sco",
+				"scroll"
 			],
 			[
 				"func",
-				"funcBtn"
+				"funcBtnHandler"
+			],
+			[
+				"funcB",
+				"funcBtnHandler"
+			],
+			[
+				"back",
+				"backward"
+			],
+			[
+				"nav",
+				"navigate"
+			],
+			[
+				"backB",
+				"backBtnHandler"
+			],
+			[
+				"_on",
+				"_onScrollEnd"
+			],
+			[
+				"_scro",
+				"_scrollEndHandler"
+			],
+			[
+				"en",
+				"enableTitlebar"
+			],
+			[
+				"bac",
+				"backBtn"
 			],
 			[
 				"sw",
@@ -36,10 +164,6 @@
 				"content"
 			],
 			[
-				"en",
-				"enableTransition"
-			],
-			[
 				"ini",
 				"init"
 			],
@@ -64,10 +188,6 @@
 				"enableTitlebar"
 			],
 			[
-				"scroll",
-				"scrollHeight"
-			],
-			[
 				"x-t",
 				"x-titlebar"
 			],
@@ -88,20 +208,12 @@
 				"element"
 			],
 			[
-				"tr",
-				"transitionport"
-			],
-			[
 				"t",
 				"transitionport"
 			],
 			[
 				"tran",
 				"transition"
-			],
-			[
-				"sc",
-				"scrollport"
 			],
 			[
 				"J_",
@@ -124,20 +236,8 @@
 				"_searchPage"
 			],
 			[
-				"_s",
-				"_searchPage"
-			],
-			[
 				"comp",
 				"compiled"
-			],
-			[
-				"com",
-				"compiledTemplate"
-			],
-			[
-				"nav",
-				"navigation"
 			],
 			[
 				"tm",
@@ -158,10 +258,6 @@
 			[
 				"right",
 				"rightExtra"
-			],
-			[
-				"back",
-				"backStack"
 			],
 			[
 				"app",
@@ -232,10 +328,6 @@
 				"extends"
 			],
 			[
-				"re",
-				"return"
-			],
-			[
 				"e",
 				"extentions"
 			],
@@ -254,10 +346,6 @@
 			[
 				"_is",
 				"_isAutoHide"
-			],
-			[
-				"for",
-				"forward"
 			],
 			[
 				"webkit-t",
@@ -320,10 +408,6 @@
 				"originY"
 			],
 			[
-				"scr",
-				"scrollport"
-			],
-			[
 				"class",
 				"className"
 			],
@@ -334,10 +418,6 @@
 			[
 				"ca",
 				"className"
-			],
-			[
-				"doc",
-				"doc"
 			],
 			[
 				"co",
@@ -434,86 +514,6 @@
 			[
 				"si",
 				"single"
-			],
-			[
-				"pase",
-				"parseInt"
-			],
-			[
-				"par",
-				"parentStyle"
-			],
-			[
-				"arg",
-				"arguments"
-			],
-			[
-				"doTr",
-				"doTransition"
-			],
-			[
-				"modu",
-				"moduleId"
-			],
-			[
-				"text",
-				"text-align"
-			],
-			[
-				"_o",
-				"_originalY"
-			],
-			[
-				"ev",
-				"events"
-			],
-			[
-				"to",
-				"touches"
-			],
-			[
-				"dis",
-				"distance"
-			],
-			[
-				"ch",
-				"changedTouches"
-			],
-			[
-				"fr",
-				"fromIndex"
-			],
-			[
-				"le",
-				"length"
-			],
-			[
-				"de",
-				"dependencies"
-			],
-			[
-				"und",
-				"underscore"
-			],
-			[
-				"fin",
-				"findNS"
-			],
-			[
-				"sp",
-				"splatParam"
-			],
-			[
-				"name",
-				"namedParam"
-			],
-			[
-				"renderH",
-				"renderHelloLevel"
-			],
-			[
-				"_h",
-				"_html"
 			]
 		]
 	},
@@ -523,7 +523,7 @@
 			"file": "package.json",
 			"settings":
 			{
-				"buffer_size": 1088,
+				"buffer_size": 1116,
 				"line_ending": "Windows"
 			}
 		},
@@ -531,23 +531,7 @@
 			"file": "test/demo1.html",
 			"settings":
 			{
-				"buffer_size": 1954,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "test/list.js",
-			"settings":
-			{
-				"buffer_size": 2173,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "test/detail.js",
-			"settings":
-			{
-				"buffer_size": 2520,
+				"buffer_size": 2263,
 				"line_ending": "Windows"
 			}
 		}
@@ -596,21 +580,29 @@
 	},
 	"file_history":
 	[
-		"/D/workspace/taobao/etao/mix/mixsln/assets/x.css",
+		"/D/workspace/taobao/etao/mix/mixsln/test/default.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/navigation.js",
+		"/D/workspace/taobao/etao/mix/mixsln/dist/app.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
+		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/init.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/scrollpos.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/lazyload.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
+		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/plugin.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/navigation.js",
+		"/D/workspace/taobao/etao/mix/mixsln/test/list.tpl",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins",
+		"/D/workspace/taobao/etao/mix/mixsln/test/default.tpl",
+		"/D/workspace/taobao/etao/mix/mixsln/test/detail.js",
+		"/D/workspace/taobao/etao/mix/mixsln/assets/x.css",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTransition.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xBack.js",
-		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
-		"/D/workspace/taobao/etao/mix/mixsln/test/detail.js",
-		"/D/workspace/taobao/etao/mix/mixsln/test/default.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
-		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
 		"/D/workspace/taobao/etao/mix/mixsln/src/controllers/cNavigation.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xScroll.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTitlebar.js",
@@ -623,8 +615,6 @@
 		"/D/workspace/taobao/etao/H5/w_Wireless/base/styles/component/float/js/notification.js",
 		"/D/workspace/doc/charge_phone_tms.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/mix-sln-debug.js",
-		"/D/workspace/taobao/etao/mix/mixsln/test/list.tpl",
-		"/D/workspace/taobao/etao/mix/mixsln/test/default.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.html",
 		"/D/workspace/taobao/etao/mix/mixsln/assets/base.css",
 		"/D/workspace/taobao/etao/mix/mixsln/test/searchData.js",
@@ -717,13 +707,7 @@
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/dist/url/router/router-debug.js",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/demos/helloworld/package.json",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/ui/component/component.js",
-		"/C/Users/zhuxun.jb/AppData/Roaming/Sublime Text 2/Packages/Default/Default (Windows).sublime-keymap",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/base/message/message.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/dist/base/message/message-debug.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/mvc/model/model.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/base/util/README.md",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/mvc/orm/orm.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/util/router/package.json"
+		"/C/Users/zhuxun.jb/AppData/Roaming/Sublime Text 2/Packages/Default/Default (Windows).sublime-keymap"
 	],
 	"find":
 	{
@@ -738,9 +722,29 @@
 	},
 	"find_state":
 	{
-		"case_sensitive": false,
+		"case_sensitive": true,
 		"find_history":
 		[
+			"Transform",
+			"transform",
+			"getMaxScrollTop(scroller)",
+			"getMaxScrollTop",
+			"_onScrollEnd",
+			"_options",
+			"listApp",
+			"AppPage",
+			"status",
+			"AppPage",
+			"getComponent",
+			"app",
+			"status",
+			"navigate",
+			"Component",
+			";\n",
+			"scrollTop",
+			"_scrollTop",
+			"_scrollHeight",
+			"_scrollTop",
 			"navigate",
 			"activePort",
 			"lastActivePort",
@@ -848,27 +852,7 @@
 			"highlight",
 			"highlighte",
 			"strong",
-			"pre",
-			"font-family",
-			"pre",
-			"code",
-			"font-family",
-			"stretch",
-			";\n",
-			"baseFontFamily",
-			"pwd",
-			"option",
-			"isReady",
-			"mu",
-			"workingDir",
-			"has",
-			"isPopup",
-			"ifPopup",
-			"isPopup",
-			"router",
-			"navigator",
-			"router",
-			"dialog"
+			"pre"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -876,6 +860,15 @@
 		"regex": false,
 		"replace_history":
 		[
+			"Transform",
+			"that._getMaxScrollTop()",
+			"_getMaxScrollTop()",
+			"_opt",
+			"STATUS",
+			"Page",
+			"component.get",
+			"component",
+			"_currentY",
 			"active",
 			"lastActive",
 			".",
@@ -963,7 +956,7 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -971,15 +964,15 @@
 					"file": "package.json",
 					"settings":
 					{
-						"buffer_size": 1088,
+						"buffer_size": 1116,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1032,
-								1032
+								699,
+								699
 							]
 						],
 						"settings":
@@ -999,74 +992,20 @@
 					"file": "test/demo1.html",
 					"settings":
 					{
-						"buffer_size": 1954,
+						"buffer_size": 2263,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1213,
-								1213
+								424,
+								424
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/HTML5/Syntaxes/HTML 5.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 416.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "test/list.js",
-					"settings":
-					{
-						"buffer_size": 2173,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1739,
-								1739
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1056.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "test/detail.js",
-					"settings":
-					{
-						"buffer_size": 2520,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,

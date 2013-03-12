@@ -1,5 +1,5 @@
 (function(app, undef) {
-	var listApp = app.page.define({
+	var listPage = app.page.define({
 		name : 'list',
 		title : '搜索列表',
 		route : 'list\\/(P<word>[^\\/]+)\\/?',
@@ -13,7 +13,7 @@
 				type : 'func',
 				text : '下一页',
 				handler : function(e) {
-					listApp.nextPage();
+					listPage.nextPage();
 				}
 			}
 		],
@@ -27,8 +27,6 @@
 			scrollpos : true
 		},
 
-
-		_navigation : null,
 		_searchWord : null,
 		_searchPage : 1,
 		_scrollPos : 0,
@@ -60,7 +58,7 @@
 
 		_bindEvents : function() {
 			var that = this,
-				navigation = that._navigation,
+				navigation = app.navigation,
 				scroll = app.component.get('scroll'),
 				content = $(app.component.getActiveContent())
 				;
@@ -96,12 +94,12 @@
 			return '"' + this._searchWord + '" 的搜索列表'
 		},
 
-		ready : function(navigation) {
+		ready : function() {
 			// implement super.load
-			var that = this
+			var that = this,
+				navigation = app.navigation
 				;
 
-			that._navigation = navigation;
 			that._searchWord = decodeURIComponent(navigation.getParameter('word'));
 			that._searchPage = 1;
 
@@ -118,11 +116,8 @@
 		},
 
 		nextPage : function() {
-			var that = this,
-				navigation = that._navigation;
-
-			that._searchPage++;
-			that._fillContent();
+			this._searchPage++;
+			this._fillContent();
 		}
 	});
 

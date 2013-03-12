@@ -13,19 +13,19 @@
 
 		_pid : 0,
 
-		ready : function(navigation) {
+		ready : function() {
 			var that = this,
-				content = $(app.getContentElement())
+				content = $(app.component.getActiveContent())
 				;
 
 			// implement super.ready
-			navigation.fill({}, function() {
+			that.fill({}, function() {
 				content.find('#J_searchForm').on('submit', function(e) {
 					var word = content.find('#J_searchForm .bton-keyword').val()
 						;
 
 					e.preventDefault();
-					navigation.push('list/' + encodeURIComponent(word) + '/');
+					app.navigation.push('list/' + encodeURIComponent(word) + '/');
 				});
 			});
 		},

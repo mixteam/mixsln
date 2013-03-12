@@ -45,8 +45,9 @@
 			callback(text);
 		},
 
-		ready : function(navigation) {
+		ready : function() {
 			var that = this,
+				navigation = app.navigation,
 				pid = this._pid = navigation.getParameter('pid'),
 				content = $(app.component.getActiveContent())
 				;

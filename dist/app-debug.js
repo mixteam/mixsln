@@ -230,7 +230,6 @@ define("#mix/sln/0.2.0/modules/transform-debug", [], function(require, exports, 
             callback && setTimeout(callback, 50);
         }
         el.addEventListener("webkitTransitionEnd", transitionEnd, false);
-        setTimeout(transitionEnd, parseFloat(time) * 1e3);
     }
     function startTransition(el, time, timeFunction, delay, x, y, callback) {
         waitTransition(el, time, callback);
@@ -480,8 +479,8 @@ define("#mix/sln/0.2.0/modules/component-debug", [ "./scroll-debug", "./gesture-
                     active = swap;
                 },
                 setClass: function() {
-                    active.className = "active";
                     inactive.className = "inactive";
+                    active.className = "active";
                 }
             });
         },
@@ -524,8 +523,9 @@ define("#mix/sln/0.2.0/modules/component-debug", [ "./scroll-debug", "./gesture-
                 originY = Transform.getY(wrap);
                 originX = (type === "forward" ? "-" : "") + "33.33%";
                 Transform.start(wrap, "0.4s", "ease", 0, originX, originY, function() {
-                    wrap.style.webkitTransform = Transform.getTranslate(0, 0);
                     content.fn.setClass();
+                    originY = Transform.getY(wrap);
+                    wrap.style.webkitTransform = Transform.getTranslate(0, originY);
                     that.trigger(type + "TransitionEnd");
                 });
             }
@@ -629,26 +629,11 @@ define("#mix/sln/0.2.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
             that.routeName = name[1];
             that.state = state;
         },
-        getParameter: function(name) {
-            return this.state.params[name];
-        },
-        getArgument: function(name) {
-            return this.state.args[name];
-        },
-        getData: function(name) {
-            return this.state.datas[name];
-        },
-        push: function(fragment, options) {
-            navigate.forward(fragment, options);
-        },
-        pop: function() {
-            navigate.backward();
-        },
         ready: function() {
             var page = Page.get(this.appName);
             if (page.status < STATUS.READY) {
                 page.status = STATUS.READY;
-                page.trigger("ready", this);
+                page.trigger("ready");
             }
         },
         compile: function() {
@@ -675,6 +660,24 @@ define("#mix/sln/0.2.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
                 page.status = STATUS.UNLOADED;
                 page.trigger("unloaded");
             }
+        }
+    });
+    Object.extend(Navigation, {
+        _cur: null,
+        getParameter: function(name) {
+            return this._cur.state.params[name];
+        },
+        getArgument: function(name) {
+            return this._cur.state.args[name];
+        },
+        getData: function(name) {
+            return this._cur.state.datas[name];
+        },
+        push: function(fragment, options) {
+            navigate.forward(fragment, options);
+        },
+        pop: function() {
+            navigate.backward();
         }
     });
     return Navigation;
@@ -705,7 +708,7 @@ define("#mix/sln/0.2.0/app-debug", [ "./modules/page-debug", "./modules/componen
         }
     }
     function initNavigation() {
-        var curNav, titlebar = Component.get("titlebar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), funcBtnHandler = null, content = Component.get("content"), transition = Component.get("transition");
+        var titlebar = Component.get("titlebar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), funcBtnHandler = null, content = Component.get("content"), transition = Component.get("transition");
         Component.on("backBtnClick", function(el) {
             navigate.backward();
         });
@@ -741,17 +744,19 @@ define("#mix/sln/0.2.0/app-debug", [ "./modules/page-debug", "./modules/componen
             var appName = navigation.appName, transition = navigation.state.transition, page = Page.get(appName), title = page.getTitle();
             titlebar.fn.change(title, transition);
         }
-        function switchNavigation(newNav) {
+        function switchNavigation(navigation) {
             if (app.config.enableTransition) {
-                transition.fn[newNav.state.transition]();
+                transition.fn[navigation.state.transition]();
             } else {
                 content.fn.switchActive();
                 content.fn.setClass();
             }
-            curNav && curNav.unload();
-            newNav.ready();
-            newNav.compile();
-            curNav = newNav;
+            if (app.navigation._cur) {
+                app.navigation._cur.unload();
+            }
+            app.navigation._cur = navigation;
+            navigation.ready();
+            navigation.compile();
         }
         navigate.on("forward backward", function(state) {
             var navigation = new Navigation(state);
@@ -796,6 +801,7 @@ define("#mix/sln/0.2.0/app-debug", [ "./modules/page-debug", "./modules/componen
         },
         page: Page,
         component: Component,
+        navigation: Navigation,
         plugin: {},
         loadFile: function(url, callback) {
             var xhr = new win.XMLHttpRequest();
