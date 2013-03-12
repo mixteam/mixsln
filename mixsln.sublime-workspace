@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"nav",
+				"navigation"
+			],
+			[
+				"list",
+				"listApp"
+			],
+			[
+				"O",
+				"originY"
+			],
+			[
 				"sc",
 				"scroll"
 			],
@@ -88,10 +100,6 @@
 				"_lazyLoad"
 			],
 			[
-				"list",
-				"listItems"
-			],
-			[
 				"re",
 				"resetPos"
 			],
@@ -114,10 +122,6 @@
 			[
 				"back",
 				"backward"
-			],
-			[
-				"nav",
-				"navigate"
 			],
 			[
 				"backB",
@@ -510,10 +514,6 @@
 			[
 				"th",
 				"theme"
-			],
-			[
-				"si",
-				"single"
 			]
 		]
 	},
@@ -528,10 +528,26 @@
 			}
 		},
 		{
-			"file": "test/demo1.html",
+			"file": "src/app.js",
 			"settings":
 			{
-				"buffer_size": 2263,
+				"buffer_size": 4450,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/modules/navigation.js",
+			"settings":
+			{
+				"buffer_size": 1641,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/modules/component.js",
+			"settings":
+			{
+				"buffer_size": 4313,
 				"line_ending": "Windows"
 			}
 		}
@@ -580,12 +596,19 @@
 	},
 	"file_history":
 	[
+		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.html",
+		"/D/workspace/taobao/etao/mix/mixsln/test/list.tpl",
+		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/default.js",
+		"/D/workspace/taobao/etao/mix/mixsln/test/default.tpl",
+		"/D/workspace/taobao/etao/mix/mixsln/test/detail.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/navigation.js",
+		"/D/workspace/taobao/etao/mix/mixsln/README.md",
 		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/app.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
-		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/init.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/scrollpos.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/lazyload.js",
@@ -594,13 +617,8 @@
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
 		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
 		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/plugin.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/navigation.js",
-		"/D/workspace/taobao/etao/mix/mixsln/test/list.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/src/plugins",
-		"/D/workspace/taobao/etao/mix/mixsln/test/default.tpl",
-		"/D/workspace/taobao/etao/mix/mixsln/test/detail.js",
 		"/D/workspace/taobao/etao/mix/mixsln/assets/x.css",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xTransition.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/components/xBack.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/controllers/cNavigation.js",
@@ -615,7 +633,6 @@
 		"/D/workspace/taobao/etao/H5/w_Wireless/base/styles/component/float/js/notification.js",
 		"/D/workspace/doc/charge_phone_tms.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/mix-sln-debug.js",
-		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.html",
 		"/D/workspace/taobao/etao/mix/mixsln/assets/base.css",
 		"/D/workspace/taobao/etao/mix/mixsln/test/searchData.js",
 		"/D/workspace/taobao/etao/mix/mixsln/lib/zepto.js",
@@ -706,8 +723,7 @@
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/dom/animation/animation.js",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/dist/url/router/router-debug.js",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/demos/helloworld/package.json",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/ui/component/component.js",
-		"/C/Users/zhuxun.jb/AppData/Roaming/Sublime Text 2/Packages/Default/Default (Windows).sublime-keymap"
+		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/ui/component/component.js"
 	],
 	"find":
 	{
@@ -725,6 +741,8 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"navigation",
+			"listApp",
 			"Transform",
 			"transform",
 			"getMaxScrollTop(scroller)",
@@ -850,9 +868,7 @@
 			"categoryUrl",
 			"font-family",
 			"highlight",
-			"highlighte",
-			"strong",
-			"pre"
+			"highlighte"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -860,6 +876,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"listPage",
 			"Transform",
 			"that._getMaxScrollTop()",
 			"_getMaxScrollTop()",
@@ -956,7 +973,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 0,
 			"sheets":
 			[
 				{
@@ -971,8 +988,8 @@
 						"selection":
 						[
 							[
-								699,
-								699
+								662,
+								662
 							]
 						],
 						"settings":
@@ -989,27 +1006,81 @@
 				},
 				{
 					"buffer": 1,
-					"file": "test/demo1.html",
+					"file": "src/app.js",
 					"settings":
 					{
-						"buffer_size": 2263,
+						"buffer_size": 4450,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								424,
-								424
+								3950,
+								3950
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/HTML5/Syntaxes/HTML 5.tmLanguage",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2112.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/modules/navigation.js",
+					"settings":
+					{
+						"buffer_size": 1641,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1252,
+								1252
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/modules/component.js",
+					"settings":
+					{
+						"buffer_size": 4313,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3566,
+								3566
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1392.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

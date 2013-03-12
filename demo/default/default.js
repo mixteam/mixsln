@@ -3,7 +3,7 @@
 	var detailApp = app.page.define({
 		name : 'default',
 		title : '请搜索商品',
-		template : './default.tpl',
+		template : './default/default.tpl',
 		buttons : [
 			{
 				type : 'back',

@@ -896,7 +896,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
     });
     module.exports = Navigate;
 });
-define("#mix/sln/0.2.0/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.0/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, events = [ "screenX", "screenY", "clientX", "clientY", "pageX", "pageY" ], Class = require("mix/core/0.3.0/base/class-debug");
     function calc(x1, y1, x2, y2, x3, y3, x4, y4) {
@@ -1072,7 +1072,7 @@ define("#mix/sln/0.2.0/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debu
     return Gestrue;
 });
 
-define("#mix/sln/0.2.0/modules/transform-debug", [], function(require, exports, module) {
+define("#mix/sln/0.3.0/modules/transform-debug", [], function(require, exports, module) {
     var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/, MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/, TRANSITION_NAME = "-webkit-transform", appVersion = navigator.appVersion, isAndroid = /android/gi.test(appVersion), isIOS = /iphone|ipad/gi.test(appVersion), has3d = "WebKitCSSMatrix" in window && "m11" in new WebKitCSSMatrix();
     function quadratic2cubicBezier(a, b) {
         return [ [ (a / 3 + (a + b) / 3 - a) / (b - a), (a * a / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a) ], [ (b / 3 + (a + b) / 3 - a) / (b - a), (b * b / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a) ] ];
@@ -1128,7 +1128,6 @@ define("#mix/sln/0.2.0/modules/transform-debug", [], function(require, exports, 
             callback && setTimeout(callback, 50);
         }
         el.addEventListener("webkitTransitionEnd", transitionEnd, false);
-        setTimeout(transitionEnd, parseFloat(time) * 1e3);
     }
     function startTransition(el, time, timeFunction, delay, x, y, callback) {
         waitTransition(el, time, callback);
@@ -1142,7 +1141,7 @@ define("#mix/sln/0.2.0/modules/transform-debug", [], function(require, exports, 
     exports.start = startTransition;
 });
 
-define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.0/modules/scroll-debug", [ "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, navigator = win.navigator, Class = require("mix/core/0.3.0/base/class-debug"), Gesture = require("./gesture-debug"), Transform = require("./transform-debug"), prevented = false;
     function getMaxScrollTop(el) {
@@ -1298,7 +1297,7 @@ define("#mix/sln/0.2.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
     return Scroll;
 });
 
-define("#mix/sln/0.2.0/modules/component-debug", [ "./scroll-debug", "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.0/modules/component-debug", [ "./scroll-debug", "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Scroll = require("./scroll-debug"), Transform = require("./transform-debug"), components = {}, emptyFunc = function() {}, extendFns = function(el, fns) {
         el.fn || (el.fn = {});
@@ -1378,8 +1377,8 @@ define("#mix/sln/0.2.0/modules/component-debug", [ "./scroll-debug", "./gesture-
                     active = swap;
                 },
                 setClass: function() {
-                    active.className = "active";
                     inactive.className = "inactive";
+                    active.className = "active";
                 }
             });
         },
@@ -1422,8 +1421,9 @@ define("#mix/sln/0.2.0/modules/component-debug", [ "./scroll-debug", "./gesture-
                 originY = Transform.getY(wrap);
                 originX = (type === "forward" ? "-" : "") + "33.33%";
                 Transform.start(wrap, "0.4s", "ease", 0, originX, originY, function() {
-                    wrap.style.webkitTransform = Transform.getTranslate(0, 0);
                     content.fn.setClass();
+                    originY = Transform.getY(wrap);
+                    wrap.style.webkitTransform = Transform.getTranslate(0, originY);
                     that.trigger(type + "TransitionEnd");
                 });
             }
@@ -1440,7 +1440,7 @@ define("#mix/sln/0.2.0/modules/component-debug", [ "./scroll-debug", "./gesture-
     return new Compontent();
 });
 
-define("#mix/sln/0.2.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), STATUS = {
         UNKOWN: 0,
@@ -1518,7 +1518,7 @@ define("#mix/sln/0.2.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
     return Page;
 });
 
-define("#mix/sln/0.2.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Page = require("./page-debug"), STATUS = Page.STATUS, Navigation = Class.create({
         initialize: function(state) {
@@ -1527,26 +1527,11 @@ define("#mix/sln/0.2.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
             that.routeName = name[1];
             that.state = state;
         },
-        getParameter: function(name) {
-            return this.state.params[name];
-        },
-        getArgument: function(name) {
-            return this.state.args[name];
-        },
-        getData: function(name) {
-            return this.state.datas[name];
-        },
-        push: function(fragment, options) {
-            navigate.forward(fragment, options);
-        },
-        pop: function() {
-            navigate.backward();
-        },
         ready: function() {
             var page = Page.get(this.appName);
             if (page.status < STATUS.READY) {
                 page.status = STATUS.READY;
-                page.trigger("ready", this);
+                page.trigger("ready");
             }
         },
         compile: function() {
@@ -1575,10 +1560,28 @@ define("#mix/sln/0.2.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
             }
         }
     });
+    Object.extend(Navigation, {
+        _cur: null,
+        getParameter: function(name) {
+            return this._cur.state.params[name];
+        },
+        getArgument: function(name) {
+            return this._cur.state.args[name];
+        },
+        getData: function(name) {
+            return this._cur.state.datas[name];
+        },
+        push: function(fragment, options) {
+            navigate.forward(fragment, options);
+        },
+        pop: function() {
+            navigate.backward();
+        }
+    });
     return Navigation;
 });
 
-define("#mix/sln/0.2.0/app-debug", [ "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.2.0/app-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.3.0/app-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Page = require("./modules/page-debug"), Component = require("./modules/component-debug"), Navigation = require("./modules/navigation-debug");
     app = {};
@@ -1603,7 +1606,7 @@ define("#mix/sln/0.2.0/app-debug", [ "./modules/page-debug", "./modules/componen
         }
     }
     function initNavigation() {
-        var curNav, titlebar = Component.get("titlebar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), funcBtnHandler = null, content = Component.get("content"), transition = Component.get("transition");
+        var titlebar = Component.get("titlebar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), funcBtnHandler = null, content = Component.get("content"), transition = Component.get("transition");
         Component.on("backBtnClick", function(el) {
             navigate.backward();
         });
@@ -1639,17 +1642,19 @@ define("#mix/sln/0.2.0/app-debug", [ "./modules/page-debug", "./modules/componen
             var appName = navigation.appName, transition = navigation.state.transition, page = Page.get(appName), title = page.getTitle();
             titlebar.fn.change(title, transition);
         }
-        function switchNavigation(newNav) {
+        function switchNavigation(navigation) {
             if (app.config.enableTransition) {
-                transition.fn[newNav.state.transition]();
+                transition.fn[navigation.state.transition]();
             } else {
                 content.fn.switchActive();
                 content.fn.setClass();
             }
-            curNav && curNav.unload();
-            newNav.ready();
-            newNav.compile();
-            curNav = newNav;
+            if (app.navigation._cur) {
+                app.navigation._cur.unload();
+            }
+            app.navigation._cur = navigation;
+            navigation.ready();
+            navigation.compile();
         }
         navigate.on("forward backward", function(state) {
             var navigation = new Navigation(state);
@@ -1694,6 +1699,7 @@ define("#mix/sln/0.2.0/app-debug", [ "./modules/page-debug", "./modules/componen
         },
         page: Page,
         component: Component,
+        navigation: Navigation,
         plugin: {},
         loadFile: function(url, callback) {
             var xhr = new win.XMLHttpRequest();
@@ -1715,4 +1721,4 @@ define("#mix/sln/0.2.0/app-debug", [ "./modules/page-debug", "./modules/componen
     win["app"] = app;
 });
 
-require("mix/sln/0.2.0/app-debug");
+require("mix/sln/0.3.0/app-debug");

@@ -3,7 +3,7 @@
 		name : 'list',
 		title : '搜索列表',
 		route : 'list\\/(P<word>[^\\/]+)\\/?',
-		template : './list.tpl',
+		template : './list/list.tpl',
 		buttons : [
 			{
 				type : 'back',
