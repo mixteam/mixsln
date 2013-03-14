@@ -14,13 +14,13 @@ var win = window,
 				name = state.name.split('.')
 				;
 				
-			that.appName = name[0];
+			that.pageName = name[0];
 			that.routeName = name[1];
 			that.state = state;
 		},
 
 		ready : function() {
-			var page = Page.get(this.appName)
+			var page = Page.get(this.pageName)
 				;
 
 			if (page.status < STATUS.READY) {
@@ -30,7 +30,7 @@ var win = window,
 		},
 
 		compile : function() {
-			var page = Page.get(this.appName)
+			var page = Page.get(this.pageName)
 				;
 
 			function _compiled() {
@@ -42,7 +42,8 @@ var win = window,
 
 			if (!page.compiledTemplate) {
 				page.loadTemplate(function(text) {
-					page.compileTemplate(text, function() {
+					page.compileTemplate(text, function(compiled) {
+						page.compiledTemplate = compiled;
 						_compiled();	
 					});
 				});
@@ -53,7 +54,7 @@ var win = window,
 
 		unload : function() {
 			var that = this,
-				page = Page.get(this.appName)
+				page = Page.get(this.pageName)
 				;
 
 			if (page.status > STATUS.UNLOADED) {
@@ -67,15 +68,33 @@ Object.extend(Navigation, {
 	_cur : null,
 
 	getParameter : function(name) {
+		if (!this._cur) return;
 		return this._cur.state.params[name];
 	},
 
 	getArgument : function(name) {
+		if (!this._cur) return;
 		return this._cur.state.args[name];
 	},
 
 	getData : function(name) {
+		if (!this._cur) return;
 		return this._cur.state.datas[name];
+	},
+
+	getPageName : function() {
+		if (!this._cur) return;
+		return this._cur.pageName;
+	},
+
+	getRouteName : function() {
+		if (!this._cur) return;
+		return this._cur.routeName;
+	},
+
+	getState : function() {
+		if (!this._cur) return;
+		return this._cur.state;
 	},
 
 	push : function(fragment, options) {

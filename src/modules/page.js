@@ -45,7 +45,7 @@ var win = window,
 			if (arguments.length === 1) {
 				callback = arguments[0];
 				url = that.template;
-			} 
+			}
 
 			url && app.loadFile(url, callback);
 		},
@@ -53,20 +53,26 @@ var win = window,
 		compileTemplate : function(text, callback) {
 			// can overwrite
 			var that = this,
-				engine;
+				engine = app.config.templateEngine;
 
-			if ((engine = win['Mustache'])) {
-				that.compiledTemplate = engine.compile(text);
-				callback(that.compiledTemplate);
+			if (engine && Object.isTypeof(text, 'string')) {
+				callback(engine.compile(text));
+			} else {
+				callback(text);
 			}
 		},
 
 		renderTemplate : function(datas, callback) {
 			// can overwrite
 			var that = this,
+				engine = app.config.templateEngine,
 				compiledTemplate = that.compiledTemplate,
-				content = compiledTemplate(datas)
+				content = ''
 				;
+
+			if (engine && Object.isTypeof(datas, 'object')) {
+				content = engine.render(compiledTemplate, datas);
+			}
 
 			callback(content);
 		},
@@ -94,9 +100,8 @@ var win = window,
 	});
 
 Page.STATUS = STATUS;
-
+Page.global = {};
 Page.fn = {};
-
 Page.define = function(properties) {
 	var cPage = Page.extend(properties),
 		page
@@ -104,6 +109,23 @@ Page.define = function(properties) {
 
 	cPage.implement(Page.fn);
 	page = new cPage();
+
+	Object.each(Page.global, function(val, name) {
+		var type = Object.isTypeof(val);
+
+		switch (type){
+			case 'array':
+				page[name] = val.slice(0).concat(page[name] || []);
+				break;
+			case 'object':
+				page[name] = Object.extend(val, page[name] || {});
+				break;
+			case 'string':
+			case 'number':
+				(page[name] == null) && (page[name] = val);
+				break;
+		}
+	});
 	return (pages[page.name] = page);
 }
 

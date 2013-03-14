@@ -19,8 +19,8 @@ var win = window,
 	function initComponent() {
 		var viewport = app.config.viewport,
 			titlebar = viewport.querySelector('header.titlebar'),
-			backBtn = titlebar.querySelector('button.back'),
-			funcBtn = titlebar.querySelector('button.func')
+			backBtn = titlebar.querySelector('li:nth-child(2) button'),
+			funcBtn = titlebar.querySelector('li:nth-child(3) button')
 			content = viewport.querySelector('section.content'),
 			toolbar = viewport.querySelector('footer.toolbar')
 			;
@@ -53,21 +53,26 @@ var win = window,
 		var titlebar = Component.get('titlebar'),
 			backBtn = Component.get('backBtn'),
 			funcBtn = Component.get('funcBtn'),
+			backBtnHandler = null,
 			funcBtnHandler = null,
 			content = Component.get('content'),
 			transition = Component.get('transition')
 			;
 
-		Component.on('backBtnClick', function (el) {
-			navigate.backward();
+		Component.on('backBtnClick', function () {
+			if (backBtnHandler) {
+				backBtnHandler();
+			} else {
+				navigate.backward();
+			}
 		});
-		Component.on('funcBtnClick', function(el) {
-			funcBtnHandler && funcBtnHandler(el);
+		Component.on('funcBtnClick', function() {
+			funcBtnHandler && funcBtnHandler();
 		});
 
 		function setButtons(navigation) {
-			var appName = navigation.appName,
-				page = Page.get(appName),
+			var pageName = navigation.pageName,
+				page = Page.get(pageName),
 				buttons = page.buttons
 				;
 
@@ -80,7 +85,9 @@ var win = window,
 				switch (type) {
 					case 'back':
 						backBtn.fn.setText(item.text);
-						if (navigate.getStateIndex() >= 1) {
+						backBtnHandler = item.handler;
+						if (item.autoHide === false || 
+								navigate.getStateIndex() >= 1) {
 							backBtn.fn.show();
 						}
 						break;
@@ -96,9 +103,9 @@ var win = window,
 		}
 
 		function setTitlebar(navigation) {
-			var appName = navigation.appName,
+			var pageName = navigation.pageName,
 				transition = navigation.state.transition,
-				page = Page.get(appName),
+				page = Page.get(pageName),
 				title = page.getTitle()
 				;
 
@@ -127,7 +134,6 @@ var win = window,
 				;
 
 			switchNavigation(navigation);
-			
 			if (app.config.enableTitlebar) {
 				setButtons(navigation);
 				setTitlebar(navigation);
@@ -167,7 +173,8 @@ var win = window,
 			enableTitlebar : false,
 			enableScroll : false,
 			enableTransition : false,
-			enableToolbar : false
+			enableToolbar : false,
+			templateEngine : null
 		},
 		page : Page,
 		component : Component,

@@ -414,7 +414,7 @@ define("#mix/sln/0.3.0/modules/component-debug", [ "./scroll-debug", "./gesture-
         },
         initViewport: function(el) {
             components["viewport"] = el;
-            el.setAttribute("id", "viewport-" + Date.now());
+            if (!el.getAttribute("id")) el.setAttribute("id", "viewport-" + Date.now());
         },
         initTitlebar: function(el) {
             var viewport = components["viewport"];
@@ -575,15 +575,19 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
         },
         compileTemplate: function(text, callback) {
             // can overwrite
-            var that = this, engine;
-            if (engine = win["Mustache"]) {
-                that.compiledTemplate = engine.compile(text);
-                callback(that.compiledTemplate);
+            var that = this, engine = app.config.templateEngine;
+            if (engine && Object.isTypeof(text, "string")) {
+                callback(engine.compile(text));
+            } else {
+                callback(text);
             }
         },
         renderTemplate: function(datas, callback) {
             // can overwrite
-            var that = this, compiledTemplate = that.compiledTemplate, content = compiledTemplate(datas);
+            var that = this, engine = app.config.templateEngine, compiledTemplate = that.compiledTemplate, content = "";
+            if (engine && Object.isTypeof(datas, "object")) {
+                content = engine.render(compiledTemplate, datas);
+            }
             callback(content);
         },
         fill: function(datas, callback) {
@@ -604,11 +608,29 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
         unload: function() {}
     });
     Page.STATUS = STATUS;
+    Page.global = {};
     Page.fn = {};
     Page.define = function(properties) {
         var cPage = Page.extend(properties), page;
         cPage.implement(Page.fn);
         page = new cPage();
+        Object.each(Page.global, function(val, name) {
+            var type = Object.isTypeof(val);
+            switch (type) {
+              case "array":
+                page[name] = val.slice(0).concat(page[name] || []);
+                break;
+
+              case "object":
+                page[name] = Object.extend(val, page[name] || {});
+                break;
+
+              case "string":
+              case "number":
+                page[name] == null && (page[name] = val);
+                break;
+            }
+        });
         return pages[page.name] = page;
     };
     Page.get = function(name) {
@@ -625,19 +647,19 @@ define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Page = require("./page-debug"), STATUS = Page.STATUS, Navigation = Class.create({
         initialize: function(state) {
             var that = this, name = state.name.split(".");
-            that.appName = name[0];
+            that.pageName = name[0];
             that.routeName = name[1];
             that.state = state;
         },
         ready: function() {
-            var page = Page.get(this.appName);
+            var page = Page.get(this.pageName);
             if (page.status < STATUS.READY) {
                 page.status = STATUS.READY;
                 page.trigger("ready");
             }
         },
         compile: function() {
-            var page = Page.get(this.appName);
+            var page = Page.get(this.pageName);
             function _compiled() {
                 if (page.status < STATUS.COMPILED) {
                     page.status = STATUS.COMPILED;
@@ -646,7 +668,8 @@ define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
             }
             if (!page.compiledTemplate) {
                 page.loadTemplate(function(text) {
-                    page.compileTemplate(text, function() {
+                    page.compileTemplate(text, function(compiled) {
+                        page.compiledTemplate = compiled;
                         _compiled();
                     });
                 });
@@ -655,7 +678,7 @@ define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
             }
         },
         unload: function() {
-            var that = this, page = Page.get(this.appName);
+            var that = this, page = Page.get(this.pageName);
             if (page.status > STATUS.UNLOADED) {
                 page.status = STATUS.UNLOADED;
                 page.trigger("unloaded");
@@ -665,13 +688,28 @@ define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
     Object.extend(Navigation, {
         _cur: null,
         getParameter: function(name) {
+            if (!this._cur) return;
             return this._cur.state.params[name];
         },
         getArgument: function(name) {
+            if (!this._cur) return;
             return this._cur.state.args[name];
         },
         getData: function(name) {
+            if (!this._cur) return;
             return this._cur.state.datas[name];
+        },
+        getPageName: function() {
+            if (!this._cur) return;
+            return this._cur.pageName;
+        },
+        getRouteName: function() {
+            if (!this._cur) return;
+            return this._cur.routeName;
+        },
+        getState: function() {
+            if (!this._cur) return;
+            return this._cur.state;
         },
         push: function(fragment, options) {
             navigate.forward(fragment, options);
@@ -688,7 +726,7 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Page = require("./modules/page-debug"), Component = require("./modules/component-debug"), Navigation = require("./modules/navigation-debug");
     app = {};
     function initComponent() {
-        var viewport = app.config.viewport, titlebar = viewport.querySelector("header.titlebar"), backBtn = titlebar.querySelector("button.back"), funcBtn = titlebar.querySelector("button.func");
+        var viewport = app.config.viewport, titlebar = viewport.querySelector("header.titlebar"), backBtn = titlebar.querySelector("li:nth-child(2) button"), funcBtn = titlebar.querySelector("li:nth-child(3) button");
         content = viewport.querySelector("section.content"), toolbar = viewport.querySelector("footer.toolbar");
         Component.initViewport(viewport);
         if (app.config.enableTitlebar) {
@@ -708,15 +746,19 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
         }
     }
     function initNavigation() {
-        var titlebar = Component.get("titlebar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), funcBtnHandler = null, content = Component.get("content"), transition = Component.get("transition");
-        Component.on("backBtnClick", function(el) {
-            navigate.backward();
+        var titlebar = Component.get("titlebar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), backBtnHandler = null, funcBtnHandler = null, content = Component.get("content"), transition = Component.get("transition");
+        Component.on("backBtnClick", function() {
+            if (backBtnHandler) {
+                backBtnHandler();
+            } else {
+                navigate.backward();
+            }
         });
-        Component.on("funcBtnClick", function(el) {
-            funcBtnHandler && funcBtnHandler(el);
+        Component.on("funcBtnClick", function() {
+            funcBtnHandler && funcBtnHandler();
         });
         function setButtons(navigation) {
-            var appName = navigation.appName, page = Page.get(appName), buttons = page.buttons;
+            var pageName = navigation.pageName, page = Page.get(pageName), buttons = page.buttons;
             backBtn.fn.hide();
             funcBtn.fn.hide();
             buttons && Object.each(buttons, function(item) {
@@ -724,7 +766,8 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
                 switch (type) {
                   case "back":
                     backBtn.fn.setText(item.text);
-                    if (navigate.getStateIndex() >= 1) {
+                    backBtnHandler = item.handler;
+                    if (item.autoHide === false || navigate.getStateIndex() >= 1) {
                         backBtn.fn.show();
                     }
                     break;
@@ -741,7 +784,7 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
             });
         }
         function setTitlebar(navigation) {
-            var appName = navigation.appName, transition = navigation.state.transition, page = Page.get(appName), title = page.getTitle();
+            var pageName = navigation.pageName, transition = navigation.state.transition, page = Page.get(pageName), title = page.getTitle();
             titlebar.fn.change(title, transition);
         }
         function switchNavigation(navigation) {
@@ -797,7 +840,8 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
             enableTitlebar: false,
             enableScroll: false,
             enableTransition: false,
-            enableToolbar: false
+            enableToolbar: false,
+            templateEngine: null
         },
         page: Page,
         component: Component,

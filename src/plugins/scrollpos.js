@@ -34,14 +34,14 @@
 				this._setPos(0);
 			} else {
 				options.first = false;
-			}
 
-			if (options.transitonEnd) {
-				scroll2(options.pos);
-			} else {
-				app.component.once('forwardTransitionEnd backwardTransitionEnd', function() {
+				if (options.transitonEnd) {
 					scroll2(options.pos);
-				})
+				} else {
+					app.component.once('backwardTransitionEnd', function() {
+						scroll2(options.pos);
+					})
+				}
 			}
 		},
 
@@ -52,13 +52,13 @@
 			scroll = app.component.get('scroll');
 
 			app.component.on('scrollEnd', this._setPos, this);
-			app.component.on('forwardTransitionEnd backwardTransitionEnd', this._transitonEnd, this);
+			app.component.on('backwardTransitionEnd', this._transitonEnd, this);
 			page.on('rendered', this.once, this);
 		},
 
 		off : function(page, options) {
 			app.component.off('scrollEnd', this._setPos, this);
-			app.component.off('forwardTransitionEnd backwardTransitionEnd', this._transitonEnd, this);
+			app.component.off('backwardTransitionEnd', this._transitonEnd, this);
 			page.off('rendered', this.once, this);
 		}
 	}

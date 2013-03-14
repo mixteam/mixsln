@@ -29,7 +29,8 @@ var win = window,
 		initViewport : function(el) {
 			components['viewport'] = el;
 
-			el.setAttribute('id', 'viewport-' + Date.now());
+			if (!el.getAttribute('id'))
+				el.setAttribute('id', 'viewport-' + Date.now());
 		},
 
 		initTitlebar : function(el) {
