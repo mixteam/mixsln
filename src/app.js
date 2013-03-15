@@ -80,7 +80,8 @@ var win = window,
 			funcBtn.fn.hide();
 
 			buttons && Object.each(buttons, function(item) {
-				var type = item.type;
+				var type = item.type,
+					isShow = false;
 
 				switch (type) {
 					case 'back':
@@ -89,15 +90,21 @@ var win = window,
 						if (item.autoHide === false || 
 								navigate.getStateIndex() >= 1) {
 							backBtn.fn.show();
+							isShow = true;
 						}
 						break;
 					case 'func':
 						funcBtn.fn.setText(item.text);
 						funcBtnHandler = item.handler;
 						funcBtn.fn.show();
+						isShow = true;
 						break;
 					default:
 						break;
+				}
+
+				if (isShow && item.onshow) {
+					item.onshow.call(backBtn);
 				}
 			});
 		}

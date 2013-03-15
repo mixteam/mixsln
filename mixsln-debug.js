@@ -1660,13 +1660,14 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
             backBtn.fn.hide();
             funcBtn.fn.hide();
             buttons && Object.each(buttons, function(item) {
-                var type = item.type;
+                var type = item.type, isShow = false;
                 switch (type) {
                   case "back":
                     backBtn.fn.setText(item.text);
                     backBtnHandler = item.handler;
                     if (item.autoHide === false || navigate.getStateIndex() >= 1) {
                         backBtn.fn.show();
+                        isShow = true;
                     }
                     break;
 
@@ -1674,10 +1675,14 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
                     funcBtn.fn.setText(item.text);
                     funcBtnHandler = item.handler;
                     funcBtn.fn.show();
+                    isShow = true;
                     break;
 
                   default:
                     break;
+                }
+                if (isShow && item.onshow) {
+                    item.onshow.call(backBtn);
                 }
             });
         }
