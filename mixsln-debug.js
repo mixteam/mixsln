@@ -1485,6 +1485,8 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
             var that = this, engine = app.config.templateEngine, compiledTemplate = that.compiledTemplate, content = "";
             if (engine && Object.isTypeof(datas, "object")) {
                 content = engine.render(compiledTemplate, datas);
+            } else {
+                content = compiledTemplate;
             }
             callback(content);
         },

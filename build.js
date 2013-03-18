@@ -38,9 +38,11 @@ function main(args) {
 		while (args.length > 0) {
 			var v = args.shift();
 			switch(v) {
+				case 'js':
 				case '--js':
 					options.builder = jsBuilder;
 					break;
+				case 'css':
 				case '--css':
 					options.builder = cssBuilder;
 					break;

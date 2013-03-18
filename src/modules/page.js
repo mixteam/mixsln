@@ -72,6 +72,8 @@ var win = window,
 
 			if (engine && Object.isTypeof(datas, 'object')) {
 				content = engine.render(compiledTemplate, datas);
+			} else {
+				content = compiledTemplate;
 			}
 
 			callback(content);

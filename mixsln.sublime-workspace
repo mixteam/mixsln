@@ -4,6 +4,30 @@
 		"selected_items":
 		[
 			[
+				"on",
+				"onshow"
+			],
+			[
+				"page",
+				"page"
+			],
+			[
+				"pro",
+				"prototype"
+			],
+			[
+				"tem",
+				"templateEngine"
+			],
+			[
+				"com",
+				"compiled"
+			],
+			[
+				"back",
+				"backBtn"
+			],
+			[
 				"nav",
 				"navigation"
 			],
@@ -76,10 +100,6 @@
 				"documentElement"
 			],
 			[
-				"com",
-				"component"
-			],
-			[
 				"off",
 				"offsetHeight"
 			],
@@ -118,10 +138,6 @@
 			[
 				"funcB",
 				"funcBtnHandler"
-			],
-			[
-				"back",
-				"backward"
 			],
 			[
 				"backB",
@@ -396,10 +412,6 @@
 				"_isInit"
 			],
 			[
-				"pro",
-				"properties"
-			],
-			[
 				"route",
 				"routePrefix"
 			],
@@ -502,44 +514,16 @@
 			[
 				"r",
 				"routePrefix"
-			],
-			[
-				"ge",
-				"gesture"
-			],
-			[
-				"exten",
-				"extends"
-			],
-			[
-				"th",
-				"theme"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "package.json",
-			"settings":
-			{
-				"buffer_size": 1116,
-				"line_ending": "Windows"
-			}
-		},
-		{
 			"file": "src/app.js",
 			"settings":
 			{
-				"buffer_size": 4450,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/modules/navigation.js",
-			"settings":
-			{
-				"buffer_size": 1641,
+				"buffer_size": 4794,
 				"line_ending": "Windows"
 			}
 		},
@@ -547,7 +531,23 @@
 			"file": "src/modules/component.js",
 			"settings":
 			{
-				"buffer_size": 4313,
+				"buffer_size": 4345,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/modules/page.js",
+			"settings":
+			{
+				"buffer_size": 2692,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/modules/navigation.js",
+			"settings":
+			{
+				"buffer_size": 2031,
 				"line_ending": "Windows"
 			}
 		}
@@ -596,25 +596,31 @@
 	},
 	"file_history":
 	[
+		"/D/workspace/taobao/etao/mix/mixsln/demo/debug.html",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/list/list.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/index.html",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/config.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/scrollpos.js",
+		"/D/workspace/taobao/etao/mix/mixsln/package.json",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
+		"/D/workspace/taobao/etao/mix/mixsln/assets/base.css",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/init.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/navigation.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.html",
 		"/D/workspace/taobao/etao/mix/mixsln/test/list.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/test/list.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/default.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/default.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/test/detail.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/navigation.js",
 		"/D/workspace/taobao/etao/mix/mixsln/README.md",
 		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/app.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/init.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/scrollpos.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/lazyload.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
 		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
 		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/plugin.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/plugins",
@@ -633,7 +639,6 @@
 		"/D/workspace/taobao/etao/H5/w_Wireless/base/styles/component/float/js/notification.js",
 		"/D/workspace/doc/charge_phone_tms.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/mix-sln-debug.js",
-		"/D/workspace/taobao/etao/mix/mixsln/assets/base.css",
 		"/D/workspace/taobao/etao/mix/mixsln/test/searchData.js",
 		"/D/workspace/taobao/etao/mix/mixsln/lib/zepto.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/detail.tpl",
@@ -655,7 +660,6 @@
 		"/D/workspace/taobao/etao/mix/mixsln/dist/sln.all-debug.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/app.all-debug.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/sln-debug.js",
-		"/D/workspace/taobao/etao/mix/mixsln/package.json",
 		"/D/workspace/taobao/etao/mix/mixsln/old/common.css",
 		"/D/workspace/taobao/etao/mix/mixsln/old/index.html",
 		"/D/workspace/taobao/etao/mix/mixsln/common-d64fb1c.css",
@@ -719,11 +723,7 @@
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/base/cmd/README.md",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/demos/helloworld/apps/hellomix/src/view.js",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/demos/helloworld/apps/hellomix/assets/view.mu",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/demos/helloworld/apps/hellomix/src/route.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/dom/animation/animation.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/dist/url/router/router-debug.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/demos/helloworld/package.json",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/ui/component/component.js"
+		"/D/workspace/taobao/etao/mix/mixjs-gitpower/demos/helloworld/apps/hellomix/src/route.js"
 	],
 	"find":
 	{
@@ -741,6 +741,7 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"appName",
 			"navigation",
 			"listApp",
 			"Transform",
@@ -867,8 +868,7 @@
 			"basePath",
 			"categoryUrl",
 			"font-family",
-			"highlight",
-			"highlighte"
+			"highlight"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -876,6 +876,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"pageName",
 			"listPage",
 			"Transform",
 			"that._getMaxScrollTop()",
@@ -978,73 +979,45 @@
 			[
 				{
 					"buffer": 0,
-					"file": "package.json",
+					"file": "src/app.js",
 					"settings":
 					{
-						"buffer_size": 1116,
+						"buffer_size": 4794,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								662,
-								662
+								2477,
+								2477
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JSON.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 975.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "src/app.js",
+					"file": "src/modules/component.js",
 					"settings":
 					{
-						"buffer_size": 4450,
+						"buffer_size": 4345,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3950,
-								3950
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 2112.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "src/modules/navigation.js",
-					"settings":
-					{
-						"buffer_size": 1641,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1252,
-								1252
+								2869,
+								2869
 							]
 						],
 						"settings":
@@ -1059,19 +1032,19 @@
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "src/modules/component.js",
+					"buffer": 2,
+					"file": "src/modules/page.js",
 					"settings":
 					{
-						"buffer_size": 4313,
+						"buffer_size": 2692,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3566,
-								3566
+								1861,
+								1861
 							]
 						],
 						"settings":
@@ -1080,7 +1053,34 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1392.0,
+						"translation.y": 1455.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/modules/navigation.js",
+					"settings":
+					{
+						"buffer_size": 2031,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1618,
+								1629
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 48.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

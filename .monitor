@@ -1,4 +1,4 @@
-[spm build, node build --js]
+[spm build, node build js]
 ./package.json
 ./src/app.js
 ./src/modules/gesture.js
@@ -11,6 +11,6 @@
 ./src/plugins/lazyload.js
 ./src/plugins/scrollpos.js
 
-[node build --css]
+[node build css]
 ./assets/base.css
 ./assets/x.css
