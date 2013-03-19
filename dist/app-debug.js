@@ -549,7 +549,7 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
         UNLOADED: 0,
         READY: 1,
         COMPILED: 2
-    }, pages = {}, Page = Class.create({
+    }, abstracts = {}, pages = {}, Page = Class.create({
         Implements: Message,
         initialize: function() {
             var that = this, name = that.name;
@@ -577,9 +577,12 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
             // can overwrite
             var that = this, engine = app.config.templateEngine;
             if (engine && Object.isTypeof(text, "string")) {
-                callback(engine.compile(text));
-            } else {
+                text = engine.compile(text);
+            }
+            if (callback) {
                 callback(text);
+            } else {
+                return text;
             }
         },
         renderTemplate: function(datas, callback) {
@@ -590,7 +593,11 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
             } else {
                 content = compiledTemplate;
             }
-            callback(content);
+            if (callback) {
+                callback(content);
+            } else {
+                return content;
+            }
         },
         fill: function(datas, callback) {
             var that = this;
@@ -612,28 +619,39 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
     Page.STATUS = STATUS;
     Page.global = {};
     Page.fn = {};
+    Page.abstract = function(properties) {
+        return abstracts[properties.name] = properties;
+    };
     Page.define = function(properties) {
-        var cPage = Page.extend(properties), page;
+        var cPage, iPage;
+        if (properties.Implements) {
+            var Implements = properties.Implements;
+            Object.isTypeof(Implements, "string") && (Implements = properties.Implements = [ Implements ]);
+            Object.each(properties.Implements, function(name, i) {
+                abstracts[name] && (Implements[i] = abstracts[name]);
+            });
+        }
+        cPage = Page.extend(properties);
         cPage.implement(Page.fn);
-        page = new cPage();
+        iPage = new cPage();
         Object.each(Page.global, function(val, name) {
             var type = Object.isTypeof(val);
             switch (type) {
               case "array":
-                page[name] = val.slice(0).concat(page[name] || []);
+                iPage[name] = val.slice(0).concat(iPage[name] || []);
                 break;
 
               case "object":
-                page[name] = Object.extend(val, page[name] || {});
+                iPage[name] = Object.extend(val, iPage[name] || {});
                 break;
 
               case "string":
               case "number":
-                page[name] == null && (page[name] = val);
+                iPage[name] == null && (iPage[name] = val);
                 break;
             }
         });
-        return pages[page.name] = page;
+        return pages[iPage.name] = iPage;
     };
     Page.get = function(name) {
         return pages[name];
