@@ -26,6 +26,7 @@ var win = window,
 			if (page.status < STATUS.READY) {
 				page.status = STATUS.READY;
 				page.trigger('ready');
+				page.ready();
 			}
 		},
 
@@ -60,6 +61,7 @@ var win = window,
 			if (page.status > STATUS.UNLOADED) {
 				page.status = STATUS.UNLOADED;
 				page.trigger('unloaded');
+				page.unload();
 			}
 		}
 	});

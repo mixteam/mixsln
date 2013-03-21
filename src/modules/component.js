@@ -124,7 +124,6 @@ var win = window,
 				setClass : function() {
 					inactive.className = 'inactive';
 					active.className = 'active';
-					
 				}
 			});
 		},
@@ -182,20 +181,26 @@ var win = window,
 
 			function action(type) {
 				var wrap = el.querySelector('div'),
-					active,	originX, originY
+					wrapWidth = wrap.offsetWidth,
+					active,	inactive, originX, originY
 					;
 
 				content.fn.switchActive();
-				active = content.fn.getActive(),
-				active.innerHTML = '';
+				active = content.fn.getActive();
+				inactive = content.fn.getInactive();
 
+				originX = Transform.getX(wrap);
 				originY = Transform.getY(wrap);
-				originX = (type === 'forward'?'-':'') + '33.33%';
+
+				originX += (type === 'forward'?-wrapWidth:wrapWidth);
 
 				Transform.start(wrap, '0.4s', 'ease', 0, originX, originY, function() {
 					content.fn.setClass();
-					originY = Transform.getY(wrap);
-					wrap.style.webkitTransform = Transform.getTranslate(0, originY);
+					active.style.left = (-Transform.getX(wrap)) + 'px';
+					inactive.innerHTML = '';
+					//wrap.removeChild(inactive);
+					//wrap.appendChild(inactive);
+					wrap.style.webkitTransform = Transform.getTranslate(originX, 0);
 					that.trigger(type  + 'TransitionEnd');
 				});
 			}

@@ -19,27 +19,27 @@
 		_options : null,
 
 		_setPos : function(pos) {
-			this._options.pos = (pos != null ? pos: getScrollTop());
+			this._options.state.pos = (pos != null ? pos: getScrollTop());
 		},
 
 		_transitonEnd : function() {
-			this._options.transitonEnd = true;
+			this._options.page.transitonEnd = true;
 		},
 
-		once : function() {
+		_resetPos : function() {
 			var options = this._options
 				;
 
-			if (!options.first) {
+			if (!options.page.first) {
 				this._setPos(0);
 			} else {
-				options.first = false;
+				options.page.first = false;
 
-				if (options.transitonEnd) {
-					scroll2(options.pos);
+				if (options.page.transitonEnd) {
+					scroll2(options.state.pos);
 				} else {
 					app.component.once('backwardTransitionEnd', function() {
-						scroll2(options.pos);
+						scroll2(options.state.pos);
 					})
 				}
 			}
@@ -47,19 +47,19 @@
 
 		on : function(page, options) {
 			this._options = options;
-			options.first = true;
-			options.transitonEnd = false;
+			options.page.first = true;
+			options.page.transitonEnd = false;
 			scroll = app.component.get('scroll');
 
 			app.component.on('scrollEnd', this._setPos, this);
 			app.component.on('backwardTransitionEnd', this._transitonEnd, this);
-			page.on('rendered', this.once, this);
+			page.on('rendered', this._resetPos, this);
 		},
 
 		off : function(page, options) {
 			app.component.off('scrollEnd', this._setPos, this);
 			app.component.off('backwardTransitionEnd', this._transitonEnd, this);
-			page.off('rendered', this.once, this);
+			page.off('rendered', this._resetPos, this);
 		}
 	}
 })(window, window['app']);

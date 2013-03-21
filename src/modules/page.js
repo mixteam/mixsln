@@ -23,14 +23,7 @@ var win = window,
 				;
 
 			Message.prototype.initialize.call(that, 'app.' + name);
-
 			that.status = STATUS.UNKOWN;
-
-			that.ready = that.ready.bind(that);
-			that.unload = that.unload.bind(that);
-
-			that.on('ready', that.ready);
-			that.on('unloaded', that.unload);
 		},
 
 		getTitle : function() {
@@ -107,7 +100,7 @@ var win = window,
 			}
 		},
 
-		ready : function(navigation) {/*implement*/},
+		ready : function() {/*implement*/},
 		unload : function() {/*implement*/}
 	});
 

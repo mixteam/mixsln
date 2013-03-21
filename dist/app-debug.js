@@ -258,6 +258,7 @@ define("#mix/sln/0.3.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
             that._wrap = element;
             that._scroller = element.children[0];
             that._gesture = new Gesture(that._scroller);
+            that._originalX = null;
             that._originalY = null;
             that._currentY = null;
             that._scrollHeight = null;
@@ -299,6 +300,7 @@ define("#mix/sln/0.3.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
             }
         },
         refresh: function() {
+            this._scroller.style.height = "auto";
             this._refreshed = true;
         },
         getHeight: function() {
@@ -308,14 +310,14 @@ define("#mix/sln/0.3.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
             return -Transform.getY(this._scroller);
         },
         to: function(top) {
-            var that = this, scroller = that._scroller, maxScrollTop = getMaxScrollTop(scroller);
+            var that = this, scroller = that._scroller, left = Transform.getX(scroller), maxScrollTop = getMaxScrollTop(scroller);
             top = -top;
             if (top < maxScrollTop) {
                 top = maxScrollTop;
             } else if (top > 0) {
                 top = 0;
             }
-            scroller.style.webkitTransform = Transform.getTranslate(0, top);
+            scroller.style.webkitTransform = Transform.getTranslate(left, top);
             that._onScrollEnd();
         },
         _preventBodyTouch: function(e) {
@@ -329,26 +331,26 @@ define("#mix/sln/0.3.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
             if (that._refreshed) {
                 that._refreshed = false;
                 that._scrollHeight = scroller.offsetHeight;
-                scroller.style.height = "auto";
                 scroller.style.height = that._scrollHeight + "px";
             }
         },
         _onPanStart: function(e) {
             var that = this, scroller = that._scroller;
+            that._originalX = Transform.getX(scroller);
             that._originalY = Transform.getY(scroller);
         },
         _onPan: function(e) {
-            var that = this, scroller = that._scroller, maxScrollTop = getMaxScrollTop(scroller), originalY = that._originalY, currentY = that._currentY = originalY + e.displacementY;
+            var that = this, scroller = that._scroller, maxScrollTop = getMaxScrollTop(scroller), originalX = that._originalX, originalY = that._originalY, currentY = that._currentY = originalY + e.displacementY;
             if (currentY > 0) {
-                scroller.style.webkitTransform = Transform.getTranslate(0, currentY / 2);
+                scroller.style.webkitTransform = Transform.getTranslate(originalX, currentY / 2);
             } else if (currentY < maxScrollTop) {
-                scroller.style.webkitTransform = Transform.getTranslate(0, (maxScrollTop - currentY) / 2 + currentY);
+                scroller.style.webkitTransform = Transform.getTranslate(originalX, (maxScrollTop - currentY) / 2 + currentY);
             } else {
-                scroller.style.webkitTransform = Transform.getTranslate(0, currentY);
+                scroller.style.webkitTransform = Transform.getTranslate(originalX, currentY);
             }
         },
         _onPanEnd: function(e) {
-            var that = this, scroller = that._scroller, currentY = that._currentY, maxScrollTop = getMaxScrollTop(scroller), translateY = null;
+            var that = this, scroller = that._scroller, originalX = that._originalX, currentY = that._currentY, maxScrollTop = getMaxScrollTop(scroller), translateY = null;
             if (currentY > 0) {
                 translateY = 0;
             }
@@ -356,13 +358,13 @@ define("#mix/sln/0.3.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
                 translateY = maxScrollTop;
             }
             if (translateY != null) {
-                Transform.start(scroller, "0.4s", "ease-out", "0s", 0, translateY, that._onScrollEnd);
+                Transform.start(scroller, "0.4s", "ease-out", "0s", originalX, translateY, that._onScrollEnd);
             } else {
                 that._onScrollEnd();
             }
         },
         _onFlick: function(e) {
-            var that = this, scroller = that._scroller, currentY = that._currentY, maxScrollTop = getMaxScrollTop(scroller);
+            var that = this, scroller = that._scroller, originalX = that._originalX, currentY = that._currentY, maxScrollTop = getMaxScrollTop(scroller);
             that._scrollEndCancel = true;
             if (currentY < maxScrollTop || currentY > 0) return;
             var s0 = Transform.getY(scroller), v0 = e.valocityY;
@@ -374,16 +376,16 @@ define("#mix/sln/0.3.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
                 s = (s - edge) / 2 + edge;
                 t = (sign * Math.sqrt(2 * a * (s - s0) + v0 * v0) - v0) / a;
                 v = v0 - a * t;
-                Transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + Transform.getBezier(-v0 / a, -v0 / a + t) + ")", "0s", 0, s.toFixed(0), function() {
+                Transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + Transform.getBezier(-v0 / a, -v0 / a + t) + ")", "0s", originalX, s.toFixed(0), function() {
                     v0 = v;
                     s0 = s;
                     a = .0045 * (v0 / Math.abs(v0));
                     t = -v0 / a;
                     s = edge;
-                    Transform.start(scroller, (0 - t).toFixed(0) + "ms", "cubic-bezier(" + Transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0), that._onScrollEnd);
+                    Transform.start(scroller, (0 - t).toFixed(0) + "ms", "cubic-bezier(" + Transform.getBezier(-t, 0) + ")", "0s", originalX, s.toFixed(0), that._onScrollEnd);
                 });
             } else {
-                Transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + Transform.getBezier(-t, 0) + ")", "0s", 0, s.toFixed(0), that._onScrollEnd);
+                Transform.start(scroller, t.toFixed(0) + "ms", "cubic-bezier(" + Transform.getBezier(-t, 0) + ")", "0s", originalX, s.toFixed(0), that._onScrollEnd);
             }
         },
         _onScrollEnd: function() {
@@ -517,15 +519,20 @@ define("#mix/sln/0.3.0/modules/component-debug", [ "./scroll-debug", "./gesture-
             viewport.className += " enableTransition";
             el.className += " transition";
             function action(type) {
-                var wrap = el.querySelector("div"), active, originX, originY;
+                var wrap = el.querySelector("div"), wrapWidth = wrap.offsetWidth, active, inactive, originX, originY;
                 content.fn.switchActive();
-                active = content.fn.getActive(), active.innerHTML = "";
+                active = content.fn.getActive();
+                inactive = content.fn.getInactive();
+                originX = Transform.getX(wrap);
                 originY = Transform.getY(wrap);
-                originX = (type === "forward" ? "-" : "") + "33.33%";
+                originX += type === "forward" ? -wrapWidth : wrapWidth;
                 Transform.start(wrap, "0.4s", "ease", 0, originX, originY, function() {
                     content.fn.setClass();
-                    originY = Transform.getY(wrap);
-                    wrap.style.webkitTransform = Transform.getTranslate(0, originY);
+                    active.style.left = -Transform.getX(wrap) + "px";
+                    inactive.innerHTML = "";
+                    //wrap.removeChild(inactive);
+                    //wrap.appendChild(inactive);
+                    wrap.style.webkitTransform = Transform.getTranslate(originX, 0);
                     that.trigger(type + "TransitionEnd");
                 });
             }
@@ -555,10 +562,6 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
             var that = this, name = that.name;
             Message.prototype.initialize.call(that, "app." + name);
             that.status = STATUS.UNKOWN;
-            that.ready = that.ready.bind(that);
-            that.unload = that.unload.bind(that);
-            that.on("ready", that.ready);
-            that.on("unloaded", that.unload);
         },
         getTitle: function() {
             //can overrewite
@@ -613,7 +616,7 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
                 _fill();
             }
         },
-        ready: function(navigation) {},
+        ready: function() {},
         unload: function() {}
     });
     Page.STATUS = STATUS;
@@ -676,6 +679,7 @@ define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
             if (page.status < STATUS.READY) {
                 page.status = STATUS.READY;
                 page.trigger("ready");
+                page.ready();
             }
         },
         compile: function() {
@@ -702,6 +706,7 @@ define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
             if (page.status > STATUS.UNLOADED) {
                 page.status = STATUS.UNLOADED;
                 page.trigger("unloaded");
+                page.unload();
             }
         }
     });
