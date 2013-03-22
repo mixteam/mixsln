@@ -1366,6 +1366,8 @@ define("#mix/sln/0.3.0/modules/component-debug", [ "./scroll-debug", "./gesture-
         initContent: function(el) {
             components["content"] = el;
             var active = el.querySelector("div > .active"), inactive = el.querySelector("div > .inactive");
+            active.setAttribute("index", "0");
+            inactive.setAttribute("index", "1");
             extendFns(el, {
                 getActive: function() {
                     return active;
@@ -1378,7 +1380,7 @@ define("#mix/sln/0.3.0/modules/component-debug", [ "./scroll-debug", "./gesture-
                     inactive = active;
                     active = swap;
                 },
-                setClass: function() {
+                toggleClass: function() {
                     inactive.className = "inactive";
                     active.className = "active";
                 }
@@ -1416,24 +1418,81 @@ define("#mix/sln/0.3.0/modules/component-debug", [ "./scroll-debug", "./gesture-
             var that = this, viewport = components["viewport"], content = components["content"];
             viewport.className += " enableTransition";
             el.className += " transition";
+            // 简单的转场效果
             function action(type) {
                 var wrap = el.querySelector("div"), wrapWidth = wrap.offsetWidth, active, inactive, originX, originY;
                 content.fn.switchActive();
                 active = content.fn.getActive();
                 inactive = content.fn.getInactive();
+                active.style.display = "block";
+                active.style.top = "-9999px";
+                wrap.appendChild(active);
                 originX = Transform.getX(wrap);
                 originY = Transform.getY(wrap);
                 originX += type === "forward" ? -wrapWidth : wrapWidth;
                 Transform.start(wrap, "0.4s", "ease", 0, originX, originY, function() {
-                    content.fn.setClass();
-                    active.style.left = -Transform.getX(wrap) + "px";
+                    content.fn.toggleClass();
+                    active.style.left = -originX + "px";
+                    active.style.top = "";
+                    active.style.display = "";
                     inactive.innerHTML = "";
-                    //wrap.removeChild(inactive);
-                    //wrap.appendChild(inactive);
+                    wrap.removeChild(inactive);
                     wrap.style.webkitTransform = Transform.getTranslate(originX, 0);
                     that.trigger(type + "TransitionEnd");
                 });
             }
+            // 复杂的转场效果
+            /*
+			function action(type) {
+				var wrap = el.querySelector('div'),
+					wrapWidth = wrap.offsetWidth,
+					active,	inactive, originX, originY
+					;
+
+				originX = Transform.getX(wrap);
+				originY = Transform.getY(wrap);
+
+				content.fn.switchActive();
+				active = content.fn.getActive();
+				inactive = content.fn.getInactive();
+
+				active.style.display = 'block';
+				
+				// 两个页面是在-webkit-box下，呈现并排状态，用relative定位，当有转场效果时，得重新计算各自的偏移。
+				// 每单位偏移量为wrap的宽度。
+				if (type === 'forward') {
+					if (active.getAttribute('index') === '1') {
+						// 被激活的div在原先div之后，偏移量为原始偏移量
+						active.style.left = (-originX) + 'px';
+					} else {
+						// 被激活的div在原先div之前，两个div需要互换位置，被激活的div向右偏移一个单位，原先div向左偏移一个单位
+						active.style.left = (-originX+wrapWidth) + 'px';
+						inactive.style.left = (-originX-wrapWidth) + 'px';
+					}
+					originX -= wrapWidth;
+				} else if (type === 'backward') {
+					if (active.getAttribute('index') === '1') {
+						// 被激活的div在原先div之后，需要向左偏移两个单位
+						active.style.left = (-originX-wrapWidth*2) + 'px';
+					} else {
+						// 被激活的div在原先div之前，同时向左平移一个单位
+						active.style.left = (-originX-wrapWidth) + 'px';
+						inactive.style.left = (-originX-wrapWidth) + 'px';
+					}
+					originX += wrapWidth;
+				}
+
+				Transform.start(wrap, '0.4s', 'ease', 0, originX, originY, function() {
+					content.fn.toggleClass();
+					// 回正偏移量
+					active.style.left = (-originX) + 'px';
+					active.style.display = '';
+					inactive.innerHTML = '';
+					wrap.style.webkitTransform = Transform.getTranslate(originX, 0);
+					that.trigger(type  + 'TransitionEnd');
+				});
+			}
+			*/
             extendFns(el, {
                 forward: function() {
                     action("forward");
@@ -1720,7 +1779,7 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
                 transition.fn[navigation.state.transition]();
             } else {
                 content.fn.switchActive();
-                content.fn.setClass();
+                content.fn.toggleClass();
             }
             if (app.navigation._cur) {
                 app.navigation._cur.unload();

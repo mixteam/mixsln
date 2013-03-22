@@ -140,7 +140,7 @@ header.titlebar button.back:before {
     left: 0;
     min-height: 100%;
     /*background-color: white;*/
-    outline: solid rgba(0, 0, 0, 0.7) 1px;
+    /*outline: solid rgba(0, 0, 0, 0.7) 1px;*/
 }
 
 .viewport > section.content > div > div{
@@ -197,6 +197,7 @@ header.titlebar button.back:before {
     -webkit-backface-visibility: hidden;
     -webkit-transform-style: preserve-3d;
     width: 100%;
+    display: -webkit-box;
     /*
     width: 300%;
     left: -100%;

@@ -124,7 +124,7 @@ var win = window,
 				transition.fn[navigation.state.transition]();
 			} else {
 				content.fn.switchActive();
-				content.fn.setClass();
+				content.fn.toggleClass();
 			}
 
 			if (app.navigation._cur) {
