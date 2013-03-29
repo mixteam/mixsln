@@ -17,20 +17,30 @@
     };
     app.plugin.domevent = {
         _options: null,
-        on: function(page, options) {
-            this._options = options;
-            options.page.cache = [];
-            if (page.events) {
-                Object.each(page.events, function(ev) {
+        _delegate: function(page, view) {
+            var that = this;
+            if (view.events) {
+                Object.each(view.events, function(ev) {
                     var handler = ev[2];
                     if (Object.isTypeof(handler, "string")) {
-                        handler = page[handler];
+                        handler = view[handler];
                     }
                     page.delegate(ev[0], ev[1], function(e) {
                         handler.call(this, e, page);
                     });
                 });
             }
+            if (view.views) {
+                Object.each(view.views, function(view) {
+                    that._delegate(page, view);
+                });
+            }
+        },
+        on: function(page, options) {
+            var that = this;
+            that._options = options;
+            options.page.cache = [];
+            that._delegate(page, page);
         },
         off: function(page, options) {
             var options = this._options;

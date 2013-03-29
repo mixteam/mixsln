@@ -132,9 +132,7 @@ var win = window,
 				app.navigation._cur.unload();
 			}
 			app.navigation._cur = navigation;
-			navigation.ready();
-			//navigation.compile();
-			
+			navigation.ready();			
 		}
 
 		navigate.on('forward backward', function (state) {

@@ -762,7 +762,6 @@ define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "./view-debu
                 page.ready();
             }
         },
-        compile: function() {},
         unload: function() {
             var that = this, page = Page.get(this.pageName);
             if (page.status > STATUS.UNLOADED) {

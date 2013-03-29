@@ -8,7 +8,7 @@
 		template : './templates/list.tpl',
 
 		events : [
-			'submit', '#J_topSearchForm', '_submitFormHandler'
+			['submit', '#J_topSearchForm', '_submitFormHandler']
 		],
 
 		views : {
@@ -42,6 +42,7 @@
 
 			searchItems.render(function(html) {
 				that.find('.searchcontent').html(html);
+				app.plugin.lazyload.check();
 			});
 		},
 

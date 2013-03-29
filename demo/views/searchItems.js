@@ -4,7 +4,7 @@
 		template : './templates/searchItems.tpl',
 
 		events : [
-			'click', 'a', '_itemClickHandler'
+			['click', 'a', '_itemClickHandler']
 		],
 
 		word : null,
@@ -15,7 +15,7 @@
 				;
 
 			e.preventDefault();
-			navigation.push('detail/' + el.getAttribute('dataid') + '/');
+			app.navigation.push('detail/' + el.getAttribute('dataid') + '/');
 		},
 
 		_getSearchItems : function(callback) {

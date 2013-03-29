@@ -30,29 +30,6 @@ var win = window,
 			}
 		},
 
-		compile : function() {
-			// var page = Page.get(this.pageName)
-			// 	;
-
-			// function _compiled() {
-			// 	if (page.status < STATUS.COMPILED) {
-			// 		page.status = STATUS.COMPILED;
-			// 		page.trigger('compiled');
-			// 	}
-			// }
-
-			// if (!page.compiledTemplate) {
-			// 	page.loadTemplate(function(text) {
-			// 		page.compileTemplate(text, function(compiled) {
-			// 			page.compiledTemplate = compiled;
-			// 			_compiled();	
-			// 		});
-			// 	});
-			// } else {
-			// 	_compiled();
-			// }
-		},
-
 		unload : function() {
 			var that = this,
 				page = Page.get(this.pageName)
