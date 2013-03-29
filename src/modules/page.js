@@ -5,6 +5,7 @@ var win = window,
     doc = win.document,
     Class = require('class'),
     Message = require('message'),
+    View = require('./view'),
 
     STATUS = {
 		'UNKOWN' : 0,
@@ -12,9 +13,9 @@ var win = window,
 		'READY' : 1,
 		'COMPILED' : 2,
 	},
-	abstracts = {},
 	pages = {},
 	Page = Class.create({
+		Extends : View,
 		Implements : Message,
 
 		initialize : function() {
@@ -22,7 +23,8 @@ var win = window,
 				name = that.name
 				;
 
-			Message.prototype.initialize.call(that, 'app.' + name);
+			Message.prototype.initialize.call(that, 'page.' + name);
+			View.prototype.initialize.apply(that, arguments);
 			that.status = STATUS.UNKOWN;
 		},
 
@@ -31,73 +33,14 @@ var win = window,
 			return this.title;
 		},
 
-		loadTemplate : function(url, callback) {
-			// can overwrite
-			var that = this
-				;
-
-			if (arguments.length === 1) {
-				callback = arguments[0];
-				url = that.template;
-			}
-
-			url && app.loadFile(url, callback);
-		},
-
-		compileTemplate : function(text, callback) {
-			// can overwrite
-			var that = this,
-				engine = app.config.templateEngine
-				;
-
-			if (engine && Object.isTypeof(text, 'string')) {
-				text = engine.compile(text);
-			}
-
-			if (callback) {
-				callback(text);
-			} else {
-				return text;
-			}
-		},
-
-		renderTemplate : function(datas, callback) {
-			// can overwrite
-			var that = this,
-				engine = app.config.templateEngine,
-				compiledTemplate = that.compiledTemplate,
-				content = ''
-				;
-
-			if (engine && Object.isTypeof(datas, 'object')) {
-				content = engine.render(compiledTemplate, datas);
-			} else {
-				content = compiledTemplate;
-			}
-
-			if (callback) {
-				callback(content);
-			} else {
-				return content;
-			}
-		},
-
 		fill : function(datas, callback) {
 			var that = this
 				;
 
-			function _fill() {
-				that.renderTemplate(datas, function(content) {
-					that.trigger('rendered', content);
-					callback && callback();
-				});
-			}
-
-			if (!that.compiledTemplate) {
-				that.once('compiled', _fill);
-			} else {
-				_fill();
-			}
+			that.renderDatas(datas, function(content) {
+				that.trigger('rendered', content);
+				callback && callback();				
+			});
 		},
 
 		ready : function() {/*implement*/},
@@ -107,20 +50,8 @@ var win = window,
 Page.STATUS = STATUS;
 Page.global = {};
 Page.fn = {};
-Page.abstract = function(properties) {
-	return (abstracts[properties.name] = properties);
-}
 Page.define = function(properties) {
 	var cPage, iPage;
-
-	if (properties.Implements) {
-		var Implements = properties.Implements;
-		Object.isTypeof(Implements, 'string') && 
-			(Implements = properties.Implements = [Implements]);
-		Object.each(properties.Implements, function(name, i) {
-			abstracts[name] && (Implements[i] = abstracts[name]);
-		});
-	}
 
 	cPage = Page.extend(properties);
 	cPage.implement(Page.fn);
@@ -144,11 +75,9 @@ Page.define = function(properties) {
 	});
 	return (pages[iPage.name] = iPage);
 }
-
 Page.get = function(name) {
 	return pages[name];
 }
-
 Page.each = function(callback) {
 	Object.each(pages, callback);
 }

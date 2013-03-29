@@ -50,7 +50,7 @@
         Object.each(dataSet, function(datas, name) {
             var compiledTemplate = templates[name];
             if (compiledTemplate) {
-                contents[name] = engine.render(compiledTemplate, datas);
+                contents[name] = engine && engine.render ? engine.render(compiledTemplate, datas) : compiledTemplate;
             }
         });
         if (contents.main) {

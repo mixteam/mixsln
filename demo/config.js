@@ -1,5 +1,5 @@
 app.config.viewport = document.querySelector('.viewport');
-app.config.enableTitlebar = true;
+app.config.enableNavibar = true;
 app.config.enableScroll = true;
 app.config.enableTransition = true;
 app.config.templateEngine = {

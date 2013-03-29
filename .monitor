@@ -4,6 +4,7 @@
 ./src/modules/gesture.js
 ./src/modules/transform.js
 ./src/modules/scroll.js
+./src/modules/view.js
 ./src/modules/page.js
 ./src/modules/component.js
 ./src/modules/navigation.js

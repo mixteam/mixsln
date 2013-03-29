@@ -30,6 +30,7 @@
                 "./modules/transform",
                 "./modules/scroll",
                 "./modules/component.js",
+                "./modules/view",
                 "./modules/page",
                 "./modules/navigation.js",
                 "./app"

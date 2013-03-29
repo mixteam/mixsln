@@ -33,12 +33,12 @@ var win = window,
 				el.setAttribute('id', 'viewport-' + Date.now());
 		},
 
-		initTitlebar : function(el) {
+		initNavibar : function(el) {
 			var viewport = components['viewport']
 				;
 
-			viewport.className += ' enableTitlebar';
-			components['titlebar'] = el;
+			viewport.className += ' enableNavibar';
+			components['navibar'] = el;
 
 			extendFns(el, {
 				change : function(text, movement) {

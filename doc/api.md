@@ -32,6 +32,12 @@
 
 设置是否启用转场效果，默认为false
 
+### templateEngine
+
+* @var {object}
+
+定义模版引擎的compile和render方法。
+
 ##app.page
 
 ### define(properties)
@@ -41,12 +47,25 @@
 
 定义一个页面
 
+### abstract(properties)
+
+* @param {object} properties
+* @return a abstract page
+
+定义一个虚页面（虚基类），该页面不会被实例化。而其他页面可以扩展此虚页面的方法和属性。因此不推荐在虚页面中设置`route`。
+
 ### get(name)
 
 * @param {string} name
 * @return {Page} a page object
 
 获取指定name的页面
+
+### each(delegate)
+
+* @param {function} delegate
+
+遍历当前已经定义的页面
 
 ##app.component
 
@@ -85,6 +104,24 @@
 * @return {string} a value
 
 获取指定name的POST值（参见push方法）
+
+### getPageName()
+
+* @retrun {string} the name of the current page
+
+返回当前页面的名称
+
+### getRouteName()
+
+* @retrun {string} the name of the current route
+
+返回当前路由的名称
+
+### getState()
+
+* @return {object} the current state
+
+获取当前导航的状态
 
 ### push(fragment, options)
 

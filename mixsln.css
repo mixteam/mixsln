@@ -22,7 +22,7 @@ body * {
     background: url(http://a.tbcdn.cn/mw/base/styles/component/more/images/loading.gif) center center no-repeat;
 }
 
-header.titlebar {
+header.navibar {
     -webkit-box-shadow:inset 0 1px 1px white;
     background: -webkit-gradient(linear, left top, left bottom, from(rgb(110,132,161)), to(rgb(180,191,205)), color-stop(0.5, rgb(137,155,178)), color-stop(0.51, rgb(127,148,176)));
     border-bottom:solid 1px rgb(33,39,48);
@@ -38,7 +38,7 @@ header.titlebar {
     left: 0;
 }
 
-header.titlebar > ul {
+header.navibar > ul {
     position: relative;
     width: 100%;
     height: 100%;
@@ -46,31 +46,31 @@ header.titlebar > ul {
     background: none;
 }
 
-header.titlebar > ul.forward {
+header.navibar > ul.forward {
     -webkit-transform: translate(50px, 0); 
     opacity: 0;
 }
 
-header.titlebar > ul.backward {
+header.navibar > ul.backward {
     -webkit-transform: translate(-50px, 0);
     opacity: 0;
 }
 
-header.titlebar > ul.transition {
+header.navibar > ul.transition {
     -webkit-transition:0.4s ease; 
     -webkit-transition-property: -webkit-transform opacity; 
     -webkit-transform: translate(0, 0);
     opacity: 1;
 }
 
-header.titlebar:after {
+header.navibar:after {
     display: block;
     content: ' ';
     clear: both;
     visibility: hidden;
 }
 
-header.titlebar > ul > li {
+header.navibar > ul > li {
     position: relative;
     height: 100%;
     display: -webkit-box;
@@ -78,24 +78,24 @@ header.titlebar > ul > li {
     -webkit-box-align: center;
 }
 
-header.titlebar > ul > li:first-child {
+header.navibar > ul > li:first-child {
     width: 100%;
     float: left;
 }
 
-header.titlebar > ul > li:nth-child(2) {
+header.navibar > ul > li:nth-child(2) {
     float: left;
     top: -100%;
     padding: 0 10px;
 }
 
-header.titlebar > ul > li:last-child {
+header.navibar > ul > li:last-child {
     float: right;
     top: -100%;
     padding: 0 10px;
 }
 
-header.titlebar button {
+header.navibar button {
     top: 0;
     display: inline-block;
     text-align: center;
@@ -116,14 +116,14 @@ header.titlebar button {
     font-size: 13px;
 }
 
-header.titlebar button.back {
+header.navibar button.back {
     margin-left: 15px;
     border-left: 0;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
 
-header.titlebar button.back:before {
+header.navibar button.back:before {
     content: "";
     color: white;
     height: 31px;
@@ -144,7 +144,7 @@ header.titlebar button.back:before {
     min-height: 100%;
 }
 
-.viewport > header.titlebar {
+.viewport > header.navibar {
     display: none;
 }
 
@@ -178,7 +178,7 @@ header.titlebar button.back:before {
 }
 
 
-.viewport.enableTitlebar > header.titlebar {
+.viewport.enableNavibar > header.navibar {
     display: block;
 }
 
@@ -188,7 +188,7 @@ header.titlebar button.back:before {
 }
 
 
-.viewport.enableTitlebar > section {
+.viewport.enableNavibar > section {
     margin-top: -43px;
     padding-top: 43px;
 }

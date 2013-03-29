@@ -418,10 +418,10 @@ define("#mix/sln/0.3.0/modules/component-debug", [ "./scroll-debug", "./gesture-
             components["viewport"] = el;
             if (!el.getAttribute("id")) el.setAttribute("id", "viewport-" + Date.now());
         },
-        initTitlebar: function(el) {
+        initNavibar: function(el) {
             var viewport = components["viewport"];
-            viewport.className += " enableTitlebar";
-            components["titlebar"] = el;
+            viewport.className += " enableNavibar";
+            components["navibar"] = el;
             extendFns(el, {
                 change: function(text, movement) {
                     var that = this, wrap = el.querySelector("ul"), title = wrap.querySelector("li:first-child");
@@ -608,23 +608,13 @@ define("#mix/sln/0.3.0/modules/component-debug", [ "./scroll-debug", "./gesture-
     return new Compontent();
 });
 
-define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.0/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), STATUS = {
-        UNKOWN: 0,
-        UNLOADED: 0,
-        READY: 1,
-        COMPILED: 2
-    }, abstracts = {}, pages = {}, Page = Class.create({
-        Implements: Message,
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), views = {}, vAutoIdx = 0, View = Class.create({
         initialize: function() {
             var that = this, name = that.name;
-            Message.prototype.initialize.call(that, "app." + name);
-            that.status = STATUS.UNKOWN;
-        },
-        getTitle: function() {
-            //can overrewite
-            return this.title;
+            that._vid = name + "-" + Date.now() + "-" + vAutoIdx++;
+            that.views || (that.views = {});
         },
         loadTemplate: function(url, callback) {
             // can overwrite
@@ -638,7 +628,7 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
         compileTemplate: function(text, callback) {
             // can overwrite
             var that = this, engine = app.config.templateEngine;
-            if (engine && Object.isTypeof(text, "string")) {
+            if (engine && engine.compile && Object.isTypeof(text, "string")) {
                 text = engine.compile(text);
             }
             if (callback) {
@@ -650,7 +640,7 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
         renderTemplate: function(datas, callback) {
             // can overwrite
             var that = this, engine = app.config.templateEngine, compiledTemplate = that.compiledTemplate, content = "";
-            if (engine && Object.isTypeof(datas, "object")) {
+            if (engine && engine.render && Object.isTypeof(datas, "object")) {
                 content = engine.render(compiledTemplate, datas);
             } else {
                 content = compiledTemplate;
@@ -661,19 +651,60 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
                 return content;
             }
         },
+        renderDatas: function(datas, callback) {
+            // can overwrite
+            var that = this;
+            if (!that.compiledTemplate) {
+                that.loadTemplate(function(text) {
+                    that.compileTemplate(text, function(compiled) {
+                        that.compiledTemplate = compiled;
+                        that.renderTemplate(datas, callback);
+                    });
+                });
+            } else {
+                that.renderTemplate(datas, callback);
+            }
+        }
+    });
+    View.define = function(properties) {
+        var cView = View.extend(properties);
+        return views[properties.name] = cView;
+    };
+    View.get = function(name) {
+        return views[name];
+    };
+    View.each = function(callback) {
+        Object.each(views, callback);
+    };
+    return View;
+});
+
+define("#mix/sln/0.3.0/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), View = require("./view-debug"), STATUS = {
+        UNKOWN: 0,
+        UNLOADED: 0,
+        READY: 1,
+        COMPILED: 2
+    }, pages = {}, Page = Class.create({
+        Extends: View,
+        Implements: Message,
+        initialize: function() {
+            var that = this, name = that.name;
+            Message.prototype.initialize.call(that, "page." + name);
+            View.prototype.initialize.apply(that, arguments);
+            that.status = STATUS.UNKOWN;
+        },
+        getTitle: function() {
+            //can overrewite
+            return this.title;
+        },
         fill: function(datas, callback) {
             var that = this;
-            function _fill() {
-                that.renderTemplate(datas, function(content) {
-                    that.trigger("rendered", content);
-                    callback && callback();
-                });
-            }
-            if (!that.compiledTemplate) {
-                that.once("compiled", _fill);
-            } else {
-                _fill();
-            }
+            that.renderDatas(datas, function(content) {
+                that.trigger("rendered", content);
+                callback && callback();
+            });
         },
         ready: function() {},
         unload: function() {}
@@ -681,18 +712,8 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
     Page.STATUS = STATUS;
     Page.global = {};
     Page.fn = {};
-    Page.abstract = function(properties) {
-        return abstracts[properties.name] = properties;
-    };
     Page.define = function(properties) {
         var cPage, iPage;
-        if (properties.Implements) {
-            var Implements = properties.Implements;
-            Object.isTypeof(Implements, "string") && (Implements = properties.Implements = [ Implements ]);
-            Object.each(properties.Implements, function(name, i) {
-                abstracts[name] && (Implements[i] = abstracts[name]);
-            });
-        }
         cPage = Page.extend(properties);
         cPage.implement(Page.fn);
         iPage = new cPage();
@@ -724,7 +745,7 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "mix/core/0.3.0/base/reset-debug",
     return Page;
 });
 
-define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Page = require("./page-debug"), STATUS = Page.STATUS, Navigation = Class.create({
         initialize: function(state) {
@@ -741,25 +762,7 @@ define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
                 page.ready();
             }
         },
-        compile: function() {
-            var page = Page.get(this.pageName);
-            function _compiled() {
-                if (page.status < STATUS.COMPILED) {
-                    page.status = STATUS.COMPILED;
-                    page.trigger("compiled");
-                }
-            }
-            if (!page.compiledTemplate) {
-                page.loadTemplate(function(text) {
-                    page.compileTemplate(text, function(compiled) {
-                        page.compiledTemplate = compiled;
-                        _compiled();
-                    });
-                });
-            } else {
-                _compiled();
-            }
-        },
+        compile: function() {},
         unload: function() {
             var that = this, page = Page.get(this.pageName);
             if (page.status > STATUS.UNLOADED) {
@@ -805,16 +808,16 @@ define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "mix/core/0.
     return Navigation;
 });
 
-define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.3.0/app-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.0/app-debug", [ "./modules/view-debug", "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.3.0/app-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Page = require("./modules/page-debug"), Component = require("./modules/component-debug"), Navigation = require("./modules/navigation-debug");
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, View = require("./modules/view-debug"), Page = require("./modules/page-debug"), Component = require("./modules/component-debug"), Navigation = require("./modules/navigation-debug");
     app = {};
     function initComponent() {
-        var viewport = app.config.viewport, titlebar = viewport.querySelector("header.titlebar"), backBtn = titlebar.querySelector("li:nth-child(2) button"), funcBtn = titlebar.querySelector("li:nth-child(3) button");
+        var viewport = app.config.viewport, navibar = viewport.querySelector("header.navibar"), backBtn = navibar.querySelector("li:nth-child(2) button"), funcBtn = navibar.querySelector("li:nth-child(3) button");
         content = viewport.querySelector("section.content"), toolbar = viewport.querySelector("footer.toolbar");
         Component.initViewport(viewport);
-        if (app.config.enableTitlebar) {
-            Component.initTitlebar(titlebar);
+        if (app.config.enableNavibar) {
+            Component.initNavibar(navibar);
             Component.initBackBtn(backBtn);
             Component.initFuncBtn(funcBtn);
         }
@@ -830,7 +833,7 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
         }
     }
     function initNavigation() {
-        var titlebar = Component.get("titlebar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), backBtnHandler = null, funcBtnHandler = null, content = Component.get("content"), transition = Component.get("transition");
+        var navibar = Component.get("navibar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), backBtnHandler = null, funcBtnHandler = null, content = Component.get("content"), transition = Component.get("transition");
         Component.on("backBtnClick", function() {
             if (backBtnHandler) {
                 backBtnHandler();
@@ -872,9 +875,9 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
                 }
             });
         }
-        function setTitlebar(navigation) {
+        function setNavibar(navigation) {
             var pageName = navigation.pageName, transition = navigation.state.transition, page = Page.get(pageName), title = page.getTitle();
-            titlebar.fn.change(title, transition);
+            navibar.fn.change(title, transition);
         }
         function switchNavigation(navigation) {
             if (app.config.enableTransition) {
@@ -888,14 +891,13 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
             }
             app.navigation._cur = navigation;
             navigation.ready();
-            navigation.compile();
         }
         navigate.on("forward backward", function(state) {
             var navigation = new Navigation(state);
             switchNavigation(navigation);
-            if (app.config.enableTitlebar) {
+            if (app.config.enableNavibar) {
                 setButtons(navigation);
-                setTitlebar(navigation);
+                setNavibar(navigation);
             }
         });
         Page.each(function(page) {
@@ -912,9 +914,9 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
                 };
             }
             navigate.addRoute(name + "." + route.name, route.text, route);
-            page.on("rendered", function(html) {
+            page.on("rendered", function(content) {
                 var scroll = Component.get("scroll"), active = Component.getActiveContent();
-                active && (active.innerHTML = html);
+                active && (active.innerHTML = content);
                 scroll && scroll.fn.refresh();
             });
         });
@@ -932,6 +934,7 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/page-debug", "./modules/componen
             enableToolbar: false,
             templateEngine: null
         },
+        view: View,
         page: Page,
         component: Component,
         navigation: Navigation,

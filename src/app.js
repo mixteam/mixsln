@@ -9,6 +9,7 @@ var win = window,
 	router = require('router').singleton,
 	navigate = require('navigate').singleton,
 
+	View = require('./modules/view'),
 	Page = require('./modules/page'),
 	Component = require('./modules/component'),
 	Navigation = require('./modules/navigation')
@@ -18,17 +19,17 @@ var win = window,
 
 	function initComponent() {
 		var viewport = app.config.viewport,
-			titlebar = viewport.querySelector('header.titlebar'),
-			backBtn = titlebar.querySelector('li:nth-child(2) button'),
-			funcBtn = titlebar.querySelector('li:nth-child(3) button')
+			navibar = viewport.querySelector('header.navibar'),
+			backBtn = navibar.querySelector('li:nth-child(2) button'),
+			funcBtn = navibar.querySelector('li:nth-child(3) button')
 			content = viewport.querySelector('section.content'),
 			toolbar = viewport.querySelector('footer.toolbar')
 			;
 
 		Component.initViewport(viewport);
 
-		if (app.config.enableTitlebar) {
-			Component.initTitlebar(titlebar);
+		if (app.config.enableNavibar) {
+			Component.initNavibar(navibar);
 			Component.initBackBtn(backBtn);
 			Component.initFuncBtn(funcBtn);
 		}
@@ -50,7 +51,7 @@ var win = window,
 	}
 
 	function initNavigation() {
-		var titlebar = Component.get('titlebar'),
+		var navibar = Component.get('navibar'),
 			backBtn = Component.get('backBtn'),
 			funcBtn = Component.get('funcBtn'),
 			backBtnHandler = null,
@@ -109,14 +110,14 @@ var win = window,
 			});
 		}
 
-		function setTitlebar(navigation) {
+		function setNavibar(navigation) {
 			var pageName = navigation.pageName,
 				transition = navigation.state.transition,
 				page = Page.get(pageName),
 				title = page.getTitle()
 				;
 
-			titlebar.fn.change(title, transition);
+			navibar.fn.change(title, transition);
 		}
 
 		function switchNavigation(navigation) {
@@ -132,7 +133,7 @@ var win = window,
 			}
 			app.navigation._cur = navigation;
 			navigation.ready();
-			navigation.compile();
+			//navigation.compile();
 			
 		}
 
@@ -141,9 +142,9 @@ var win = window,
 				;
 
 			switchNavigation(navigation);
-			if (app.config.enableTitlebar) {
+			if (app.config.enableNavibar) {
 				setButtons(navigation);
-				setTitlebar(navigation);
+				setNavibar(navigation);
 			}
 		});
 
@@ -160,12 +161,12 @@ var win = window,
 
 			navigate.addRoute(name + '.' + route.name, route.text, route);
 
-			page.on('rendered', function(html) {
+			page.on('rendered', function(content) {
 				var scroll = Component.get('scroll'),
 					active = Component.getActiveContent()
 					;
 
-				active && (active.innerHTML = html);
+				active && (active.innerHTML = content);
 				scroll && scroll.fn.refresh();
 			});
 		});
@@ -183,6 +184,7 @@ var win = window,
 			enableToolbar : false,
 			templateEngine : null
 		},
+		view : View,
 		page : Page,
 		component : Component,
 		navigation : Navigation,
