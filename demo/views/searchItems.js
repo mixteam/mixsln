@@ -39,7 +39,7 @@
 				;
 
 			that._getSearchItems(function(datas) {
-				that.renderDatas(datas, callback);
+				that.renderTemplate(datas, callback);
 			});
 		}
 	});

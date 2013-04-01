@@ -10,8 +10,8 @@ var win = window,
     STATUS = {
 		'UNKOWN' : 0,
 		'UNLOADED' : 0,
-		'READY' : 1,
-		'COMPILED' : 2,
+		'LOADED' : 1,
+		'READY' : 2
 	},
 	pages = {},
 	Page = Class.create({
@@ -37,10 +37,11 @@ var win = window,
 			var that = this
 				;
 
-			that.renderDatas(datas, function(content) {
-				that.trigger('rendered', content);
-				callback && callback();				
-			});
+			if (!Object.isTypeof(datas, 'string')) {
+				datas = that.renderTemplate(datas);
+			}
+			that.trigger('rendered', datas);
+			callback && callback();
 		},
 
 		ready : function() {/*implement*/},
@@ -50,12 +51,19 @@ var win = window,
 Page.STATUS = STATUS;
 Page.global = {};
 Page.fn = {};
+var isExtend = false;
+function extendPageFn() {
+	if (!isExtend) {
+		isExtend = true;
+		Object.extend(Page.prototype, Page.fn);
+	}
+}
 Page.define = function(properties) {
-	var cPage, iPage;
+	extendPageFn();
 
-	cPage = Page.extend(properties);
-	cPage.implement(Page.fn);
-	iPage = new cPage();
+	var cPage = Page.extend(properties), 
+		iPage = new cPage()
+		;
 
 	Object.each(Page.global, function(val, name) {
 		var type = Object.isTypeof(val);

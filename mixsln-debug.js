@@ -896,7 +896,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
     });
     module.exports = Navigate;
 });
-define("#mix/sln/0.3.0/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.1/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, events = [ "screenX", "screenY", "clientX", "clientY", "pageX", "pageY" ], Class = require("mix/core/0.3.0/base/class-debug");
     function calc(x1, y1, x2, y2, x3, y3, x4, y4) {
@@ -1072,7 +1072,7 @@ define("#mix/sln/0.3.0/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debu
     return Gestrue;
 });
 
-define("#mix/sln/0.3.0/modules/transform-debug", [], function(require, exports, module) {
+define("#mix/sln/0.3.1/modules/transform-debug", [], function(require, exports, module) {
     var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/, MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/, TRANSITION_NAME = "-webkit-transform", appVersion = navigator.appVersion, isAndroid = /android/gi.test(appVersion), isIOS = /iphone|ipad/gi.test(appVersion), has3d = "WebKitCSSMatrix" in window && "m11" in new WebKitCSSMatrix();
     function quadratic2cubicBezier(a, b) {
         return [ [ (a / 3 + (a + b) / 3 - a) / (b - a), (a * a / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a) ], [ (b / 3 + (a + b) / 3 - a) / (b - a), (b * b / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a) ] ];
@@ -1141,7 +1141,7 @@ define("#mix/sln/0.3.0/modules/transform-debug", [], function(require, exports, 
     exports.start = startTransition;
 });
 
-define("#mix/sln/0.3.0/modules/scroll-debug", [ "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.1/modules/scroll-debug", [ "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, navigator = win.navigator, Class = require("mix/core/0.3.0/base/class-debug"), Gesture = require("./gesture-debug"), Transform = require("./transform-debug"), prevented = false;
     function getMaxScrollTop(el) {
@@ -1299,7 +1299,7 @@ define("#mix/sln/0.3.0/modules/scroll-debug", [ "./gesture-debug", "./transform-
     return Scroll;
 });
 
-define("#mix/sln/0.3.0/modules/component-debug", [ "./scroll-debug", "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.1/modules/component-debug", [ "./scroll-debug", "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Scroll = require("./scroll-debug"), Transform = require("./transform-debug"), components = {}, emptyFunc = function() {}, extendFns = function(el, fns) {
         el.fn || (el.fn = {});
@@ -1506,7 +1506,7 @@ define("#mix/sln/0.3.0/modules/component-debug", [ "./scroll-debug", "./gesture-
     return new Compontent();
 });
 
-define("#mix/sln/0.3.0/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.1/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), views = {}, vAutoIdx = 0, View = Class.create({
         initialize: function() {
@@ -1548,23 +1548,18 @@ define("#mix/sln/0.3.0/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug",
             } else {
                 return content;
             }
-        },
-        renderDatas: function(datas, callback) {
-            // can overwrite
-            var that = this;
-            if (!that.compiledTemplate) {
-                that.loadTemplate(function(text) {
-                    that.compileTemplate(text, function(compiled) {
-                        that.compiledTemplate = compiled;
-                        that.renderTemplate(datas, callback);
-                    });
-                });
-            } else {
-                that.renderTemplate(datas, callback);
-            }
         }
     });
+    View.fn = {};
+    var isExtend = false;
+    function extendViewFn() {
+        if (!isExtend) {
+            isExtend = true;
+            Object.extend(View.prototype, View.fn);
+        }
+    }
     View.define = function(properties) {
+        extendViewFn();
         var cView = View.extend(properties);
         return views[properties.name] = cView;
     };
@@ -1577,13 +1572,13 @@ define("#mix/sln/0.3.0/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug",
     return View;
 });
 
-define("#mix/sln/0.3.0/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.1/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), View = require("./view-debug"), STATUS = {
         UNKOWN: 0,
         UNLOADED: 0,
-        READY: 1,
-        COMPILED: 2
+        LOADED: 1,
+        READY: 2
     }, pages = {}, Page = Class.create({
         Extends: View,
         Implements: Message,
@@ -1599,10 +1594,11 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/ba
         },
         fill: function(datas, callback) {
             var that = this;
-            that.renderDatas(datas, function(content) {
-                that.trigger("rendered", content);
-                callback && callback();
-            });
+            if (!Object.isTypeof(datas, "string")) {
+                datas = that.renderTemplate(datas);
+            }
+            that.trigger("rendered", datas);
+            callback && callback();
         },
         ready: function() {},
         unload: function() {}
@@ -1610,11 +1606,16 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/ba
     Page.STATUS = STATUS;
     Page.global = {};
     Page.fn = {};
+    var isExtend = false;
+    function extendPageFn() {
+        if (!isExtend) {
+            isExtend = true;
+            Object.extend(Page.prototype, Page.fn);
+        }
+    }
     Page.define = function(properties) {
-        var cPage, iPage;
-        cPage = Page.extend(properties);
-        cPage.implement(Page.fn);
-        iPage = new cPage();
+        extendPageFn();
+        var cPage = Page.extend(properties), iPage = new cPage();
         Object.each(Page.global, function(val, name) {
             var type = Object.isTypeof(val);
             switch (type) {
@@ -1643,7 +1644,7 @@ define("#mix/sln/0.3.0/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/ba
     return Page;
 });
 
-define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.1/modules/navigation-debug", [ "./page-debug", "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Page = require("./page-debug"), STATUS = Page.STATUS, Navigation = Class.create({
         initialize: function(state) {
@@ -1658,6 +1659,28 @@ define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "./view-debu
                 page.status = STATUS.READY;
                 page.trigger("ready");
                 page.ready();
+            }
+        },
+        load: function(callback) {
+            var that = this, page = Page.get(this.pageName), views = page.views || {}, loadedState = [ page ];
+            function checkLoaded(i) {
+                loadedState[i] = true;
+                if (loadedState.join("").match(/^(true)*$/)) {
+                    callback();
+                }
+            }
+            if (page.status < STATUS.LOADED) {
+                Object.each(views, function(view) {
+                    loadedState.push(view);
+                });
+                Object.each(loadedState, function(state, i) {
+                    state.loadTemplate(function(text) {
+                        state.compileTemplate(text, function(compiled) {
+                            state.compiledTemplate = compiled;
+                            checkLoaded(i);
+                        });
+                    });
+                });
             }
         },
         unload: function() {
@@ -1705,7 +1728,7 @@ define("#mix/sln/0.3.0/modules/navigation-debug", [ "./page-debug", "./view-debu
     return Navigation;
 });
 
-define("#mix/sln/0.3.0/app-debug", [ "./modules/view-debug", "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.3.0/app-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.1/app-debug", [ "./modules/view-debug", "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.3.1/app-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, View = require("./modules/view-debug"), Page = require("./modules/page-debug"), Component = require("./modules/component-debug"), Navigation = require("./modules/navigation-debug");
     app = {};
@@ -1787,7 +1810,9 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/view-debug", "./modules/page-deb
                 app.navigation._cur.unload();
             }
             app.navigation._cur = navigation;
-            navigation.ready();
+            navigation.load(function() {
+                navigation.ready();
+            });
         }
         navigate.on("forward backward", function(state) {
             var navigation = new Navigation(state);
@@ -1856,4 +1881,4 @@ define("#mix/sln/0.3.0/app-debug", [ "./modules/view-debug", "./modules/page-deb
     win["app"] = app;
 });
 
-require("mix/sln/0.3.0/app-debug");
+require("mix/sln/0.3.1/app-debug");

@@ -30,6 +30,36 @@ var win = window,
 			}
 		},
 
+		load : function(callback) {
+			var that = this,
+				page = Page.get(this.pageName),
+				views = page.views || {}, 
+				loadedState = [page]
+				;
+
+			function checkLoaded(i) {
+				loadedState[i] = true;
+				if (loadedState.join('').match(/^(true)*$/)) {
+					callback();
+				}
+			}
+
+			if (page.status < STATUS.LOADED) {
+				Object.each(views, function(view) {
+					loadedState.push(view);
+				});
+
+				Object.each(loadedState, function(state, i) {
+					state.loadTemplate(function(text) {
+						state.compileTemplate(text, function(compiled) {
+							state.compiledTemplate = compiled;
+							checkLoaded(i);
+						});
+					});
+				});
+			}
+		},
+
 		unload : function() {
 			var that = this,
 				page = Page.get(this.pageName)

@@ -1,7 +1,7 @@
 {
     "name" : "mix/sln",
     "root" : "#",
-    "version" : "0.3.0",
+    "version" : "0.3.1",
     "description" : "the solution for mixjs",
     "license" : "MIT",
     "author" : "zhuxun <zhuxun.jb@taobao.com>",
@@ -18,7 +18,7 @@
         "router" : "mix/core/0.3.0/url/router",
         "navigate" : "mix/core/0.3.0/url/navigate",
 
-        "app" : "mix/sln/0.3.0/app"
+        "app" : "mix/sln/0.3.1/app"
     },
     "output" : {
         "plugins/*" : ".",

@@ -66,27 +66,20 @@ var win = window,
 			} else {
 				return content;
 			}
-		},
-
-		renderDatas: function(datas, callback) {
-			// can overwrite
-			var that = this
-				;
-
-			if (!that.compiledTemplate) {
-				that.loadTemplate(function(text) {
-					that.compileTemplate(text, function(compiled) {
-						that.compiledTemplate = compiled;
-						that.renderTemplate(datas, callback);
-					});
-				});
-			} else {
-				that.renderTemplate(datas, callback);
-			}
 		}
 	});
 
+View.fn = {};
+var isExtend = false;
+function extendViewFn() {
+	if (!isExtend) {
+		isExtend = true;
+		Object.extend(View.prototype, View.fn);
+	}
+}
 View.define = function(properties) {
+	extendViewFn();
+	
 	var cView = View.extend(properties);
 	return (views[properties.name] = cView);
 }
