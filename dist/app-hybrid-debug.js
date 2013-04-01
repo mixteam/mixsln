@@ -834,19 +834,36 @@ define("#mix/sln/0.3.2/modules/navigation-debug", [ "./page-debug", "./view-debu
     return Navigation;
 });
 
-define("#mix/sln/0.3.2/app-debug", [ "./modules/view-debug", "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.3.2/app-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.2/app-hybrid-debug", [ "./modules/view-debug", "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.3.2/app-hybrid-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, View = require("./modules/view-debug"), Page = require("./modules/page-debug"), Component = require("./modules/component-debug"), Navigation = require("./modules/navigation-debug");
-    app = {};
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, View = require("./modules/view-debug"), Page = require("./modules/page-debug"), Component = require("./modules/component-debug"), Navigation = require("./modules/navigation-debug"), hybridNavigation = {
+        resetNavigationBar: function(successCallback, failedCallback) {
+            var p = {};
+            callObjMethod("TBNavigationBar", "resetNavigationBar", p, successCallback, failedCallback);
+        },
+        switchNavigationBar: function(navTitle, type, token, successCallback, failedCallback) {
+            var p = {
+                title: navTitle,
+                type: type,
+                t: token
+            };
+            callObjMethod("TBNavigationBar", "setNavigationBar", p, successCallback, failedCallback);
+        },
+        setTitle: function(navTitle, successCallback, failedCallback) {
+            var p = {
+                title: navTitle
+            };
+            callObjMethod("TBNavigationBar", "setNavigationTitle", p, successCallback, failedCallback);
+        },
+        isReady: function(successCallback, failedCallback) {
+            var p = {};
+            callObjMethod("TBNavigationBar", "isReady", p, successCallback, failedCallback);
+        }
+    }, app = {};
     function initComponent() {
         var viewport = app.config.viewport, navibar = viewport.querySelector("header.navibar"), backBtn = navibar.querySelector("li:nth-child(2) button"), funcBtn = navibar.querySelector("li:nth-child(3) button");
         content = viewport.querySelector("section.content"), toolbar = viewport.querySelector("footer.toolbar");
         Component.initViewport(viewport);
-        if (app.config.enableNavibar) {
-            Component.initNavibar(navibar);
-            Component.initBackBtn(backBtn);
-            Component.initFuncBtn(funcBtn);
-        }
         Component.initContent(content);
         if (app.config.enableScroll) {
             Component.initScroll(content);
@@ -854,56 +871,22 @@ define("#mix/sln/0.3.2/app-debug", [ "./modules/view-debug", "./modules/page-deb
         if (app.config.enableTransition) {
             Component.initTransition(content);
         }
-        if (app.config.enableToolbar) {
-            Component.initToolbar();
-        }
     }
     function initNavigation() {
         var navibar = Component.get("navibar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), backBtnHandler = null, funcBtnHandler = null, content = Component.get("content"), transition = Component.get("transition");
-        Component.on("backBtnClick", function() {
+        win.addEventListener(window.onpagehide ? "pagehide" : "unload", function() {
+            hybridNavigation.resetNavigationBar();
+        }, false);
+        doc.addEventListener("navigation.back", function() {
             if (backBtnHandler) {
                 backBtnHandler();
             } else {
                 navigate.backward();
             }
-        });
-        Component.on("funcBtnClick", function() {
-            funcBtnHandler && funcBtnHandler();
-        });
-        function setButtons(navigation) {
-            var pageName = navigation.pageName, page = Page.get(pageName), buttons = page.buttons;
-            backBtn.fn.hide();
-            funcBtn.fn.hide();
-            buttons && Object.each(buttons, function(item) {
-                var type = item.type, isShow = false;
-                switch (type) {
-                  case "back":
-                    backBtn.fn.setText(item.text);
-                    backBtnHandler = item.handler;
-                    if (item.autoHide === false || navigate.getStateIndex() >= 1) {
-                        backBtn.fn.show();
-                        isShow = true;
-                    }
-                    break;
-
-                  case "func":
-                    funcBtn.fn.setText(item.text);
-                    funcBtnHandler = item.handler;
-                    funcBtn.fn.show();
-                    isShow = true;
-                    break;
-
-                  default:
-                    break;
-                }
-                if (isShow && item.onshow) {
-                    item.onshow.call(backBtn);
-                }
-            });
-        }
-        function setNavibar(navigation, isMove) {
-            var pageName = navigation.pageName, transition = navigation.state.transition, page = Page.get(pageName), title = page.getTitle() || "";
-            isMove ? navibar.fn.change(title, transition) : navibar.fn.set(title, transition);
+        }, false);
+        function setNavibar(navigation, move) {
+            var pageName = navigation.pageName, transition = navigation.state.transition, page = Page.get(pageName), title = page.getTitle();
+            move ? hybridNavigation.switchNavigationBar(title, transition, doc.location.href) : hybridNavigation.setTitle(title);
         }
         function switchNavigation(navigation) {
             if (app.config.enableTransition) {
@@ -918,17 +901,12 @@ define("#mix/sln/0.3.2/app-debug", [ "./modules/view-debug", "./modules/page-deb
             app.navigation._cur = navigation;
             navigation.load(function() {
                 navigation.ready();
-                if (app.config.enableNavibar) {
-                    setNavibar(navigation, false);
-                }
+                setNavibar(navigation, false);
             });
         }
         navigate.on("forward backward", function(state) {
             var navigation = new Navigation(state);
-            if (app.config.enableNavibar) {
-                setButtons(navigation);
-                setNavibar(navigation, true);
-            }
+            setNavibar(navigation, true);
             switchNavigation(navigation);
         });
         Page.each(function(page) {
@@ -984,10 +962,12 @@ define("#mix/sln/0.3.2/app-debug", [ "./modules/view-debug", "./modules/page-deb
             initComponent();
             initNavigation();
             app.plugin.init && app.plugin.init();
-            router.start();
+            hybridNavigation.isReady(function() {
+                router.start();
+            });
         }
     });
     win["app"] = app;
 });
 
-require("mix/sln/0.3.2/app-debug");
+require("mix/sln/0.3.2/app-hybrid-debug");

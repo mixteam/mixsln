@@ -12,7 +12,37 @@ var win = window,
 	View = require('./modules/view'),
 	Page = require('./modules/page'),
 	Component = require('./modules/component'),
-	Navigation = require('./modules/navigation')
+	Navigation = require('./modules/navigation'),
+
+	hybridNavigation = {
+		resetNavigationBar : function (successCallback, failedCallback) {
+			var p = {};
+			callObjMethod('TBNavigationBar', 'resetNavigationBar', p, successCallback, failedCallback);
+		},
+
+		switchNavigationBar : function (navTitle, type, token, successCallback, failedCallback) {
+			var p = {
+				title : navTitle,
+				type : type,
+				t : token
+			};
+			
+			callObjMethod('TBNavigationBar', 'setNavigationBar', p, successCallback, failedCallback);
+		},
+
+		setTitle : function (navTitle, successCallback, failedCallback) {
+			var p = {
+				title : navTitle
+			};
+
+			callObjMethod('TBNavigationBar', 'setNavigationTitle', p, successCallback, failedCallback);
+		},
+
+		isReady : function (successCallback, failedCallback) {
+			var p = {};
+			callObjMethod('TBNavigationBar', 'isReady', p, successCallback, failedCallback);
+		}
+	},
 
 	app = {}
 	;
@@ -27,13 +57,6 @@ var win = window,
 			;
 
 		Component.initViewport(viewport);
-
-		if (app.config.enableNavibar) {
-			Component.initNavibar(navibar);
-			Component.initBackBtn(backBtn);
-			Component.initFuncBtn(funcBtn);
-		}
-
 		Component.initContent(content);
 
 		if (app.config.enableScroll) {
@@ -43,11 +66,6 @@ var win = window,
 		if (app.config.enableTransition) {
 			Component.initTransition(content);
 		}
-
-		if (app.config.enableToolbar) {
-			Component.initToolbar();
-		}
-
 	}
 
 	function initNavigation() {
@@ -60,65 +78,27 @@ var win = window,
 			transition = Component.get('transition')
 			;
 
-		Component.on('backBtnClick', function () {
+		win.addEventListener(window.onpagehide?'pagehide':'unload', function() {
+			hybridNavigation.resetNavigationBar();
+		}, false);
+
+		doc.addEventListener('navigation.back', function() {
 			if (backBtnHandler) {
 				backBtnHandler();
 			} else {
 				navigate.backward();
 			}
-		});
-		Component.on('funcBtnClick', function() {
-			funcBtnHandler && funcBtnHandler();
-		});
+		}, false);
 
-		function setButtons(navigation) {
-			var pageName = navigation.pageName,
-				page = Page.get(pageName),
-				buttons = page.buttons
-				;
-
-			backBtn.fn.hide();
-			funcBtn.fn.hide();
-
-			buttons && Object.each(buttons, function(item) {
-				var type = item.type,
-					isShow = false;
-
-				switch (type) {
-					case 'back':
-						backBtn.fn.setText(item.text);
-						backBtnHandler = item.handler;
-						if (item.autoHide === false || 
-								navigate.getStateIndex() >= 1) {
-							backBtn.fn.show();
-							isShow = true;
-						}
-						break;
-					case 'func':
-						funcBtn.fn.setText(item.text);
-						funcBtnHandler = item.handler;
-						funcBtn.fn.show();
-						isShow = true;
-						break;
-					default:
-						break;
-				}
-
-				if (isShow && item.onshow) {
-					item.onshow.call(backBtn);
-				}
-			});
-		}
-
-		function setNavibar(navigation, isMove) {
+		function setNavibar(navigation, move) {
 			var pageName = navigation.pageName,
 				transition = navigation.state.transition,
 				page = Page.get(pageName),
-				title = page.getTitle() || ''
+				title = page.getTitle()
 				;
 
-			isMove ? navibar.fn.change(title, transition): 
-				navibar.fn.set(title, transition);
+			move ? hybridNavigation.switchNavigationBar(title, transition, doc.location.href) :
+					hybridNavigation.setTitle(title);
 		}
 
 		function switchNavigation(navigation) {
@@ -135,9 +115,7 @@ var win = window,
 			app.navigation._cur = navigation;
 			navigation.load(function() {
 				navigation.ready();
-				if (app.config.enableNavibar) {
-					setNavibar(navigation, false);
-				}
+				setNavibar(navigation, false);
 			});
 		}
 
@@ -145,10 +123,7 @@ var win = window,
 			var navigation = new Navigation(state)
 				;
 
-			if (app.config.enableNavibar) {
-				setButtons(navigation);
-				setNavibar(navigation, true);
-			}
+			setNavibar(navigation, true);
 			switchNavigation(navigation);
 		});
 
@@ -212,11 +187,13 @@ var win = window,
 			initComponent();
 			initNavigation();
 			app.plugin.init && app.plugin.init();
-			router.start();
+			hybridNavigation.isReady(function() {
+				router.start();	
+			});
 		}
 	});
 
 	win['app'] = app;
 });
 
-require('app');
+require('app-hybrid');

@@ -1,6 +1,7 @@
 [spm build, node build js]
 ./package.json
 ./src/app.js
+./src/app-hybrid.js
 ./src/modules/gesture.js
 ./src/modules/transform.js
 ./src/modules/scroll.js

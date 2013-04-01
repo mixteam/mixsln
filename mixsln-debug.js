@@ -896,7 +896,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
     });
     module.exports = Navigate;
 });
-define("#mix/sln/0.3.1/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.2/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, events = [ "screenX", "screenY", "clientX", "clientY", "pageX", "pageY" ], Class = require("mix/core/0.3.0/base/class-debug");
     function calc(x1, y1, x2, y2, x3, y3, x4, y4) {
@@ -1072,7 +1072,7 @@ define("#mix/sln/0.3.1/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debu
     return Gestrue;
 });
 
-define("#mix/sln/0.3.1/modules/transform-debug", [], function(require, exports, module) {
+define("#mix/sln/0.3.2/modules/transform-debug", [], function(require, exports, module) {
     var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/, MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/, TRANSITION_NAME = "-webkit-transform", appVersion = navigator.appVersion, isAndroid = /android/gi.test(appVersion), isIOS = /iphone|ipad/gi.test(appVersion), has3d = "WebKitCSSMatrix" in window && "m11" in new WebKitCSSMatrix();
     function quadratic2cubicBezier(a, b) {
         return [ [ (a / 3 + (a + b) / 3 - a) / (b - a), (a * a / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a) ], [ (b / 3 + (a + b) / 3 - a) / (b - a), (b * b / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a) ] ];
@@ -1141,7 +1141,7 @@ define("#mix/sln/0.3.1/modules/transform-debug", [], function(require, exports, 
     exports.start = startTransition;
 });
 
-define("#mix/sln/0.3.1/modules/scroll-debug", [ "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.2/modules/scroll-debug", [ "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, navigator = win.navigator, Class = require("mix/core/0.3.0/base/class-debug"), Gesture = require("./gesture-debug"), Transform = require("./transform-debug"), prevented = false;
     function getMaxScrollTop(el) {
@@ -1299,7 +1299,7 @@ define("#mix/sln/0.3.1/modules/scroll-debug", [ "./gesture-debug", "./transform-
     return Scroll;
 });
 
-define("#mix/sln/0.3.1/modules/component-debug", [ "./scroll-debug", "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.2/modules/component-debug", [ "./scroll-debug", "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Scroll = require("./scroll-debug"), Transform = require("./transform-debug"), components = {}, emptyFunc = function() {}, extendFns = function(el, fns) {
         el.fn || (el.fn = {});
@@ -1333,6 +1333,10 @@ define("#mix/sln/0.3.1/modules/component-debug", [ "./scroll-debug", "./gesture-
                         wrap.className += " transition";
                         wrap.addEventListener("webkitTransitionEnd", handler, false);
                     }, 1);
+                },
+                set: function(text) {
+                    var that = this, wrap = el.querySelector("ul"), title = wrap.querySelector("li:first-child");
+                    title.innerHTML = text;
                 }
             });
         },
@@ -1506,7 +1510,7 @@ define("#mix/sln/0.3.1/modules/component-debug", [ "./scroll-debug", "./gesture-
     return new Compontent();
 });
 
-define("#mix/sln/0.3.1/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.2/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), views = {}, vAutoIdx = 0, View = Class.create({
         initialize: function() {
@@ -1572,7 +1576,7 @@ define("#mix/sln/0.3.1/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug",
     return View;
 });
 
-define("#mix/sln/0.3.1/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.2/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), View = require("./view-debug"), STATUS = {
         UNKOWN: 0,
@@ -1644,7 +1648,7 @@ define("#mix/sln/0.3.1/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/ba
     return Page;
 });
 
-define("#mix/sln/0.3.1/modules/navigation-debug", [ "./page-debug", "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.2/modules/navigation-debug", [ "./page-debug", "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Page = require("./page-debug"), STATUS = Page.STATUS, Navigation = Class.create({
         initialize: function(state) {
@@ -1728,7 +1732,7 @@ define("#mix/sln/0.3.1/modules/navigation-debug", [ "./page-debug", "./view-debu
     return Navigation;
 });
 
-define("#mix/sln/0.3.1/app-debug", [ "./modules/view-debug", "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.3.1/app-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.2/app-debug", [ "./modules/view-debug", "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.3.2/app-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, View = require("./modules/view-debug"), Page = require("./modules/page-debug"), Component = require("./modules/component-debug"), Navigation = require("./modules/navigation-debug");
     app = {};
@@ -1795,9 +1799,9 @@ define("#mix/sln/0.3.1/app-debug", [ "./modules/view-debug", "./modules/page-deb
                 }
             });
         }
-        function setNavibar(navigation) {
-            var pageName = navigation.pageName, transition = navigation.state.transition, page = Page.get(pageName), title = page.getTitle();
-            navibar.fn.change(title, transition);
+        function setNavibar(navigation, isMove) {
+            var pageName = navigation.pageName, transition = navigation.state.transition, page = Page.get(pageName), title = page.getTitle() || "";
+            isMove ? navibar.fn.change(title, transition) : navibar.fn.set(title, transition);
         }
         function switchNavigation(navigation) {
             if (app.config.enableTransition) {
@@ -1812,15 +1816,18 @@ define("#mix/sln/0.3.1/app-debug", [ "./modules/view-debug", "./modules/page-deb
             app.navigation._cur = navigation;
             navigation.load(function() {
                 navigation.ready();
+                if (app.config.enableNavibar) {
+                    setNavibar(navigation, false);
+                }
             });
         }
         navigate.on("forward backward", function(state) {
             var navigation = new Navigation(state);
-            switchNavigation(navigation);
             if (app.config.enableNavibar) {
                 setButtons(navigation);
-                setNavibar(navigation);
+                setNavibar(navigation, true);
             }
+            switchNavigation(navigation);
         });
         Page.each(function(page) {
             var name = page.name, route = page.route;
@@ -1881,4 +1888,4 @@ define("#mix/sln/0.3.1/app-debug", [ "./modules/view-debug", "./modules/page-deb
     win["app"] = app;
 });
 
-require("mix/sln/0.3.1/app-debug");
+require("mix/sln/0.3.2/app-debug");

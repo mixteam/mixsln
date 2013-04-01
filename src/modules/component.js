@@ -58,6 +58,15 @@ var win = window,
 						wrap.className += ' transition';
 						wrap.addEventListener('webkitTransitionEnd', handler, false);
 					}, 1);
+				},
+
+				set : function(text) {
+					var that = this,
+						wrap = el.querySelector('ul'),
+						title = wrap.querySelector('li:first-child')
+						;
+
+					title.innerHTML = text;
 				}
 			});
 		},

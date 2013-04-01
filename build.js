@@ -10,17 +10,22 @@ var fs = require("fs"),
 	;
 
 function jsBuilder() {
-	var debug = [], release = []
+	var debug = [], release = [], hybrid = [];
 	
 	debug.push(fs.readFileSync('./lib/cjs-debug.js'));
 	debug.push(fs.readFileSync('./lib/mix-debug.js'));
 	debug.push(fs.readFileSync('./dist/app-debug.js'));
+
+	hybrid.push(fs.readFileSync('./lib/cjs.js'));
+	hybrid.push(fs.readFileSync('./lib/mix.js'));
+	hybrid.push(fs.readFileSync('./dist/app-hybrid.js'));
 	
 	release.push(fs.readFileSync('./lib/cjs.js'));
 	release.push(fs.readFileSync('./lib/mix.js'));
 	release.push(fs.readFileSync('./dist/app.js'));
 	
 	fs.writeFileSync('./mixsln-debug.js', debug.join('\r\n'));
+	fs.writeFileSync('./mixsln-hybrid.js', hybrid.join('\r\n'));
 	fs.writeFileSync('./mixsln.js', release.join('\r\n'));
 }
 
