@@ -36,10 +36,7 @@ var win = window,
 			function pushViews(view) {
 				var views = view.views || {};
 				loadedState.push(view);
-				Object.each(views, function(subView) {
-					loadedState.push(subView);
-					pushViews(subView);
-				});
+				Object.each(views, pushViews);
 			}
 
 			if (page.status < STATUS.LOADED) {

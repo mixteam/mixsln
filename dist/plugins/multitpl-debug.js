@@ -1,6 +1,6 @@
 (function(win, app) {
     var doc = win.document;
-    app.page.fn.parseMultiTemplate = function(text) {
+    app.view.fn.parseMultiTemplate = function(text) {
         var wrap = doc.createElement("div"), templateTags, templateTexts, templates = {};
         wrap.innerHTML = text;
         templateTags = wrap.querySelectorAll('script[type="text/template"]');
@@ -14,7 +14,7 @@
         }
         return templates;
     };
-    app.page.fn.compileMultiTemplate = function(tpls, callback) {
+    app.view.fn.compileMultiTemplate = function(tpls, callback) {
         var that = this, compiled = {};
         Object.each(tpls, function(tpl, name) {
             that.compileTemplate(tpl, function(ctpl) {
@@ -27,7 +27,7 @@
             return compiled;
         }
     };
-    app.page.fn.loadTemplate = function(url, callback) {
+    app.view.fn.loadTemplate = function(url, callback) {
         var that = this;
         if (arguments.length === 1) {
             callback = arguments[0];
@@ -42,10 +42,10 @@
             url && that.compileMultiTemplate(url, callback);
         }
     };
-    app.page.fn.renderTemplate = function() {
+    app.view.fn.renderTemplate = function() {
         return this.renderMultiTemplate.apply(this, arguments);
     };
-    app.page.fn.renderMultiTemplate = function(dataSet, callback) {
+    app.view.fn.renderMultiTemplate = function(dataSet, callback) {
         var that = this, engine = app.config.templateEngine, templates = that.compiledTemplate, contents = {}, div;
         Object.each(dataSet, function(datas, name) {
             var compiledTemplate = templates[name];
@@ -69,7 +69,7 @@
             return contents;
         }
     };
-    app.page.fn.renderSingleTemplate = function(name, datas, callback) {
+    app.view.fn.renderSingleTemplate = function(name, datas, callback) {
         var that = this, dataSet = {};
         dataSet[name] = datas;
         if (callback) {

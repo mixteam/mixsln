@@ -69,7 +69,16 @@ var win = window,
 		}
 	});
 
-View.define = function(properties) {	
+View.fn = {};
+var isExtend = false;
+function extendViewFn() {
+	if (!isExtend) {
+		isExtend = true;
+		Object.extend(View.prototype, View.fn);
+	}
+}
+View.define = function(properties) {
+	extendViewFn();	
 	var cView = View.extend(properties);
 	return (views[properties.name] = cView);
 }

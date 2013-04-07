@@ -1,6 +1,6 @@
 (function(win, app) {
     var doc = win.document;
-    app.page.fn.loadTemplate = function(url, callback) {
+    app.view.fn.loadTemplate = function(url, callback) {
         var that = this;
         if (arguments.length === 1) {
             callback = arguments[0];

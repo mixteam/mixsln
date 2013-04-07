@@ -2,7 +2,7 @@
 	var doc = win.document
 		;
 
-	app.page.fn.loadTemplate = function(url, callback) {
+	app.view.fn.loadTemplate = function(url, callback) {
 		var that = this
 			;
 
