@@ -11,3 +11,8 @@ app.config.templateEngine = {
 		return compiled(data);
 	}
 }
+
+app.page.global.plugins = {
+	domfind : true,
+	domevent : true
+}

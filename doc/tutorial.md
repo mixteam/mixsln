@@ -74,7 +74,7 @@
 	</head>
 	<body>
 	<div class="viewport">
-		<header class="titlebar">
+		<header class="navibar">
 			<ul>
 				<li>Title</li>
 				<li><button class="back">Back Btn</button></li>
@@ -183,18 +183,18 @@
 		})
 	})(window['app']);
 
-最后把list页面相关的文件引入到项目中
+最后把hello页面相关的文件引入到项目中
 
 	<script src="zepto.js" type="text/javascript"></script>
 	<script src="mustache.js" type="text/javascript"></script>
 	<script src="mixsln.js" type="text/javascript"></script>
-	<!--##list页面的代码-->
+	<!--##hello页面的代码-->
 	<link type="text/css" rel="styleSheet" href="assets/hello.css"/>
 	<script src="pages/hello.js" type="text/javascript"></script>
-	<!--//list页面的代码-->
+	<!--//hello页面的代码-->
 	<script type="text/javascript">
 		app.config.viewport = document.querySelector('.viewport');
-		app.config.enableTitlebar = true;
+		app.config.enableNavibar  = true;
 		app.config.enableScroll = true;
 		app.config.enableTransition = true;
 		app.config.templateEngine = {

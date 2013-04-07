@@ -157,7 +157,7 @@ var win = window,
 			theme : 'iOS',
 			routePrefix : 0, // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
 			routePrefixSep : '\/',
-			enableTitlebar : false,
+			enableNavibar : false,
 			enableScroll : false,
 			enableTransition : false,
 			enableToolbar : false,

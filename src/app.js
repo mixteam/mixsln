@@ -158,9 +158,9 @@ var win = window,
 				;
 
 			if (!route) {
-				route = {name : 'default', 'default' : true}
+				route = {name: 'default', 'default': true}
 			} else if (Object.isTypeof(route, 'string')) {
-				route = {name : 'anonymous', text : route}
+				route = {name: 'anonymous', text: route}
 			}
 
 			navigate.addRoute(name + '.' + route.name, route.text, route);
@@ -182,7 +182,7 @@ var win = window,
 			theme : 'iOS',
 			routePrefix : 0, // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
 			routePrefixSep : '\/',
-			enableTitlebar : false,
+			enableNavibar : false,
 			enableScroll : false,
 			enableTransition : false,
 			enableToolbar : false,

@@ -19,35 +19,31 @@ var win = window,
 			that.state = state;
 		},
 
-		ready : function() {
-			var page = Page.get(this.pageName)
-				;
-
-			if (page.status < STATUS.READY) {
-				page.status = STATUS.READY;
-				page.trigger('ready');
-				page.ready();
-			}
-		},
-
 		load : function(callback) {
 			var that = this,
 				page = Page.get(this.pageName),
-				views = page.views || {}, 
-				loadedState = [page]
+				loadedState = []
 				;
 
 			function checkLoaded(i) {
 				loadedState[i] = true;
 				if (loadedState.join('').match(/^(true)*$/)) {
+					page.status = STATUS.LOADED;
 					callback();
 				}
 			}
 
-			if (page.status < STATUS.LOADED) {
-				Object.each(views, function(view) {
-					loadedState.push(view);
+			function pushViews(view) {
+				var views = view.views || {};
+				loadedState.push(view);
+				Object.each(views, function(subView) {
+					loadedState.push(subView);
+					pushViews(subView);
 				});
+			}
+
+			if (page.status < STATUS.LOADED) {
+				pushViews(page);
 
 				Object.each(loadedState, function(state, i) {
 					state.loadTemplate(function(text) {
@@ -57,6 +53,17 @@ var win = window,
 						});
 					});
 				});
+			}
+		},
+
+		ready : function() {
+			var page = Page.get(this.pageName)
+				;
+
+			if (page.status === STATUS.LOADED && page.status < STATUS.READY) {
+				page.status = STATUS.READY;
+				page.trigger('ready');
+				page.ready();
 			}
 		},
 

@@ -39,8 +39,18 @@
 				;
 
 			that._getSearchItems(function(datas) {
-				that.renderTemplate(datas, callback);
+				that.renderTemplate(datas, function(html) {
+					that._el = $(html);
+					that._el.on('click', 'a', that._itemClickHandler);
+					callback(that._el);
+				});
 			});
+		},
+
+		destroy : function() {
+			if (this._el) {
+				this._el.off('click', 'a', this._itemClickHandler);
+			}
 		}
 	});
 

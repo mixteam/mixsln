@@ -9,8 +9,14 @@
 ./src/modules/page.js
 ./src/modules/component.js
 ./src/modules/navigation.js
+
+[spm build]
+./src/plugins/domevent.js
+./src/plugins/domfind.js
 ./src/plugins/init.js
+./src/plugins/inlinetpl.js
 ./src/plugins/lazyload.js
+./src/plugins/multitpl.js
 ./src/plugins/scrollpos.js
 
 [node build css]

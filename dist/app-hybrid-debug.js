@@ -656,16 +656,7 @@ define("#mix/sln/0.3.2/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug",
             }
         }
     });
-    View.fn = {};
-    var isExtend = false;
-    function extendViewFn() {
-        if (!isExtend) {
-            isExtend = true;
-            Object.extend(View.prototype, View.fn);
-        }
-    }
     View.define = function(properties) {
-        extendViewFn();
         var cView = View.extend(properties);
         return views[properties.name] = cView;
     };
@@ -759,26 +750,25 @@ define("#mix/sln/0.3.2/modules/navigation-debug", [ "./page-debug", "./view-debu
             that.routeName = name[1];
             that.state = state;
         },
-        ready: function() {
-            var page = Page.get(this.pageName);
-            if (page.status < STATUS.READY) {
-                page.status = STATUS.READY;
-                page.trigger("ready");
-                page.ready();
-            }
-        },
         load: function(callback) {
-            var that = this, page = Page.get(this.pageName), views = page.views || {}, loadedState = [ page ];
+            var that = this, page = Page.get(this.pageName), loadedState = [];
             function checkLoaded(i) {
                 loadedState[i] = true;
                 if (loadedState.join("").match(/^(true)*$/)) {
+                    page.status = STATUS.LOADED;
                     callback();
                 }
             }
-            if (page.status < STATUS.LOADED) {
-                Object.each(views, function(view) {
-                    loadedState.push(view);
+            function pushViews(view) {
+                var views = view.views || {};
+                loadedState.push(view);
+                Object.each(views, function(subView) {
+                    loadedState.push(subView);
+                    pushViews(subView);
                 });
+            }
+            if (page.status < STATUS.LOADED) {
+                pushViews(page);
                 Object.each(loadedState, function(state, i) {
                     state.loadTemplate(function(text) {
                         state.compileTemplate(text, function(compiled) {
@@ -787,6 +777,14 @@ define("#mix/sln/0.3.2/modules/navigation-debug", [ "./page-debug", "./view-debu
                         });
                     });
                 });
+            }
+        },
+        ready: function() {
+            var page = Page.get(this.pageName);
+            if (page.status === STATUS.LOADED && page.status < STATUS.READY) {
+                page.status = STATUS.READY;
+                page.trigger("ready");
+                page.ready();
             }
         },
         unload: function() {
@@ -937,7 +935,7 @@ define("#mix/sln/0.3.2/app-hybrid-debug", [ "./modules/view-debug", "./modules/p
             routePrefix: 0,
             // 0 - no prefix, 1 - use app.name, 'any string' - use 'any string'
             routePrefixSep: "/",
-            enableTitlebar: false,
+            enableNavibar: false,
             enableScroll: false,
             enableTransition: false,
             enableToolbar: false,

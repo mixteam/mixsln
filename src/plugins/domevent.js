@@ -29,31 +29,6 @@
 	app.plugin.domevent = {
 		_options : null,
 
-		_delegate : function(page, view) {
-			var that = this
-				;
-
-			if (view.events) {
-				Object.each(view.events, function(ev) {
-					var handler = ev[2];
-
-					if (Object.isTypeof(handler, 'string')) {
-						handler = view[handler];
-					}
-
-					page.delegate(ev[0], ev[1], function(e) {
-						handler.call(this, e, page);
-					});
-				});
-			}
-
-			if (view.views) {
-				Object.each(view.views, function(view) {
-					that._delegate(page, view);
-				});
-			}
-		},
-
 		on : function(page, options) {
 			var that = this
 				;
@@ -61,7 +36,17 @@
 			that._options = options;
 			options.page.cache = [];
 
-			that._delegate(page, page);
+			Object.each(page.events, function(ev) {
+				var handler = ev[2];
+
+				if (Object.isTypeof(handler, 'string')) {
+					handler = page[handler];
+				}
+
+				page.delegate(ev[0], ev[1], function(e) {
+					handler.call(this, e, page);
+				});
+			});
 		},
 
 		off : function(page,  options) {

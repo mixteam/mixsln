@@ -1,6 +1,6 @@
 (function(app, undef) {
 
-	var detailApp = app.page.define({
+	app.page.define({
 		name : 'default',
 		title : '请搜索商品',
 		template : './templates/default.tpl',
@@ -10,24 +10,23 @@
 				text : '返回'
 			}
 		],
+		events : [
+			['submit', '#J_searchForm', '_submitFormHandler']
+		],
 
 		_pid : 0,
 
-		ready : function() {
-			var that = this,
-				content = $(app.component.getActiveContent())
+		_submitFormHandler : function(e, that) {
+			var word = that.find('#J_searchForm .bton-keyword').val()
 				;
 
-			// implement super.ready
-			that.fill({}, function() {
-				content.find('#J_searchForm').on('submit', function(e) {
-					var word = content.find('#J_searchForm .bton-keyword').val()
-						;
+			e.preventDefault();
+			app.navigation.push('list/' + encodeURIComponent(word) + '/');
+		},
 
-					e.preventDefault();
-					app.navigation.push('list/' + encodeURIComponent(word) + '/');
-				});
-			});
+		ready : function() {
+			// implement super.ready
+			this.fill({});
 		},
 
 		unload : function() {

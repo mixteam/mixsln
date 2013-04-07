@@ -31,17 +31,17 @@
 
 			plugins : {
 				lazyload : true,
-				scrollpos : true,
-				domfind : true,
-				domevent : true
+				scrollpos : true
 			},
 
 			_fillContent : function() {
 				var that = this,
-					searchItems = that.views.searchItems;
+					searchItems = that.views.searchItems,
+					searchContent = that.find('.searchcontent')
+					;
 
-				searchItems.render(function(html) {
-					that.find('.searchcontent').html(html);
+				searchItems.render(function(dom) {
+					searchContent.html('').append(dom);
 					app.plugin.lazyload.check();
 				});
 			},
@@ -72,6 +72,11 @@
 
 			unload : function() {
 				// implement super.unload
+				var that = this,
+					searchItems = that.views.searchItems
+					;
+
+				searchItems.destroy();
 			},
 
 			layout : function() {
