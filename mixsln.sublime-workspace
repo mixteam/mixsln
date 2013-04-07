@@ -4,6 +4,38 @@
 		"selected_items":
 		[
 			[
+				"reset",
+				"resetNavigationBar"
+			],
+			[
+				"pa",
+				"parentNode"
+			],
+			[
+				"of",
+				"offsetParent"
+			],
+			[
+				"na",
+				"navTitle"
+			],
+			[
+				"nav",
+				"navTitle"
+			],
+			[
+				"h",
+				"hybridNavigation"
+			],
+			[
+				"lo",
+				"location"
+			],
+			[
+				"sw",
+				"switchNavigation"
+			],
+			[
 				"vi",
 				"views"
 			],
@@ -72,10 +104,6 @@
 				"forward"
 			],
 			[
-				"of",
-				"offsetX"
-			],
-			[
 				"or",
 				"originX"
 			],
@@ -110,10 +138,6 @@
 			[
 				"tem",
 				"templateEngine"
-			],
-			[
-				"nav",
-				"navigation"
 			],
 			[
 				"O",
@@ -234,10 +258,6 @@
 			[
 				"bac",
 				"backBtn"
-			],
-			[
-				"sw",
-				"switch"
 			],
 			[
 				"ac",
@@ -416,10 +436,6 @@
 				"buttons"
 			],
 			[
-				"h",
-				"handler"
-			],
-			[
 				"_is",
 				"_isAutoHide"
 			],
@@ -446,10 +462,6 @@
 			[
 				"se",
 				"section	Tag"
-			],
-			[
-				"pa",
-				"params"
 			],
 			[
 				"rote",
@@ -502,76 +514,32 @@
 			[
 				"sty",
 				"styles"
-			],
-			[
-				"pre",
-				"preserve-3d"
-			],
-			[
-				"crea",
-				"createElement"
-			],
-			[
-				"compoent",
-				"Component"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "demo/config.js",
-			"settings":
-			{
-				"buffer_size": 322,
-				"line_ending": "Windows"
-			}
-		},
-		{
 			"file": "src/app.js",
 			"settings":
 			{
-				"buffer_size": 4814,
+				"buffer_size": 4998,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "demo/debug.html",
+			"file": "src/app-hybrid.js",
 			"settings":
 			{
-				"buffer_size": 2630,
+				"buffer_size": 4853,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "demo/index.html",
+			"file": "src/modules/navigation.js",
 			"settings":
 			{
-				"buffer_size": 2389,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "demo/pages/list.js",
-			"settings":
-			{
-				"buffer_size": 1815,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "demo/views/searchItems.js",
-			"settings":
-			{
-				"buffer_size": 904,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/plugins/domevent.js",
-			"settings":
-			{
-				"buffer_size": 1607,
+				"buffer_size": 2260,
 				"line_ending": "Windows"
 			}
 		}
@@ -620,35 +588,46 @@
 	},
 	"file_history":
 	[
+		"/D/workspace/taobao/etao/mix/mixsln/package.json",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/lazyload.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/pages/detail.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/templates/list.tpl",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/app-hybrid.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/hybrid.html",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/config-hybrid.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/pages/list.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
+		"/D/workspace/taobao/etao/mix/mixsln/mixsln-hybrid.js",
+		"/D/workspace/taobao/etao/mix/mixsln/build.js",
+		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/navigation.js",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/pages/default.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/view.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/view.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/views/searchItems.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/config.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/debug.html",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/multitpl.js",
+		"/D/workspace/taobao/etao/mix/mixsln/mixsln-debug.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/index.html",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/domevent.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/pages/default.js",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/list/list.js",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/list/listView.js",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/default/default.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/pages",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/list/listView.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/list/list.tpl",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/debug.html",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/index.html",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
 		"/D/workspace/taobao/etao/mix/mixsln/assets/x.css",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/default/default.js",
-		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
 		"/D/workspace/taobao/etao/mix/mixsln/assets/base.css",
-		"/D/workspace/taobao/etao/mix/mixsln/package.json",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/init.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/multitpl.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/domevent.js",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/config.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/lazyload.js",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/style.css",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/detail/detail.js",
 		"/D/workspace/taobao/etao/mix/mixsln/lib/zepto.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/transform.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
 		"/D/workspace/taobao/etao/mix/mixsln/lib/mix-debug.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/scrollpos.js",
 		"/D/workspace/taobao/etao/mix/mixsln/test/demo1.html",
@@ -658,7 +637,6 @@
 		"/D/workspace/taobao/etao/mix/mixsln/test/default.tpl",
 		"/D/workspace/taobao/etao/mix/mixsln/test/detail.js",
 		"/D/workspace/taobao/etao/mix/mixsln/README.md",
-		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/app.js",
 		"/D/workspace/taobao/etao/mix/mixsln/dist/app-debug.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/plugin.js",
@@ -737,17 +715,7 @@
 		"/C/Users/zhuxun.jb/AppData/Roaming/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/libs/less/package.json",
 		"/D/workspace/taobao/etao/mix/mixjs-gitpower/libs/underscore/package.json",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/package.json",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/libs/handlebars/src/handlebars.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/demos/helloworld/index.html",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/libs/seajs/package.json",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/libs/handlebars/package.json",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/libs/backbone/package.json",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/libs/underscore/src/underscore.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/base/cjs/cjs.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/src/mvc/controller/controller.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/demos/helloworld/apps/hellomix/entry.js",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/demos/helloworld/src/helloworld.js"
+		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/package.json"
 	],
 	"find":
 	{
@@ -765,6 +733,12 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"switchNavigation",
+			"enableNavibar",
+			"setNavibar",
+			"setButtons",
+			"initNavigation",
+			"enableNavibar",
 			"searchPage",
 			"searchWord",
 			"searchPage",
@@ -886,13 +860,7 @@
 			"ele",
 			"myGestures",
 			"_scope",
-			"resolveId",
-			"_scope",
-			"jQuery",
-			"previousUnderscore",
-			"_scope",
-			"undef",
-			"require"
+			"resolveId"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1005,28 +973,29 @@
 	"groups":
 	[
 		{
-			"selected": 5,
+			"selected": 2,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "demo/config.js",
+					"file": "src/app.js",
 					"settings":
 					{
-						"buffer_size": 322,
+						"buffer_size": 4998,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								254,
-								254
+								2794,
+								2794
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -1036,18 +1005,18 @@
 				},
 				{
 					"buffer": 1,
-					"file": "src/app.js",
+					"file": "src/app-hybrid.js",
 					"settings":
 					{
-						"buffer_size": 4814,
+						"buffer_size": 4853,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2642,
-								2642
+								848,
+								848
 							]
 						],
 						"settings":
@@ -1056,79 +1025,25 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1488.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 2,
-					"file": "demo/debug.html",
+					"file": "src/modules/navigation.js",
 					"settings":
 					{
-						"buffer_size": 2630,
+						"buffer_size": 2260,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1269,
-								1269
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML5/Syntaxes/HTML 5.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "demo/index.html",
-					"settings":
-					{
-						"buffer_size": 2389,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1388,
-								1388
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML5/Syntaxes/HTML 5.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "demo/pages/list.js",
-					"settings":
-					{
-						"buffer_size": 1815,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								179,
-								179
+								1838,
+								1838
 							]
 						],
 						"settings":
@@ -1137,61 +1052,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "demo/views/searchItems.js",
-					"settings":
-					{
-						"buffer_size": 904,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								196,
-								196
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "src/plugins/domevent.js",
-					"settings":
-					{
-						"buffer_size": 1607,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1176,
-								1176
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 288.0,
+						"translation.y": 912.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
