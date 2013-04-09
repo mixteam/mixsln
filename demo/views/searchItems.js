@@ -2,11 +2,6 @@
 	app.view.define({
 		name : 'searchItems',
 		template : './templates/searchItems.tpl',
-
-		events : [
-			['click', 'a', '_itemClickHandler']
-		],
-
 		word : null,
 		page : 1,
 

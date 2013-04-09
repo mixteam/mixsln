@@ -55,7 +55,7 @@ var win = window,
 				content = ''
 				;
 
-			if (engine && engine.render && Object.isTypeof(datas, 'object')) {
+			if (engine && engine.render && Object.isTypeof(datas, 'object') && compiledTemplate) {
 				content = engine.render(compiledTemplate, datas);
 			} else {
 				content = compiledTemplate;

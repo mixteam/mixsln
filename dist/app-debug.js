@@ -644,7 +644,7 @@ define("#mix/sln/0.3.3/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug",
         renderTemplate: function(datas, callback) {
             // can overwrite
             var that = this, engine = app.config.templateEngine, compiledTemplate = that.compiledTemplate, content = "";
-            if (engine && engine.render && Object.isTypeof(datas, "object")) {
+            if (engine && engine.render && Object.isTypeof(datas, "object") && compiledTemplate) {
                 content = engine.render(compiledTemplate, datas);
             } else {
                 content = compiledTemplate;
@@ -681,10 +681,10 @@ define("#mix/sln/0.3.3/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug",
 define("#mix/sln/0.3.3/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), View = require("./view-debug"), STATUS = {
-        UNKOWN: 0,
-        UNLOADED: 0,
-        LOADED: 1,
-        READY: 2
+        DEFINED: 0,
+        UNLOADED: 1,
+        LOADED: 2,
+        READY: 3
     }, pages = {}, Page = Class.create({
         Extends: View,
         Implements: Message,
@@ -692,7 +692,7 @@ define("#mix/sln/0.3.3/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/ba
             var that = this, name = that.name;
             Message.prototype.initialize.call(that, "page." + name);
             View.prototype.initialize.apply(that, arguments);
-            that.status = STATUS.UNKOWN;
+            that.status = STATUS.DEFINED;
         },
         getTitle: function() {
             //can overrewite
@@ -879,14 +879,13 @@ define("#mix/sln/0.3.3/app-debug", [ "./modules/view-debug", "./modules/page-deb
             backBtn.fn.hide();
             funcBtn.fn.hide();
             buttons && Object.each(buttons, function(item) {
-                var type = item.type, isShow = false;
+                var type = item.type;
                 switch (type) {
                   case "back":
                     backBtn.fn.setText(item.text);
                     backBtnHandler = item.handler;
                     if (item.autoHide === false || navigate.getStateIndex() >= 1) {
                         backBtn.fn.show();
-                        isShow = true;
                     }
                     break;
 
@@ -894,15 +893,12 @@ define("#mix/sln/0.3.3/app-debug", [ "./modules/view-debug", "./modules/page-deb
                     funcBtn.fn.setText(item.text);
                     funcBtnHandler = item.handler;
                     funcBtn.fn.show();
-                    isShow = true;
                     break;
 
                   default:
                     break;
                 }
-                if (isShow && item.onshow) {
-                    item.onshow.call(backBtn);
-                }
+                item.onChange && item.onChange.call(backBtn);
             });
         }
         function setNavibar(navigation, isMove) {

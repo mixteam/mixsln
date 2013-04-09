@@ -14,7 +14,7 @@
 
 设置项目的视区元素
 
-### enableTitlebar
+### enableNavibar
 
 * @var {boolean} [false]
 
@@ -38,6 +38,28 @@
 
 定义模版引擎的compile和render方法。
 
+##app.view
+
+### define(properties)
+
+* @param {object} properties
+* @return a view class
+
+定义一个视图
+
+### get(name)
+
+* @param {string} name
+* @return {Page} a view class
+
+获取指定name的视图
+
+### each(delegate)
+
+* @param {function} delegate
+
+遍历当前已经定义的视图
+
 ##app.page
 
 ### define(properties)
@@ -46,13 +68,6 @@
 * @return a page object
 
 定义一个页面
-
-### abstract(properties)
-
-* @param {object} properties
-* @return a abstract page
-
-定义一个虚页面（虚基类），该页面不会被实例化。而其他页面可以扩展此虚页面的方法和属性。因此不推荐在虚页面中设置`route`。
 
 ### get(name)
 
@@ -74,13 +89,27 @@
 * @param {string} name
 * @return {HTMLElement} a component element
 
-获取指定name的组件元素
+获取指定name的系统组件
 
 ### getActiveContent()
 
 * @return {HTMLElement} the current actived content
 
 获取当前活动的内容区
+
+### on(message, handler\[, context\])
+
+* @param {string} message
+* @param {function} handler
+
+监听组件的消息
+
+### off(message, handler\[, context\])
+
+* @param {string} message
+* @param {function} handler
+
+取消监听组件的消息
 
 ##app.navigation
 

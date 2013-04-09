@@ -4,14 +4,14 @@
 
 **解决方案代码**
 
-* [v0.3.1 调试版](https://raw.github.com/mixteam/mixsln/v0.3.1/mixsln-debug.js)
-* [v0.3.1 压缩版](https://raw.github.com/mixteam/mixsln/v0.3.1/mixsln.js)
-* [CSS样式表](https://raw.github.com/mixteam/mixsln/v0.3.1/mixsln.css)
+* [v0.3.3 调试版](https://raw.github.com/mixteam/mixsln/v0.3.3/mixsln-debug.js)
+* [v0.3.3 压缩版](https://raw.github.com/mixteam/mixsln/v0.3.3/mixsln.js)
+* [CSS样式表](https://raw.github.com/mixteam/mixsln/v0.3.3/mixsln.css)
 
 **以下js框架可选**
 
-* [mustache模版引擎](https://raw.github.com/mixteam/mixsln/v0.3.1/lib/mustache.js)
-* [zepto v1.0rc](https://raw.github.com/mixteam/mixsln/v0.3.1/lib/zepto.js)
+* [mustache模版引擎](https://raw.github.com/mixteam/mixsln/v0.3.3/lib/mustache.js)
+* [zepto v1.0rc](https://raw.github.com/mixteam/mixsln/v0.3.3/lib/zepto.js)
 
 
 ## 启动应用（App）
@@ -44,7 +44,7 @@
 		<footer class="toolbar"></footer>
 	</div>
 
-最后启动App：
+最后增加这段JS，来启动App：
 
 	<script type="text/javascript">
 		app.config.viewport = document.querySelector('.viewport');
@@ -63,7 +63,7 @@
 		app.start();
 	</script>
 
-完整的HTML代码：
+完整的代码：
 
 	<!DOCTYPE HTML>
 	<html>
@@ -115,7 +115,8 @@
 
 ## 创建页面（Page）
 
-在MIX中，页面会完成一系列的功能或交互，并且由唯一的路由指向唯一的页面，它是一个特殊的视图。
+在MIX中，页面会完成一系列的功能或交互，并且由唯一的路由指向唯一的页面，它是一个特殊的视图（View）。
+
 例如有如下目录结构:
 
 	- [demoapp]
@@ -132,11 +133,11 @@
 		- index.html
 	
 
-`hello.tpl`是该页面的`html模板`，内容如下：
+`hello.tpl`是页面的`html模板`，内容如下：
 
 	<h1>hello, <em>{{name}}</em></h1>
 
-`hello.js`用来定义一个页面：
+`hello.js`中定义了一个名为`helloworld`的页面：
 
 	(function(app){
 		app.page.define({
@@ -145,7 +146,7 @@
 			route : 'hello\\/(P<name>[^\\/]+)\\/?',	// 指定唯一路由（Perl风格）
 			template : './templates/hello.tpl',	// 需要加载的模版
 			buttons : [				// 设置标题栏上的按钮
-				{					// 左侧返回按钮的文本，操作不可变更
+				{					// 左侧返回按钮的文本
 					type : 'back',			
 					text : '返回'
 				},
@@ -154,7 +155,7 @@
 					text : '问候',
 					handler : function(e) {
 						// 点击按钮的句柄
-						if (var name = confirm('输入要问候人的名字')) {
+						if (var name = prompt('输入要问候人的名字')) {
 							app.navigation.push('hello/' + encodeURIComponent(name))
 						}
 					}
@@ -164,8 +165,7 @@
 			ready : function() {
 				// 在页面已经准备好时，可以进行后续操作
 				// 获取路由中的参数
-				var navigation = app.navigation,
-					name = navigation.getParameter('name'),
+				var name = app.navigation.getParameter('name'),
 					data = {name:name}
 					;
 				
@@ -208,15 +208,6 @@
 		}
 		app.start();
 	</script>
-
-## 路由规则
-
-MIX中每个页面拥有唯一的路由，路由语法为Perl风格的正则表达式。
-该路由规则最重要的是获取参数的语法，采用`(P<name>regexp)`的语法来声明参数。例如上述hello页面的路由规则为`hello\\/(P<name>[^\\/]+)\\/?`，它可以匹配诸如`hello/terry`，`hello/world`等路径（hash）。
-
-## 页面的生命周期
-
-MIX中每个页面都拥有自己的生命周期，分别是`define`，`ready`和`unload`。当用`app.page.define`方法定义一个页面时，处于`define`阶段，该阶段页面会被初始化并配置到路由规则集中。当路由规则匹配到该页面时，页面处于`ready`阶段，此时可以针对该页面进行操作。当路由匹配到下一个页面时，当前页面处于`unload`阶段，同理，下一个页面处于`ready`阶段。`ready`和`unload`阶段是个环，一个页面总是先从`define`进入到`ready`，此后到`unload`，再回到`ready`，以此类推。
 
 ## 重要的对象
 

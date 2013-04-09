@@ -8,10 +8,10 @@ var win = window,
     View = require('./view'),
 
     STATUS = {
-		'UNKOWN' : 0,
-		'UNLOADED' : 0,
-		'LOADED' : 1,
-		'READY' : 2
+		'DEFINED' : 0,
+		'UNLOADED' : 1,
+		'LOADED' : 2,
+		'READY' : 3
 	},
 	pages = {},
 	Page = Class.create({
@@ -25,7 +25,7 @@ var win = window,
 
 			Message.prototype.initialize.call(that, 'page.' + name);
 			View.prototype.initialize.apply(that, arguments);
-			that.status = STATUS.UNKOWN;
+			that.status = STATUS.DEFINED;
 		},
 
 		getTitle : function() {
