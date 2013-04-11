@@ -1,17 +1,17 @@
-# 用MIX快速开发WebApp
+# 十分钟快速开发WebApp
 
 ## 获取代码（v0.3.x）
 
-**框架代码**
+**解决方案代码**
 
-* [v0.3.0 调试版](https://raw.github.com/mixteam/mixsln/v0.3.0/mixsln-debug.js)
-* [v0.3.0 压缩版](https://raw.github.com/mixteam/mixsln/v0.3.0/mixsln.js)
-* [CSS样式表](https://raw.github.com/mixteam/mixsln/v0.3.0/mixsln.css)
+* [v0.3.3 调试版](https://raw.github.com/mixteam/mixsln/v0.3.3/mixsln-debug.js)
+* [v0.3.3 压缩版](https://raw.github.com/mixteam/mixsln/v0.3.3/mixsln.js)
+* [CSS样式表](https://raw.github.com/mixteam/mixsln/v0.3.3/mixsln.css)
 
-**以下js库可选**
+**以下js框架可选**
 
-* [mustache模版引擎](https://raw.github.com/mixteam/mixsln/v0.3.0/lib/mustache.js)
-* [zepto v1.0rc](https://raw.github.com/mixteam/mixsln/v0.3.0/lib/zepto.js)
+* [mustache模版引擎](https://raw.github.com/mixteam/mixsln/v0.3.3/lib/mustache.js)
+* [zepto v1.0rc](https://raw.github.com/mixteam/mixsln/v0.3.3/lib/zepto.js)
 
 
 ## 启动应用（App）
@@ -28,7 +28,7 @@
 复制以下这段HTML代码到到body中：
 
 	<div class="viewport">
-		<header class="titlebar">
+		<header class="navibar">
 			<ul>
 				<li>Title</li>
 				<li><button class="back">Back Btn</button></li>
@@ -44,17 +44,26 @@
 		<footer class="toolbar"></footer>
 	</div>
 
-最后启动App：
+最后增加这段JS，来启动App：
 
 	<script type="text/javascript">
 		app.config.viewport = document.querySelector('.viewport');
-		app.config.enableTitlebar = true;
+		app.config.enableNavibar = true;
 		app.config.enableScroll = true;
 		app.config.enableTransition = true;
+		app.config.templateEngine = {
+			compile : function(text) {
+				return Mustache.compile(text);
+			},
+		
+			render : function(compiled, data) {
+				return compiled(data);
+			}
+		}
 		app.start();
 	</script>
 
-完整的HTML代码：
+完整的代码：
 
 	<!DOCTYPE HTML>
 	<html>
@@ -65,7 +74,7 @@
 	</head>
 	<body>
 	<div class="viewport">
-		<header class="titlebar">
+		<header class="navibar">
 			<ul>
 				<li>Title</li>
 				<li><button class="back">Back Btn</button></li>
@@ -89,6 +98,15 @@
 		app.config.enableTitlebar = true;
 		app.config.enableScroll = true;
 		app.config.enableTransition = true;
+		app.config.templateEngine = {
+			compile : function(text) {
+				return Mustache.compile(text);
+			},
+		
+			render : function(compiled, data) {
+				return compiled(data);
+			}
+		}
 		app.start();
 	</script>
 	</body>
@@ -97,17 +115,17 @@
 
 ## 创建页面（Page）
 
-在MIX中，页面指的是一个特定的功能，比如列表页面、详情页面等，即由唯一的路由指向唯一的页面。
-页面包括了处理逻辑的JS，组织结构的模版，以及展示样式的CSS。它们的相互关系可以被灵活的指定。
+在MIX中，页面会完成一系列的功能或交互，并且由唯一的路由指向唯一的页面，它是一个特殊的视图（View）。
+
 例如有如下目录结构:
 
 	- [demoapp]
 		- [assets]
-			- list.css
+			- hello.css
 		- [templates]
-			- list.tpl
+			- hello.tpl
 		- [pages]
-			- list.js
+			- hello.js
 		- mixsln.js
 		- mixsln.css
 		- zepto.js
@@ -115,54 +133,41 @@
 		- index.html
 	
 
-`list.tpl`内容如下：
+`hello.tpl`是页面的`html模板`，内容如下：
 
-	<ul>
-		{{#items}}
-		<li>{{name}}</li>
-		{{/items}}
-	</ul>
+	<h1>hello, <em>{{name}}</em></h1>
 
-`list.js`用来定义一个页面的处理逻辑：
+`hello.js`中定义了一个名为`helloworld`的页面：
 
 	(function(app){
-		var listPage = app.page.define({
-			name : 'list',				// 指定唯一名称
-			title : '搜索列表',			// 在标题栏上显示的标题
-			route : 'list\\/(P<word>[^\\/]+)\\/(P<page>\d+)\\/?',	// 指定唯一路由（Perl风格）
-			template : './templates/list.tpl',	// 需要加载的模版
+		app.page.define({
+			name : 'helloworld',	// 指定唯一名称
+			title : '你好',			// 在标题栏上显示的标题
+			route : 'hello\\/(P<name>[^\\/]+)\\/?',	// 指定唯一路由（Perl风格）
+			template : './templates/hello.tpl',	// 需要加载的模版
 			buttons : [				// 设置标题栏上的按钮
-				{					// 左侧返回按钮的文本，操作不可变更
+				{					// 左侧返回按钮的文本
 					type : 'back',			
 					text : '返回'
 				},
 				{					// 右侧功能按钮的文本和操作
 					type : 'func',		
-					text : '下一页',
+					text : '问候',
 					handler : function(e) {
 						// 点击按钮的句柄
-						app.navigation.push('list/' + encodeURIComponent(listPage._word) + '/' + listPage._page)
+						if (var name = prompt('输入要问候人的名字')) {
+							app.navigation.push('hello/' + encodeURIComponent(name))
+						}
 					}
 				}
 			],
-
-			_data : null,
-			_word : null,
-			_page : 1,
 			
 			ready : function() {
 				// 在页面已经准备好时，可以进行后续操作
 				// 获取路由中的参数
-				var navigation = app.navigation;
-				this._word = navigation.getParameter('word');
-				this._page = navigation.getParameter('page');
-				// 准备数据，当然也可以通过ajax获取。
-				this._data = {items:[
-					{name:'hanquan'},
-					{name:'zhuxun'},
-					{name:'xuanji'},
-					{name:'jiangcheng'}
-				]};	
+				var name = app.navigation.getParameter('name'),
+					data = {name:name}
+					;
 				
 				// 调用fill方法，可以把数据渲染到模版上，最终生成可见的页面
 				this.fill(data, function() {	
@@ -178,33 +183,37 @@
 		})
 	})(window['app']);
 
-最后把list页面相关的文件引入到项目中
+最后把hello页面相关的文件引入到项目中
 
 	<script src="zepto.js" type="text/javascript"></script>
 	<script src="mustache.js" type="text/javascript"></script>
 	<script src="mixsln.js" type="text/javascript"></script>
-	<!--##list页面的代码-->
-	<link type="text/css" rel="styleSheet" href="assets/list.css"/>
-	<script src="pages/list.js" type="text/javascript"></script>
-	<!--//list页面的代码-->
+	<!--##hello页面的代码-->
+	<link type="text/css" rel="styleSheet" href="assets/hello.css"/>
+	<script src="pages/hello.js" type="text/javascript"></script>
+	<!--//hello页面的代码-->
 	<script type="text/javascript">
 		app.config.viewport = document.querySelector('.viewport');
-		app.config.enableTitlebar = true;
+		app.config.enableNavibar  = true;
 		app.config.enableScroll = true;
 		app.config.enableTransition = true;
+		app.config.templateEngine = {
+			compile : function(text) {
+				return Mustache.compile(text);
+			},
+		
+			render : function(compiled, data) {
+				return compiled(data);
+			}
+		}
 		app.start();
 	</script>
 
-## 路由规则
-
-MIX中每个页面拥有唯一的路由，路由语法为Perl风格的正则表达式。
-该路由规则最重要的是获取参数的语法，采用`(P<name>regexp)`的语法来声明参数。例如上述list页面的路由规则为`list\\/(P<word>[^\\/]+)\\/(P<page>\d+)\\/?`，它可以匹配诸如`list/iphone/1`，`list/衣服/2`等路径（hash）。
-
-## 页面的生命周期
-
-MIX中每个页面都拥有自己的生命周期，分别是`define`，`ready`和`unload`。当用`app.page.define`方法定义一个页面时，处于`define`阶段，该阶段页面会被初始化并配置到路由规则集中。当路由规则匹配到该页面时，页面处于`ready`阶段，此时可以针对该页面进行操作。当路由匹配到下一个页面时，当前页面处于`unload`阶段，同理，下一个页面处于`ready`阶段。`ready`和`unload`阶段是个环，一个页面总是先从`define`进入到`ready`，此后到`unload`，再回到`ready`，以此类推。
-
 ## 重要的对象
+
+### app.view
+
+用于定义视图、获取视图
 
 ### app.page
 
@@ -217,6 +226,10 @@ MIX中每个页面都拥有自己的生命周期，分别是`define`，`ready`�
 ### app.navigation
 
 用于获取路由的参数，以及执行前进后退操作。
+
+### app.plugin
+
+包含自定义的插件
 	
 
 	

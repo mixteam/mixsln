@@ -1,0 +1,1 @@
+(function(a,b){var d=(a.document,a.Zepto||a.$);b.page.fn.find=function(){var a=d(b.component.getActiveContent());return a.find.apply(a,arguments)},b.plugin.domfind=!0})(window,window.app);

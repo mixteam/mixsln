@@ -14,51 +14,65 @@ var win = window,
 				name = state.name.split('.')
 				;
 				
-			that.appName = name[0];
+			that.pageName = name[0];
 			that.routeName = name[1];
 			that.state = state;
 		},
 
-		ready : function() {
-			var page = Page.get(this.appName)
+		load : function(callback) {
+			var that = this,
+				page = Page.get(this.pageName),
+				loadedState = []
 				;
 
-			if (page.status < STATUS.READY) {
-				page.status = STATUS.READY;
-				page.trigger('ready');
-			}
-		},
-
-		compile : function() {
-			var page = Page.get(this.appName)
-				;
-
-			function _compiled() {
-				if (page.status < STATUS.COMPILED) {
-					page.status = STATUS.COMPILED;
-					page.trigger('compiled');
+			function checkLoaded(i) {
+				loadedState[i] = true;
+				if (loadedState.join('').match(/^(true)*$/)) {
+					page.status = STATUS.LOADED;
+					callback();
 				}
 			}
 
-			if (!page.compiledTemplate) {
-				page.loadTemplate(function(text) {
-					page.compileTemplate(text, function() {
-						_compiled();	
+			function pushViews(view) {
+				var views = view.views || {};
+				loadedState.push(view);
+				Object.each(views, pushViews);
+			}
+
+			if (page.status < STATUS.LOADED) {
+				pushViews(page);
+
+				Object.each(loadedState, function(state, i) {
+					state.loadTemplate(function(text) {
+						state.compileTemplate(text, function(compiled) {
+							state.compiledTemplate = compiled;
+							checkLoaded(i);
+						});
 					});
 				});
-			} else {
-				_compiled();
+			}
+		},
+
+		ready : function() {
+			var page = Page.get(this.pageName)
+				;
+
+			if (page.status === STATUS.LOADED && page.status < STATUS.READY) {
+				page.status = STATUS.READY;
+				page.trigger('ready');
+				page.ready();
 			}
 		},
 
 		unload : function() {
 			var that = this,
-				page = Page.get(this.appName)
+				page = Page.get(this.pageName)
 				;
 
 			if (page.status > STATUS.UNLOADED) {
 				page.status = STATUS.UNLOADED;
 				page.trigger('unloaded');
+				page.unload();
 			}
 		}
 	});
@@ -67,15 +81,33 @@ Object.extend(Navigation, {
 	_cur : null,
 
 	getParameter : function(name) {
+		if (!this._cur) return;
 		return this._cur.state.params[name];
 	},
 
 	getArgument : function(name) {
+		if (!this._cur) return;
 		return this._cur.state.args[name];
 	},
 
 	getData : function(name) {
+		if (!this._cur) return;
 		return this._cur.state.datas[name];
+	},
+
+	getPageName : function() {
+		if (!this._cur) return;
+		return this._cur.pageName;
+	},
+
+	getRouteName : function() {
+		if (!this._cur) return;
+		return this._cur.routeName;
+	},
+
+	getState : function() {
+		if (!this._cur) return;
+		return this._cur.state;
 	},
 
 	push : function(fragment, options) {

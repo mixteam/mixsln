@@ -5,16 +5,28 @@
             var plugins = page.plugins;
             if (plugins) {
                 page.on("ready", function() {
-                    Object.each(plugins, function(options, name) {
-                        if (page.plugins[name] === true) {
-                            options = page.plugins[name] = {};
+                    Object.each(plugins, function(pageOptions, name) {
+                        var state = app.navigation.getState(), plugin = app.plugin[name];
+                        state.plugins || (state.plugins = {});
+                        state.plugins[name] || (state.plugins[name] = {});
+                        pageOptions === true && (pageOptions = page.plugins[name] = {});
+                        if (plugin && plugin.on) {
+                            plugin.on(page, {
+                                page: pageOptions,
+                                state: state.plugins[name]
+                            });
                         }
-                        app.plugin[name] && app.plugin[name].on(page, options);
                     });
                 });
                 page.on("unloaded", function() {
-                    Object.each(plugins, function(options, name) {
-                        app.plugin[name] && app.plugin[name].off(page);
+                    Object.each(plugins, function(pageOptions, name) {
+                        var state = app.navigation.getState(), plugin = app.plugin[name];
+                        if (plugin && plugin.off) {
+                            plugin.off(page, {
+                                page: pageOptions,
+                                state: state.plugins[name]
+                            });
+                        }
                     });
                 });
             }
