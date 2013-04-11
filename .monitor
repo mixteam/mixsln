@@ -1,18 +1,24 @@
-[spm build]
+[spm build, node build js]
 ./package.json
 ./src/app.js
+./src/app-hybrid.js
 ./src/modules/gesture.js
 ./src/modules/transform.js
 ./src/modules/scroll.js
+./src/modules/view.js
 ./src/modules/page.js
 ./src/modules/component.js
 ./src/modules/navigation.js
+
+[spm build]
+./src/plugins/domevent.js
+./src/plugins/domfind.js
 ./src/plugins/init.js
+./src/plugins/inlinetpl.js
 ./src/plugins/lazyload.js
+./src/plugins/multitpl.js
 ./src/plugins/scrollpos.js
 
-#[copy ".\lib\cjs-debug.js"+".\lib\mix-debug.js"+".\dist\app-debug.js" "mixsln-debug.js"]
-#./dist/app-debug.js
-
-#[copy ".\lib\cjs.js"+".\lib\mix.js"+".\dist\app.js" "mixsln.js"]
-#./dist/app.js
+[node build css]
+./assets/base.css
+./assets/x.css

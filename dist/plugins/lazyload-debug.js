@@ -1,38 +1,78 @@
 (function(win, app) {
     var doc = win.document, scroll;
     function getScrollTop() {
-        return scroll.fn.getScrollTop();
+        if (scroll) {
+            return scroll.fn.getScrollTop();
+        } else {
+            return doc.body.scrollTop;
+        }
     }
     function getScrollHeight() {
-        return scroll.fn.getScrollHeight();
+        if (scroll) {
+            return scroll.fn.getScrollHeight();
+        } else {
+            return doc.body.scrollHeight;
+        }
     }
     function getViewHeight() {
-        return scroll.offsetHeight;
+        if (scroll) {
+            return scroll.offsetHeight;
+        } else {
+            return doc.body.clientHeight;
+        }
     }
     app.plugin.lazyload = {
         _options: null,
-        once: function() {
-            var options = this._options, items = doc.querySelectorAll(options.itemSelector), scrollTop = getScrollTop(), scrollHeight = getScrollHeight(), itemHeight = options.itemHeight, viewHeight = getViewHeight() + options.viewHeightPatch, start, end;
-            start = Math.floor(scrollTop / itemHeight);
-            end = Math.ceil((scrollTop + viewHeight) / itemHeight);
-            for (var i = start; i < end && i < items.length; i++) {
-                var item = items[i], img = item.querySelector("img[data-src]"), src = img.getAttribute("data-src");
-                if (src) {
-                    img.setAttribute("src", src);
-                    img.setAttribute("data-src", "");
+        _getOffset: function(img) {
+            var content = app.component.getActiveContent(), cStyle = getComputedStyle(img), offsetHeight = parseFloat(img.getAttribute("height") || img.offsetHeight || cStyle.height), offsetParent, offsetTop = parseFloat(img.offsetTop), offsetContent = 0;
+            if (!scroll) {
+                offsetParent = content.parentNode;
+                while (offsetParent != doc.body) {
+                    offsetContent += parseFloat(offsetParent.offsetTop);
+                    offsetParent = offsetParent.parentNode;
+                }
+            }
+            offsetParent = img.parentNode;
+            while (offsetParent != content) {
+                offsetTop += parseFloat(offsetParent.offsetTop);
+                offsetParent = offsetParent.parentNode;
+            }
+            return {
+                top: offsetTop + offsetContent,
+                bottom: offsetTop + offsetHeight + offsetContent
+            };
+        },
+        check: function() {
+            var options = this._options, dataAttr = options.page.dataAttr || "data-src", content = app.component.getActiveContent(), imgs = content.querySelectorAll("img[" + dataAttr + "]"), viewportTop = getScrollTop(), viewportBottom = getScrollTop() + getViewHeight();
+            for (var i = 0; i < imgs.length; i++) {
+                var img = imgs[i], offset = this._getOffset(img), src;
+                if (offset.top > viewportTop && offset.top < viewportBottom || offset.bottom > viewportTop && offset.bottom < viewportBottom) {
+                    src = img.getAttribute(dataAttr);
+                    if (src) {
+                        img.setAttribute("src", src);
+                        img.removeAttribute(dataAttr);
+                    }
                 }
             }
         },
         on: function(page, options) {
             this._options = options;
-            options.dataAttr || (options.dataAttr = "data-src");
             scroll = app.component.get("scroll");
-            app.component.on("scrollEnd", this.once, this);
-            page.on("rendered", this.once, this);
+            this.check = this.check.bind(this);
+            if (scroll) {
+                app.component.on("scrollEnd", this.check);
+            } else {
+                doc.addEventListener("touchend", this.check, false);
+            }
+            page.on("rendered", this.check, this);
         },
         off: function(page, options) {
-            app.component.off("scrollEnd", this.once, this);
-            page.off("rendered", this.once, this);
+            if (scroll) {
+                app.component.off("scrollEnd", this.check);
+            } else {
+                doc.removeEventListener("touchend", this.check, false);
+            }
+            page.off("rendered", this.check, this);
         }
     };
 })(window, window["app"]);

@@ -36,6 +36,7 @@ var Scroll = Class.create({
         that._wrap = element;
         that._scroller = element.children[0];
         that._gesture = new Gesture(that._scroller);
+        that._originalX = null;
         that._originalY = null;
         that._currentY = null;
         that._scrollHeight = null;
@@ -91,6 +92,7 @@ var Scroll = Class.create({
     },
 
     refresh : function() {
+        this._scroller.style.height = 'auto';
         this._refreshed = true;
     },
 
@@ -105,6 +107,7 @@ var Scroll = Class.create({
     to : function(top) {
         var that = this,
             scroller = that._scroller,
+            left = Transform.getX(scroller),
             maxScrollTop = getMaxScrollTop(scroller)
             ;
 
@@ -116,7 +119,7 @@ var Scroll = Class.create({
             top = 0;
         }
 
-        scroller.style.webkitTransform = Transform.getTranslate(0, top);
+        scroller.style.webkitTransform = Transform.getTranslate(left, top);
         that._onScrollEnd();
     },
 
@@ -136,7 +139,6 @@ var Scroll = Class.create({
         if (that._refreshed) {
             that._refreshed = false;
             that._scrollHeight = scroller.offsetHeight;
-            scroller.style.height = 'auto';
             scroller.style.height = that._scrollHeight + 'px';
         }
     },
@@ -146,6 +148,7 @@ var Scroll = Class.create({
             scroller = that._scroller
             ;
 
+        that._originalX = Transform.getX(scroller);
         that._originalY = Transform.getY(scroller);
     },
 
@@ -153,23 +156,25 @@ var Scroll = Class.create({
         var that = this,
             scroller = that._scroller,
             maxScrollTop = getMaxScrollTop(scroller),
+            originalX = that._originalX,
             originalY = that._originalY,
             currentY = that._currentY = originalY + e.displacementY
             ;
 
         
         if(currentY > 0) {
-            scroller.style.webkitTransform = Transform.getTranslate(0, currentY / 2);
+            scroller.style.webkitTransform = Transform.getTranslate(originalX, currentY / 2);
         } else if(currentY < maxScrollTop) {
-            scroller.style.webkitTransform = Transform.getTranslate(0, (maxScrollTop - currentY) / 2 + currentY);
+            scroller.style.webkitTransform = Transform.getTranslate(originalX, (maxScrollTop - currentY) / 2 + currentY);
         } else {
-            scroller.style.webkitTransform = Transform.getTranslate(0, currentY);
+            scroller.style.webkitTransform = Transform.getTranslate(originalX, currentY);
         }
     },
 
     _onPanEnd : function(e) {
         var that = this,
             scroller = that._scroller,
+            originalX = that._originalX,
             currentY = that._currentY,
             maxScrollTop = getMaxScrollTop(scroller),
             translateY = null
@@ -184,7 +189,7 @@ var Scroll = Class.create({
         }
 
         if (translateY != null) {
-            Transform.start(scroller, '0.4s', 'ease-out', '0s', 0, translateY, that._onScrollEnd);
+            Transform.start(scroller, '0.4s', 'ease-out', '0s', originalX, translateY, that._onScrollEnd);
         } else {
             that._onScrollEnd();
         }
@@ -193,6 +198,7 @@ var Scroll = Class.create({
     _onFlick : function(e) {
         var that = this,
             scroller = that._scroller,
+            originalX = that._originalX,
             currentY = that._currentY,
             maxScrollTop = getMaxScrollTop(scroller)
             ;
@@ -224,7 +230,7 @@ var Scroll = Class.create({
             Transform.start(
                 scroller, 
                 t.toFixed(0) + 'ms', 'cubic-bezier(' + Transform.getBezier(-v0/a, -v0/a+t) + ')', '0s',
-                0, s.toFixed(0), 
+                originalX, s.toFixed(0), 
                 function() {
                     v0 = v;
                     s0 = s;
@@ -235,7 +241,7 @@ var Scroll = Class.create({
                     Transform.start(
                         scroller,
                         (0-t).toFixed(0) + 'ms', 'cubic-bezier(' + Transform.getBezier(-t, 0) + ')', '0s',
-                        0, s.toFixed(0),
+                        originalX, s.toFixed(0),
                         that._onScrollEnd
                     );
                 }
@@ -244,7 +250,7 @@ var Scroll = Class.create({
             Transform.start(
                 scroller,
                 t.toFixed(0) + 'ms', 'cubic-bezier(' + Transform.getBezier(-t, 0) + ')', '0s',
-                0, s.toFixed(0),
+                originalX, s.toFixed(0),
                 that._onScrollEnd
             );
         }

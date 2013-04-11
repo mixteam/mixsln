@@ -5,15 +5,17 @@ var win = window,
     doc = win.document,
     Class = require('class'),
     Message = require('message'),
+    View = require('./view'),
 
     STATUS = {
-		'UNKOWN' : 0,
-		'UNLOADED' : 0,
-		'READY' : 1,
-		'COMPILED' : 2,
+		'DEFINED' : 0,
+		'UNLOADED' : 1,
+		'LOADED' : 2,
+		'READY' : 3
 	},
 	pages = {},
 	Page = Class.create({
+		Extends : View,
 		Implements : Message,
 
 		initialize : function() {
@@ -21,15 +23,9 @@ var win = window,
 				name = that.name
 				;
 
-			Message.prototype.initialize.call(that, 'app.' + name);
-
-			that.status = STATUS.UNKOWN;
-
-			that.ready = that.ready.bind(that);
-			that.unload = that.unload.bind(that);
-
-			that.on('ready', that.ready);
-			that.on('unloaded', that.unload);
+			Message.prototype.initialize.call(that, 'page.' + name);
+			View.prototype.initialize.apply(that, arguments);
+			that.status = STATUS.DEFINED;
 		},
 
 		getTitle : function() {
@@ -37,80 +33,59 @@ var win = window,
 			return this.title;
 		},
 
-		loadTemplate : function(url, callback) {
-			// can overwrite
-			var that = this
-				;
-
-			if (arguments.length === 1) {
-				callback = arguments[0];
-				url = that.template;
-			} 
-
-			url && app.loadFile(url, callback);
-		},
-
-		compileTemplate : function(text, callback) {
-			// can overwrite
-			var that = this,
-				engine;
-
-			if ((engine = win['Mustache'])) {
-				that.compiledTemplate = engine.compile(text);
-				callback(that.compiledTemplate);
-			}
-		},
-
-		renderTemplate : function(datas, callback) {
-			// can overwrite
-			var that = this,
-				compiledTemplate = that.compiledTemplate,
-				content = compiledTemplate(datas)
-				;
-
-			callback(content);
-		},
-
 		fill : function(datas, callback) {
 			var that = this
 				;
 
-			function _fill() {
-				that.renderTemplate(datas, function(content) {
-					that.trigger('rendered', content);
-					callback && callback();
-				});
+			if (!Object.isTypeof(datas, 'string')) {
+				datas = that.renderTemplate(datas);
 			}
-
-			if (!that.compiledTemplate) {
-				that.once('compiled', _fill);
-			} else {
-				_fill();
-			}
+			that.trigger('rendered', datas);
+			callback && callback();
 		},
 
-		ready : function(navigation) {/*implement*/},
+		ready : function() {/*implement*/},
 		unload : function() {/*implement*/}
 	});
 
 Page.STATUS = STATUS;
-
+Page.global = {};
 Page.fn = {};
-
+var isExtend = false;
+function extendPageFn() {
+	if (!isExtend) {
+		isExtend = true;
+		Object.extend(Page.prototype, Page.fn);
+	}
+}
 Page.define = function(properties) {
-	var cPage = Page.extend(properties),
-		page
+	extendPageFn();
+
+	var cPage = Page.extend(properties), 
+		iPage = new cPage()
 		;
 
-	cPage.implement(Page.fn);
-	page = new cPage();
-	return (pages[page.name] = page);
-}
+	Object.each(Page.global, function(val, name) {
+		var type = Object.isTypeof(val);
 
+		switch (type){
+			case 'array':
+				iPage[name] = val.slice(0).concat(iPage[name] || []);
+				break;
+			case 'object':
+				iPage[name] = Object.extend(val, iPage[name] || {});
+				break;
+			case 'string':
+			case 'number':
+				(iPage[name] == null) && (iPage[name] = val);
+				break;
+		}
+	});
+	return (pages[iPage.name] = iPage);
+}
 Page.get = function(name) {
 	return pages[name];
 }
-
 Page.each = function(callback) {
 	Object.each(pages, callback);
 }
