@@ -4,6 +4,26 @@
 		"selected_items":
 		[
 			[
+				"c",
+				"callback"
+			],
+			[
+				"te",
+				"templates"
+			],
+			[
+				"data",
+				"dataSet"
+			],
+			[
+				"sea",
+				"searchcontent"
+			],
+			[
+				"tr",
+				"trigger"
+			],
+			[
 				"reset",
 				"resetNavigationBar"
 			],
@@ -152,10 +172,6 @@
 				"forwardTransitionEnd"
 			],
 			[
-				"tr",
-				"_transitonEnd"
-			],
-			[
 				"max",
 				"maxScrollTop"
 			],
@@ -174,10 +190,6 @@
 			[
 				"pl",
 				"plugins"
-			],
-			[
-				"data",
-				"dataAttr"
 			],
 			[
 				"scroll",
@@ -400,10 +412,6 @@
 				"matched"
 			],
 			[
-				"c",
-				"component"
-			],
-			[
 				"ma",
 				"matched"
 			],
@@ -506,14 +514,6 @@
 			[
 				"mar",
 				"margin-top"
-			],
-			[
-				"S",
-				"STYLE"
-			],
-			[
-				"sty",
-				"styles"
 			]
 		]
 	},
@@ -523,15 +523,7 @@
 			"file": "src/app.js",
 			"settings":
 			{
-				"buffer_size": 4998,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/app-hybrid.js",
-			"settings":
-			{
-				"buffer_size": 4853,
+				"buffer_size": 4908,
 				"line_ending": "Windows"
 			}
 		},
@@ -539,7 +531,39 @@
 			"file": "src/modules/navigation.js",
 			"settings":
 			{
-				"buffer_size": 2260,
+				"buffer_size": 2369,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/modules/page.js",
+			"settings":
+			{
+				"buffer_size": 1828,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "demo/pages/list.js",
+			"settings":
+			{
+				"buffer_size": 1998,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/modules/view.js",
+			"settings":
+			{
+				"buffer_size": 1807,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/plugins/domevent.js",
+			"settings":
+			{
+				"buffer_size": 1358,
 				"line_ending": "Windows"
 			}
 		}
@@ -588,32 +612,34 @@
 	},
 	"file_history":
 	[
-		"/D/workspace/taobao/etao/mix/mixsln/package.json",
-		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/lazyload.js",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/pages/detail.js",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/templates/list.tpl",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/inlinetpl.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/component.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/view.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/multitpl.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/views/searchItems.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/app-hybrid.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/pages/detail.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/index.html",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/debug.html",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/hybrid.html",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/config-hybrid.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/navigation.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
+		"/D/workspace/taobao/etao/mix/mixsln/package.json",
+		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/pages/list.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/templates/default.tpl",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/templates/list.tpl",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/pages/default.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/config.js",
+		"/D/workspace/taobao/etao/mix/mixsln/demo/config-hybrid.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/domevent.js",
+		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/lazyload.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/scroll.js",
 		"/D/workspace/taobao/etao/mix/mixsln/mixsln-hybrid.js",
 		"/D/workspace/taobao/etao/mix/mixsln/build.js",
-		"/D/workspace/taobao/etao/mix/mixsln/.monitor",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/navigation.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/page.js",
-		"/D/workspace/taobao/etao/mix/mixsln/src/modules/view.js",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/views/searchItems.js",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/config.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/modules/gesture.js",
 		"/D/workspace/taobao/etao/mix/mixsln/src/app.js",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/debug.html",
-		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/multitpl.js",
 		"/D/workspace/taobao/etao/mix/mixsln/mixsln-debug.js",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/index.html",
-		"/D/workspace/taobao/etao/mix/mixsln/src/plugins/domevent.js",
-		"/D/workspace/taobao/etao/mix/mixsln/demo/pages/default.js",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/list/list.js",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/list/listView.js",
 		"/D/workspace/taobao/etao/mix/mixsln/demo/default/default.tpl",
@@ -713,9 +739,7 @@
 		"/C/Users/zhuxun.jb/AppData/Roaming/Sublime Text 2/Packages/ZenCoding/zen-coding.sublime-settings",
 		"/C/Users/zhuxun.jb/AppData/Roaming/Sublime Text 2/Packages/User/zen-coding.sublime-settings",
 		"/C/Users/zhuxun.jb/AppData/Roaming/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/libs/less/package.json",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/libs/underscore/package.json",
-		"/D/workspace/taobao/etao/mix/mixjs-gitpower/core/package.json"
+		"/D/workspace/taobao/etao/mix/mixjs-gitpower/libs/less/package.json"
 	],
 	"find":
 	{
@@ -733,6 +757,7 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"page.",
 			"switchNavigation",
 			"enableNavibar",
 			"setNavibar",
@@ -859,8 +884,7 @@
 			"touchRecord",
 			"ele",
 			"myGestures",
-			"_scope",
-			"resolveId"
+			"_scope"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -868,6 +892,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"view.",
 			"page",
 			"word",
 			"page",
@@ -973,7 +998,6 @@
 	"groups":
 	[
 		{
-			"selected": 2,
 			"sheets":
 			[
 				{
@@ -981,15 +1005,15 @@
 					"file": "src/app.js",
 					"settings":
 					{
-						"buffer_size": 4998,
+						"buffer_size": 4908,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2794,
-								2794
+								1940,
+								1940
 							]
 						],
 						"settings":
@@ -998,25 +1022,52 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2064.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "src/app-hybrid.js",
+					"file": "src/modules/navigation.js",
 					"settings":
 					{
-						"buffer_size": 4853,
+						"buffer_size": 2369,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								848,
-								848
+								1509,
+								1509
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 48.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/modules/page.js",
+					"settings":
+					{
+						"buffer_size": 1828,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								663,
+								663
 							]
 						],
 						"settings":
@@ -1031,19 +1082,19 @@
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "src/modules/navigation.js",
+					"buffer": 3,
+					"file": "demo/pages/list.js",
 					"settings":
 					{
-						"buffer_size": 2260,
+						"buffer_size": 1998,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1838,
-								1838
+								426,
+								426
 							]
 						],
 						"settings":
@@ -1052,7 +1103,61 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 912.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/modules/view.js",
+					"settings":
+					{
+						"buffer_size": 1807,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								426,
+								426
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 960.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/plugins/domevent.js",
+					"settings":
+					{
+						"buffer_size": 1358,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								475,
+								475
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
