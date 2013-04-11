@@ -17,10 +17,13 @@
 <link type="text/css" rel="styleSheet" href="../assets/base.css"/>
 <link type="text/css" rel="styleSheet" href="../assets/x.css"/>
 <link type="text/css" rel="styleSheet" href="http://a.tbcdn.cn/mw/base/styles/component.css?v=20130110"/>
+<link type="text/css" rel="styleSheet" href="http://a.tbcdn.cn/mw/app/detail/h5/detail-fresh.css?v=20130110"/>
+<link type="text/css" rel="styleSheet" href="http://a.tbcdn.cn/mw/app/searchlist/h5/css/searchlist.css?v=20130110"/>
+<link type="text/css" rel="styleSheet" href="style.css" />
 </head>
 <body>
 <div class="viewport">
-	<header class="titlebar">
+	<header class="navibar">
 		<ul>
 			<li>Title</li>
 			<li><button class="back">Back Btn</button></li>
@@ -41,17 +44,21 @@
 <script src="../lib/cjs-debug.js" type="text/javascript"></script>
 <script src="../lib/mix-debug.js" type="text/javascript"></script>
 <script src="../dist/app-debug.js" type="text/javascript"></script>
+
+<script src="./config.js" type="text/javascript"></script>
+
 <script src="../dist/plugins/init-debug.js" type="text/javascript"></script>
 <script src="../dist/plugins/lazyload-debug.js" type="text/javascript"></script>
 <script src="../dist/plugins/scrollpos-debug.js" type="text/javascript"></script>
-<script src="./default/default.js" type="text/javascript"></script>
-<script src="./list/list.js" type="text/javascript"></script>
-<script src="./detail/detail.js" type="text/javascript"></script>
+<script src="../dist/plugins/domfind-debug.js" type="text/javascript"></script>
+<script src="../dist/plugins/domevent-debug.js" type="text/javascript"></script>
+
+<script src="./views/searchItems.js" type="text/javascript"></script>
+<script src="./pages/default.js" type="text/javascript"></script>
+<script src="./pages/list.js" type="text/javascript"></script>
+<script src="./pages/detail.js" type="text/javascript"></script>
+
 <script type="text/javascript">
-	app.config.viewport = document.querySelector('.viewport');
-	app.config.enableTitlebar = true;
-	app.config.enableScroll = true;
-	app.config.enableTransition = true;
 	app.start();
 </script>
 </body>
