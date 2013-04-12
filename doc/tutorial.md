@@ -155,7 +155,8 @@
 					text : '问候',
 					handler : function(e) {
 						// 点击按钮的句柄
-						if (var name = prompt('输入要问候人的名字')) {
+						var name;
+						if ((name = prompt('输入要问候人的名字'))) {
 							app.navigation.push('hello/' + encodeURIComponent(name))
 						}
 					}
@@ -183,7 +184,7 @@
 		})
 	})(window['app']);
 
-最后把hello页面相关的文件引入到项目中
+最后把hello页面相关的文件引入到项目中，通过hash（#hello/abcd）访问页面，即可完成。
 
 	<script src="zepto.js" type="text/javascript"></script>
 	<script src="mustache.js" type="text/javascript"></script>
