@@ -155,7 +155,8 @@
 					text : '问候',
 					handler : function(e) {
 						// 点击按钮的句柄
-						if (var name = prompt('输入要问候人的名字')) {
+						var name;
+						if ((name = prompt('输入要问候人的名字'))) {
 							app.navigation.push('hello/' + encodeURIComponent(name))
 						}
 					}

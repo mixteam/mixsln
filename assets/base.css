@@ -10,6 +10,10 @@ ul, ol {
     -webkit-margin-after: 0;
     -webkit-margin-start: 0;
     -webkit-margin-end: 0;
+    -webkit-padding-before: 0;
+    -webkit-padding-after: 0;
+    -webkit-padding-start: 0;
+    -webkit-padding-end: 0;
 }
 
 body * {
