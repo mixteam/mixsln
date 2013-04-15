@@ -40,18 +40,19 @@
 				;
 
 			if (!scroll) {
-				offsetParent = content.parentNode;
+				offsetParent = content.offsetParent;
 				while (offsetParent != doc.body) {
 					offsetContent += parseFloat(offsetParent.offsetTop);
-					offsetParent = offsetParent.parentNode;
+					offsetParent = offsetParent.offsetParent;
 				}
 			}
 
-			offsetParent = img.parentNode;
-			while (offsetParent != content) {
-				offsetTop += parseFloat(offsetParent.offsetTop);
-				offsetParent = offsetParent.parentNode;
-			}
+            offsetParent = img.offsetParent;
+            while (offsetParent != content) {
+                offsetTop += parseFloat(offsetParent.offsetTop);
+                offsetParent = offsetParent.offsetParent;
+            }
+
 
 			return {
 				top : offsetTop + offsetContent,
@@ -60,6 +61,8 @@
 		},
 
 		check : function() {
+
+
 			var options = this._options,
 				dataAttr = options.page.dataAttr || 'data-src',
 				content = app.component.getActiveContent(),

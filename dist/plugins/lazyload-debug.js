@@ -26,16 +26,16 @@
         _getOffset: function(img) {
             var content = app.component.getActiveContent(), cStyle = getComputedStyle(img), offsetHeight = parseFloat(img.getAttribute("height") || img.offsetHeight || cStyle.height), offsetParent, offsetTop = parseFloat(img.offsetTop), offsetContent = 0;
             if (!scroll) {
-                offsetParent = content.parentNode;
+                offsetParent = content.offsetParent;
                 while (offsetParent != doc.body) {
                     offsetContent += parseFloat(offsetParent.offsetTop);
-                    offsetParent = offsetParent.parentNode;
+                    offsetParent = offsetParent.offsetParent;
                 }
             }
-            offsetParent = img.parentNode;
+            offsetParent = img.offsetParent;
             while (offsetParent != content) {
                 offsetTop += parseFloat(offsetParent.offsetTop);
-                offsetParent = offsetParent.parentNode;
+                offsetParent = offsetParent.offsetParent;
             }
             return {
                 top: offsetTop + offsetContent,

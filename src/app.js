@@ -128,6 +128,9 @@ var win = window,
 				app.navigation._cur.unload();
 			}
 			app.navigation._cur = navigation;
+		}
+
+		function loadNavigation(navigation) {
 			navigation.load(function() {
 				navigation.ready();
 				if (app.config.enableNavibar) {
@@ -140,11 +143,12 @@ var win = window,
 			var navigation = new Navigation(state)
 				;
 
+			switchNavigation(navigation);
 			if (app.config.enableNavibar) {
 				setButtons(navigation);
 				setNavibar(navigation, true);
 			}
-			switchNavigation(navigation);
+			loadNavigation(navigation);
 		});
 
 		Page.each(function(page) {
