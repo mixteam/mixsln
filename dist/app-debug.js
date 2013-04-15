@@ -916,6 +916,8 @@ define("#mix/sln/0.3.4/app-debug", [ "./modules/view-debug", "./modules/page-deb
                 app.navigation._cur.unload();
             }
             app.navigation._cur = navigation;
+        }
+        function loadNavigation(navigation) {
             navigation.load(function() {
                 navigation.ready();
                 if (app.config.enableNavibar) {
@@ -925,11 +927,12 @@ define("#mix/sln/0.3.4/app-debug", [ "./modules/view-debug", "./modules/page-deb
         }
         navigate.on("forward backward", function(state) {
             var navigation = new Navigation(state);
+            switchNavigation(navigation);
             if (app.config.enableNavibar) {
                 setButtons(navigation);
                 setNavibar(navigation, true);
             }
-            switchNavigation(navigation);
+            loadNavigation(navigation);
         });
         Page.each(function(page) {
             var name = page.name, route = page.route;

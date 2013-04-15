@@ -774,8 +774,8 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             var that = this, states = that._states, stateIdx = that._stateIdx, stateLimit = that._stateLimit, stateLen = states.length, move = that._move, transition = that._transition, datas = that._datas, prev = states[stateIdx - 1], next = states[stateIdx + 1], cur = {
                 name: name,
                 fragment: fragment,
-                params: params,
-                args: args
+                params: params || {},
+                args: args || {}
             };
             if (move == null) {
                 if (!datas && that._stateEquals(prev, cur)) {
@@ -1814,6 +1814,8 @@ define("#mix/sln/0.3.4/app-debug", [ "./modules/view-debug", "./modules/page-deb
                 app.navigation._cur.unload();
             }
             app.navigation._cur = navigation;
+        }
+        function loadNavigation(navigation) {
             navigation.load(function() {
                 navigation.ready();
                 if (app.config.enableNavibar) {
@@ -1823,11 +1825,12 @@ define("#mix/sln/0.3.4/app-debug", [ "./modules/view-debug", "./modules/page-deb
         }
         navigate.on("forward backward", function(state) {
             var navigation = new Navigation(state);
+            switchNavigation(navigation);
             if (app.config.enableNavibar) {
                 setButtons(navigation);
                 setNavibar(navigation, true);
             }
-            switchNavigation(navigation);
+            loadNavigation(navigation);
         });
         Page.each(function(page) {
             var name = page.name, route = page.route;
