@@ -37,20 +37,6 @@
                 "./modules/navigation.js",
                 "./app"
             ]
-        },
-
-        "app-hybrid.js" : {
-            "main" : "./app-hybrid",
-            "includes" : [
-                "./modules/gesture",
-                "./modules/transform",
-                "./modules/scroll",
-                "./modules/component.js",
-                "./modules/view",
-                "./modules/page",
-                "./modules/navigation.js",
-                "./app-hybrid"
-            ]
         }
     }
 }
