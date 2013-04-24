@@ -18,6 +18,7 @@
 ./src/plugins/lazyload.js
 ./src/plugins/multitpl.js
 ./src/plugins/scrollpos.js
+./src/plugins/stateStorage.js
 
 [node build css]
 ./assets/base.css

@@ -1,4 +1,4 @@
-define("#mix/sln/0.3.4/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.5/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, events = [ "screenX", "screenY", "clientX", "clientY", "pageX", "pageY" ], Class = require("mix/core/0.3.0/base/class-debug");
     function calc(x1, y1, x2, y2, x3, y3, x4, y4) {
@@ -174,7 +174,7 @@ define("#mix/sln/0.3.4/modules/gesture-debug", [ "mix/core/0.3.0/base/reset-debu
     return Gestrue;
 });
 
-define("#mix/sln/0.3.4/modules/transform-debug", [], function(require, exports, module) {
+define("#mix/sln/0.3.5/modules/transform-debug", [], function(require, exports, module) {
     var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/, MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/, TRANSITION_NAME = "-webkit-transform", appVersion = navigator.appVersion, isAndroid = /android/gi.test(appVersion), isIOS = /iphone|ipad/gi.test(appVersion), has3d = "WebKitCSSMatrix" in window && "m11" in new WebKitCSSMatrix();
     function quadratic2cubicBezier(a, b) {
         return [ [ (a / 3 + (a + b) / 3 - a) / (b - a), (a * a / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a) ], [ (b / 3 + (a + b) / 3 - a) / (b - a), (b * b / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a) ] ];
@@ -213,7 +213,7 @@ define("#mix/sln/0.3.4/modules/transform-debug", [], function(require, exports, 
             y += "px";
         }
         if (isIOS && has3d) {
-            return "translate3d(" + x + ", " + y + ", 0)";
+            return "translate3d(" + x + ", " + y + ",0)";
         } else {
             return "translate(" + x + ", " + y + ")";
         }
@@ -243,12 +243,12 @@ define("#mix/sln/0.3.4/modules/transform-debug", [], function(require, exports, 
     exports.start = startTransition;
 });
 
-define("#mix/sln/0.3.4/modules/scroll-debug", [ "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.5/modules/scroll-debug", [ "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, navigator = win.navigator, Class = require("mix/core/0.3.0/base/class-debug"), Gesture = require("./gesture-debug"), Transform = require("./transform-debug"), prevented = false;
     function getMaxScrollTop(el) {
-        var parentEl = el.parentNode, parentStyle = getComputedStyle(parentEl);
-        var maxTop = 0 - el.scrollHeight + parentEl.offsetHeight - parseInt(parentStyle.paddingTop) - parseInt(parentStyle.paddingBottom);
+        var parentStyle = getComputedStyle(el.parentNode);
+        var maxTop = 0 - el.offsetHeight + parseInt(parentStyle.height) - parseInt(parentStyle.paddingTop) - parseInt(parentStyle.paddingBottom);
         if (maxTop > 0) maxTop = 0;
         return maxTop;
     }
@@ -401,7 +401,7 @@ define("#mix/sln/0.3.4/modules/scroll-debug", [ "./gesture-debug", "./transform-
     return Scroll;
 });
 
-define("#mix/sln/0.3.4/modules/component-debug", [ "./scroll-debug", "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.5/modules/component-debug", [ "./scroll-debug", "./gesture-debug", "./transform-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Scroll = require("./scroll-debug"), Transform = require("./transform-debug"), components = {}, emptyFunc = function() {}, extendFns = function(el, fns) {
         el.fn || (el.fn = {});
@@ -472,8 +472,8 @@ define("#mix/sln/0.3.4/modules/component-debug", [ "./scroll-debug", "./gesture-
         initContent: function(el) {
             components["content"] = el;
             var active = el.querySelector("div > .active"), inactive = el.querySelector("div > .inactive");
-            active.setAttribute("index", "0");
-            inactive.setAttribute("index", "1");
+            // active.setAttribute('index', '0');
+            // inactive.setAttribute('index', '1');
             extendFns(el, {
                 getActive: function() {
                     return active;
@@ -494,6 +494,11 @@ define("#mix/sln/0.3.4/modules/component-debug", [ "./scroll-debug", "./gesture-
         },
         getActiveContent: function() {
             return components["content"].fn.getActive();
+        },
+        fillActiveContent: function(html) {
+            var content = this.getActiveContent();
+            content && (content.innerHTML = html);
+            this.trigger("fillContentEnd");
         },
         initScroll: function(el) {
             components["scroll"] = el;
@@ -530,17 +535,18 @@ define("#mix/sln/0.3.4/modules/component-debug", [ "./scroll-debug", "./gesture-
                 content.fn.switchActive();
                 active = content.fn.getActive();
                 inactive = content.fn.getInactive();
+                //active.style.top = '-9999px';
                 active.style.display = "block";
-                active.style.top = "-9999px";
-                wrap.appendChild(active);
                 originX = Transform.getX(wrap);
                 originY = Transform.getY(wrap);
                 originX += type === "forward" ? -wrapWidth : wrapWidth;
                 Transform.start(wrap, "0.4s", "ease", 0, originX, originY, function() {
                     content.fn.toggleClass();
                     active.style.left = -originX + "px";
-                    active.style.top = "";
-                    active.style.display = "";
+                    //active.style.top = '';
+                    //active.style.display = '';
+                    wrap.appendChild(active);
+                    inactive.style.display = "none";
                     inactive.innerHTML = "";
                     wrap.removeChild(inactive);
                     wrap.style.webkitTransform = Transform.getTranslate(originX, 0);
@@ -612,7 +618,7 @@ define("#mix/sln/0.3.4/modules/component-debug", [ "./scroll-debug", "./gesture-
     return new Compontent();
 });
 
-define("#mix/sln/0.3.4/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.5/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), views = {}, vAutoIdx = 0, View = Class.create({
         initialize: function() {
@@ -627,7 +633,11 @@ define("#mix/sln/0.3.4/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug",
                 callback = arguments[0];
                 url = that.template;
             }
-            url && app.loadFile(url, callback);
+            if (url) {
+                app.loadFile(url, callback);
+            } else {
+                callback();
+            }
         },
         compileTemplate: function(text, callback) {
             // can overwrite
@@ -672,15 +682,15 @@ define("#mix/sln/0.3.4/modules/view-debug", [ "mix/core/0.3.0/base/reset-debug",
     View.get = function(name) {
         return views[name];
     };
-    View.each = function(callback) {
-        Object.each(views, callback);
+    View.each = function(delegate) {
+        Object.each(views, delegate);
     };
     return View;
 });
 
-define("#mix/sln/0.3.4/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.5/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/navigate-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), View = require("./view-debug"), STATUS = {
+    var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, View = require("./view-debug"), STATUS = {
         DEFINED: 0,
         UNLOADED: 1,
         LOADED: 2,
@@ -699,11 +709,13 @@ define("#mix/sln/0.3.4/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/ba
             return this.title;
         },
         fill: function(datas, callback) {
-            var that = this;
-            if (!Object.isTypeof(datas, "string")) {
-                datas = that.renderTemplate(datas);
+            var that = this, html;
+            if (Object.isTypeof(datas, "string")) {
+                html = datas;
+            } else {
+                html = that.renderTemplate(datas);
             }
-            that.trigger("rendered", datas);
+            app.component.fillActiveContent(html);
             callback && callback();
         },
         ready: function() {},
@@ -721,7 +733,7 @@ define("#mix/sln/0.3.4/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/ba
     }
     Page.define = function(properties) {
         extendPageFn();
-        var cPage = Page.extend(properties), iPage = new cPage();
+        var cPage = Page.extend(properties), iPage = new cPage(), name, route;
         Object.each(Page.global, function(val, name) {
             var type = Object.isTypeof(val);
             switch (type) {
@@ -739,18 +751,32 @@ define("#mix/sln/0.3.4/modules/page-debug", [ "./view-debug", "mix/core/0.3.0/ba
                 break;
             }
         });
+        name = iPage.name;
+        route = iPage.route;
+        if (!route) {
+            route = {
+                name: "default",
+                "default": true
+            };
+        } else if (Object.isTypeof(route, "string")) {
+            route = {
+                name: "anonymous",
+                text: route
+            };
+        }
+        navigate.addRoute(name + "." + route.name, route.text, route);
         return pages[iPage.name] = iPage;
     };
     Page.get = function(name) {
         return pages[name];
     };
-    Page.each = function(callback) {
-        Object.each(pages, callback);
+    Page.each = function(delegate) {
+        Object.each(pages, delegate);
     };
     return Page;
 });
 
-define("#mix/sln/0.3.4/modules/navigation-debug", [ "./page-debug", "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.5/modules/navigation-debug", [ "./page-debug", "./view-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, Page = require("./page-debug"), STATUS = Page.STATUS, Navigation = Class.create({
         initialize: function(state) {
@@ -816,6 +842,10 @@ define("#mix/sln/0.3.4/modules/navigation-debug", [ "./page-debug", "./view-debu
             if (!this._cur) return;
             return this._cur.state.datas[name];
         },
+        setData: function(name, value) {
+            if (!this._cur) return;
+            this._cur.state.datas[name] = value;
+        },
         getPageName: function() {
             if (!this._cur) return;
             return this._cur.pageName;
@@ -838,7 +868,7 @@ define("#mix/sln/0.3.4/modules/navigation-debug", [ "./page-debug", "./view-debu
     return Navigation;
 });
 
-define("#mix/sln/0.3.4/app-debug", [ "./modules/view-debug", "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.3.4/app-debug" ], function(require, exports, module) {
+define("#mix/sln/0.3.5/app-debug", [ "./modules/view-debug", "./modules/page-debug", "./modules/component-debug", "./modules/scroll-debug", "./modules/gesture-debug", "./modules/transform-debug", "./modules/navigation-debug", "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug", "mix/core/0.3.0/url/navigate-debug", "mix/core/0.3.0/base/message-debug", "mix/sln/0.3.5/app-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, View = require("./modules/view-debug"), Page = require("./modules/page-debug"), Component = require("./modules/component-debug"), Navigation = require("./modules/navigation-debug");
     app = {};
@@ -863,7 +893,7 @@ define("#mix/sln/0.3.4/app-debug", [ "./modules/view-debug", "./modules/page-deb
         }
     }
     function initNavigation() {
-        var navibar = Component.get("navibar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), backBtnHandler = null, funcBtnHandler = null, content = Component.get("content"), transition = Component.get("transition");
+        var navibar = Component.get("navibar"), backBtn = Component.get("backBtn"), funcBtn = Component.get("funcBtn"), backBtnHandler = null, funcBtnHandler = null, content = Component.get("content"), scroll = Component.get("scroll"), transition = Component.get("transition");
         Component.on("backBtnClick", function() {
             if (backBtnHandler) {
                 backBtnHandler();
@@ -873,6 +903,9 @@ define("#mix/sln/0.3.4/app-debug", [ "./modules/view-debug", "./modules/page-deb
         });
         Component.on("funcBtnClick", function() {
             funcBtnHandler && funcBtnHandler();
+        });
+        Component.on("fillContentEnd", function() {
+            scroll && scroll.fn.refresh();
         });
         function setButtons(navigation) {
             var pageName = navigation.pageName, page = Page.get(pageName), buttons = page.buttons;
@@ -934,26 +967,6 @@ define("#mix/sln/0.3.4/app-debug", [ "./modules/view-debug", "./modules/page-deb
             }
             loadNavigation(navigation);
         });
-        Page.each(function(page) {
-            var name = page.name, route = page.route;
-            if (!route) {
-                route = {
-                    name: "default",
-                    "default": true
-                };
-            } else if (Object.isTypeof(route, "string")) {
-                route = {
-                    name: "anonymous",
-                    text: route
-                };
-            }
-            navigate.addRoute(name + "." + route.name, route.text, route);
-            page.on("rendered", function(content) {
-                var scroll = Component.get("scroll"), active = Component.getActiveContent();
-                active && (active.innerHTML = content);
-                scroll && scroll.fn.refresh();
-            });
-        });
     }
     Object.extend(app, {
         config: {
@@ -993,4 +1006,4 @@ define("#mix/sln/0.3.4/app-debug", [ "./modules/view-debug", "./modules/page-deb
     win["app"] = app;
 });
 
-require("mix/sln/0.3.4/app-debug");
+require("mix/sln/0.3.5/app-debug");

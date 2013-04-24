@@ -5,7 +5,7 @@ app.page.global.plugins = {
 
 app.config.viewport = document.querySelector('.viewport');
 app.config.enableNavibar = true;
-app.config.enableScroll = true;
+app.config.enableScroll = false;
 app.config.enableTransition = true;
 app.config.templateEngine = {
 	compile : function(text) {

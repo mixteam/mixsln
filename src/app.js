@@ -57,6 +57,7 @@ var win = window,
 			backBtnHandler = null,
 			funcBtnHandler = null,
 			content = Component.get('content'),
+			scroll = Component.get('scroll'),
 			transition = Component.get('transition')
 			;
 
@@ -67,9 +68,14 @@ var win = window,
 				navigate.backward();
 			}
 		});
+
 		Component.on('funcBtnClick', function() {
 			funcBtnHandler && funcBtnHandler();
 		});
+
+		Component.on('fillContentEnd', function() {
+			scroll && scroll.fn.refresh();
+		})
 
 		function setButtons(navigation) {
 			var pageName = navigation.pageName,
@@ -149,29 +155,6 @@ var win = window,
 				setNavibar(navigation, true);
 			}
 			loadNavigation(navigation);
-		});
-
-		Page.each(function(page) {
-			var name = page.name,
-				route = page.route
-				;
-
-			if (!route) {
-				route = {name: 'default', 'default': true}
-			} else if (Object.isTypeof(route, 'string')) {
-				route = {name: 'anonymous', text: route}
-			}
-
-			navigate.addRoute(name + '.' + route.name, route.text, route);
-
-			page.on('rendered', function(content) {
-				var scroll = Component.get('scroll'),
-					active = Component.getActiveContent()
-					;
-
-				active && (active.innerHTML = content);
-				scroll && scroll.fn.refresh();
-			});
 		});
 	}
 

@@ -5,6 +5,7 @@ var win = window,
     doc = win.document,
     Class = require('class'),
     Message = require('message'),
+    navigate = require('navigate').singleton,
     View = require('./view'),
 
     STATUS = {
@@ -34,13 +35,16 @@ var win = window,
 		},
 
 		fill : function(datas, callback) {
-			var that = this
+			var that = this, html
 				;
 
-			if (!Object.isTypeof(datas, 'string')) {
-				datas = that.renderTemplate(datas);
+			if (Object.isTypeof(datas, 'string')) {
+				html = datas;
+			} else {
+				html = that.renderTemplate(datas);
 			}
-			that.trigger('rendered', datas);
+
+			app.component.fillActiveContent(html);
 			callback && callback();
 		},
 
@@ -62,7 +66,8 @@ Page.define = function(properties) {
 	extendPageFn();
 
 	var cPage = Page.extend(properties), 
-		iPage = new cPage()
+		iPage = new cPage(),
+		name, route
 		;
 
 	Object.each(Page.global, function(val, name) {
@@ -81,15 +86,26 @@ Page.define = function(properties) {
 				break;
 		}
 	});
+
+	name = iPage.name;
+	route = iPage.route;
+
+	if (!route) {
+		route = {name: 'default', 'default': true}
+	} else if (Object.isTypeof(route, 'string')) {
+		route = {name: 'anonymous', text: route}
+	}
+
+	navigate.addRoute(name + '.' + route.name, route.text, route);
+
 	return (pages[iPage.name] = iPage);
 }
 Page.get = function(name) {
 	return pages[name];
 }
-Page.each = function(callback) {
-	Object.each(pages, callback);
+Page.each = function(delegate) {
+	Object.each(pages, delegate);
 }
-
 return Page;
 
 });
