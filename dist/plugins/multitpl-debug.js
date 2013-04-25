@@ -39,7 +39,11 @@
                 that.compileMultiTemplate(tpls, callback);
             });
         } else {
-            url && that.compileMultiTemplate(url, callback);
+            if (url) {
+                that.compileMultiTemplate(url, callback);
+            } else {
+                callback();
+            }
         }
     };
     app.view.fn.renderTemplate = function() {

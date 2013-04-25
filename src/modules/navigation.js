@@ -95,6 +95,11 @@ Object.extend(Navigation, {
 		return this._cur.state.datas[name];
 	},
 
+	setData : function(name, value) {
+		if (!this._cur) return;
+		this._cur.state.datas[name] = value;
+	},
+
 	getPageName : function() {
 		if (!this._cur) return;
 		return this._cur.pageName;

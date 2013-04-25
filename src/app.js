@@ -18,34 +18,38 @@ var win = window,
 	;
 
 	function initComponent() {
-		var viewport = app.config.viewport,
-			navibar = viewport.querySelector('header.navibar'),
-			backBtn = navibar.querySelector('li:nth-child(2) button'),
-			funcBtn = navibar.querySelector('li:nth-child(3) button')
-			content = viewport.querySelector('section.content'),
-			toolbar = viewport.querySelector('footer.toolbar')
-			;
+		var viewport = app.config.viewport, 
+			navibar, backBtn, funcBtn, content, toolbar;
 
-		Component.initViewport(viewport);
 
-		if (app.config.enableNavibar) {
-			Component.initNavibar(navibar);
-			Component.initBackBtn(backBtn);
-			Component.initFuncBtn(funcBtn);
-		}
+		if (viewport) {
+			navibar = viewport.querySelector('header.navibar');
+			backBtn = navibar.querySelector('li:nth-child(2) button');
+			funcBtn = navibar.querySelector('li:nth-child(3) button');
+			content = viewport.querySelector('section.content');
+			toolbar = viewport.querySelector('footer.toolbar');
 
-		Component.initContent(content);
+			Component.initViewport(viewport);
 
-		if (app.config.enableScroll) {
-			Component.initScroll(content);
-		}
+			if (app.config.enableNavibar) {
+				Component.initNavibar(navibar);
+				Component.initBackBtn(backBtn);
+				Component.initFuncBtn(funcBtn);
+			}
 
-		if (app.config.enableTransition) {
-			Component.initTransition(content);
-		}
+			Component.initContent(content);
 
-		if (app.config.enableToolbar) {
-			Component.initToolbar();
+			if (app.config.enableScroll) {
+				Component.initScroll(content);
+			}
+
+			if (app.config.enableTransition) {
+				Component.initTransition(content);
+			}
+
+			if (app.config.enableToolbar) {
+				Component.initToolbar();
+			}
 		}
 
 	}
@@ -57,6 +61,7 @@ var win = window,
 			backBtnHandler = null,
 			funcBtnHandler = null,
 			content = Component.get('content'),
+			scroll = Component.get('scroll'),
 			transition = Component.get('transition')
 			;
 
@@ -67,9 +72,14 @@ var win = window,
 				navigate.backward();
 			}
 		});
+
 		Component.on('funcBtnClick', function() {
 			funcBtnHandler && funcBtnHandler();
 		});
+
+		Component.on('fillContentEnd', function() {
+			scroll && scroll.fn.refresh();
+		})
 
 		function setButtons(navigation) {
 			var pageName = navigation.pageName,
@@ -116,14 +126,20 @@ var win = window,
 				navibar.fn.set(title, transition);
 		}
 
-		function switchNavigation(navigation) {
+		function switchContent(navigation, callback) {
 			if (app.config.enableTransition) {
 				transition.fn[navigation.state.transition]();
+				Component.once('forwardTransitionEnd backwardTransitionEnd', callback);
 			} else {
-				content.fn.switchActive();
-				content.fn.toggleClass();
+				if (content) {
+					content.fn.switchActive();
+					content.fn.toggleClass();
+				}
+				callback();
 			}
+		}
 
+		function switchNavigation(navigation) {
 			if (app.navigation._cur) {
 				app.navigation._cur.unload();
 			}
@@ -143,35 +159,14 @@ var win = window,
 			var navigation = new Navigation(state)
 				;
 
+			switchContent(navigation, function() {
+				loadNavigation(navigation);	
+			});
 			switchNavigation(navigation);
 			if (app.config.enableNavibar) {
 				setButtons(navigation);
 				setNavibar(navigation, true);
 			}
-			loadNavigation(navigation);
-		});
-
-		Page.each(function(page) {
-			var name = page.name,
-				route = page.route
-				;
-
-			if (!route) {
-				route = {name: 'default', 'default': true}
-			} else if (Object.isTypeof(route, 'string')) {
-				route = {name: 'anonymous', text: route}
-			}
-
-			navigate.addRoute(name + '.' + route.name, route.text, route);
-
-			page.on('rendered', function(content) {
-				var scroll = Component.get('scroll'),
-					active = Component.getActiveContent()
-					;
-
-				active && (active.innerHTML = content);
-				scroll && scroll.fn.refresh();
-			});
 		});
 	}
 
