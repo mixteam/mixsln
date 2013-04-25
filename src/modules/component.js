@@ -115,8 +115,8 @@ var win = window,
 				inactive = el.querySelector('div > .inactive')
 				;
 
-			active.setAttribute('index', '0');
-			inactive.setAttribute('index', '1');
+			// active.setAttribute('index', '0');
+			// inactive.setAttribute('index', '1');
 
 			extendFns(el, {
 				getActive : function() {
@@ -142,6 +142,14 @@ var win = window,
 
 		getActiveContent : function() {
 			return components['content'].fn.getActive();
+		},
+
+		fillActiveContent : function(html) {
+			var content = this.getActiveContent()
+				;
+
+			content && (content.innerHTML = html);
+			this.trigger('fillContentEnd');
 		},
 
 		initScroll : function(el) {
@@ -178,7 +186,7 @@ var win = window,
 					scroller.to(top);
 				}
 			});
-		},
+		},	
 
 		initTransition : function(el) {
 			components['transition'] = el;
@@ -202,9 +210,8 @@ var win = window,
 				active = content.fn.getActive();
 				inactive = content.fn.getInactive();
 				
+				//active.style.top = '-9999px';
 				active.style.display = 'block';
-				active.style.top = '-9999px';
-				wrap.appendChild(active);
 
 				originX = Transform.getX(wrap);
 				originY = Transform.getY(wrap);
@@ -212,11 +219,16 @@ var win = window,
 
 				Transform.start(wrap, '0.4s', 'ease', 0, originX, originY, function() {
 					content.fn.toggleClass();
+
 					active.style.left = (-originX) + 'px';
-					active.style.top = '';
-					active.style.display = '';
+					//active.style.top = '';
+					//active.style.display = '';
+					wrap.appendChild(active);
+					
+					inactive.style.display = 'none';
 					inactive.innerHTML = '';
 					wrap.removeChild(inactive);
+
 					wrap.style.webkitTransform = Transform.getTranslate(originX, 0);
 					that.trigger(type  + 'TransitionEnd');
 				});

@@ -1,7 +1,7 @@
 {
     "name" : "mix/sln",
     "root" : "#",
-    "version" : "0.3.4",
+    "version" : "0.3.5",
     "description" : "the solution for mixjs",
     "license" : "MIT",
     "author" : "zhuxun <zhuxun.jb@taobao.com>",
@@ -18,8 +18,8 @@
         "router" : "mix/core/0.3.0/url/router",
         "navigate" : "mix/core/0.3.0/url/navigate",
 
-        "app" : "mix/sln/0.3.4/app",
-        "app-hybrid" : "mix/sln/0.3.4/app-hybrid"
+        "app" : "mix/sln/0.3.5/app",
+        "app-hybrid" : "mix/sln/0.3.5/app-hybrid"
 
     },
     "output" : {
@@ -36,20 +36,6 @@
                 "./modules/page",
                 "./modules/navigation.js",
                 "./app"
-            ]
-        },
-
-        "app-hybrid.js" : {
-            "main" : "./app-hybrid",
-            "includes" : [
-                "./modules/gesture",
-                "./modules/transform",
-                "./modules/scroll",
-                "./modules/component.js",
-                "./modules/view",
-                "./modules/page",
-                "./modules/navigation.js",
-                "./app-hybrid"
             ]
         }
     }

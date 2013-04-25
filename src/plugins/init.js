@@ -1,9 +1,4 @@
 (function(win, app){
-	var doc = win.document,
-		docEl = doc.documentElement,
-		scroll = app.component.get('scroll')
-		;
-
 	app.plugin.init = function() {
 		app.page.each(function(page) {
 			var plugins = page.plugins
@@ -12,6 +7,8 @@
 			if (plugins) {
 				page.on('ready', function() {
 					Object.each(plugins, function(pageOptions, name) {
+						if (pageOptions === false) return;
+
 						var state = app.navigation.getState(), plugin = app.plugin[name];
 
 						state.plugins || (state.plugins = {});
@@ -29,6 +26,8 @@
 
 				page.on('unloaded', function() {
 					Object.each(plugins, function(pageOptions, name) {
+						if (pageOptions === false) return;
+						
 						var state = app.navigation.getState(), plugin = app.plugin[name];
 
 						if (plugin && plugin.off) {

@@ -34,7 +34,7 @@
 				scrollpos : true
 			},
 
-			_fillContent : function() {
+			_renderItems : function(callback) {
 				var that = this,
 					searchItems = that.views.searchItems,
 					searchContent = that.find('.searchcontent')
@@ -42,7 +42,7 @@
 
 				searchItems.render(function(dom) {
 					searchContent.html('').append(dom);
-					app.plugin.lazyload.check();
+					callback && callback();
 				});
 			},
 
@@ -81,11 +81,15 @@
 
 			layout : function() {
 				var that = this,
-					searchItems = that.views.searchItems
+					searchItems = that.views.searchItems,
+					data = {searchWord : searchItems.word}
+					;
 
-				that.fill({
-					searchWord : searchItems.word
-				}, that._fillContent.bind(that));
+				that.fill(data);
+				that._renderItems(function() {
+					app.plugin.scrollpos.reset();
+					app.plugin.lazyload.check();
+				});
 			},
 
 			nextPage : function() {
@@ -93,7 +97,10 @@
 					searchItems = that.views.searchItems
 
 				searchItems.page++;
-				this._fillContent();
+				this._renderItems(function() {
+					app.plugin.scrollpos.reset(0);
+					app.plugin.lazyload.check();
+				});
 			}
 		})
 	;

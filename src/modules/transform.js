@@ -57,8 +57,8 @@ function getTranslate(x, y) {
 		y += 'px';
 	}
 
-    if (isIOS && has3d) {
-        return 'translate3d(' + x + ', ' + y + ', 0)';
+    if (has3d) {
+        return 'translate3d(' + x + ', ' + y + ',0)';
     } else {
         return 'translate(' + x + ', ' + y + ')';
     }
@@ -88,7 +88,6 @@ function startTransition(el, time, timeFunction, delay, x, y, callback) {
 	waitTransition(el, time, callback);
     el.style.webkitTransition = [TRANSITION_NAME, time, timeFunction, delay].join(' ');
     el.style.webkitTransform = getTranslate(x, y);
-
 }
 
 exports.getY = getTransformY;

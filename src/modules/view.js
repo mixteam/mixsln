@@ -27,7 +27,11 @@ var win = window,
 				url = that.template;
 			}
 
-			url && app.loadFile(url, callback);
+			if (url) {
+				app.loadFile(url, callback);
+			} else {
+				callback();
+			}
 		},
 
 		compileTemplate: function(text, callback) {
@@ -85,9 +89,8 @@ View.define = function(properties) {
 View.get = function(name) {
 	return views[name];
 }
-View.each = function(callback) {
-	Object.each(views, callback);
+View.each = function(delegate) {
+	Object.each(views, delegate);
 }
-
 return View;
 });
