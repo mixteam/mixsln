@@ -134,6 +134,13 @@
 
 获取指定name的POST值（参见push方法）
 
+### setData(name, value)
+
+* @param {string} name
+* @param {*} value
+
+设置指定name的value值（参见push方法）
+
 ### getPageName()
 
 * @retrun {string} the name of the current page
