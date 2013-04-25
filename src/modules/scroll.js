@@ -13,11 +13,10 @@ var win = window,
     ;
 
 function getMaxScrollTop(el) {
-    var parentEl = el.parentNode,
-        parentStyle = getComputedStyle(parentEl)
+    var parentStyle = getComputedStyle(el.parentNode)
         ;
 
-    var maxTop = 0 - el.scrollHeight + parentEl.offsetHeight - 
+    var maxTop = 0 - el.offsetHeight + parseInt(parentStyle.height) - 
                 parseInt(parentStyle.paddingTop) - 
                 parseInt(parentStyle.paddingBottom)/* - 
                 parseInt(parentStyle.marginTop) - 
