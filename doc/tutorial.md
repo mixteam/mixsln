@@ -4,14 +4,14 @@
 
 **解决方案代码**
 
-* [v0.3.3 调试版](https://raw.github.com/mixteam/mixsln/v0.3.3/mixsln-debug.js)
-* [v0.3.3 压缩版](https://raw.github.com/mixteam/mixsln/v0.3.3/mixsln.js)
-* [CSS样式表](https://raw.github.com/mixteam/mixsln/v0.3.3/mixsln.css)
+- [js开发版下载](https://raw.github.com/mixteam/mixsln/v0.3.x_dev/mixsln-debug.js)
+- [js压缩版下载](https://raw.github.com/mixteam/mixsln/v0.3.x_dev/mixsln.js)
+- [css下载](https://raw.github.com/mixteam/mixsln/v0.3.x_dev/mixsln.css)
 
 **以下js框架可选**
 
-* [mustache模版引擎](https://raw.github.com/mixteam/mixsln/v0.3.3/lib/mustache.js)
-* [zepto v1.0rc](https://raw.github.com/mixteam/mixsln/v0.3.3/lib/zepto.js)
+* [mustache模版引擎](https://raw.github.com/mixteam/mixsln/v0.3.x_dev/lib/mustache.js)
+* [zepto v1.0rc](https://raw.github.com/mixteam/mixsln/v0.3.x_dev/lib/zepto.js)
 
 
 ## 启动应用（App）

@@ -1,4 +1,14 @@
-# MIX解决方案
+# Mix解决方案
+
+## 稳定版本(v0.3.5)
+
+- [js开发版下载](https://raw.github.com/mixteam/mixsln/master/mixsln-debug.js)
+- [js压缩版下载](https://raw.github.com/mixteam/mixsln/master/mixsln.js)
+- [css下载](https://raw.github.com/mixteam/mixsln/master/mixsln.css)
+
+## 用Mix快速开发WebApp
+
+[访问文档](https://github.com/mixteam/mixsln/blob/master/doc/tutorial.md)
 
 ## 解决了哪些问题？
 
@@ -17,42 +27,71 @@
 
 ## 版本更新
 
+### v0.3.5
+
+- 新增stateStorage，可以在浏览器刷新后，仍旧保持导航状态。
+- 更新文档和演示
+- 更改page的ready和unload时机
+- 修复lazyload和scrollpos两个插件的bug
+- 修复切换导航时的bug
+- 修复样式的bug
+
 ### v0.3.3
 
-- log
+- 重构view的代码
+- 修复插件的bug
+- 修复demo的bug
 
 ### v0.3.2
 
-- log
+- 更改模板的加载时机
+- 重构AbstractPage的代码，变为view
+- 修复插件的bug
+- 更新demo
 
 ### v0.3.1
 
-- log
+- 新增multitpl和domfind的插件
+- 重构page的代码
+- 更新转场动画
+- 更新模板渲染的引擎
+- 修复其它bug
 
 ### v0.3.0
 
-- log
+- 重构目录结构
+- 更新导航的API
+- 更新scroll的bounce算法
+- 更新文档
 
 ### v0.2.0
 
-- log
+- 重构组件
+- 导航模块化
+- 完善demo
 
 ### v0.1.2
 
-- log
+- 更新样式
+- 更新组件
+- 更新模块结构
 
 ### v0.1.0
 
-- log
+- 新增demo
+- gesture和scroll模块化
 
 ## 计划
 
 ### v0.4.0
 
-## 文档
+- 重构模块间依赖
+- 更新gesture和scroll算法
+- 更新转场动画
 
-* [用MIX快速开发WebApp](https://github.com/mixteam/mixsln/blob/devel/doc/tutorial.md)
-* [开发者向导](https://github.com/mixteam/mixsln/blob/devel/doc/guide.md)
-* [插件教程](https://github.com/mixteam/mixsln/blob/devel/doc/plugin.md)
-* [API手册](https://github.com/mixteam/mixsln/blob/devel/doc/api.md)
+## 其他文档
+
+* [开发者向导](https://github.com/mixteam/mixsln/blob/devel/master/guide.md)
+* [插件教程](https://github.com/mixteam/mixsln/blob/devel/master/plugin.md)
+* [API手册](https://github.com/mixteam/mixsln/blob/devel/master/api.md)
 
