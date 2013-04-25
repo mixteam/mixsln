@@ -1,50 +1,54 @@
 (function(win, app) {
     var doc = win.document, scroll;
     function getScrollTop() {
-        return scroll.fn.getScrollTop();
+        if (scroll) {
+            return scroll.fn.getScrollTop();
+        } else {
+            return doc.body.scrollTop;
+        }
     }
     function getScrollHeight() {
-        return scroll.fn.getScrollHeight();
+        if (scroll) {
+            return scroll.fn.getScrollHeight();
+        } else {
+            return doc.body.scrollHeight;
+        }
     }
     function scroll2(pos) {
-        scroll.fn.scrollTo(pos);
+        if (scroll) {
+            scroll.fn.scrollTo(pos);
+        } else {
+            scrollTo(0, pos);
+        }
     }
     app.plugin.scrollpos = {
         _options: null,
         _setPos: function(pos) {
-            this._options.state.pos = pos != null ? pos : getScrollTop();
+            this._options.state.pos = typeof pos === "number" ? pos : getScrollTop();
         },
-        _transitonEnd: function() {
-            this._options.page.transitonEnd = true;
-        },
-        _resetPos: function() {
+        reset: function(pos) {
             var options = this._options;
-            if (!options.page.first) {
-                this._setPos(0);
-            } else {
-                options.page.first = false;
-                if (options.page.transitonEnd) {
-                    scroll2(options.state.pos);
-                } else {
-                    app.component.once("backwardTransitionEnd", function() {
-                        scroll2(options.state.pos);
-                    });
-                }
+            if (pos != null) {
+                this._setPos(pos);
             }
+            scroll2(options.state.pos);
         },
         on: function(page, options) {
-            this._options = options;
-            options.page.first = true;
-            options.page.transitonEnd = false;
             scroll = app.component.get("scroll");
-            app.component.on("scrollEnd", this._setPos, this);
-            app.component.on("backwardTransitionEnd", this._transitonEnd, this);
-            page.on("rendered", this._resetPos, this);
+            this._options = options;
+            this._setPos = this._setPos.bind(this);
+            if (scroll) {
+                app.component.on("scrollEnd", this._setPos);
+            } else {
+                doc.addEventListener("touchend", this._setPos);
+            }
         },
         off: function(page, options) {
-            app.component.off("scrollEnd", this._setPos, this);
-            app.component.off("backwardTransitionEnd", this._transitonEnd, this);
-            page.off("rendered", this._resetPos, this);
+            if (scroll) {
+                app.component.off("scrollEnd", this._setPos);
+            } else {
+                doc.removeEventListener("touchend", this._setPos);
+            }
         }
     };
 })(window, window["app"]);
