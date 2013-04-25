@@ -212,7 +212,7 @@ define("#mix/sln/0.3.5/modules/transform-debug", [], function(require, exports, 
         if (y.indexOf("%") < 0 && y !== "0") {
             y += "px";
         }
-        if (isIOS && has3d) {
+        if (has3d) {
             return "translate3d(" + x + ", " + y + ",0)";
         } else {
             return "translate(" + x + ", " + y + ")";
@@ -873,23 +873,29 @@ define("#mix/sln/0.3.5/app-debug", [ "./modules/view-debug", "./modules/page-deb
     var win = window, doc = win.document, Class = require("mix/core/0.3.0/base/class-debug"), router = require("mix/core/0.3.0/url/router-debug").singleton, navigate = require("mix/core/0.3.0/url/navigate-debug").singleton, View = require("./modules/view-debug"), Page = require("./modules/page-debug"), Component = require("./modules/component-debug"), Navigation = require("./modules/navigation-debug");
     app = {};
     function initComponent() {
-        var viewport = app.config.viewport, navibar = viewport.querySelector("header.navibar"), backBtn = navibar.querySelector("li:nth-child(2) button"), funcBtn = navibar.querySelector("li:nth-child(3) button");
-        content = viewport.querySelector("section.content"), toolbar = viewport.querySelector("footer.toolbar");
-        Component.initViewport(viewport);
-        if (app.config.enableNavibar) {
-            Component.initNavibar(navibar);
-            Component.initBackBtn(backBtn);
-            Component.initFuncBtn(funcBtn);
-        }
-        Component.initContent(content);
-        if (app.config.enableScroll) {
-            Component.initScroll(content);
-        }
-        if (app.config.enableTransition) {
-            Component.initTransition(content);
-        }
-        if (app.config.enableToolbar) {
-            Component.initToolbar();
+        var viewport = app.config.viewport, navibar, backBtn, funcBtn, content, toolbar;
+        if (viewport) {
+            navibar = viewport.querySelector("header.navibar");
+            backBtn = navibar.querySelector("li:nth-child(2) button");
+            funcBtn = navibar.querySelector("li:nth-child(3) button");
+            content = viewport.querySelector("section.content");
+            toolbar = viewport.querySelector("footer.toolbar");
+            Component.initViewport(viewport);
+            if (app.config.enableNavibar) {
+                Component.initNavibar(navibar);
+                Component.initBackBtn(backBtn);
+                Component.initFuncBtn(funcBtn);
+            }
+            Component.initContent(content);
+            if (app.config.enableScroll) {
+                Component.initScroll(content);
+            }
+            if (app.config.enableTransition) {
+                Component.initTransition(content);
+            }
+            if (app.config.enableToolbar) {
+                Component.initToolbar();
+            }
         }
     }
     function initNavigation() {
@@ -938,13 +944,19 @@ define("#mix/sln/0.3.5/app-debug", [ "./modules/view-debug", "./modules/page-deb
             var pageName = navigation.pageName, transition = navigation.state.transition, page = Page.get(pageName), title = page.getTitle() || "";
             isMove ? navibar.fn.change(title, transition) : navibar.fn.set(title, transition);
         }
-        function switchNavigation(navigation) {
+        function switchContent(navigation, callback) {
             if (app.config.enableTransition) {
                 transition.fn[navigation.state.transition]();
+                Component.once("forwardTransitionEnd backwardTransitionEnd", callback);
             } else {
-                content.fn.switchActive();
-                content.fn.toggleClass();
+                if (content) {
+                    content.fn.switchActive();
+                    content.fn.toggleClass();
+                }
+                callback();
             }
+        }
+        function switchNavigation(navigation) {
             if (app.navigation._cur) {
                 app.navigation._cur.unload();
             }
@@ -960,12 +972,14 @@ define("#mix/sln/0.3.5/app-debug", [ "./modules/view-debug", "./modules/page-deb
         }
         navigate.on("forward backward", function(state) {
             var navigation = new Navigation(state);
+            switchContent(navigation, function() {
+                loadNavigation(navigation);
+            });
             switchNavigation(navigation);
             if (app.config.enableNavibar) {
                 setButtons(navigation);
                 setNavibar(navigation, true);
             }
-            loadNavigation(navigation);
         });
     }
     Object.extend(app, {

@@ -1,3 +1,9 @@
+.viewport {
+	width: 320px!important;
+	overflow: hidden;
+}
+
+
 #tbh5v0 .searchcontent .search-list ul li {
 	min-height: 80px;
 	margin: 0!important;

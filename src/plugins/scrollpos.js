@@ -34,39 +34,21 @@
 			this._options.state.pos = (typeof pos === 'number' ? pos: getScrollTop());
 		},
 
-		_transitonEnd : function() {
-			this._options.page.transitonEnd = true;
-		},
-
 		reset : function(pos) {
-			var options = this._options,
-				move = app.navigation.getState().move
+			var options = this._options
 				;
-
-			function resetPos() {
-				scroll2(options.state.pos);
-			}
 
 			if (pos != null) {
 				this._setPos(pos);
-				resetPos();
-			} else {
-				if (options.page.transitonEnd) {
-					resetPos();
-				} else {
-					app.component.once(move + 'TransitionEnd', resetPos);
-				}
 			}
+			scroll2(options.state.pos);
 		},
 
 		on : function(page, options) {
 			scroll = app.component.get('scroll');
 
 			this._options = options;
-			this._options.page.transitonEnd = false;
 			this._setPos = this._setPos.bind(this);
-
-			app.component.on('forwardTransitionEnd backwardTransitionEnd', this._transitonEnd, this);
 
 			if (scroll) {
 				app.component.on('scrollEnd', this._setPos);
@@ -76,8 +58,6 @@
 		},
 
 		off : function(page, options) {
-			app.component.off('forwardTransitionEnd backwardTransitionEnd', this._transitonEnd, this);
-
 			if (scroll) {
 				app.component.off('scrollEnd', this._setPos);
 			} else {

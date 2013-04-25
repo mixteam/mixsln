@@ -57,7 +57,7 @@ function getTranslate(x, y) {
 		y += 'px';
 	}
 
-    if (isIOS && has3d) {
+    if (has3d) {
         return 'translate3d(' + x + ', ' + y + ',0)';
     } else {
         return 'translate(' + x + ', ' + y + ')';
