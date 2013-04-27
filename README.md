@@ -6,6 +6,10 @@
 - [js压缩版下载](https://raw.github.com/mixteam/mixsln/master/mixsln.js)
 - [css下载](https://raw.github.com/mixteam/mixsln/master/mixsln.css)
 
+## Mix解决方案初探
+
+[演示文档]()
+
 ## 用Mix快速开发WebApp
 
 [访问文档](https://github.com/mixteam/mixsln/blob/master/doc/tutorial.md)
@@ -26,6 +30,10 @@
 4. 为各平台提供统一方案，保证兼容性。
 
 ## 版本更新
+
+### v0.3.6
+
+- 修复切换导航时的bug
 
 ### v0.3.5
 
