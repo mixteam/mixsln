@@ -8,7 +8,7 @@
 
 ## Mix解决方案初探
 
-[演示文档]()
+[演示文档](http://http://mixteam.github.io/mixsln/ppt/headfirst/)
 
 ## 用Mix快速开发WebApp
 
