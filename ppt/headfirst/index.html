@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Mix解决方案初探</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+		<link rel="stylesheet" href="css/ppt.css">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+			    <section id="page-1">
+			        <section id="page-1-1">
+			            <h2> <font face="arial">make.easy</font> </h2>
+			            <p> <span style="letter-spacing: -0.02em;">Mix解决方案初探</span> <br>
+			            </p>
+			            <p>Created by <a href="http://github.com/terrykingcha">渚薰</a> </p>
+			        </section>
+			        <section id="page-1-2">
+			            <h2>Staff</h2>
+			            <div> <br>
+			            </div>
+			            <div>无线UED-前端Mix小组</div>
+			            <div> <br>
+			            </div>
+			            <div>@渚薰</div>
+			            <div>@江成</div>
+			            <div>@玄寂</div>
+			        </section>
+			    </section>
+			    <section id="page-2">
+			        <section id="page-2-1">
+			            <p> <span style="letter-spacing: -0.02em;">如果你女友肚子饿了，你会怎么做？</span>&nbsp;</p>
+			            <p> <img src="images/001.jpg" style="width:40%"> </p>
+			        </section>
+			        <section id="page-2-2">
+			            <h3>普通青年：老板，来一打包子</h3>
+			            <div> <br>
+			            </div>
+			            <div> <img src="images/002.jpg" style="width: 70.0%;"> <br>
+			            </div>
+			        </section>
+			        <section id="page-2-3">
+			            <h3>文艺青年：抓住女人就抓住她的胃</h3>
+			            <div> <br>
+			            </div>
+			            <div> <img src="images/003.jpg"> <br>
+			            </div>
+			        </section>
+			        <section id="page-2-4">
+			            <h2>2B青年：我也饿了</h2>
+			            <div> <br>
+			            </div>
+			            <div> <img src="images/004.jpg" style="width: 70.0%;"> </div>
+			        </section>
+			        <section id="page-2-5">
+			            <div> <br>
+			            </div>
+			            <div> <br>
+			            </div>
+			            <img src="images/005.png" style="border: 0;"> </section>
+			        <section id="page-2-6">
+			            <h2>其实还可以这样</h2>
+			            <div> <br>
+			            </div>
+			            <div> <img src="images/006.jpg" style="width: 70.0%;border: 0;"> <br>
+			            </div>
+			        </section>
+			    </section>
+			    <section id="page-3">
+			        <p> <br>
+			        </p>
+			        <p>上述方法都可以解决核心问题，只是面对的用户不同</p>
+			        <div> <br>
+			        </div>
+			        <div> <br>
+			        </div>
+			    </section>
+			    <section id="page-4">
+			        <section id="page-4-1">
+			            <div> <br>
+			            </div>
+			            <div> <br>
+			            </div>
+			            <div style="text-align: center;">
+			                <ul style="list-style: none;">
+			                    <li>普通青年：用EXT，YUI<br><br></li>
+			                    <li class="fragment" data-fragment-index="1">文艺青年：用Backbone，Ember<br><br></li>
+			                    <li class="fragment" data-fragment-index="2">2B青年：....</li>
+			                </ul>
+			                <div style="text-align: left;"> <br>
+			                </div>
+			                <h2> <br>
+			                </h2>
+			                <div> </div>
+			            </div>
+			            <ul>
+			            </ul>
+			        </section>
+			        <section id="page-4-2">
+			            <div> <img src="images/006.png" style="line-height: 1.2em;letter-spacing: -0.02em;"> <br></div>
+			            <div>我们推荐你用</div>
+			            <div> <br> </div>
+			            <h1 class="fragment">Mix解决方案</h1>
+			        </section>
+			    </section>
+			    <section id="page-5">
+			        <p> <br> </p>
+			        <div>
+			        	<blockquote class="fragment" data-fragment-index="1">框架，通常专注于某个领域的问题。</blockquote>
+			        	<span>VS</span>
+			        	<blockquote class="fragment" data-fragment-index="4">Mix解决方案，是针对WebApp的<font color="#99ffcc">统一解决方案。</font></blockquote>
+			    	</div>
+			    	<div>
+			        	<blockquote class="fragment" data-fragment-index="2">框架，提供自由的API，可以做任何事情。</blockquote>
+			        	<span>VS</span>
+			        	<blockquote class="fragment" data-fragment-index="5">Mix解决方案，让开发者快速开发应用，把<font color="#99ffcc">精力集中于业务逻辑</font> ，而少关心WebApp的各种特性。</blockquote>
+			    	</div>
+			    	<div>
+			    		<blockquote class="fragment" data-fragment-index="3">框架，保有自己的生态圈。</blockquote>
+			        	<span>VS</span>
+						<blockquote class="fragment" data-fragment-index="6">Mix解决方案，可以<font color="#99ffcc">低耦合</font>的来使用其它框架。</blockquote>
+			    	</div>
+			    </section>
+			    <section id="page-6">
+			        <section id="page-6-1">
+			            <h2>Let's Rock</h2>
+			            <div> <br>
+			            </div>
+			            <div> <br>
+			            </div>
+			            <h2><a href="./code.zip">HelloWorld Demo</a></h2>
+			        </section>
+			        <section id="page-6-2">
+			            <div> <br>
+			            </div>
+			            <img src="images/007.png"> </section>
+			        <section id="page-6-3">
+			            <h3>如果你想对喜欢的人say hello</h3>
+			            <div> <img src="images/008.jpg" style="border: 0px;width: 40%;"> </div>
+			        </section>
+			        <section id="page-6-4">
+			            <div> <br></div>
+			            <h2> <img src="images/009.jpg" style="border: 0px;"> </h2>
+			            <h2>Just Do it</h2>
+			        </section>
+			    </section>
+			    <section id="page-7">
+			        <h3 class="fragment shrink" data-fragment-index="1">我们不授人鱼</h3>
+			        <div> <br> </div>
+			        <h2 class="fragment grow" data-fragment-index="2">也不单只授人以渔</h2>
+			        <div class="fragment roll-in" data-fragment-index="3"> <br>
+			        	<div>如果框架是方法，Mix就是工具</div>
+			        	<div>方法要搭配好的工具，给你一台炒菜机<br></div>
+			    	</div>
+			        <div> <br> </div>
+			        <p> </p>
+			        <h3 class="fragment fade-in" data-fragment-index="4">你可以挑选喜欢的原料</h3>
+			        <p> </p>
+			        <p> </p>
+			        <h3 class="fragment fade-in" data-fragment-index="5">免去制作的麻烦</h3>
+			        <p> </p>
+			        <p> </p>
+			        <h3 class="fragment fade-in" data-fragment-index="6">又不失自娱的乐趣</h3>
+			        <p> </p>
+			    </section>
+			    <section id="page-8-">
+			        <section id="page-8-1">
+			            <h3>Mix WebAPP的结构</h3>
+			            <div> <br>
+			            </div>
+			            <div> <img src="images/010.gif" style="width: 45%;border: 0;"> <br>
+			            </div>
+			        </section>
+			        <section id="page-8-2">
+			            <h3>特性一 &nbsp; &nbsp;全局导航</h3>
+			            <div> <br>
+			            </div>
+			            <div> <img src="images/011.gif"> <br>
+			            </div>
+			        </section>
+			        <section id="page-8-3">
+			            <h3>特性二 &nbsp; 转场效果</h3>
+			            <div> 
+			            	<video src="images/012.mov" height="600" preload="auto" controls="controls"></video>
+			            </div>
+			        </section>
+			        <section id="page-8-4">
+			            <h3>特性三 &nbsp; 触摸手势</h3>
+			            <div> <br>
+			            </div>
+			            <div> <img src="images/013.gif" style="border: 0;"> <br>
+			            </div>
+			        </section>
+			        <section id="page-8-5">
+			            <h3>特性四 &nbsp; 页面滚动</h3>
+			            <div> 
+			            	<video src="images/014.mov" height="600" preload="auto" controls="controls"></video>
+			            </div>
+			        </section>
+			    </section>
+			    <section id="page-9">
+			        <section id="page-9-1">
+			            <div>
+			                <ol>
+			                    <li class="fragment highlight-green">引用mixsln.js和mixsln.css等资源</li>
+			                    <li class="fragment highlight-green">插入标准的HTML</li>
+			                    <li class="fragment highlight-green">配置app.config</li>
+			                    <li class="fragment highlight-blue">编写页面模板和逻辑代码</li>
+			                    <li class="fragment highlight-green">app.start()</li>
+			                </ol>
+			            </div>
+			        </section>
+			        <section id="page-9-2">
+			            <h2>HTML &amp; Mix Source</h2>
+			            <div> <br> </div>
+			            <pre><code class="html">&lt;link href="mixsln.css" type="text/css" /&gt;
+&lt;script src="mixlsn.js"&gt;&lt;/script&gt;
+&lt;script src="mustache.js"&gt;&lt;/script&gt;&lt;!-- 可选，涉及到模板引擎的配置 --&gt;</code></pre>
+			            <pre><code class="html">&lt;div class="viewport"&gt;
+    &lt;header class="navibar"&gt;&lt;!-- 导航栏 --&gt;
+    &lt;ul&gt;
+        &lt;li&gt;Title&lt;/li&gt;
+        &lt;li&gt;&lt;button class="back"&gt;Back&lt;/button&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;button class="func"&gt;Func&lt;/button&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;/header&gt;
+    &lt;section class="content"&gt;&lt;!-- 内容区 --&gt;
+    &lt;div&gt;
+            &lt;div class="active"&gt;&lt;/div&gt;
+        &lt;div class="inactive"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;/section&gt;
+&lt;/div&gt;</code></pre>
+			        </section>
+			        <section id="page-9-3">
+			            <h2>config</h2>
+			            <div> <br> </div>
+			            <pre><code class="html">&lt;script&gt;
+app.config.viewport = document.querySelector('.viewport');
+app.config.enableNavibar = true;       //导航栏的开关
+app.config.enableScroll = true;        //页面滚动的开关
+app.config.enableTransition = true;    //转场动画的开关
+app.config.templateEngine = {
+    compile : function(text) {
+    	return Mustache.compile(text);
+    },
+
+    render : function(compiled, data) {
+    	return compiled(data);
+    }
+}
+&lt;/script&gt;</code></pre>
+			        </section>
+			        <section id="page-9-4">
+			            <h2>Helloworld Page</h2>
+			            <div> <br> </div>
+			            <h6 style="text-align: left;">&nbsp; &nbsp; &nbsp; &nbsp; helloworld.tpl</h6>
+			            <pre><code class="html">&lt;section&gt;
+    &lt;input type="text" id="hello-to"&gt;&lt;button id="say-hello"&gt;say&lt;/button&gt;
+&lt;/section&gt;</code></pre>
+			            <h6 style="text-align: left;">&nbsp; &nbsp; &nbsp; &nbsp; helloworld.js</h6>
+			            <pre><code class="javascript">app.page.define({
+    name: 'helloworld',
+    title: 'hello, world',
+    template: './templates/helloworld.tpl',
+    ready: function() {
+        this.fill({});
+        var btn = document.querySelector('#say-hello'),
+            text = document.querySelector('#hello-to');
+        btn.addEventListener('click', function() {
+            app.navigation.push('hello/' + encodeURI(text.value));
+        });
+    }
+});</code></pre>
+			        </section>
+			        <section id="page-9-5">
+			            <h2>sayhello Page</h2>
+			            <div> <br>
+			            </div>
+			            <h6 style="text-align: left;">&nbsp; &nbsp; &nbsp; &nbsp; sayhello.tpl</h6>
+			            <pre><code class="html">&lt;h1&gt;&lt;center&gt;Hello, {{name}}&lt;/center&gt;&lt;/h1&gt;</code></pre>
+			            <h6 style="text-align: left;">&nbsp; &nbsp; &nbsp; &nbsp; sayhello.js</h6>
+			            <pre><code class="javascript">app.page.define({
+    name: 'sayhello',
+    title: 'say hello',
+    template: './templates/sayhello.tpl',
+    route: 'hello\\/(P&lt;name&gt;[^\\/]+)',
+    ready: function(){
+        var data = {name:decodeURI(app.navigation.getParameter('name'))};
+        this.fill(data);
+    }
+});</code></pre>
+			        </section>
+			        <section id="page-9-6">
+			            <h2>app.Start</h2>
+			            <div> <img src="images/015.png"> </div>
+			        </section>
+			    </section>
+			    <section id="page-10">
+			        <div> <br> </div>
+			        <div> <img src="images/016.png" style="line-height: 1.2em;letter-spacing: -0.02em;"> </div>
+			    </section>
+			    <section id="page-11">
+			        <div> <br> </div>
+			        <div> <img src="images/017.png"> </div>
+			    </section>
+			    <section id="page-12">
+			        <h2> <br> </h2>
+			        <h2>Q&amp;A</h2>
+			    </section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+				rollingLinks: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
