@@ -1,0 +1,30 @@
+#page-5 > div {
+	display: -webkit-box;
+	-webkit-box-align: center;
+}
+
+#page-5 > div > blockquote {
+	width: 45%!important;
+	margin: 5px!important;
+	font-size: 25px;
+	box-sizing: border-box;
+}
+
+#page-5 > div > span {
+	width: 10%;
+	display: block;
+}
+
+#page-9-1 .fragment.highlight-green.visible {
+	color: #99ffcc!important;
+}
+
+#page-9-1 .fragment.highlight-blue.visible {
+	color: #00ccff!important;
+}
+
+#page-9 pre > code{
+	font-family: "Courier New";
+	font-size: 16px;
+}
+
