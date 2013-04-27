@@ -159,10 +159,10 @@ var win = window,
 			var navigation = new Navigation(state)
 				;
 
+			switchNavigation(navigation);
 			switchContent(navigation, function() {
 				loadNavigation(navigation);	
 			});
-			switchNavigation(navigation);
 			if (app.config.enableNavibar) {
 				setButtons(navigation);
 				setNavibar(navigation, true);
