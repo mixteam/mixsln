@@ -1,13 +1,29 @@
+#page-4-2 > div:first-child,
+	#page-4-2 > div:nth-child(2) {
+		display: -webkit-box;
+		-webkit-box-pack: center;
+		-webkit-box-align: center;
+	}
+
+#page-4-2 img{
+	width: 300px;
+}
+
 #page-5 > div {
 	display: -webkit-box;
 	-webkit-box-align: center;
 }
 
-#page-5 > div > blockquote {
+#page-5 > div > div,
+	#page-5 > div > blockquote {
 	width: 45%!important;
 	margin: 5px!important;
 	font-size: 25px;
 	box-sizing: border-box;
+}
+
+#page-5 > div > div {
+	font-size: 35px;
 }
 
 #page-5 > div > span {
