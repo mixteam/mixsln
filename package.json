@@ -17,13 +17,5 @@
     "grunt-contrib-cssmin": "~0.6.0"
   },
   "dependencies": {
-    "reset": "mix/core/0.3.0/base/reset",
-    "class": "mix/core/0.3.0/base/class",
-    "message": "mix/core/0.3.0/base/message",
-    "util": "mix/core/0.3.0/base/util",
-    "router": "mix/core/0.3.0/url/router",
-    "navigate": "mix/core/0.3.0/url/navigate",
-    "app": "mix/sln/0.3.6/app",
-    "app-hybrid": "mix/sln/0.3.6/app-hybrid"
   }
 }
