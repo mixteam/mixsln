@@ -1,12 +1,9 @@
-define(function(require, exports, module) {
-require('reset');
+(function(win, app, undef) {
 
-var win = window,
-    doc = win.document,
-    Class = require('class'),
-    Message = require('message'),
-    navigate = require('navigate').singleton,
-    View = require('./view'),
+var util = app.util,
+    Message = app._module.message,
+    navigate = app._module.navigate.instance,
+    View = app.view,
 
     STATUS = {
 		'DEFINED' : 0,
@@ -14,43 +11,46 @@ var win = window,
 		'LOADED' : 2,
 		'READY' : 3
 	},
-	pages = {},
-	Page = Class.create({
-		Extends : View,
-		Implements : Message,
+	pages = {}
+	;
 
-		initialize : function() {
-			var that = this,
-				name = that.name
-				;
+function Page() {
+	var that = this,
+		name = that.name,
+		msgContext = new Message('page.' + name)
+		;
 
-			Message.prototype.initialize.call(that, 'page.' + name);
-			View.prototype.initialize.apply(that, arguments);
-			that.status = STATUS.DEFINED;
-		},
+	Message.mixto(this, msgContext);
+	View.apply(that, arguments);
+	that.status = STATUS.DEFINED;
+}
 
-		getTitle : function() {
-			//can overrewite
-			return this.title;
-		},
+var proto = {
+	getTitle : function() {
+		//can overrewite
+		return this.title;
+	},
 
-		fill : function(datas, callback) {
-			var that = this, html
-				;
+	fill : function(datas, callback) {
+		var that = this, html
+			;
 
-			if (Object.isTypeof(datas, 'string')) {
-				html = datas;
-			} else {
-				html = that.renderTemplate(datas);
-			}
+		if (util.isTypeof(datas, 'string')) {
+			html = datas;
+		} else {
+			html = that.renderTemplate(datas);
+		}
 
-			app.component.fillActiveContent(html);
-			callback && callback();
-		},
+		app.component.fillActiveContent(html);
+		callback && callback();
+	},
 
-		ready : function() {/*implement*/},
-		unload : function() {/*implement*/}
-	});
+	ready : function() {/*implement*/},
+	unload : function() {/*implement*/}
+}
+
+util.inherit(Page, View);
+util.extend(Page.prototype, proto);
 
 Page.STATUS = STATUS;
 Page.global = {};
@@ -59,26 +59,32 @@ var isExtend = false;
 function extendPageFn() {
 	if (!isExtend) {
 		isExtend = true;
-		Object.extend(Page.prototype, Page.fn);
+		util.extend(Page.prototype, Page.fn);
 	}
 }
 Page.define = function(properties) {
 	extendPageFn();
 
-	var cPage = Page.extend(properties), 
-		iPage = new cPage(),
+	function ChildPage() {
+		Page.apply(this, arguments);
+		this.initialize && this.initialize.apply(this, arguments);
+	}
+	util.inherit(ChildPage, Page);
+	util.extend(ChildPage.prototype, properties);
+
+	var	iPage = new ChildPage(),
 		name, route
 		;
 
-	Object.each(Page.global, function(val, name) {
-		var type = Object.isTypeof(val);
+	util.each(Page.global, function(val, name) {
+		var type = util.isTypeof(val);
 
 		switch (type){
 			case 'array':
 				iPage[name] = val.slice(0).concat(iPage[name] || []);
 				break;
 			case 'object':
-				iPage[name] = Object.extend(val, iPage[name] || {});
+				iPage[name] = util.extend(val, iPage[name] || {});
 				break;
 			case 'string':
 			case 'number':
@@ -92,7 +98,7 @@ Page.define = function(properties) {
 
 	if (!route) {
 		route = {name: 'default', 'default': true}
-	} else if (Object.isTypeof(route, 'string')) {
+	} else if (util.isTypeof(route, 'string')) {
 		route = {name: 'anonymous', text: route}
 	}
 
@@ -104,8 +110,9 @@ Page.get = function(name) {
 	return pages[name];
 }
 Page.each = function(delegate) {
-	Object.each(pages, delegate);
+	util.each(pages, delegate);
 }
-return Page;
 
-});
+app.page = app._module.page = Page;
+
+})(window, window['app']||(window['app']={}));

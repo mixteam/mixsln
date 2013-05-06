@@ -1,7 +1,7 @@
 (function(win, app){
 	var doc = win.document,
 		ss = win.sessionStorage,
-		navigate = require('navigate').singleton,
+		navigate = app._module.navigate.instance,
 		SS_PREIX = 'mix_storage_001_'
 		;
 

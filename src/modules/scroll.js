@@ -1,15 +1,10 @@
-define(function(require, exports, module) {
+(function(win, app, undef) {
 
-require('reset');
-
-var win = window,
-    doc = win.document,
-    navigator = win.navigator,
-
-    Class = require('class'),
-    Gesture = require('./gesture'),
-    Transform = require('./transform'),
-    prevented = false
+var util = app.util,
+    Gesture = app._module.gesture,
+    Transform = app._module.transform,
+    prevented = false,
+    doc = win.document
     ;
 
 function getMaxScrollTop(el) {
@@ -27,31 +22,31 @@ function getMaxScrollTop(el) {
     return maxTop;
 }
 
-var Scroll = Class.create({
-    initialize : function(element) {
-        var that = this
-            ;
+function Scroll(element) {
+    var that = this
+        ;
 
-        that._wrap = element;
-        that._scroller = element.children[0];
-        that._gesture = new Gesture(that._scroller);
-        that._originalX = null;
-        that._originalY = null;
-        that._currentY = null;
-        that._scrollHeight = null;
-        that._scrollEndHandler = null;
-        that._scrollEndCancel = false;
-        that._refreshed = false;
+    that._wrap = element;
+    that._scroller = element.children[0];
+    that._gesture = new Gesture(that._scroller);
+    that._originalX = null;
+    that._originalY = null;
+    that._currentY = null;
+    that._scrollHeight = null;
+    that._scrollEndHandler = null;
+    that._scrollEndCancel = false;
+    that._refreshed = false;
 
-        that._preventBodyTouch = that._preventBodyTouch.bind(that);
-        that._onTouchStart = that._onTouchStart.bind(that);
-        that._onPanStart = that._onPanStart.bind(that);
-        that._onPan = that._onPan.bind(that);
-        that._onPanEnd = that._onPanEnd.bind(that);
-        that._onFlick = that._onFlick.bind(that);
-        that._onScrollEnd = that._onScrollEnd.bind(that);
-    },
+    that._preventBodyTouch = util.bindContext(that._preventBodyTouch, that);
+    that._onTouchStart = util.bindContext(that._onTouchStart, that);
+    that._onPanStart = util.bindContext(that._onPanStart, that);
+    that._onPan = util.bindContext(that._onPan, that);
+    that._onPanEnd = util.bindContext(that._onPanEnd, that);
+    that._onFlick = util.bindContext(that._onFlick, that);
+    that._onScrollEnd = util.bindContext(that._onScrollEnd, that);
+}
 
+var proto = {
     enable : function() {
         var that = this,
             scroller = that._scroller
@@ -267,7 +262,9 @@ var Scroll = Class.create({
             }
         }, 10);
     }
-});
+}
+util.extend(Scroll.prototype, proto);
 
-return Scroll;
-});
+app._module.scroll = Scroll;
+
+})(window, window['app']||(window['app']={}));

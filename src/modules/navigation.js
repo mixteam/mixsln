@@ -1,83 +1,92 @@
-define(function(require, exports, module) {
+(function(win, app, undef) {
 
-require('reset');
-var win = window,
-	doc = win.document,
+var util = app.util,
+	navigate = app._module.navigate.instance,
+	Page = app.page,
+	STATUS = Page.STATUS
+	;
 
-	Class = require('class'),
-	navigate = require('navigate').singleton,
-	Page = require('./page'),
-	STATUS = Page.STATUS,
-	Navigation = Class.create({
-		initialize : function(state) {
-			var that = this,
-				name = state.name.split('.')
-				;
-				
-			that.pageName = name[0];
-			that.routeName = name[1];
-			that.state = state;
-		},
+function Navigation(state) {
+	var that = this,
+		name = state.name.split('.')
+		;
+		
+	that.pageName = name[0];
+	that.routeName = name[1];
+	that.state = state;
+}
 
-		load : function(callback) {
-			var that = this,
-				page = Page.get(this.pageName),
-				loadedState = []
-				;
+var proto = {
+	initialize : function(state) {
+		var that = this,
+			name = state.name.split('.')
+			;
+			
+		that.pageName = name[0];
+		that.routeName = name[1];
+		that.state = state;
+	},
 
-			function checkLoaded(i) {
-				loadedState[i] = true;
-				if (loadedState.join('').match(/^(true)*$/)) {
-					page.status = STATUS.LOADED;
-					callback();
-				}
-			}
+	load : function(callback) {
+		var that = this,
+			page = Page.get(this.pageName),
+			loadedState = []
+			;
 
-			function pushViews(view) {
-				var views = view.views || {};
-				loadedState.push(view);
-				Object.each(views, pushViews);
-			}
-
-			if (page.status < STATUS.LOADED) {
-				pushViews(page);
-
-				Object.each(loadedState, function(state, i) {
-					state.loadTemplate(function(text) {
-						state.compileTemplate(text, function(compiled) {
-							state.compiledTemplate = compiled;
-							checkLoaded(i);
-						});
-					});
-				});
-			}
-		},
-
-		ready : function() {
-			var page = Page.get(this.pageName)
-				;
-
-			if (page.status === STATUS.LOADED && page.status < STATUS.READY) {
-				page.status = STATUS.READY;
-				page.trigger('ready');
-				page.ready();
-			}
-		},
-
-		unload : function() {
-			var that = this,
-				page = Page.get(this.pageName)
-				;
-
-			if (page.status > STATUS.UNLOADED) {
-				page.status = STATUS.UNLOADED;
-				page.trigger('unloaded');
-				page.unload();
+		function checkLoaded(i) {
+			loadedState[i] = true;
+			if (loadedState.join('').match(/^(true)*$/)) {
+				page.status = STATUS.LOADED;
+				callback();
 			}
 		}
-	});
 
-Object.extend(Navigation, {
+		function pushViews(view) {
+			var views = view.views || {};
+			loadedState.push(view);
+			util.each(views, pushViews);
+		}
+
+		if (page.status < STATUS.LOADED) {
+			pushViews(page);
+
+			util.each(loadedState, function(state, i) {
+				state.loadTemplate(function(text) {
+					state.compileTemplate(text, function(compiled) {
+						state.compiledTemplate = compiled;
+						checkLoaded(i);
+					});
+				});
+			});
+		}
+	},
+
+	ready : function() {
+		var page = Page.get(this.pageName)
+			;
+
+		if (page.status === STATUS.LOADED && page.status < STATUS.READY) {
+			page.status = STATUS.READY;
+			page.trigger('ready');
+			page.ready();
+		}
+	},
+
+	unload : function() {
+		var that = this,
+			page = Page.get(this.pageName)
+			;
+
+		if (page.status > STATUS.UNLOADED) {
+			page.status = STATUS.UNLOADED;
+			page.trigger('unloaded');
+			page.unload();
+		}
+	}
+};
+util.extend(Navigation.prototype, proto);
+
+util.extend(Navigation, {
 	_cur : null,
 
 	getParameter : function(name) {
@@ -124,5 +133,6 @@ Object.extend(Navigation, {
 	}
 })
 
-return Navigation;
-});
+app.navigation = app._module.navigation = Navigation;
+
+})(window, window['app']||(window['app']={}));

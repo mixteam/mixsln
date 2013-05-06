@@ -1,5 +1,6 @@
 (function(win, app){
-	var doc = win.document
+	var util = app.util,
+		doc = win.document
 		;
 
 	app.view.fn.parseMultiTemplate = function(text) {
@@ -13,7 +14,7 @@
 		if (templateTags.length === 0) {
 			templates.main = text;
 		} else {
-			Object.each(templateTags, function(tag) {
+			util.each(templateTags, function(tag) {
 				var name = tag.getAttribute('id');
 				templates[name] = tag.innerHTML;
 			});
@@ -26,7 +27,7 @@
 		var that = this,
 			compiled = {};
 
-		Object.each(tpls, function(tpl, name) {
+		util.each(tpls, function(tpl, name) {
 			that.compileTemplate(tpl, function(ctpl) {
 				compiled[name] = ctpl;
 			});
@@ -49,7 +50,7 @@
 			url = that.template || that.templates;
 		}
 
-		if (Object.isTypeof(url, 'string')) {
+		if (util.isTypeof(url, 'string')) {
 			app.loadFile(url, function(text, callback) {
 				var tpls = that.parseMultiTemplate(text);
 				that.compileMultiTemplate(tpls, callback);
@@ -74,7 +75,7 @@
 			contents = {}, div
 			;
 
-		Object.each(dataSet, function(datas, name) {
+		util.each(dataSet, function(datas, name) {
 			var compiledTemplate = templates[name];
 
 			if (compiledTemplate) {
@@ -86,7 +87,7 @@
 			div = doc.createElement('div');
 			div.innerHTML = contents.main;
 
-			Object.each(contents, function(html, name) {
+			util.each(contents, function(html, name) {
 				if (name === 'main') return;
 				var el = div.querySelector('#' + name)
 					;

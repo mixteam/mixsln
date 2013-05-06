@@ -1,5 +1,6 @@
 (function(win, app){
-	var doc = win.document,
+	var util = app.util,
+		doc = win.document,
 		$ = win.Zepto || win.$
 		;
 
@@ -12,7 +13,7 @@
 		if (arguments.length === 3) {
 			cache.push([event, selector, calllback]);
 		} else if (arguments.length === 3) {
-			Object.each(arguments[0], function(callback, event) {
+			util.each(arguments[0], function(callback, event) {
 				cache.push([event, selector, callback]);
 			});
 		}
@@ -36,10 +37,10 @@
 			that._options = options;
 			options.page.cache = [];
 
-			Object.each(page.events, function(ev) {
+			util.each(page.events, function(ev) {
 				var handler = ev[2];
 
-				if (Object.isTypeof(handler, 'string')) {
+				if (util.isTypeof(handler, 'string')) {
 					handler = page[handler];
 				}
 
@@ -53,7 +54,7 @@
 			var options = this._options
 				;
 
-			Object.each(options.page.cache, function(dv) {
+			util.each(options.page.cache, function(dv) {
 				page.undelegate(dv[0], dv[1], dv[2]);
 			});
 

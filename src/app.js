@@ -1,20 +1,12 @@
-define(function(require, exports, module) {
+(function(win, app, undef) {
 
-require('reset');
+var util = app.util,
+	router = app._module.router.instance,
+	navigate = app._module.navigate.instance,
 
-var win = window,
-	doc = win.document,
-
-	Class = require('class'),
-	router = require('router').singleton,
-	navigate = require('navigate').singleton,
-
-	View = require('./modules/view'),
-	Page = require('./modules/page'),
-	Component = require('./modules/component'),
-	Navigation = require('./modules/navigation')
-
-	app = {}
+	Page = app.page,
+	Component = app.component,
+	Navigation = app.navigation
 	;
 
 	function initComponent() {
@@ -90,7 +82,7 @@ var win = window,
 			backBtn.fn.hide();
 			funcBtn.fn.hide();
 
-			buttons && Object.each(buttons, function(item) {
+			buttons && util.each(buttons, function(item) {
 				var type = item.type;
 
 				switch (type) {
@@ -170,7 +162,7 @@ var win = window,
 		});
 	}
 
-	Object.extend(app, {
+	util.extend(app, {
 		config : {
 			viewport : null,
 			theme : 'iOS',
@@ -182,10 +174,6 @@ var win = window,
 			enableToolbar : false,
 			templateEngine : null
 		},
-		view : View,
-		page : Page,
-		component : Component,
-		navigation : Navigation,
 		plugin : {},
 		
 		loadFile : function(url, callback) {
@@ -210,7 +198,4 @@ var win = window,
 		}
 	});
 
-	win['app'] = app;
-});
-
-require('app');
+})(window, window['app']||(window['app']={}));

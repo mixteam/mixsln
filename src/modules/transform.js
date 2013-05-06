@@ -1,4 +1,5 @@
-define(function(require, exports, module) {
+(function(win, app, undef) {
+
 var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/,
 	MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/,
     TRANSITION_NAME = '-webkit-transform',
@@ -90,9 +91,13 @@ function startTransition(el, time, timeFunction, delay, x, y, callback) {
     el.style.webkitTransform = getTranslate(x, y);
 }
 
-exports.getY = getTransformY;
-exports.getX = getTransformX;
-exports.getTranslate = getTranslate;
-exports.getBezier = quadratic2cubicBezier;
-exports.start = startTransition;
-})
+
+app._module.transform = {
+    getY : getTransformY,
+    getX : getTransformX,
+    getTranslate : getTranslate,
+    getBezier : quadratic2cubicBezier,
+    start : startTransition
+}
+
+})(window, window['app']||(window['app']={}));

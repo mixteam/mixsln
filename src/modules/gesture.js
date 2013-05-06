@@ -1,15 +1,12 @@
-define(function(require, exports, module) {
+(function(win, app, undef) {
 
-require('reset');
-
-var win = window,
-    doc = win.document,
+var util = app.util,
     events = [
         'screenX', 'screenY', 
         'clientX', 'clientY', 
         'pageX', 'pageY'
     ],
-    Class = require('class')
+    doc = win.document
     ;
 
 
@@ -37,32 +34,32 @@ function copyEvents(type, src, copies) {
     ev.initEvent(type, true, true);
     if (src) {
         if (copies) {
-            Object.each(copies, function (p) {
+            util.each(copies, function (p) {
                 ev[p] = src[p];
             });
         } else {
-            Object.extend(ev, src);
+            util.extend(ev, src);
         }   
     }
 
     return ev;
 }
 
-var Gestrue = Class.create({
-    initialize : function(element) {
-        var that = this
-            ;
+function Gestrue(element) {
+    var that = this
+        ;
 
-        that._el = element;
-        that._myGestures = {};
-        that._lastTapTime = NaN;
+    that._el = element;
+    that._myGestures = {};
+    that._lastTapTime = NaN;
 
-        that._onStart = that._onStart.bind(that);
-        that._onDoing = that._onDoing.bind(that);
-        that._onEnd = that._onEnd.bind(that);
-        that._onTap = that._onTap.bind(that);
-    },
+    that._onStart = that._onStart.bind(that);
+    that._onDoing = that._onDoing.bind(that);
+    that._onEnd = that._onEnd.bind(that);
+    that._onTap = that._onTap.bind(that);
+}
 
+var proto = {
     getElement : function() {
         return that._el;
     },
@@ -96,7 +93,7 @@ var Gestrue = Class.create({
             doc.body.addEventListener('touchend', that._onEnd, false);
         }
 
-        Object.each(e.changedTouches, function(touch) {
+        util.each(e.changedTouches, function(touch) {
             var touchRecord = {};
 
             for (var p in touch)
@@ -135,7 +132,7 @@ var Gestrue = Class.create({
             myGestures = that._myGestures
             ;
 
-        Object.each(e.changedTouches, function(touch) {
+        util.each(e.changedTouches, function(touch) {
             var gesture = myGestures[touch.identifier],
                 displacementX, displacementY, distance,
                 ev;
@@ -169,7 +166,7 @@ var Gestrue = Class.create({
                 ev
                 ;
 
-            Object.each(e.touchs, function(touch){
+            util.each(e.touchs, function(touch){
                 var gesture;
                 if ((gesture = myGestures[touch.identifier])) {
                     position.push([gesture.startTouch.clientX, gesture.startTouch.clientY]);
@@ -257,16 +254,17 @@ var Gestrue = Class.create({
         if (Date.now() - lastTapTime < 500) {
             var ev = document.createEvent('HTMLEvents');
             ev.initEvent('doubletap', true, true);
-            Object.each(events, function (p) {
+            util.each(events, function (p) {
                 ev[p] = e[p];
             })
             el.dispatchEvent(ev);
         }
         that._lastTapTime = Date.now();
     }
-});
+};
+util.extend(Gestrue.prototype, proto);
 
-return Gestrue;
+app._module.gesture = Gestrue;
 
-});
+})(window, window['app']||(window['app']={}));
 
