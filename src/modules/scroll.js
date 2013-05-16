@@ -267,4 +267,4 @@ util.extend(Scroll.prototype, proto);
 
 app._module.scroll = Scroll;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));

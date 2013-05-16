@@ -162,5 +162,5 @@ Router.instance = new Router;
 
 app._module.router = Router;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 

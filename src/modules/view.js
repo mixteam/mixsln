@@ -26,7 +26,7 @@ var proto = {
 		}
 
 		if (url) {
-			app.loadFile(url, callback);
+			util.loadFile(url, callback);
 		} else {
 			callback();
 		}
@@ -102,4 +102,4 @@ View.each = function(delegate) {
 
 app.view = app._module.view = View;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));

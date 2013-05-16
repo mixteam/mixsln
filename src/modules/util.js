@@ -107,10 +107,24 @@ var toString = Object.prototype.toString,
 		    		src[name] = func;
 		    	}
 		    });
-	    }
+	    },
+
+		loadFile : function(url, callback) {
+			var xhr = new win.XMLHttpRequest()
+				;
+
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4 &&
+						((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304)) {
+					callback(xhr.responseText);
+				}
+			}
+			xhr.open('GET', url, true);
+			xhr.send();
+		}
 	}
 	;
 
 app.util = app._module.util = util;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));

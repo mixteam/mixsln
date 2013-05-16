@@ -135,4 +135,4 @@ util.extend(Navigation, {
 
 app.navigation = app._module.navigation = Navigation;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));

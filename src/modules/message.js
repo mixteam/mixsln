@@ -208,4 +208,4 @@ Message.instance = new Message('global');
 
 app._module.message = Message;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));

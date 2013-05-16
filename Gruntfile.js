@@ -2,7 +2,50 @@ var path = require('path'),
 	fs = require('fs')
 	;
 
-var uglifyTask = {
+var concatTask = {
+		options: {
+			banner: '/*! <%= context.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
+			separator: '\n',
+			stripBanners: true
+		},
+		
+		main: {
+			src: [
+				'<%= context.srcPath %>/<%= context.modulePath %>/util.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/message.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/router.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/navigate.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/gesture.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/transform.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/scroll.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/component.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/view.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/page.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/navigation.js',
+				'<%= context.srcPath %>/app.js'
+			],
+			dest: '<%= context.distPath %>/<%= context.name %>.js'
+		},
+
+		rebuild: {
+			src: [
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/message.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/navigation.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/vm.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/page.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/gesture.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/animation.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/scroll.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/transition.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/navbar.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/viewport.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/application.js',
+			],
+			dest: '<%= context.distPath %>/<%= context.name %>-rebuild.js'
+		}
+	},
+
+	uglifyTask = {
 		main: {
 			files: {
 				'<%= context.distPath %>/<%= context.name %>.min.js': '<%= concat.main.dest %>'
@@ -20,49 +63,6 @@ var uglifyTask = {
 		}
 	},
 
-	concatTask = {
-		options: {
-			banner: '/*! <%= context.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
-			separator: '\n',
-			stripBanners: true
-		},
-		main: {
-			src: [
-				'<%= context.srcPath %>/<%= context.modulePath %>/app.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>/util.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>/message.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>/router.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>/navigate.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>/gesture.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>/transform.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>/scroll.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>/component.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>/view.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>/page.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>/navigation.js',
-				'<%= context.srcPath %>/app.js'
-			],
-			dest: '<%= context.distPath %>/<%= context.name %>.js'
-		}
-	},
-
-	watchTask = {
-		'main_js' : {
-			files: ['<%= concat.main.src %>'],
-			tasks: ['concat', 'uglify:main']
-		},
-
-		'plugin_js' :  {
-			files: ['<%= context.srcPath %>/<%= context.pluginPath %>/*.js'],
-			tasks: ['uglify:plugin']
-		},
-
-		'css' : {
-			files: ['<%= cssmin.main.src %>'],
-			tasks: ['cssmin']
-		}
-	},
-
 	cssminTask = {
 		options: {
 			banner: '/*! <%= context.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
@@ -74,6 +74,29 @@ var uglifyTask = {
 				'<%= context.assetPath %>/x.css'
 			],
 			dest: '<%= context.distPath %>/<%= context.name %>.css'
+		}
+	},
+
+
+	watchTask = {
+		'main_js' : {
+			files: ['<%= concat.main.src %>'],
+			tasks: ['concat:main', 'uglify:main']
+		},
+
+		'rebuild_js' : {
+			files: ['<%= concat.rebuild.src %>'],
+			tasks: ['concat:rebuild']
+		},
+
+		'plugin_js' :  {
+			files: ['<%= context.srcPath %>/<%= context.pluginPath %>/*.js'],
+			tasks: ['uglify:plugin']
+		},
+
+		'css' : {
+			files: ['<%= cssmin.main.src %>'],
+			tasks: ['cssmin']
 		}
 	}
 	;

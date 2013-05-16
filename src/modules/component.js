@@ -2,7 +2,6 @@
 
 var util = app.util,
 	Message = app._module.message,
-	navigate = app._module.navigate.instance,
 	Scroll = app._module.scroll,
 	Transform = app._module.transform,
 	components = {},
@@ -300,4 +299,4 @@ util.extend(Compontent.prototype, proto);
 
 app.component = app._module.component = new Compontent;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));

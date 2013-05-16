@@ -115,4 +115,4 @@ Page.each = function(delegate) {
 
 app.page = app._module.page = Page;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));

@@ -276,4 +276,4 @@ Navigate.instance = new Navigate({
 
 app._module.navigate = Navigate;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));

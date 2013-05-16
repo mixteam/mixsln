@@ -175,20 +175,6 @@ var util = app.util,
 			templateEngine : null
 		},
 		plugin : {},
-		
-		loadFile : function(url, callback) {
-			var xhr = new win.XMLHttpRequest()
-				;
-
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState === 4 &&
-						((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304)) {
-					callback(xhr.responseText);
-				}
-			}
-			xhr.open('GET', url, true);
-			xhr.send();
-		},
 
 		start : function() {
 			initComponent();

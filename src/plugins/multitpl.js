@@ -51,7 +51,7 @@
 		}
 
 		if (util.isTypeof(url, 'string')) {
-			app.loadFile(url, function(text, callback) {
+			util.loadFile(url, function(text, callback) {
 				var tpls = that.parseMultiTemplate(text);
 				that.compileMultiTemplate(tpls, callback);
 			});

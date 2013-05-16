@@ -266,5 +266,5 @@ util.extend(Gestrue.prototype, proto);
 
 app._module.gesture = Gestrue;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 

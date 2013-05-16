@@ -1,12 +1,4 @@
-/*! mixsln 2013-05-06 */
-(function(win, undef) {
-	var app = {
-		_module : {},
-		plugin : {}
-	}
-
-	win['app'] = app;
-})(window);
+/*! mixsln 2013-05-16 */
 (function(win, app, undef) {
 	
 var toString = Object.prototype.toString,
@@ -116,13 +108,27 @@ var toString = Object.prototype.toString,
 		    		src[name] = func;
 		    	}
 		    });
-	    }
+	    },
+
+		loadFile : function(url, callback) {
+			var xhr = new win.XMLHttpRequest()
+				;
+
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4 &&
+						((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304)) {
+					callback(xhr.responseText);
+				}
+			}
+			xhr.open('GET', url, true);
+			xhr.send();
+		}
 	}
 	;
 
 app.util = app._module.util = util;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 // Thanks to:
 //  - https://github.com/documentcloud/backbone/blob/master/backbone.js
 //  - https://github.com/joyent/node/blob/master/lib/events.js
@@ -333,7 +339,7 @@ Message.instance = new Message('global');
 
 app._module.message = Message;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 
 // --------------------------------
 // Thanks to:
@@ -499,7 +505,7 @@ Router.instance = new Router;
 
 app._module.router = Router;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 
 
 // --------------------------------
@@ -780,7 +786,7 @@ Navigate.instance = new Navigate({
 
 app._module.navigate = Navigate;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 
 (function(win, app, undef) {
 
@@ -1050,7 +1056,7 @@ util.extend(Gestrue.prototype, proto);
 
 app._module.gesture = Gestrue;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 
 
 (function(win, app, undef) {
@@ -1155,7 +1161,7 @@ app._module.transform = {
     start : startTransition
 }
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 (function(win, app, undef) {
 
 var util = app.util,
@@ -1425,13 +1431,12 @@ util.extend(Scroll.prototype, proto);
 
 app._module.scroll = Scroll;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 
 (function(win, app, undef) {
 
 var util = app.util,
 	Message = app._module.message,
-	navigate = app._module.navigate.instance,
 	Scroll = app._module.scroll,
 	Transform = app._module.transform,
 	components = {},
@@ -1729,7 +1734,7 @@ util.extend(Compontent.prototype, proto);
 
 app.component = app._module.component = new Compontent;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 (function(win, app, undef) {
 
 var util = app.util,
@@ -1758,7 +1763,7 @@ var proto = {
 		}
 
 		if (url) {
-			app.loadFile(url, callback);
+			util.loadFile(url, callback);
 		} else {
 			callback();
 		}
@@ -1834,7 +1839,7 @@ View.each = function(delegate) {
 
 app.view = app._module.view = View;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 (function(win, app, undef) {
 
 var util = app.util,
@@ -1952,7 +1957,7 @@ Page.each = function(delegate) {
 
 app.page = app._module.page = Page;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 (function(win, app, undef) {
 
 var util = app.util,
@@ -2090,7 +2095,7 @@ util.extend(Navigation, {
 
 app.navigation = app._module.navigation = Navigation;
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
 (function(win, app, undef) {
 
 var util = app.util,
@@ -2268,20 +2273,6 @@ var util = app.util,
 			templateEngine : null
 		},
 		plugin : {},
-		
-		loadFile : function(url, callback) {
-			var xhr = new win.XMLHttpRequest()
-				;
-
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState === 4 &&
-						((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304)) {
-					callback(xhr.responseText);
-				}
-			}
-			xhr.open('GET', url, true);
-			xhr.send();
-		},
 
 		start : function() {
 			initComponent();

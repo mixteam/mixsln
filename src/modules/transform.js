@@ -100,4 +100,4 @@ app._module.transform = {
     start : startTransition
 }
 
-})(window, window['app']||(window['app']={}));
+})(window, window['app']||(window['app']={_module:{},plugin:{}}));
