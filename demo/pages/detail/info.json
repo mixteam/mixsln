@@ -1,0 +1,7 @@
+{
+	"name" : "detail",
+	"title" : "商品详情",
+	"route" : "detail\\/(P<pid>\\d+)\\/?",
+	"js": ["detail.js"],
+	"css": ["detail.css"]
+}
