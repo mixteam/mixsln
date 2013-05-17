@@ -1,4 +1,4 @@
-/*! mixsln 2013-05-16 */
+/*! mixsln 2013-05-17 */
 (function(win, app, undef) {
 	
 var toString = Object.prototype.toString,
@@ -1510,6 +1510,8 @@ var proto = {
 			;
 
 		extendFns(el, {
+			handler: null,
+
 			setText : function(text) {
 				el.innerText = text;
 			},
@@ -1524,8 +1526,8 @@ var proto = {
 		});
 
 		el.addEventListener('click', function(e) {
-			that.trigger(name + 'Click');
 			e.preventDefault();
+			el.fn.handler && el.fn.handler.apply(this, arguments);
 			return false;
 		});
 
@@ -1873,18 +1875,44 @@ var proto = {
 		return this.title;
 	},
 
-	fill : function(datas, callback) {
-		var that = this, html
-			;
-
-		if (util.isTypeof(datas, 'string')) {
-			html = datas;
-		} else {
-			html = that.renderTemplate(datas);
+	navigation: {
+		push: function(fragment, options) {
+			app.navigation.push(fragment,  options);
+		},
+		pop: function() {
+			app.navigation.pop();
+		},
+		getParameter: function(name) {
+			return app.navigation.getParameter(name);
+		},
+		getData: function(name) {
+			return app.navigation.getData(name);
+		},
+		setData: function(name, value) {
+			return app.navigation.setData(name, value);
+		},
+		setTitle: function(title) {
+			app.component.get('navibar').fn.set(title);
+		},
+		setButtons: function(options) {
+			var btn = options.type==='back'?app.component.get('backBtn'):app.component.get('funcBtn');
+			btn.fn.setText(options.text);
+			if (!options.handler && type === 'back') {
+				btn.fn.handler = function() {
+					navigate.backward();
+				}
+			} else {
+				btn.fn.handler = options.handler;
+			}
 		}
+	},
 
-		app.component.fillActiveContent(html);
-		callback && callback();
+	viewport: {
+		el: null,
+		$el: null,
+		fill : function(html) {
+			app.component.fillActiveContent(html);
+		}
 	},
 
 	ready : function() {/*implement*/},
@@ -2022,11 +2050,13 @@ var proto = {
 	},
 
 	ready : function() {
-		var page = Page.get(this.pageName)
+		var page = Page.get(this.pageName), $
 			;
 
 		if (page.status === STATUS.LOADED && page.status < STATUS.READY) {
 			page.status = STATUS.READY;
+			page.viewport.el = app.component.getActiveContent();
+			($ = window['$']) && (page.viewport.$el = $(page.viewport.el));
 			page.trigger('ready');
 			page.ready();
 		}
@@ -2051,7 +2081,8 @@ util.extend(Navigation, {
 
 	getParameter : function(name) {
 		if (!this._cur) return;
-		return this._cur.state.params[name];
+		var state = this._cur.state;
+		return state.params[name] || state.args[name] || state.datas[name];
 	},
 
 	getArgument : function(name) {
@@ -2148,24 +2179,14 @@ var util = app.util,
 		var navibar = Component.get('navibar'),
 			backBtn = Component.get('backBtn'),
 			funcBtn = Component.get('funcBtn'),
-			backBtnHandler = null,
-			funcBtnHandler = null,
 			content = Component.get('content'),
 			scroll = Component.get('scroll'),
 			transition = Component.get('transition')
 			;
 
-		Component.on('backBtnClick', function () {
-			if (backBtnHandler) {
-				backBtnHandler();
-			} else {
-				navigate.backward();
-			}
-		});
-
-		Component.on('funcBtnClick', function() {
-			funcBtnHandler && funcBtnHandler();
-		});
+		function backBtnClick() {
+			navigate.backward();
+		}
 
 		Component.on('fillContentEnd', function() {
 			scroll && scroll.fn.refresh();
@@ -2186,7 +2207,7 @@ var util = app.util,
 				switch (type) {
 					case 'back':
 						backBtn.fn.setText(item.text);
-						backBtnHandler = item.handler;
+						backBtn.fn.handler = item.handler || backBtnClick;
 						if (item.autoHide === false || 
 								navigate.getStateIndex() >= 1) {
 							backBtn.fn.show();
@@ -2194,14 +2215,14 @@ var util = app.util,
 						break;
 					case 'func':
 						funcBtn.fn.setText(item.text);
-						funcBtnHandler = item.handler;
+						funcBtn.fn.handler = item.handler;
 						funcBtn.fn.show();
 						break;
 					default:
 						break;
 				}
 
-				item.onChange && item.onChange.call(backBtn);
+				item.onChange && item.onChange.call(type==='back'?backBtn:funcBtn);
 			});
 		}
 
@@ -2239,9 +2260,6 @@ var util = app.util,
 		function loadNavigation(navigation) {
 			navigation.load(function() {
 				navigation.ready();
-				if (app.config.enableNavibar) {
-					setNavibar(navigation, false);
-				}
 			});
 		}
 

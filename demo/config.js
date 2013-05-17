@@ -1,8 +1,3 @@
-app.page.global.plugins = {
-	domfind : true,
-	domevent : true
-}
-
 app.config.viewport = document.querySelector('.viewport');
 app.config.enableNavibar = true;
 app.config.enableScroll = true;

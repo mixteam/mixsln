@@ -1,7 +1,7 @@
 (function(app, undef) {
 	app.view.define({
 		name : 'searchItems',
-		template : './templates/searchItems.tpl',
+		template : './pages/list/searchItems.tpl',
 		word : null,
 		page : 1,
 

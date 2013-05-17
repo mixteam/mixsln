@@ -16,10 +16,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
 <link type="text/css" rel="styleSheet" href="../assets/base.css"/>
 <link type="text/css" rel="styleSheet" href="../assets/x.css"/>
-
-<link type="text/css" rel="styleSheet" href="http://a.tbcdn.cn/mw/base/styles/component.css?v=20130110"/>
-<link type="text/css" rel="styleSheet" href="http://a.tbcdn.cn/mw/app/detail/h5/detail-fresh.css?v=20130110"/>
-<link type="text/css" rel="styleSheet" href="http://a.tbcdn.cn/mw/app/searchlist/h5/css/searchlist.css?v=20130110"/>
 <link type="text/css" rel="styleSheet" href="style.css" />
 </head>
 <body>
@@ -40,8 +36,8 @@
 	<footer class="toolbar"></footer>
 </div>
 
-<script src="./zepto.js" type="text/javascript"></script>
-<script src="./mustache.js" type="text/javascript"></script>
+<script src="./libs/zepto.js" type="text/javascript"></script>
+<script src="./libs/mustache.js" type="text/javascript"></script>
 <script src="../dist/mixsln.js" type="text/javascript"></script>
 
 <script src="./config.js" type="text/javascript"></script>
@@ -49,14 +45,20 @@
 <script src="../src/plugins/init.js" type="text/javascript"></script>
 <script src="../src/plugins/lazyload.js" type="text/javascript"></script>
 <script src="../src/plugins/scrollpos.js" type="text/javascript"></script>
-<script src="../src/plugins/domfind.js" type="text/javascript"></script>
 <script src="../src/plugins/domevent.js" type="text/javascript"></script>
 <script src="../src/plugins/stateStorage.js" type="text/javascript"></script>
 
-<script src="./views/searchItems.js" type="text/javascript"></script>
-<script src="./pages/default.js" type="text/javascript"></script>
-<script src="./pages/list.js" type="text/javascript"></script>
-<script src="./pages/detail.js" type="text/javascript"></script>
+<!-- default page -->
+<script src="./pages/default/default.js" type="text/javascript"></script>
+
+<!-- list page -->
+<link type="text/css" rel="styleSheet" href="./pages/list/list.css" />
+<script src="./pages/list/searchItems.js" type="text/javascript"></script>
+<script src="./pages/list/list.js" type="text/javascript"></script>
+
+<!-- detail page -->
+<link type="text/css" rel="styleSheet" href="./pages/detail/detail.css" />
+<script src="./pages/detail/detail.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 	app.start();

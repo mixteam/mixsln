@@ -5,7 +5,7 @@
 			name : 'list',
 			title : '搜索列表',
 			route : 'list\\/(P<word>[^\\/]+)\\/?',
-			template : './templates/list.tpl',
+			template : './pages/list/list.tpl',
 
 			events : [
 				['submit', '#J_topSearchForm', '_submitFormHandler']
@@ -30,14 +30,15 @@
 			],
 
 			plugins : {
-				lazyload : true,
-				scrollpos : true
+				domevent: true,
+				lazyload: true,
+				scrollpos: true
 			},
 
 			_renderItems : function(callback) {
 				var that = this,
 					searchItems = that.views.searchItems,
-					searchContent = that.find('.searchcontent')
+					searchContent = that.viewport.$el.find('.searchcontent')
 					;
 
 				searchItems.render(function(dom) {
@@ -47,26 +48,24 @@
 			},
 
 			_submitFormHandler : function(e, that) {
-				var word = that.find('#J_topSearchForm .c-form-search input').val()
+				e.preventDefault();
+
+				var word = that.viewport.$el.find('#J_topSearchForm .c-form-search input').val()
 					;
 
-				e.preventDefault();
-				navigation.push('list/' + encodeURIComponent(word) + '/');
-			},
-
-			getTitle : function() {
-				return '"' + this.views.searchItems.word + '" 的搜索列表'
+				that.navigation.push('list/' + encodeURIComponent(word) + '/');
 			},
 
 			ready : function() {
 				// implement super.load
 				var that = this,
-					navigation = app.navigation,
+					word = decodeURIComponent(that.navigation.getParameter('word')),
 					searchItems = that.views.searchItems
 					;
 
-				searchItems.word = decodeURIComponent(navigation.getParameter('word'));
+				searchItems.word = word;
 				searchItems.page = 1;
+				that.navigation.setTitle('"' + word + '" 的搜索列表');
 				that.layout();
 			},
 
@@ -82,10 +81,11 @@
 			layout : function() {
 				var that = this,
 					searchItems = that.views.searchItems,
-					data = {searchWord : searchItems.word}
+					data = {searchWord : searchItems.word},
+					html = that.renderTemplate(data);
 					;
 
-				that.fill(data);
+				that.viewport.fill(html);
 				that._renderItems(function() {
 					app.plugin.scrollpos.reset();
 					app.plugin.lazyload.check();

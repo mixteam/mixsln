@@ -31,18 +31,44 @@ var proto = {
 		return this.title;
 	},
 
-	fill : function(datas, callback) {
-		var that = this, html
-			;
-
-		if (util.isTypeof(datas, 'string')) {
-			html = datas;
-		} else {
-			html = that.renderTemplate(datas);
+	navigation: {
+		push: function(fragment, options) {
+			app.navigation.push(fragment,  options);
+		},
+		pop: function() {
+			app.navigation.pop();
+		},
+		getParameter: function(name) {
+			return app.navigation.getParameter(name);
+		},
+		getData: function(name) {
+			return app.navigation.getData(name);
+		},
+		setData: function(name, value) {
+			return app.navigation.setData(name, value);
+		},
+		setTitle: function(title) {
+			app.component.get('navibar').fn.set(title);
+		},
+		setButtons: function(options) {
+			var btn = options.type==='back'?app.component.get('backBtn'):app.component.get('funcBtn');
+			btn.fn.setText(options.text);
+			if (!options.handler && type === 'back') {
+				btn.fn.handler = function() {
+					navigate.backward();
+				}
+			} else {
+				btn.fn.handler = options.handler;
+			}
 		}
+	},
 
-		app.component.fillActiveContent(html);
-		callback && callback();
+	viewport: {
+		el: null,
+		$el: null,
+		fill : function(html) {
+			app.component.fillActiveContent(html);
+		}
 	},
 
 	ready : function() {/*implement*/},

@@ -75,6 +75,8 @@ var proto = {
 			;
 
 		extendFns(el, {
+			handler: null,
+
 			setText : function(text) {
 				el.innerText = text;
 			},
@@ -89,8 +91,8 @@ var proto = {
 		});
 
 		el.addEventListener('click', function(e) {
-			that.trigger(name + 'Click');
 			e.preventDefault();
+			el.fn.handler && el.fn.handler.apply(this, arguments);
 			return false;
 		});
 

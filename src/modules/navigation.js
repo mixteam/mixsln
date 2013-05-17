@@ -62,11 +62,13 @@ var proto = {
 	},
 
 	ready : function() {
-		var page = Page.get(this.pageName)
+		var page = Page.get(this.pageName), $
 			;
 
 		if (page.status === STATUS.LOADED && page.status < STATUS.READY) {
 			page.status = STATUS.READY;
+			page.viewport.el = app.component.getActiveContent();
+			($ = window['$']) && (page.viewport.$el = $(page.viewport.el));
 			page.trigger('ready');
 			page.ready();
 		}
@@ -91,7 +93,8 @@ util.extend(Navigation, {
 
 	getParameter : function(name) {
 		if (!this._cur) return;
-		return this._cur.state.params[name];
+		var state = this._cur.state;
+		return state.params[name] || state.args[name] || state.datas[name];
 	},
 
 	getArgument : function(name) {

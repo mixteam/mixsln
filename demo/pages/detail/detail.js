@@ -7,7 +7,7 @@
 		buttons : [
 			{
 				type : 'back',
-				text : '搜索'
+				text : '搜索列表'
 			},
 			{
 				type : 'func',
@@ -24,11 +24,11 @@
 		_pid : 0,
 
 		_submitFormHandler : function(e, that) {
-			var word = that.find('#J_searchForm .bton-keyword').val()
+			e.preventDefault();
+			var word = that.viewort.$el.find('#J_searchForm .bton-keyword').val()
 				;
 
-			e.preventDefault();
-			navigation.push('list/' + encodeURIComponent(word) + '/');
+			that.navigation.push('list/' + encodeURIComponent(word) + '/');
 		},
 
 		loadTemplate : function(callback) {
@@ -83,12 +83,12 @@
 
 		ready : function() {
 			var that = this,
-				navigation = app.navigation,
-				pid = this._pid = navigation.getParameter('pid')
+				pid = this._pid = that.navigation.getParameter('pid'),
+				html = that.renderTemplate({})
 				;
 
 			// implement super.ready
-			that.fill({});
+			that.viewport.fill(html);
 		},
 
 		unload : function() {

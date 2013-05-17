@@ -50,24 +50,14 @@ var util = app.util,
 		var navibar = Component.get('navibar'),
 			backBtn = Component.get('backBtn'),
 			funcBtn = Component.get('funcBtn'),
-			backBtnHandler = null,
-			funcBtnHandler = null,
 			content = Component.get('content'),
 			scroll = Component.get('scroll'),
 			transition = Component.get('transition')
 			;
 
-		Component.on('backBtnClick', function () {
-			if (backBtnHandler) {
-				backBtnHandler();
-			} else {
-				navigate.backward();
-			}
-		});
-
-		Component.on('funcBtnClick', function() {
-			funcBtnHandler && funcBtnHandler();
-		});
+		function backBtnClick() {
+			navigate.backward();
+		}
 
 		Component.on('fillContentEnd', function() {
 			scroll && scroll.fn.refresh();
@@ -88,7 +78,7 @@ var util = app.util,
 				switch (type) {
 					case 'back':
 						backBtn.fn.setText(item.text);
-						backBtnHandler = item.handler;
+						backBtn.fn.handler = item.handler || backBtnClick;
 						if (item.autoHide === false || 
 								navigate.getStateIndex() >= 1) {
 							backBtn.fn.show();
@@ -96,14 +86,14 @@ var util = app.util,
 						break;
 					case 'func':
 						funcBtn.fn.setText(item.text);
-						funcBtnHandler = item.handler;
+						funcBtn.fn.handler = item.handler;
 						funcBtn.fn.show();
 						break;
 					default:
 						break;
 				}
 
-				item.onChange && item.onChange.call(backBtn);
+				item.onChange && item.onChange.call(type==='back'?backBtn:funcBtn);
 			});
 		}
 
@@ -141,9 +131,6 @@ var util = app.util,
 		function loadNavigation(navigation) {
 			navigation.load(function() {
 				navigation.ready();
-				if (app.config.enableNavibar) {
-					setNavibar(navigation, false);
-				}
 			});
 		}
 
