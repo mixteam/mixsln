@@ -128,6 +128,11 @@ util.extend(Navigation, {
 	},
 
 	push : function(fragment, options) {
+		if (options && options.type === 'GET') {
+			options.args = options.datas;
+			options.data = null;
+		}
+
 		navigate.forward(fragment, options);
 	},
 

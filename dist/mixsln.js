@@ -1,4 +1,4 @@
-/*! mixsln 2013-05-17 */
+/*! mixsln 2013-05-20 */
 (function(win, app, undef) {
 	
 var toString = Object.prototype.toString,
@@ -2116,6 +2116,11 @@ util.extend(Navigation, {
 	},
 
 	push : function(fragment, options) {
+		if (options && options.type === 'GET') {
+			options.args = options.datas;
+			options.data = null;
+		}
+
 		navigate.forward(fragment, options);
 	},
 
