@@ -19,6 +19,10 @@ function test2(p) {
 	console.log('test 2', p, this.c);
 }
 
+function after_test2() {
+	console.log('after test2');
+}
+
 msg.on('test1', test11);
 
 msg.on('test1', test12);
@@ -39,6 +43,7 @@ Message.mixto(b, 'global');
 
 b.on('test2', test2, b);
 
-b.trigger('test2', 'test3');
+b.after('test2', after_test2);
 
+b.trigger('test2', 'test3');
 }

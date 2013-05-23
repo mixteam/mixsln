@@ -59,7 +59,7 @@ function MessageScope(scope) {
 			list = that._cache[event]
 			;
 
-        for (i = 0; i < list.length; i += 2) {
+        for (var i = 0; i < list.length; i += 2) {
             list[i].apply(list[i + 1], args);
         }
 	}
@@ -108,7 +108,7 @@ var MessageScopeProto = {
 
         	list = cache[event];
 
-            for (i = list.length - 2; i >= 0; i -= 2) {
+            for (var i = list.length - 2; i >= 0; i -= 2) {
                 if (!(callback && list[i] !== callback ||
                         context && list[i + 1] !== context)) {
                     list.splice(i, 2);
@@ -136,6 +136,30 @@ var MessageScopeProto = {
         return that.on(events, onceHandler, context);
 	},
 
+	after: function(events, callback, context) {
+		var that = this,
+			state = {}
+			;
+
+		if (!callback) return that;
+
+		function checkState() {
+			for (var ev in state) {
+				if (!state[ev]) return;
+			}
+			callback.apply(context);
+		}
+
+		events = events.split(SPLITER_REG);
+
+		events.forEach(function(ev) {
+			state[ev] = false;
+			that.once(ev, function() {
+				state[ev] = true;
+				checkState();
+			});
+		});
+	},
 
 	trigger: function(events) {
 		var that = this,
