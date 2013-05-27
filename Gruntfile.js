@@ -31,7 +31,8 @@ var concatTask = {
 			src: [
 				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/message.js',
 				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/navigation.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/vm.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/model.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/view.js',
 				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/page.js',
 				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/gesture.js',
 				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/animation.js',
@@ -115,8 +116,6 @@ function prepareTask(grunt, callback) {
 }
 
 function runTask(grunt, context) {
-
-
 	grunt.initConfig({
 		context: context,
 		uglify: uglifyTask,
