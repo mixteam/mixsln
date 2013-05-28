@@ -89,6 +89,8 @@ function Collection(data) {
 	var that = this
 		;
 
+	if (!data instanceof Array) return;
+
 	that.length = data.length;
 
 	that.push = function(value) {

@@ -27,12 +27,31 @@ var concatTask = {
 			dest: '<%= context.distPath %>/<%= context.name %>.js'
 		},
 
+		hybrid: {
+			src: [
+				'<%= context.srcPath %>/<%= context.modulePath %>/util.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/message.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/router.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/navigate.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/gesture.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/transform.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/scroll.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/component.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/view.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/page.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>/navigation.js',
+				'<%= context.srcPath %>/app-hybrid.js'
+			],
+			dest: '<%= context.distPath %>/<%= context.name %>-hybrid.js'
+		},
+
 		rebuild: {
 			src: [
 				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/message.js',
-				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/navigation.js',
 				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/model.js',
 				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/view.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/template.js',
+				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/navigation.js',
 				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/page.js',
 				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/gesture.js',
 				'<%= context.srcPath %>/<%= context.modulePath %>-rebuild/animation.js',

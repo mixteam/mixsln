@@ -1,4 +1,4 @@
-/*! mixsln 2013-05-27 */
+/*! mixsln 2013-05-28 */
 (function(win, app, undef) {
 
 function EventSource() {
@@ -221,6 +221,289 @@ MessageScope.get = function(scope) {
 
 app.module.EventSource = EventSource;
 app.module.MessageScope = MessageScope;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}));
+(function(win, app, undef) {
+
+var Message = app.module.MessageScope,
+	mid = 0, cid = 0;
+
+function Model(data) {
+	var that = this,
+		initializing  = true,
+		children = {}
+		;
+
+	Message.mixto(that, 'model-' + mid++);
+
+	that.addProperty = function(key, value) {
+		Object.defineProperty(that, key, {
+			get: function() {
+				return children[key] || data[key];
+			},
+			set: function(value) {
+				if (children[key]) {
+					children[key].destory();
+					delete children[key];
+				}
+
+				if (value != null) {
+					data[key] = value;
+					if (typeof value === 'object') {
+						children[key] = new Model(value);
+						children[key].on('propertyChange',  function(e) {
+							that.trigger('propertyChange', {
+								target: e.target,
+								value: e.value,
+								name: e.name,
+								path: key + '.' + e.path
+							});
+						});
+					}
+				}
+
+				!initializing && that.trigger('propertyChange', {
+					target: that,
+					value: children[key] || data[key],
+					name: key,
+					path: key
+				});
+			}
+		});
+
+		that[key] = value;
+	}
+
+	that.update = function(data) {
+		if (data instanceof Array) {
+			for (var i = 0; i < data.length; i++) {
+				if (!(data[i] instanceof Model)) {
+					this.addProperty(i, data[i]);
+				}
+			}
+		} else {
+			for (var key in data) {
+				if (that.hasOwnProperty(key)) {
+					throw new Error('property conflict "' + key + '"');
+				}
+
+				if (data.hasOwnProperty(key) && !(data[key] instanceof Model)) {
+					this.addProperty(key, data[key]);
+				}
+			}
+		}
+	}
+
+	that.destory = function() {
+		for (var key in children) {
+			children[key].destory();
+		}
+		that.off();
+	}
+
+	that.on('propertyChange', function(e) {
+		that.trigger('change:' + e.path, e.value);
+	});
+
+	that.update(data);
+
+	initializing = false;
+}
+
+function Collection(data) {
+	var that = this
+		;
+
+	if (!data instanceof Array) return;
+
+	that.length = data.length;
+
+	that.push = function(value) {
+		data.push(value);
+		that.length = data.length;
+		that.addProperty(data.length - 1, value);
+	}
+
+	that.pop = function() {
+		var value = data.pop();
+		that.length = data.length;
+		that[data.length] = null;
+		return value;
+	}
+
+	Model.call(that, data);
+}
+
+app.module.Model = Model;
+app.module.Collection = Collection;
+
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}));
+(function(win, app, undef) {
+
+var doc = win.document,
+	views = {}
+	;
+
+function extend(target, properties) {
+	for (var key in properties) {
+		if (properties.hasOwnProperty(key)) {
+			target[key] = properties[key];
+		}
+	}
+}
+
+function inherit(child, parent) {
+	function Ctor() {}
+	Ctor.prototype = parent.prototype;
+	var proto = new Ctor();
+	extend(proto, child.prototype);
+	proto.constructor = child;
+	child.prototype = proto;
+}
+	
+function View() {
+	var el, $el, $ = win['$'];
+
+
+	Object.defineProperty(this, 'el', {
+		get: function() {
+			return el;
+		},
+
+		set: function(element) {
+			var $;
+
+			if (typeof element === 'string') {
+				el = doc.querySelector(element);
+			} else if (element instanceof HTMLElement) {
+				el = element;
+			}
+
+			$ && ($el = $(el));
+		}
+	});
+
+	Object.defineProperty(this, '$el', {
+		get: function() {
+			return $el;
+		},
+
+		set: function(element) {
+			if (typeof element === 'string' && $) {
+				$el = $(element);
+			} else {
+				$el = element;
+			}
+
+			$el && (el = $el[0]);
+		}
+	});
+}
+
+var ViewProto = {
+	render: function(callback) {/*implement*/},
+	destory: function(callback) {/*implement*/}
+}
+
+for (var p in ViewProto) {
+	View.prototype[p] = ViewProto[p];
+} 
+
+View.fn = {};
+
+View.extend = function(properties) {
+	function ChildView() {
+		View.apply(this, arguments);
+		this.initialize && this.initialize.apply(this, arguments);
+		extend(this, View.fn);
+		extend(this, properties);
+	}
+	inherit(ChildView, View);
+	
+	return (views[properties.name] = ChildView);
+}
+
+View.get = function(name) {
+	return views[name];
+}
+
+app.module.View = View;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}));
+(function(win, app, undef) {
+
+var doc = win.document
+	;
+
+function Template(url) {
+	this.url = url;
+}
+
+var TemplateProto = {
+	load: function(url, callback) {
+		// can overwrite
+		var that = this,
+			engine = app.config.templateEngine
+			;
+
+		if (arguments.length === 1) {
+			callback = arguments[0];
+			url = that.url;
+		} else {
+			that.url = url;
+		}
+
+		function loaded(text) {
+			callback && callback(text);
+		}
+
+		if (engine && engine.load && typeof url === 'string') {
+			engine.load(url, loaded);
+		} else {
+			loaded(url);
+		}
+	},
+
+	compile: function(text) {
+		// can overwrite
+		var that = this,
+			engine = app.config.templateEngine
+			;
+
+		that.originTemplate = text;
+
+		if (engine && engine.compile && typeof text === 'string') {
+			that.compiledTemplate = engine.compile(text);
+		} else {
+			that.compiledTemplate = text;
+		}
+
+		return that.compiledTemplate;
+	},
+
+	render: function(datas) {
+		// can overwrite
+		var that = this,
+			engine = app.config.templateEngine,
+			compiledTemplate = that.compiledTemplate
+			;
+
+		if (engine && engine.render && typeof datas === 'object' && compiledTemplate) {
+			that.content = engine.render(compiledTemplate, datas);
+		} else {
+			that.content = compiledTemplate;
+		}
+
+		return that.content;
+	}
+}
+
+for (var p in TemplateProto) {
+	Template.prototype[p] = TemplateProto[p];
+} 
+
+app.module.Template = Template;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
@@ -577,162 +860,73 @@ app.module.Navigation = Navigation;
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
 
-var Message = app.module.MessageScope,
-	mid = 0, cid = 0;
 
-function Model(data) {
-	var that = this,
-		initializing  = true,
-		children = {}
-		;
-
-	Message.mixto(that, 'model-' + mid++);
-
-	that.addProperty = function(key, value) {
-		Object.defineProperty(that, key, {
-			get: function() {
-				return children[key] || data[key];
-			},
-			set: function(value) {
-				if (children[key]) {
-					children[key].destory();
-					delete children[key];
-				}
-
-				if (value != null) {
-					data[key] = value;
-					if (typeof value === 'object') {
-						children[key] = new Model(value);
-						children[key].on('propertyChange',  function(e) {
-							that.trigger('propertyChange', {
-								target: e.target,
-								value: e.value,
-								name: e.name,
-								path: key + '.' + e.path
-							});
-						});
-					}
-				}
-
-				!initializing && that.trigger('propertyChange', {
-					target: that,
-					value: children[key] || data[key],
-					name: key,
-					path: key
-				});
-			}
-		});
-
-		that[key] = value;
-	}
-
-	that.update = function(data) {
-		if (data instanceof Array) {
-			for (var i = 0; i < data.length; i++) {
-				if (!(data[i] instanceof Model)) {
-					this.addProperty(i, data[i]);
-				}
-			}
-		} else {
-			for (var key in data) {
-				if (that.hasOwnProperty(key)) {
-					throw new Error('property conflict "' + key + '"');
-				}
-
-				if (data.hasOwnProperty(key) && !(data[key] instanceof Model)) {
-					this.addProperty(key, data[key]);
-				}
-			}
-		}
-	}
-
-	that.destory = function() {
-		for (var key in children) {
-			children[key].destory();
-		}
-		that.off();
-	}
-
-	that.on('propertyChange', function(e) {
-		that.trigger('change:' + e.path, e.value);
-	});
-
-	that.update(data);
-
-	initializing = false;
-}
-
-function Collection(data) {
-	var that = this
-		;
-
-	that.length = data.length;
-
-	that.push = function(value) {
-		data.push(value);
-		that.length = data.length;
-		that.addProperty(data.length - 1, value);
-	}
-
-	that.pop = function() {
-		var value = data.pop();
-		that.length = data.length;
-		that[data.length] = null;
-		return value;
-	}
-
-	Model.call(that, data);
-}
-
-app.module.Model = Model;
-app.module.Collection = Collection;
-
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
-	
-function View() {
-
-}
-
-var viewProto = {
-	loadTemplate: function(url, callback) {},
-	compileTemplate: function(text, callback) {},
-	renderTemplate: function(datas, callback) {}
-}
-
-View.fn = {};
-View.define = function(propeties) {}
-View.get = function(name) {}
-
-app.module.View = View;
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
-
+var Message = app.module.MessageScope
+	;
 
 function Page() {
-
+	Message.mixto(this, 'page');
 }
 
-var pageProto = {
+var PageProto = {
 	navigation: {
-		push: function(fragment, options) {},
-		pop: function() {},
-		getParameter: function(name) {},
-		getData: function(name) {},
-		setData: function(name, value) {},
-		setTitle: function(title) {},
-		setButton: function(options) {}
+		push: function(fragment, options) {
+			this.trigger('navigation:push', fragment, options);
+		},
+
+		pop: function() {
+			this.trigger('navigation:pop');
+		},
+
+		getParameter: function(name) {
+			var value;
+
+			this.once('navigation:getParameter:callback', function(v) {
+				value = v;
+			})
+			this.trigger('navigation:getParameter', name);
+			return value;
+		},
+
+		getData: function(name) {
+			var value;
+			
+			this.once('navigation:getData:callback', function(v) {
+				value = v;
+			})
+			this.trigger('navigation:getData', name);	
+
+			return value;
+		},
+
+		setData: function(name, value) {
+			this.trigger('navigation:setData', name, value);
+		},
+
+		setTitle: function(title) {
+			this.trigger('navigation:setTitle', title);	
+		},
+
+		setButton: function(options) {
+			this.trigger('navigation:setTitle', options);
+		}
 	},
+
 	viewport: {
-		fill: function(html) {},
+		fill: function(html) {
+			this.trigger('viewport:fill', html);
+		},
 		el: null,
 		$el: null
 	},
+
 	ready : function() {/*implement*/},
 	unload : function() {/*implement*/}	
 }
+
+for (var p in PageProto) {
+	Page.prototype[p] = PageProto[p];
+} 
 
 Page.fn = {};
 Page.define = function() {}

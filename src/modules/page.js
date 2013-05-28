@@ -48,17 +48,26 @@ var proto = {
 			return app.navigation.setData(name, value);
 		},
 		setTitle: function(title) {
-			app.component.get('navibar').fn.set(title);
+			if (app.hybrid) {
+				app.hybrid.setTitle(title);
+			} else if (app.config.enableNavibar){
+				app.component.get('navibar').fn.set(title);
+			}
+			
 		},
 		setButtons: function(options) {
-			var btn = options.type==='back'?app.component.get('backBtn'):app.component.get('funcBtn');
-			btn.fn.setText(options.text);
-			if (!options.handler && type === 'back') {
-				btn.fn.handler = function() {
-					navigate.backward();
+			if (app.hybrid) {
+
+			} else if (app.config.enableNavibar) {
+				var btn = options.type==='back'?app.component.get('backBtn'):app.component.get('funcBtn');
+				btn.fn.setText(options.text);
+				if (!options.handler && type === 'back') {
+					btn.fn.handler = function() {
+						navigate.backward();
+					}
+				} else {
+					btn.fn.handler = options.handler;
 				}
-			} else {
-				btn.fn.handler = options.handler;
 			}
 		}
 	},
