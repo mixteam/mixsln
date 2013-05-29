@@ -1,7 +1,9 @@
 (function(win, app, undef) {
 
+var anim = app.module.Animation
+	;
 
-function Scroll() {
+function Scroll(element) {
 
 }
 

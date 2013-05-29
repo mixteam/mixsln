@@ -1,4 +1,4 @@
-/*! mixsln 2013-05-28 */
+/*! mixsln 2013-05-29 */
 (function(win, app, undef) {
 
 function EventSource() {
@@ -216,7 +216,7 @@ MessageScope.mixto = function(obj, scope) {
 }
 
 MessageScope.get = function(scope) {
-	return SCOPES[scope];
+	return SCOPES[scope] || (SCOPES[scope] = new MessageScope(scope));
 }
 
 app.module.EventSource = EventSource;
@@ -861,67 +861,85 @@ app.module.Navigation = Navigation;
 (function(win, app, undef) {
 
 
-var Message = app.module.MessageScope
+var Message = app.module.MessageScope,
+	pm = Message.get('page'),
+	pages = {}
 	;
 
+function extend(target, properties) {
+	for (var key in properties) {
+		if (properties.hasOwnProperty(key)) {
+			target[key] = properties[key];
+		}
+	}
+}
+
+function inherit(child, parent) {
+	function Ctor() {}
+	Ctor.prototype = parent.prototype;
+	var proto = new Ctor();
+	extend(proto, child.prototype);
+	proto.constructor = child;
+	child.prototype = proto;
+}
+
 function Page() {
-	Message.mixto(this, 'page');
 }
 
 var PageProto = {
 	navigation: {
 		push: function(fragment, options) {
-			this.trigger('navigation:push', fragment, options);
+			pm.trigger('navigation:push', fragment, options);
 		},
 
 		pop: function() {
-			this.trigger('navigation:pop');
+			pm.trigger('navigation:pop');
 		},
 
 		getParameter: function(name) {
 			var value;
 
-			this.once('navigation:getParameter:callback', function(v) {
+			pm.once('navigation:getParameter:callback', function(v) {
 				value = v;
 			})
-			this.trigger('navigation:getParameter', name);
+			pm.trigger('navigation:getParameter', name);
 			return value;
 		},
 
 		getData: function(name) {
 			var value;
 			
-			this.once('navigation:getData:callback', function(v) {
+			pm.once('navigation:getData:callback', function(v) {
 				value = v;
 			})
-			this.trigger('navigation:getData', name);	
+			pm.trigger('navigation:getData', name);	
 
 			return value;
 		},
 
 		setData: function(name, value) {
-			this.trigger('navigation:setData', name, value);
+			pm.trigger('navigation:setData', name, value);
 		},
 
 		setTitle: function(title) {
-			this.trigger('navigation:setTitle', title);	
+			pm.trigger('navigation:setTitle', title);	
 		},
 
 		setButton: function(options) {
-			this.trigger('navigation:setTitle', options);
+			pm.trigger('navigation:setTitle', options);
 		}
 	},
 
 	viewport: {
 		fill: function(html) {
-			this.trigger('viewport:fill', html);
+			pm.trigger('viewport:fill', html);
 		},
 		el: null,
 		$el: null
 	},
 
-	ready : function() {/*implement*/},
-	unload : function() {/*implement*/}	
+	startup : function() {/*implement*/},
+	teardown : function() {/*implement*/}	
 }
 
 for (var p in PageProto) {
@@ -929,15 +947,35 @@ for (var p in PageProto) {
 } 
 
 Page.fn = {};
-Page.define = function() {}
-Page.get = function() {}
-Page.registerPlugin = function() {}
+
+Page.define = function(properties) {
+	function ChildPage() {
+		Page.apply(this, arguments);
+		this.initialize && this.initialize.apply(this, arguments);
+
+		extend(this, Page.fn);
+		extend(this, properties);
+		Message.mixto(this, 'page.' + this.name);
+	}
+	inherit(ChildPage, Page);
+
+	return (pages[properties.name] = new ChildPage());
+}
+
+Page.get = function(name) {
+	return pages[name];
+}
 
 app.module.Page = Page;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
 
+var doc = win.document,
+    docEl = doc.documentElement,
+    slice = Array.prototype.slice,
+    gestures = {}, lastTap = null
+    ;
 
 function getCommonAncestor (el1, el2) {
     var el = el1;
@@ -951,18 +989,16 @@ function getCommonAncestor (el1, el2) {
 }
 
 function fireEvent(element, type, extra) {
-    var event = document.createEvent('HTMLEvents');
-    event.initEvent(type, true, true);
+    var event = doc.createEvent('HTMLEvents');
+    event.initEvent(type, false, true);
 
-    if(typeof extra == "object")
-    {
+    if(typeof extra === 'object') {
         for(var p in extra) {
             event[p] = extra[p];
         }
-    }    
+    }
 
-    while(event.cancelBubble == false && element)
-    {
+    while(event.cancelBubble === false && element) {
         element.dispatchEvent(event);
         element = element.parentNode;
     }
@@ -985,30 +1021,363 @@ function calc(x1, y1, x2, y2, x3, y3, x4, y4) {
     }
 }
 
-function Gesture() {
+function touchstartHandler(event) {
 
+    if (Object.keys(gestures).length === 0) {
+        docEl.addEventListener('touchmove', touchmoveHandler, false);
+        docEl.addEventListener('touchend', touchendHandler, false);
+        docEl.addEventListener('touchcancel', touchcancelHandler, false);
+    }
+    
+    for(var i = 0 ; i < event.changedTouches.length ; i++ ) {
+        var touch = event.changedTouches[i],
+            touchRecord = {};
+
+        for (var p in touch) {
+            touchRecord[p] = touch[p];
+        }
+
+        var gesture = {
+            startTouch: touchRecord,
+            startTime: Date.now(),
+            status: 'tapping',
+            element: event.srcElement,
+            pressingHandler: setTimeout(function(element) {
+                return function () {
+                    if (gesture.status === 'tapping') {
+                        gesture.status = 'pressing';
+
+                        fireEvent(element, 'press', {
+                            touchEvent:event
+                        });
+                    }
+
+                    clearTimeout(gesture.pressingHandler);
+                    gesture.pressingHandler = null;
+                }
+            }(event.srcElement), 500)
+        }
+        gestures[touch.identifier] = gesture;
+    }
+
+    if (Object.keys(gestures).length == 2) {
+        var elements = [];
+
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
+
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchstart', {
+            touches: slice.call(event.touches),
+            touchEvent: event
+        });
+    }
 }
 
-var gestureProto = {
-	getElement: function() {}
+
+function touchmoveHandler() {
+
+    for(var i = 0 ; i < event.changedTouches.length ; i++ ) {
+        var touch = event.changedTouches[i],
+            gesture = gestures[touch.identifier];
+
+        if (!gesture) {
+            return;
+        }
+
+        var displacementX = Math.abs(touch.clientX - gesture.startTouch.clientX),
+            displacementY = Math.abs(touch.clientY - gesture.startTouch.clientY),
+            distance = Math.sqrt(Math.pow(displacementX, 2) + Math.pow(displacementY, 2));
+
+        // magic number 10: moving 10px means pan, not tap
+        if (gesture.status === 'tapping' && distance > 10) {
+            gesture.status = 'panning';
+            fireEvent(gesture.element, 'panstart', {
+                touch:touch,
+                touchEvent:event
+            });
+
+            if(displacementX > displacementY) {
+                fireEvent(gesture.element, 'horizontalpanstart', {
+                    touch: touch,
+                    touchEvent: event
+                });
+                gesture.isVertical = false;
+            } else {
+                fireEvent(gesture.element, 'verticalpanstart', {
+                    touch: touch,
+                    touchEvent: event
+                });
+                gesture.isVertical = true;
+            }
+        }
+
+        if (gesture.status === 'panning') {
+            fireEvent(gesture.element, 'pan', {
+                displacementX: displacementX,
+                displacementY: displacementY,
+                touch: touch,
+                touchEvent: event
+            });
+
+
+            if(gesture.isVertical) {
+                fireEvent(gesture.element, 'verticalpan',{
+                    displacementY: displacementY,
+                    touch: touch,
+                    touchEvent: event
+                });
+            } else {
+                fireEvent(gesture.element, 'horizontalpan',{
+                    displacementX: displacementX,
+                    touch: touch,
+                    touchEvent: event
+                });
+            }
+        }
+    }
+
+    if (Object.keys(gestures).length == 2) {
+        var position = [],
+            current = [],
+            elements = [],
+            transform
+            ;
+        
+        for(var i = 0 ; i < event.touches.length ; i++ ) {
+            var touch = event.touches[i];
+            var gesture = gestures[touch.identifier];
+            position.push([gesture.startTouch.clientX, gesture.startTouch.clientY]);
+            current.push([touch.clientX, touch.clientY]);
+        }
+
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
+
+        transform = calc(position[0][0], position[0][1], position[1][0], position[1][1], current[0][0], current[0][1], current[1][0], current[1][1]);
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouch',{
+            transform : transform,
+            touches : event.touches,
+            touchEvent: event
+        });
+    }
 }
 
-app.module.Gesture = Gesture;
+
+function touchendHandler() {
+
+    if (Object.keys(gestures).length == 2) {
+        var elements = [];
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchend', {
+            touches: slice.call(event.touches),
+            touchEvent: event
+        });
+    }
+    
+    for (var i = 0; i < event.changedTouches.length; i++) {
+        var touch = event.changedTouches[i],
+            id = touch.identifier,
+            gesture = gestures[id];
+
+        if (!gesture) continue;
+
+        if (gesture.pressingHandler) {
+            clearTimeout(gesture.pressingHandler);
+            gesture.pressingHandler = null;
+        }
+
+        if (gesture.status === 'tapping') {
+            gesture.timestamp = Date.now();
+            fireEvent(gesture.element, 'tap', {
+                touch: touch,
+                touchEvent: event
+            });
+
+            if(lastTap && gesture.timestamp - lastTap.timestamp < 300) {
+                fireEvent(gesture.element, 'doubletap', {
+                    touch: touch,
+                    touchEvent: event
+                });
+            }
+
+            this.lastTap = gesture;
+        }
+
+        if (gesture.status === 'panning') {
+            fireEvent(gesture.element, 'panend', {
+                touch: touch,
+                touchEvent: event
+            });
+            
+            var duration = Date.now() - gesture.startTime;
+            
+            if (duration < 300) {
+                fireEvent(gesture.element, 'flick', {
+                    duration: duration,
+                    velocityX: (touch.clientX - gesture.startTouch.clientX) / duration,
+                    velocityY: (touch.clientY - gesture.startTouch.clientY) / duration,
+                    displacementX: touch.clientX - gesture.startTouch.clientX,
+                    displacementY: touch.clientY - gesture.startTouch.clientY,
+                    touch: touch,
+                    touchEvent: event
+                });
+
+                if(gesture.isVertical) {
+                    fireEvent(gesture.element, 'verticalflick', {
+                        duration: duration,
+                        velocityY: (touch.clientY - gesture.startTouch.clientY) / duration,
+                        displacementY: touch.clientY - gesture.startTouch.clientY,
+                        touch: touch,
+                        touchEvent: event
+                    });
+                } else {
+                    fireEvent(gesture.element, 'horizontalflick', {
+                        duration: duration,
+                        velocityX: (touch.clientX - gesture.startTouch.clientX) / duration,
+                        displacementX: touch.clientX - gesture.startTouch.clientX,
+                        touch: touch,
+                        touchEvent: event
+                    });
+                }
+            }
+        }
+
+        if (gesture.status === 'pressing') {
+            fireEvent(gesture.element, 'pressend', {
+                touch: touch,
+                touchEvent: event
+            });
+        }
+
+        delete gestures[id];
+    }
+
+    if (Object.keys(gestures).length === 0) {
+        docEl.removeEventListener('touchmove', touchmoveHandler, false);
+        docEl.removeEventListener('touchend', touchendHandler, false);
+        docEl.removeEventListener('touchcancel', touchcancelHandler, false);
+    }
+}
+
+function touchcancelHandler() {
+
+    if (Object.keys(gestures).length == 2) {
+        var elements = [];
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchend', {
+            touches: slice.call(event.touches),
+            touchEvent: event
+        });
+    }
+
+    for (var i = 0; i < event.changedTouches.length; i++) {
+        if (gesture.status === 'panning') {
+            fireEvent(gesture.element, 'panend', {
+                touch: touch,
+                touchEvent: event
+            });
+        }
+        if (gesture.status === 'pressing') {
+            fireEvent(gesture.element, 'pressend', {
+                touch: touch,
+                touchEvent: event
+            });
+        }
+        delete gestures[event.changedTouches[i].identifier];
+    }
+
+    if (Object.keys(gestures).length === 0) {
+        docEl.removeEventListener('touchmove', touchmoveHandler, false);
+        docEl.removeEventListener('touchend', touchendHandler, false);
+        docEl.removeEventListener('touchcancel', touchcancelHandler, false);
+    }
+}
+
+docEl.addEventListener('touchstart', touchstartHandler, false);
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
 
+var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([\d-]+), ([-\d]+), [\d-]+, \d+\)/,
+	MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d]+), ([-\d]+)\)$/,
+    TRANSITION_NAME = '-webkit-transform',
 
-function Animation() {
+    appVersion = navigator.appVersion,
+    isAndroid = (/android/gi).test(appVersion),
+    isIOS = (/iphone|ipad/gi).test(appVersion),
+    has3d = 'WebKitCSSMatrix' in window && 'm11' in new WebKitCSSMatrix()
+    ;
 
-}
+var Animation = {
+    doTransition: function(el, time, timeFunction, delay, x, y, callback) {
+    	var isEnd = false;
 
-var animationProto = {
-    doTransition: function(el, time, timeFunction, delay, x, y, callback) {},
-    getTranslate: function(x, y) {},
-    getBezier: function(a, b) {},
-    getTransform: function(el) {}
+	    function transitionEnd(e){
+	        if(isEnd || 
+	            e && (e.srcElement !== el || e.propertyName !== TRANSITION_NAME)) {
+	            return;
+	        }
 
+	        isEnd = true;
+	        el.removeEventListener('webkitTransitionEnd', transitionEnd, false);
+	        el.style.webkitTransition = 'none';
+	        callback && setTimeout(callback, 50);   // 延迟执行callback。解决立即取消动画造成的bug
+	    }
+
+	    el.addEventListener('webkitTransitionEnd', transitionEnd, false);
+	    //setTimeout(transitionEnd, parseFloat(time) * 1000);
+
+	    el.style.webkitTransition = [TRANSITION_NAME, time, timeFunction, delay].join(' ');
+	    el.style.webkitTransform = this.makeTranslateString(x, y);
+    },
+
+    genCubicBezier: function(a, b) {
+		return [[(a / 3 + (a + b) / 3 - a) / (b - a), (a * a / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a)],
+        	[(b / 3 + (a + b) / 3 - a) / (b - a), (b * b / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a)]];
+    },
+
+    makeTranslateString: function(x, y) {
+		x += '';
+		y += '';
+
+		if (x.indexOf('%') < 0 && x !== '0') {
+			x += 'px';
+		}
+		if (y.indexOf('%') < 0 && y !== '0') {
+			y += 'px';
+		}
+
+	    if (has3d) {
+	        return 'translate3d(' + x + ', ' + y + ', 0)';
+	    } else {
+	        return 'translate(' + x + ', ' + y + ')';
+	    }
+    },
+
+    getTransformOffset: function(el) {
+	    var offset = {
+	    		x: 0,
+	    		y: 0
+	    	}, 
+	    	transform = getComputedStyle(el).webkitTransform, 
+	    	matchs, reg;
+
+	    if (transform !== 'none') {
+	    	reg = transform.indexOf('matrix3d') > -1 ? MATRIX3D_REG : MATRIX_REG;
+	        if((matchs = transform.match(reg))) {
+	            offset.x = parseInt(matchs[1]) || 0;
+	            offset.y = parseInt(matchs[2]) || 0;
+	        }
+	    }
+
+	    return offset;
+    }
 }
 
 app.module.Animation = Animation;
@@ -1016,8 +1385,10 @@ app.module.Animation = Animation;
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
 
+var anim = app.module.Animation
+	;
 
-function Scroll() {
+function Scroll(element) {
 
 }
 

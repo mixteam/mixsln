@@ -13,7 +13,7 @@ function testTemplate() {
 		}
 	}
 
-	var template = new app.module.Template('../test/template.tpl')
+	var template = new app.module.Template('./template.tpl')
 		;
 
 	template.load(function(text) {

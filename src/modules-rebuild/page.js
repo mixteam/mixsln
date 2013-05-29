@@ -1,67 +1,85 @@
 (function(win, app, undef) {
 
 
-var Message = app.module.MessageScope
+var Message = app.module.MessageScope,
+	pm = Message.get('page'),
+	pages = {}
 	;
 
+function extend(target, properties) {
+	for (var key in properties) {
+		if (properties.hasOwnProperty(key)) {
+			target[key] = properties[key];
+		}
+	}
+}
+
+function inherit(child, parent) {
+	function Ctor() {}
+	Ctor.prototype = parent.prototype;
+	var proto = new Ctor();
+	extend(proto, child.prototype);
+	proto.constructor = child;
+	child.prototype = proto;
+}
+
 function Page() {
-	Message.mixto(this, 'page');
 }
 
 var PageProto = {
 	navigation: {
 		push: function(fragment, options) {
-			this.trigger('navigation:push', fragment, options);
+			pm.trigger('navigation:push', fragment, options);
 		},
 
 		pop: function() {
-			this.trigger('navigation:pop');
+			pm.trigger('navigation:pop');
 		},
 
 		getParameter: function(name) {
 			var value;
 
-			this.once('navigation:getParameter:callback', function(v) {
+			pm.once('navigation:getParameter:callback', function(v) {
 				value = v;
 			})
-			this.trigger('navigation:getParameter', name);
+			pm.trigger('navigation:getParameter', name);
 			return value;
 		},
 
 		getData: function(name) {
 			var value;
 			
-			this.once('navigation:getData:callback', function(v) {
+			pm.once('navigation:getData:callback', function(v) {
 				value = v;
 			})
-			this.trigger('navigation:getData', name);	
+			pm.trigger('navigation:getData', name);	
 
 			return value;
 		},
 
 		setData: function(name, value) {
-			this.trigger('navigation:setData', name, value);
+			pm.trigger('navigation:setData', name, value);
 		},
 
 		setTitle: function(title) {
-			this.trigger('navigation:setTitle', title);	
+			pm.trigger('navigation:setTitle', title);	
 		},
 
 		setButton: function(options) {
-			this.trigger('navigation:setTitle', options);
+			pm.trigger('navigation:setTitle', options);
 		}
 	},
 
 	viewport: {
 		fill: function(html) {
-			this.trigger('viewport:fill', html);
+			pm.trigger('viewport:fill', html);
 		},
 		el: null,
 		$el: null
 	},
 
-	ready : function() {/*implement*/},
-	unload : function() {/*implement*/}	
+	startup : function() {/*implement*/},
+	teardown : function() {/*implement*/}	
 }
 
 for (var p in PageProto) {
@@ -69,9 +87,24 @@ for (var p in PageProto) {
 } 
 
 Page.fn = {};
-Page.define = function() {}
-Page.get = function() {}
-Page.registerPlugin = function() {}
+
+Page.define = function(properties) {
+	function ChildPage() {
+		Page.apply(this, arguments);
+		this.initialize && this.initialize.apply(this, arguments);
+
+		extend(this, Page.fn);
+		extend(this, properties);
+		Message.mixto(this, 'page.' + this.name);
+	}
+	inherit(ChildPage, Page);
+
+	return (pages[properties.name] = new ChildPage());
+}
+
+Page.get = function(name) {
+	return pages[name];
+}
 
 app.module.Page = Page;
 

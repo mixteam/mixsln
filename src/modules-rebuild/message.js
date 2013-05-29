@@ -215,7 +215,7 @@ MessageScope.mixto = function(obj, scope) {
 }
 
 MessageScope.get = function(scope) {
-	return SCOPES[scope];
+	return SCOPES[scope] || (SCOPES[scope] = new MessageScope(scope));
 }
 
 app.module.EventSource = EventSource;
