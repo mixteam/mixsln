@@ -114,8 +114,8 @@ function touchmoveHandler() {
             return;
         }
 
-        var displacementX = Math.abs(touch.clientX - gesture.startTouch.clientX),
-            displacementY = Math.abs(touch.clientY - gesture.startTouch.clientY),
+        var displacementX = touch.clientX - gesture.startTouch.clientX,
+            displacementY = touch.clientY - gesture.startTouch.clientY,
             distance = Math.sqrt(Math.pow(displacementX, 2) + Math.pow(displacementY, 2));
 
         // magic number 10: moving 10px means pan, not tap
@@ -126,7 +126,7 @@ function touchmoveHandler() {
                 touchEvent:event
             });
 
-            if(displacementX > displacementY) {
+            if(Math.abs(displacementX) > Math.abs(displacementY)) {
                 fireEvent(gesture.element, 'horizontalpanstart', {
                     touch: touch,
                     touchEvent: event
@@ -142,6 +142,7 @@ function touchmoveHandler() {
         }
 
         if (gesture.status === 'panning') {
+            gesture.panTime = Date.now();
             fireEvent(gesture.element, 'pan', {
                 displacementX: displacementX,
                 displacementY: displacementY,
@@ -241,16 +242,21 @@ function touchendHandler() {
                 touch: touch,
                 touchEvent: event
             });
-            
-            var duration = Date.now() - gesture.startTime;
+
+            var duration = Date.now() - gesture.startTime,
+                velocityX = (touch.clientX - gesture.startTouch.clientX) / duration,
+                velocityY = (touch.clientY - gesture.startTouch.clientY) / duration,
+                displacementX = touch.clientX - gesture.startTouch.clientX,
+                displacementY = touch.clientY - gesture.startTouch.clientY
+                ;
             
             if (duration < 300) {
                 fireEvent(gesture.element, 'flick', {
                     duration: duration,
-                    velocityX: (touch.clientX - gesture.startTouch.clientX) / duration,
-                    velocityY: (touch.clientY - gesture.startTouch.clientY) / duration,
-                    displacementX: touch.clientX - gesture.startTouch.clientX,
-                    displacementY: touch.clientY - gesture.startTouch.clientY,
+                    velocityX: velocityX,
+                    velocityY: velocityY,
+                    displacementX: displacementX,
+                    displacementY: displacementY,
                     touch: touch,
                     touchEvent: event
                 });
@@ -258,16 +264,16 @@ function touchendHandler() {
                 if(gesture.isVertical) {
                     fireEvent(gesture.element, 'verticalflick', {
                         duration: duration,
-                        velocityY: (touch.clientY - gesture.startTouch.clientY) / duration,
-                        displacementY: touch.clientY - gesture.startTouch.clientY,
+                        velocityY: velocityY,
+                        displacementY: displacementY,
                         touch: touch,
                         touchEvent: event
                     });
                 } else {
                     fireEvent(gesture.element, 'horizontalflick', {
                         duration: duration,
-                        velocityX: (touch.clientX - gesture.startTouch.clientX) / duration,
-                        displacementX: touch.clientX - gesture.startTouch.clientX,
+                        velocityX: velocityX,
+                        displacementX: displacementX,
                         touch: touch,
                         touchEvent: event
                     });
