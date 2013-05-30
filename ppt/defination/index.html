@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>VIEW(PAGE) 编写规范</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+			    <section>
+			        <h2>
+			            <br>
+			        </h2>
+			        <h2>view(page) 编写规范</h2>
+			        <div>
+			            <br>
+			        </div>
+			        <div>渚薰@mixteam</div>
+			        <div>拔赤@kissymobile</div>
+			    </section>
+			    <section>
+			        <h2>背景</h2>
+			<div>
+			    <br>
+			</div>
+			<div style="text-align: center; position: absolute; width: 443px; height: 532px; z-index: 4; left: 20px; top: 131px;" class="absolute-element">客户端内嵌H5<img src="images/1.jpg" style="height: 460px;">
+			    </div>
+			<div style="text-align: center; position: absolute; width: 461px; height: 532px; z-index: 5; left: 481px; top: 132px;" class="absolute-element">业务功能插件化<img src="images/2.jpg" style="height: 460px;">
+			    <br style="font-family: inherit; font-style: inherit; font-variant: inherit;">
+			</div>
+			</section>
+			<section>
+			    <h2>应用场景</h2>
+			    <div>
+			        <br>
+			    </div>
+			    <div>
+			        <img src="images/3.jpg" style="height: 493px;">
+			        <br>
+			    </div>
+			</section>
+			<section>
+			    <h2>目标</h2>
+			    <div>
+			        <br>
+			    </div>
+			    <div>
+			        <br>
+			    </div>
+			    <blockquote style="text-align: left;">
+			        <font style="font-size: 42px; font-style: normal;">
+			            <font color="#f01856">规范</font>view（page）的编写，使其能被通用框架<font color="#f01856">加载</font>并在各种场景下适配<font color="#f01856">显示</font>。</font>
+			        </blockquote>
+			    </section>
+			    <section>
+			<h2>一个简单对象</h2>
+			<div>
+			    <br>
+			</div>
+			<div>
+			<pre><code style="font-size:28px; line-height:28px;">{
+    name: 'helloworld',  // 唯一标识
+    title: '你好',    // 标题
+    buttons: [...],   // 导航按钮，包括回退按钮和右侧按钮
+    startup: function() {
+        // 划入或加载时的入口方法
+    },
+    teardown: function() {
+        // 划出或卸载时的入口方法
+    }    
+}</code></pre>
+			</div>
+			</section>
+			    <section>
+			        <h2>导航的类型</h2>
+			        <div>
+			            <br>
+			        </div>
+			        <div>
+			            <img src="images/4.jpg" style="height: 438px;">
+			            <br>
+			        </div>
+			        <div>
+			            <br>
+			        </div>
+			    </section>
+			    <section>
+			        <h2>标题格式</h2>
+			        <div>
+			            <br>
+			        </div>
+			        <div>
+			<pre><code style="font-size:32px">title: 'pure text'</code></pre>
+			    </div>
+			    <div>or</div>
+			    <div>
+			<pre><code style="font-size:32px">title: '&lt;div&gt;a html fragment&lt;/div&gt;'</code></pre>
+			</div>
+			<div>
+			    <br>
+			</div>
+			</section>
+			<section>
+			<h2>按钮的属性和行为</h2>
+			<div>
+			    <br>
+			</div>
+			<div>
+			<pre><code style="font-size:32px"> id - 唯一标识</code></pre>
+			</div>
+			<div>
+			<pre><code style="font-size:32px"> type - 标注是回退按钮(back)还是右侧按钮(func)</code></pre>
+			</div>
+			<div>
+			<pre><code style="font-size:32px"> text - 文本（可选）</code></pre>
+			</div>
+			<div>
+			<pre><code style="font-size:32px"> bg - 背景图片（可选）</code></pre>
+			</div>
+			<div>
+			<pre><code style="font-size:32px"> icon - 图标（可选</code></pre>
+			</div>
+			<div>
+			<pre><code style="font-size:32px"> handler - 点击句柄（回退按钮默认为history.back</code></pre>
+			</div>
+			<div>
+			<pre><code style="font-size:32px"> hide - 是否隐藏</code></pre>
+			</div>
+
+			<div>
+			<br>
+			</div>
+			<div>回退按钮只存在一个，右侧按钮可存在多个
+			</div>
+
+
+			</section>
+			<section>
+			    <h2>view（page）的操作</h2>
+			    <div>
+			        <br>
+			    </div>
+			    <div>
+			        <br>
+			    </div>
+			    <blockquote style="text-align: left;">
+			        <span style="font-style: normal;">
+			            <font style="font-size: 42px;">工具方法和属性，可在<font color="#f01856">上下文</font>中被访问</font>
+			        </span>
+			    </blockquote>
+			</section>
+			<section>
+			    <h2>导航相关操作</h2>
+			    <div>
+			        <br>
+			    </div>
+			    <div>
+			        <br>
+			    </div>
+			    <div style="text-align: left;">&nbsp; &nbsp; 前进：open(url) or push(fragment)</div>
+			    <div style="text-align: left;">&nbsp; &nbsp; 后退：back() or pop()</div>
+			    <div style="text-align: left;">&nbsp; &nbsp; 设置标题：setTitle(title)</div>
+			    <div style="text-align: left;">&nbsp; &nbsp; 设置按钮：setButton(options)</div>
+			</section>
+			<section>
+			    <h2>内容相关操作</h2>
+			    <div>
+			        <br>
+			    </div>
+			    <div style="text-align: left;">&nbsp; &nbsp; 填充内容：fill(html)</div>
+			    <div style="text-align: left;">&nbsp; &nbsp; 内容区域结点：el</div>
+			    <div style="text-align: left;">&nbsp; &nbsp; 内容区域的$结点：$el</div>
+			</section>
+			<section>
+			    <h2>问题和困难</h2>
+			<div>
+			    <br>
+			</div>
+			<div>
+			    <blockquote>
+			        <span style="text-align: left;">view(page)是个最小子集 or 严格定义？</span>
+			</blockquote>
+			<div>
+			    <br>
+			</div>
+			    <blockquote>
+			        <span style="text-align: left;">业务代码中依赖某特通用框架的模块或方法，在其他通用框架中是不被支持的。</span>
+			    </blockquote>
+			<div>
+			    <br>
+			</div>
+			<blockquote>在业务场景的压力下，也许view(page)的定义需要快速迭代</blockquote>
+			<div>
+			    <br>
+			</div>    
+			</div>
+
+			</section>
+			<section>
+			    <h1>
+			        <br>
+			    </h1>
+			    <h1>
+			        <span style="font-size: 115.362px;">Q&amp;A</span>
+			        <br>
+			    </h1>
+			</section>
+			</div>
+
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: false,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
