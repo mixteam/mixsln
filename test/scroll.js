@@ -43,45 +43,46 @@ function testScroll() {
 
 
 	var isUpdate = false;
-	scrollEl1.addEventListener('panbounce', function(e) {
-		var el= this, top = el.getScrollTop(), outof  = el.outOfBoundary(), text;
+	scrollEl1.addEventListener('pulldown', function(e) {
+		var el = this, offset = el.getBoundaryOffset(), text;
 
-		if (top < 0) {
-			if (outof > 60) {
-				text = '松开即刷新';
-				isUpdate = true;
-			} else {
-				text = '下拉可刷新';
-				isUpdate = false;
-			}
-			el.querySelector('div:first-child').innerHTML = text;
+		if (offset > 60) {
+			text = '松开即刷新';
+			isUpdate = 'pulldown';
 		} else {
-			if (outof > 60) {
-				text = '松开即加载更多';
-				isUpdate = true;
-			} else {
-				text = '上拉可加载更多';
-				isUpdate = false;
-			}
-			el.querySelector('div:last-child').innerHTML = text;
+			text = '下拉可刷新';
+			isUpdate = false;
 		}
-
+		el.querySelector('div:first-child').innerHTML = text;
 
 	});
 
-	scrollEl1.addEventListener('panend', function(e) {
-		var el = this, top = el.getScrollTop(), outof = el.outOfBoundary(), text;
+	scrollEl1.addEventListener('pullup', function(e) {
+		var el = this, offset  = el.getBoundaryOffset(), text;
 
-		if (isUpdate && outof) {
+		if (offset > 60) {
+			text = '松开即加载更多';
+			isUpdate = 'pullup';
+		} else {
+			text = '上拉可加载更多';
+			isUpdate = false;
+		}
+		el.querySelector('div:last-child').innerHTML = text;
+	});
+
+	scrollEl1.addEventListener('panend', function(e) {
+		var el = this, offset = el.getBoundaryOffset(), text;
+
+		if (isUpdate && offset) {
 			scrollEl1.stopBounce();
 			setTimeout(function(){
-				if (top < 0) {
+				if (isUpdate === 'pulldown') {
 					var date = new Date();
 					el.querySelector('div:first-child').innerHTML = '最近刷新:' + date.getHours() + ':' + date.getMinutes();
 					el.querySelector('ul').innerHTML = html1.join('');
 
 					el.refresh();
-				} else {
+				} else if (isUpdate === 'pullup') {
 					el.querySelector('div:last-child').innerHTML = '上拉可加载更多';
 
 					var length = el.querySelectorAll('li').length,
@@ -101,9 +102,9 @@ function testScroll() {
 				scrollEl1.resumeBounce();
 			}, 1000);
 		} else {
-			if (top < 0) {
+			if (isUpdate === 'pulldown') {
 				el.querySelector('div:first-child').innerHTML = '下拉可刷新';
-			} else {
+			} else if (isUpdate === 'pullup') {
 				el.querySelector('div:last-child').innerHTML = '上拉可加载更多';
 			}
 
@@ -118,7 +119,7 @@ function testScroll() {
 
 	app.module.Scroll.enable(scrollEl2);
 	scrollEl2.refresh();
-	scrollEl2.setScrollTop(200);
+	scrollEl2.scrollTo(200);
 
 	app.module.Scroll.enable(scrollEl3);
 	scrollEl3.refresh();

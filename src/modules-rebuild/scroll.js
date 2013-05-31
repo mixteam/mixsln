@@ -24,9 +24,12 @@ function getMaxScrollTop(el) {
     return maxTop + (el.bounceBottom || 0);
 }
 
-function fireEvent(element, eventName) {
+function fireEvent(element, eventName, extra) {
 	var event = doc.createEvent('HTMLEvents');
 	event.initEvent(eventName, false, true);
+	for (var p in extra) {
+		event[p] = extra[p];
+	}
     element.dispatchEvent(event);
 }
 
@@ -56,10 +59,13 @@ function panstartHandler(e) {
 	minScrollTop = getMinScrollTop(element);
 	maxScrollTop = getMaxScrollTop(element);
 	panFixRatio = 2.5;
+	stopBounce = false;
+	cancelScrollEnd = false;
 }
 
 function panHandler(e) {
-    var y = offset.y + e.displacementY
+    var y = offset.y + e.displacementY,
+    	bOffset
         ;
 
     if(y > minScrollTop) {
@@ -72,8 +78,13 @@ function panHandler(e) {
     	if (panFixRatio > 4) panFixRatio = 4;
     }
 
-    if (checkBoundary(y) != null) {
-    	fireEvent(element, 'panbounce');
+    if ((bOffset = getBoundaryOffset(y))) {
+    	if (y > minScrollTop) {
+    		var name = 'pulldown';
+    	} else if (y < maxScrollTop) {
+    		var name = 'pullup';
+    	}
+    	fireEvent(element, name);
     }
 
     element.style.webkitTransition = '';
@@ -81,22 +92,30 @@ function panHandler(e) {
 }
 
 function panendHandler(e) {
-	var y = checkBoundary();
-	y != null ? bounceEnd(y) : scrollEnd();
+	var y = anim.getTransformOffset(element).y
+	if (getBoundaryOffset(y)) {
+		bounceEnd()
+	} else {
+		scrollEnd();
+	}
 }
 
-function checkBoundary(y) {
-    var _y;
-
-	(y != null) || (y = anim.getTransformOffset(element).y);
-
-    if(y > minScrollTop) {
-        _y = minScrollTop;
+function getBoundaryOffset(y) {
+	if(y > minScrollTop) {
+        return y - minScrollTop;
     } else if (y < maxScrollTop){
-        _y = maxScrollTop;
+        return maxScrollTop - y;
     }
+}
 
-    return _y;
+function touchBoundary(y) {
+	if (y > minScrollTop) {
+		y = minScrollTop;
+	} else if (y < maxScrollTop) {
+		y = maxScrollTop;
+	}
+
+	return y;
 }
 
 function bounceStart(v) {
@@ -111,15 +130,15 @@ function bounceStart(v) {
     anim.doTransition(element, 
     	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
     	offset.x, s.toFixed(0),
-    	function() {
-    		var y = checkBoundary();
-    		y != null ? bounceEnd(y) : scrollEnd();
-    	}
+		bounceEnd
     );
 }
 
-function bounceEnd(y) {
+function bounceEnd() {
 	if (stopBounce) return;
+
+	var y = anim.getTransformOffset(element).y;
+	y = touchBoundary(y);
 
     anim.doTransition(element, 
     	'0.4s', 'ease-in-out', '0s', 
@@ -194,7 +213,6 @@ function scrollEnd() {
 	}, 10);
 }
 
-
 var Scroll = {
 	enable: function(element, options) {
 		var parentElement = element.parentNode || element.offsetParent
@@ -226,40 +244,25 @@ var Scroll = {
 	    		return -(offset.y + (element.bounceTop||0));
 	    	}
 
-	    	element.setScrollTop = function(y) {
-	    		var minScrollTop = getMinScrollTop(element),
-	    			maxScrollTop = getMaxScrollTop(element),
-	    			offset = anim.getTransformOffset(element)
-	    			;
-
-		        y = -y;
-
-		        if (y < maxScrollTop) {
-		            y = maxScrollTop;
-		        } else if (y > minScrollTop) {
-		            y = minScrollTop;
-		        }
-				element.style.webkitTransition = '';
-		        element.style.webkitTransform = anim.makeTranslateString(offset.x, y);
-	    	}
-
 		    element.refresh = function() {
 		        element.style.height = 'auto';
 		        element.style.height = element.offsetHeight + 'px';
 		    }
 
 		    element.scrollTo = function(y) {
-
+		    	var x = anim.getTransformOffset(element).x;
+		    	y = touchBoundary(-y - (element.bounceTop || 0));
+				element.style.webkitTransition = '';
+		        element.style.webkitTransform = anim.makeTranslateString(x, y);
 		    }
 
-		    element.outOfBoundary = function() {
+		    element.getBoundaryOffset = function() {
 			    var y = anim.getTransformOffset(element).y;
+			    return getBoundaryOffset(y);
+		    }
 
-			    if(y > minScrollTop) {
-			        return y - minScrollTop;
-			    } else if (y < maxScrollTop){
-			        return maxScrollTop - y;
-			    }
+		    element.getViewHeight = function() {
+		    	return getMinScrollTop(element) - getMaxScrollTop(element);
 		    }
 
 		    element.stopBounce = function() {
@@ -310,7 +313,7 @@ var Scroll = {
 		if (options) {
 			element.bounceTop = options.bounceTop;
 			element.bounceBottom = options.bounceBottom;
-			element.setScrollTop(getMinScrollTop(element));
+			element.scrollTo(0);
 		}
 
 	    return element;
