@@ -1,4 +1,4 @@
-/*! mixsln 2013-05-28 */
+/*! mixsln 2013-05-31 */
 (function(win, app, undef) {
 	
 var toString = Object.prototype.toString,
