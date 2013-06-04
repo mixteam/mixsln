@@ -3,15 +3,15 @@ function testNavigation() {
 		stack =  navigation.getStack();
 
 	function test1(p) {
-		console.log('test default', stack.getState());
+		log('test default', stack.getState());
 	}
 
 	function test2(p) {
-		console.log('test 2', stack.getState());
+		log('test 2', stack.getState());
 	}
 
 	function test3(p) {
-		console.log('test 3', stack.getState());
+		log('test 3', stack.getState());
 	}
 
 	navigation.addRoute('test default', null, {

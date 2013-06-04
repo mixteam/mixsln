@@ -4,23 +4,23 @@ var Message = app.module.MessageScope,
 	msg = new Message('global'), a = {b:1}, b = {c:2};
 
 function test11(p) {
-	console.log('test 1-1', p);
+	log('test 1-1', p);
 }
 
 function test12(p) {
-	console.log('test 1-2', p);
+	log('test 1-2', p);
 }
 
 function test13(p) {
-	console.log('test 1-3', p, this.b);
+	log('test 1-3', p, this.b);
 }
 
 function test2(p) {
-	console.log('test 2', p, this.c);
+	log('test 2', p, this.c);
 }
 
 function after_test2() {
-	console.log('after test2');
+	log('after test2');
 }
 
 msg.on('test1', test11);

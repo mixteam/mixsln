@@ -1,7 +1,7 @@
 function testView() {
 	var DemoView = app.module.View.extend({
 			name: 'demo',
-			el: '.viewport .content .active',
+			el: '.viewport .active',
 
 			render: function(callback) {
 				this.el.innerHTML = 'demo view';
@@ -16,13 +16,13 @@ function testView() {
 
 
 	demo.render();
-	console.log($('.viewport .content .active').html())
+	log($('.viewport .active').html())
 
-	demo.$el = $('.viewport .content .inactive');
+	demo.$el = $('.viewport .inactive');
 	demo.render();
-	console.log($('.viewport .content .inactive').html())
+	log($('.viewport .inactive').html())
 
 	demo.destory();
-	console.log($('.viewport .content .active').html());
-	console.log($('.viewport .content .inactive').html());
+	log($('.viewport .active').html());
+	log($('.viewport .inactive').html());
 }

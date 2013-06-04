@@ -20,6 +20,6 @@ function testTemplate() {
 		template.compile(text);
 		var html = template.render({name:'World'});
 
-		console.log(html);
+		log(html);
 	})
 }
