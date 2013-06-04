@@ -34,6 +34,8 @@ function fireEvent(element, eventName, extra) {
 }
 
 function touchstartHandler(e) {
+	if (stopBounce) return;
+
 	var parentElement = e.srcElement;
 
 	while (!parentElement.boundScrollEvent) {
@@ -55,6 +57,8 @@ function touchendHandler(e) {
 }
 
 function panstartHandler(e) {
+	if (stopBounce) return;
+
 	offset = anim.getTransformOffset(element);
 	minScrollTop = getMinScrollTop(element);
 	maxScrollTop = getMaxScrollTop(element);
@@ -64,6 +68,8 @@ function panstartHandler(e) {
 }
 
 function panHandler(e) {
+	if (stopBounce) return;
+
     var y = offset.y + e.displacementY,
     	bOffset
         ;
@@ -92,6 +98,8 @@ function panHandler(e) {
 }
 
 function panendHandler(e) {
+	if (stopBounce) return;
+
 	var y = anim.getTransformOffset(element).y
 	if (getBoundaryOffset(y)) {
 		bounceEnd()
@@ -119,6 +127,8 @@ function touchBoundary(y) {
 }
 
 function bounceStart(v) {
+	if (stopBounce) return;
+
     var s0 = anim.getTransformOffset(element).y,
     	a = 0.008 * ( v / Math.abs(v));
     	t = v / a;
@@ -151,6 +161,8 @@ function bounceEnd() {
 }
 
 function flickHandler(e) {
+	if (stopBounce) return;
+	
     var s0 = anim.getTransformOffset(element).y,
         v, a, t, s,
         _v, _s, _t
@@ -313,8 +325,8 @@ var Scroll = {
 		if (options) {
 			element.bounceTop = options.bounceTop;
 			element.bounceBottom = options.bounceBottom;
-			element.scrollTo(0);
 		}
+		element.scrollTo(0);
 
 	    return element;
 	},

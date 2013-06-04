@@ -1,11 +1,10 @@
 (function(win, app, undef) {
 
+var doc = win.document
+	;
 
-function Transition() {
 
-}
-
-var transitionProto = {
+var Transition = {
 	start: function(options) {}
 }
 
