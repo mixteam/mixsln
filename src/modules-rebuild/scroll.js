@@ -15,12 +15,18 @@ function getMinScrollTop(el) {
 }
 
 function getMaxScrollTop(el) {
-    var parentStyle = getComputedStyle(el.parentNode),
-        maxTop = 0 - el.offsetHeight + parseInt(parentStyle.height) - 
-                parseInt(parentStyle.paddingTop) - 
-                parseInt(parentStyle.paddingBottom);
+    // var parentStyle = getComputedStyle(el.parentNode),
+    //     maxTop = 0 - el.offsetHeight + parseInt(parentStyle.height) - 
+    //             parseInt(parentStyle.paddingTop) - 
+    //             parseInt(parentStyle.paddingBottom);
+
+    var rect = el.getBoundingClientRect(),
+    	pRect = el.parentNode.getBoundingClientRect(),
+    	maxTop = 0 - rect.height + pRect.height
+    	;
 
     if (maxTop > 0) maxTop = 0;
+
     return maxTop + (el.bounceBottom || 0);
 }
 
@@ -70,8 +76,7 @@ function panstartHandler(e) {
 function panHandler(e) {
 	if (stopBounce) return;
 
-    var y = offset.y + e.displacementY,
-    	bOffset
+    var y = offset.y + e.displacementY
         ;
 
     if(y > minScrollTop) {
@@ -84,7 +89,7 @@ function panHandler(e) {
     	if (panFixRatio > 4) panFixRatio = 4;
     }
 
-    if ((bOffset = getBoundaryOffset(y))) {
+    if ((getBoundaryOffset(y))) {
     	if (y > minScrollTop) {
     		var name = 'pulldown';
     	} else if (y < maxScrollTop) {
@@ -102,7 +107,7 @@ function panendHandler(e) {
 
 	var y = anim.getTransformOffset(element).y
 	if (getBoundaryOffset(y)) {
-		bounceEnd()
+		bounceEnd();
 	} else {
 		scrollEnd();
 	}
@@ -238,7 +243,7 @@ var Scroll = {
 	    if (!parentElement.boundScrollEvent) {
 	    	parentElement.boundScrollEvent = true;
 			parentElement.addEventListener('touchstart', touchstartHandler, false);
-			parentElement.addEventListener('touchend', touchstartHandler, false);
+			parentElement.addEventListener('touchend', touchendHandler, false);
 		    parentElement.addEventListener('panstart', panstartHandler, false);
 		    parentElement.addEventListener('pan', panHandler, false);
 		    parentElement.addEventListener('panend', panendHandler, false);
