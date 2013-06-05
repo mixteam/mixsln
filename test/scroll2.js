@@ -24,7 +24,7 @@ function testScroll() {
 
 	events.forEach(function(name) {
 		scrollEl1.addEventListener(name, function(event) {
-			//log(name);
+			log(name);
 		}, false);
 	});
 
