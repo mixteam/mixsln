@@ -1322,18 +1322,11 @@ var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+,
 
 var Animation = {
     doTransition: function(el, time, timeFunction, delay, x, y, callback) {
-    	if (callback) {
-		    function transitionEnd(e){
-		        if(e && (e.srcElement !== el || e.propertyName !== TRANSITION_NAME)) {
-		            return;
-		        }
-		        el.removeEventListener('webkitTransitionEnd', transitionEnd, false);
-		        //el.style.webkitTransition = '';
-		        callback && callback();   // 延迟执行callback。解决立即取消动画造成的bug
-		    }
-		    el.addEventListener('webkitTransitionEnd', transitionEnd, false);
-		    //setTimeout(transitionEnd, parseFloat(time) * 1000);
-		}
+	    callback && el.addEventListener('webkitTransitionEnd', function(e){
+	    	el.removeEventListener('webkitTransitionEnd', arguments.callee, false);
+	        if(e.srcElement !== el) return;
+	        callback();
+	    }, false);
 
 	    el.style.webkitTransition = [TRANSITION_NAME, time, timeFunction, delay].join(' ');
 	    el.style.webkitTransform = this.makeTranslateString(x, y);
@@ -1832,7 +1825,10 @@ var Transition = {
 			element.style.webkitTransform = anim.makeTranslateString(newXY.x, newXY.y);
 			element.style.opacity = opacity === 1?0:1;
 
-			callback && setTimeout(callback, 400);
+			callback && element.addEventListener('webkitTransitionEnd', function(){
+				element.removeEventListener('webkitTransitionEnd', arguments.callee);
+				callback();
+			}, false);
 		}, 10);	
 	},
 

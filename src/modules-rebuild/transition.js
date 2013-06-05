@@ -100,7 +100,10 @@ var Transition = {
 			element.style.webkitTransform = anim.makeTranslateString(newXY.x, newXY.y);
 			element.style.opacity = opacity === 1?0:1;
 
-			callback && setTimeout(callback, 400);
+			callback && element.addEventListener('webkitTransitionEnd', function(){
+				element.removeEventListener('webkitTransitionEnd', arguments.callee);
+				callback();
+			}, false);
 		}, 10);	
 	},
 
