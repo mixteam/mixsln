@@ -238,7 +238,7 @@ var Scroll = {
 	    if (!parentElement.boundScrollEvent) {
 	    	parentElement.boundScrollEvent = true;
 			parentElement.addEventListener('touchstart', touchstartHandler, false);
-			parentElement.addEventListener('touchend', touchstartHandler, false);
+			parentElement.addEventListener('touchend', touchendHandler, false);
 		    parentElement.addEventListener('panstart', panstartHandler, false);
 		    parentElement.addEventListener('pan', panHandler, false);
 		    parentElement.addEventListener('panend', panendHandler, false);
