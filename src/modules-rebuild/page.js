@@ -66,13 +66,13 @@ var PageProto = {
 		},
 
 		setButton: function(options) {
-			pm.trigger('navigation:setTitle', options);
+			pm.trigger('navigation:setButton', options);
 		}
 	},
 
-	viewport: {
+	content: {
 		fill: function(html) {
-			pm.trigger('viewport:fill', html);
+			pm.trigger('content:fill', html);
 		},
 		el: null,
 		$el: null

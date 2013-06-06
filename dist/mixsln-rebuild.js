@@ -1,4 +1,4 @@
-/*! mixsln 2013-06-05 */
+/*! mixsln 2013-06-06 */
 (function(win, app, undef) {
 
 function EventSource() {
@@ -926,13 +926,13 @@ var PageProto = {
 		},
 
 		setButton: function(options) {
-			pm.trigger('navigation:setTitle', options);
+			pm.trigger('navigation:setButton', options);
 		}
 	},
 
-	viewport: {
+	content: {
 		fill: function(html) {
-			pm.trigger('viewport:fill', html);
+			pm.trigger('content:fill', html);
 		},
 		el: null,
 		$el: null
@@ -1312,24 +1312,109 @@ docEl.addEventListener('touchstart', touchstartHandler, false);
 
 var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+), [-\d.]+, \d+\)/,
 	MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+)\)$/,
-    TRANSITION_NAME = '-webkit-transform',
+	TRANSFORM_REG = /^(translate|rotate|scale)(X|Y|Z|3d)?|(matrix)(3d)?|(perspective)|(skew)(X|Y)?$/i,
 
-    appVersion = navigator.appVersion,
-    isAndroid = (/android/gi).test(appVersion),
-    isIOS = (/iphone|ipad/gi).test(appVersion),
+    isAndroid = (/android/gi).test(navigator.appVersion),
+    isIOS = (/iphone|ipad/gi).test(navigator.appVersion),
     has3d = 'WebKitCSSMatrix' in window && 'm11' in new WebKitCSSMatrix()
     ;
 
+function addPx(v) {
+	v += '';
+
+	if (v.indexOf('px') < 0 && v.indexOf('%') < 0 && v !== '0') {
+		v += 'px';
+	}
+	return v;
+}
+
+function addDeg(v) {
+	v += '';
+
+	if (v.indexOf('deg') < 0 & v !== '0') {
+		v += 'deg';
+	}
+
+	return v;
+}
+
+function toCamelCase(str, sep) {
+	sep || (sep = '-');
+
+	str.replace(new RegExp(sep + '[a-z]', 'g'), function(v) {
+		return v.split(sep)[1].toUpperCase();
+	})
+
+	return str;
+}
+
+function toDelimiterCase(str, sep) {
+	sep || (sep = '-');
+
+	return str.replace(/[a-z][A-Z]/g, '$1' + sep +'$2').toLowerCase();
+}
+
 var Animation = {
-    doTransition: function(el, time, timeFunction, delay, x, y, callback) {
-	    callback && el.addEventListener('webkitTransitionEnd', function(e){
-	    	el.removeEventListener('webkitTransitionEnd', arguments.callee, false);
-	        if(e.srcElement !== el) return;
-	        callback();
+    translate: function(element, duration, timingFunction, delay, x, y, callback) {
+	    this.doTransition(element, {
+	    	translate: [x, y]
+	    }, {
+	    	duration: duration,
+	    	timingFunction: timingFunction,
+	    	delay: delay,
+	    	callback: callback
+	    });
+    },
+
+    doTransition: function(element, properties, options) {
+    	var postfix = [options.duration, options.timingFunction || 'ease', options.delay || '0s'].join(' '),
+    		matches, transform = '', transition = [], styles = {}
+    		;
+
+    	for (var p in properties) {
+    		var v = properties[p];
+    		if ((matches = p.match(TRANSFORM_REG))) {
+	    		if (!(v instanceof Array)) {
+	    			v = [v];
+	    		}
+
+    			var a = matches[1] || matches[3] || matches[5] || matches[6],
+    				b = matches[2] || matches[4] || matches[7] || ''
+    				;
+
+    			if (a === 'translate' && b === '' && has3d) {
+    				b = '3d';
+    				v.push(0);
+    			}
+    			if (a === 'translate') {
+    				v = v.map(addPx);
+    			} else if (a === 'rotate' || a === 'skew') {
+    				v = v.map(addDeg);
+    			}
+    			transform += a + b + '(' + v.join(',') + ')';
+    		} else {
+    			transition.push(toDelimiterCase(p) + ' ' + postfix);
+    			styles[p] = v;
+    		}
+
+    		transform && transition.push('-webkit-transform ' + postfix);
+    	}
+
+    	options.callback && element.addEventListener('webkitTransitionEnd', function(e){
+	    	element.removeEventListener('webkitTransitionEnd', arguments.callee, false);
+	        if(e.srcElement !== element) return;
+	        setTimeout(options.callback, 10);
 	    }, false);
 
-	    el.style.webkitTransition = [TRANSITION_NAME, time, timeFunction, delay].join(' ');
-	    el.style.webkitTransform = this.makeTranslateString(x, y);
+    	setTimeout(function() {
+	    	element.style.webkitTransition = transition.join(', ');
+	    	if (transform.length) {
+	    		element.style.webkitTransform = transform;
+	    	}
+	    	for (var p in styles) {
+	    		element.style[p] = styles[p];
+	    	}
+    	}, 10);
     },
 
     genCubicBezier: function(a, b) {
@@ -1338,15 +1423,8 @@ var Animation = {
     },
 
     makeTranslateString: function(x, y) {
-		x += '';
-		y += '';
-
-		if (x.indexOf('%') < 0 && x !== '0') {
-			x += 'px';
-		}
-		if (y.indexOf('%') < 0 && y !== '0') {
-			y += 'px';
-		}
+		x = addPx(x);
+		y = addPx(y);
 
 	    if (has3d) {
 	        return 'translate3d(' + x + ', ' + y + ', 0)';
@@ -1522,7 +1600,7 @@ function bounceStart(v) {
 
     fireEvent(element, 'bouncestart');
 
-    anim.doTransition(element, 
+    anim.translate(element, 
     	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
     	offset.x, s.toFixed(0),
 		bounceEnd
@@ -1535,7 +1613,7 @@ function bounceEnd() {
 	var y = anim.getTransformOffset(element).y;
 	y = touchBoundary(y);
 
-    anim.doTransition(element, 
+    anim.translate(element, 
     	'0.4s', 'ease-in-out', '0s', 
     	offset.x, y,
     	function() {
@@ -1570,7 +1648,7 @@ function flickHandler(e) {
             _t = (v - Math.sqrt(-2 * a *_s + v * v)) / a;
             _v = v - a * _t;
 
-	        anim.doTransition(element, 
+	        anim.translate(element, 
 	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
 	        	offset.x, minScrollTop,
 	        	function() {
@@ -1583,7 +1661,7 @@ function flickHandler(e) {
             _t = (v + Math.sqrt(-2 * a * _s + v * v)) / a;
             _v = v - a * _t;
 
-	        anim.doTransition(element, 
+	        anim.translate(element, 
 	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
 	        	offset.x, maxScrollTop,
 	        	function() {
@@ -1591,7 +1669,7 @@ function flickHandler(e) {
 	        	}
 	        );
         } else {
-	        anim.doTransition(element, 
+	        anim.translate(element, 
 	        	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
 	        	offset.x, s.toFixed(0),
 	        	scrollEnd
@@ -1678,7 +1756,7 @@ var Scroll = {
 		    	}
 
 		    	if (_y != null) {
-		    		anim.doTransition(element,
+		    		anim.translate(element,
 		    			'0.4s', 'ease-in-out', '0s',
 		    			offset.x, _y);
 		    	}
@@ -1700,7 +1778,7 @@ var Scroll = {
 		    	}
 
 		    	if (_y != null) {
-		    		anim.doTransition(element,
+		    		anim.translate(element,
 		    			'0.4s', 'ease-in-out', '0s',
 		    			offset.x, _y);
 		    	}
@@ -1761,7 +1839,7 @@ var Transition = {
 		var offset = anim.getTransformOffset(element)
 			;
 
-		anim.doTransition(element,
+		anim.translate(element,
 			'0.4s', 'ease', '0s',
 			offset.x + offsetX, offset.y + offsetY,
 			callback
@@ -1790,13 +1868,11 @@ var Transition = {
 		element.style.webkitTransition = '';
 		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
 
-		setTimeout(function() {
-			anim.doTransition(element,
-				'0.4s', 'ease', '0s',
-				newXY.x, newXY.y,
-				callback
-			);
-		}, 10);		
+		anim.translate(element,
+			'0.4s', 'ease', '0s',
+			newXY.x, newXY.y,
+			callback
+		);		
 	},
 
 	float: function(element, type, offset, callback) {
@@ -1825,20 +1901,18 @@ var Transition = {
 		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
 		element.style.opacity = opacity;
 
-		setTimeout(function() {
-			element.style.webkitTransition = '-webkit-transform 0.4s ease 0s, opacity 0.4s ease 0s';
-			element.style.webkitTransform = anim.makeTranslateString(newXY.x, newXY.y);
-			element.style.opacity = opacity === 1?0:1;
-
-			callback && element.addEventListener('webkitTransitionEnd', function(){
-				element.removeEventListener('webkitTransitionEnd', arguments.callee);
-				callback();
-			}, false);
-		}, 10);	
+		anim.doTransition(element, {
+			opacity: opacity === 1?0:1,
+			translate: [newXY.x, newXY.y]
+		}, {
+			duration: '0.4s',
+			timingFunction: 'ease',
+			callback : callback
+		});
 	},
 
 	fadeIn: function(element, options) {
-
+		
 	},
 
 	fadeOut: function(element, options) {
@@ -1860,17 +1934,67 @@ app.module.Transition = Transition;
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
 
+var Message = app.module.MessageScope
+	;
 
-function NavBar() {
+function NavBar(wrapEl, options) {
+	options || (options = {});
 
+	this._wrapEl = wrapEl;
+	this._options = options;
+
+	if (!options.backWrapEl) {
+		options.backWrapEl = wrapEl.querySelector('back-wrap');
+	}
+
+	if (!options.funcWrapEl) {
+		options.funcWrapEl = wrapEl.querySelector('func-wrap');
+	}
+
+	if (!options.titleWrapEl) {
+		options.titleWrapEl = wrapEl.querySelector('title-wrap');
+	}
 }
 
-var navBarProto = {
-	anime: function() {},
-    setTitle: function(title) {},
-    setButton: function(options) {},
-    showButton: function(type) {},
-    hideButton: function(type) {}
+var NavBarProto = {
+    setTitle: function(title) {
+    	this._options.titleWrapEl.innerHTML = title;
+    },
+
+    setButton: function(options) {
+    	var backWrapEl = this._options.backWrapEl,
+    		backBtnEl = backWrapEl.querySelector('button'),
+    		funcWrapEl = this._options.funcWrapEl
+    		;
+
+    	if (options.type === 'back') {
+    		options.hide == null || (options.hide = false);
+
+    		options.id && backWrapEl.setAttribute('id', options.id);
+    		options.text && (backWrapEl.innerText = options.text);
+    		options.bg && (backWrapEl.style.background = options.bg);
+    		if (options.icon) {
+    			
+    		}
+    		if (options.handler) {
+    			!backWrapEl.handler && backWrapEl.addEventListener('click', function(e) {
+    				backWrapEl.handler.apply(this, arguments);
+    			}, false);
+    			backWrapEl.handler = handler;
+    		}
+    		options.hide ? (backWrapEl.style.display = 'none'):(backWrapEl.style.display = '');
+    	} else if (options.type === 'func') {
+
+    	}
+    },
+
+    getButton: function(id) {
+
+    }
+}
+
+for (var p in NavBarProto) {
+	NavBar.prototype[p] = NavBarProto[p];
 }
 
 app.module.NavBar = NavBar;

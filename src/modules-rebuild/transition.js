@@ -31,7 +31,7 @@ var Transition = {
 		var offset = anim.getTransformOffset(element)
 			;
 
-		anim.doTransition(element,
+		anim.translate(element,
 			'0.4s', 'ease', '0s',
 			offset.x + offsetX, offset.y + offsetY,
 			callback
@@ -60,13 +60,11 @@ var Transition = {
 		element.style.webkitTransition = '';
 		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
 
-		setTimeout(function() {
-			anim.doTransition(element,
-				'0.4s', 'ease', '0s',
-				newXY.x, newXY.y,
-				callback
-			);
-		}, 10);		
+		anim.translate(element,
+			'0.4s', 'ease', '0s',
+			newXY.x, newXY.y,
+			callback
+		);		
 	},
 
 	float: function(element, type, offset, callback) {
@@ -95,20 +93,18 @@ var Transition = {
 		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
 		element.style.opacity = opacity;
 
-		setTimeout(function() {
-			element.style.webkitTransition = '-webkit-transform 0.4s ease 0s, opacity 0.4s ease 0s';
-			element.style.webkitTransform = anim.makeTranslateString(newXY.x, newXY.y);
-			element.style.opacity = opacity === 1?0:1;
-
-			callback && element.addEventListener('webkitTransitionEnd', function(){
-				element.removeEventListener('webkitTransitionEnd', arguments.callee);
-				callback();
-			}, false);
-		}, 10);	
+		anim.doTransition(element, {
+			opacity: opacity === 1?0:1,
+			translate: [newXY.x, newXY.y]
+		}, {
+			duration: '0.4s',
+			timingFunction: 'ease',
+			callback : callback
+		});
 	},
 
 	fadeIn: function(element, options) {
-
+		
 	},
 
 	fadeOut: function(element, options) {

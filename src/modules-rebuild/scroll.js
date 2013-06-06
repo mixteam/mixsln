@@ -142,7 +142,7 @@ function bounceStart(v) {
 
     fireEvent(element, 'bouncestart');
 
-    anim.doTransition(element, 
+    anim.translate(element, 
     	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
     	offset.x, s.toFixed(0),
 		bounceEnd
@@ -155,7 +155,7 @@ function bounceEnd() {
 	var y = anim.getTransformOffset(element).y;
 	y = touchBoundary(y);
 
-    anim.doTransition(element, 
+    anim.translate(element, 
     	'0.4s', 'ease-in-out', '0s', 
     	offset.x, y,
     	function() {
@@ -190,7 +190,7 @@ function flickHandler(e) {
             _t = (v - Math.sqrt(-2 * a *_s + v * v)) / a;
             _v = v - a * _t;
 
-	        anim.doTransition(element, 
+	        anim.translate(element, 
 	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
 	        	offset.x, minScrollTop,
 	        	function() {
@@ -203,7 +203,7 @@ function flickHandler(e) {
             _t = (v + Math.sqrt(-2 * a * _s + v * v)) / a;
             _v = v - a * _t;
 
-	        anim.doTransition(element, 
+	        anim.translate(element, 
 	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
 	        	offset.x, maxScrollTop,
 	        	function() {
@@ -211,7 +211,7 @@ function flickHandler(e) {
 	        	}
 	        );
         } else {
-	        anim.doTransition(element, 
+	        anim.translate(element, 
 	        	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
 	        	offset.x, s.toFixed(0),
 	        	scrollEnd
@@ -298,7 +298,7 @@ var Scroll = {
 		    	}
 
 		    	if (_y != null) {
-		    		anim.doTransition(element,
+		    		anim.translate(element,
 		    			'0.4s', 'ease-in-out', '0s',
 		    			offset.x, _y);
 		    	}
@@ -320,7 +320,7 @@ var Scroll = {
 		    	}
 
 		    	if (_y != null) {
-		    		anim.doTransition(element,
+		    		anim.translate(element,
 		    			'0.4s', 'ease-in-out', '0s',
 		    			offset.x, _y);
 		    	}

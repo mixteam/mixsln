@@ -1,45 +1,67 @@
 function testPage() {
-	var page = app.module.Page.define({
+	var data = {a:1,b:2},
+		page = app.module.Page.define({
 			name: 'demo',
 			startup: function() {
-				console.log('startup');
+				log('startup');
 
 				this.navigation.push('demo1', {
 					type: 'GET',
-					data: {a:1, b:2}
+					data: data
 				});
 				this.navigation.pop();
-				console.log(this.navigation.getParameter('a'));
-				console.log(this.navigation.getData('a'));
+				log(this.navigation.getParameter('a'));
+				log(this.navigation.getData('a'));
 				this.navigation.setData('b', 2);
 				this.navigation.setTitle('demo');
 				this.navigation.setButton({type:'back'});
-				this.viewport.fill('abcd');
+				this.content.fill('abcd');
 
 				this.trigger('show');
 			},
 			teardown: function() {
-				console.log('teardown');
+				log('teardown');
 			}
 		}), 
 		pm = app.module.MessageScope.get('page')
 		;
 
 	pm.on('navigation:push', function(fragment, options) {
-		console.log('push', fragment, options);
+		log('push', fragment, options);
 	});
 
 	pm.on('navigation:pop', function(fragment, options) {
-		console.log('pop');
+		log('pop');
 	});
 
 	pm.on('navigation:getParameter', function(name) {
-		console.log('getParameter', name);
-		pm.trigger('navigation:getParameter:callback', 1);
+		log('getParameter', name, data[name]);
+		pm.trigger('navigation:getParameter:callback', data[name]);
+	});
+
+	pm.on('navigation:getData', function(name) {
+		log('getData', name, data[name]);
+		pm.trigger('navigation:getData:callback', data[name]);
+	});
+
+	pm.on('navigation:setData', function(name, value) {
+		log('setData', name, value);
+	});
+
+	pm.on('navigation:setTitle', function(title) {
+		log('setTitle', title);
+	});
+
+	pm.on('navigation:setButton', function(options) {
+		log('setButton', options);
+	});
+
+	pm.on('content:fill', function(html) {
+		log('fill', html);
 	});
 
 	page.on('show', function() {
-		console.log('show');
+		log('show');
 	});
 
 	page.startup();
