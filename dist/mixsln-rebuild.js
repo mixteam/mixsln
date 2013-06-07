@@ -1,4 +1,4 @@
-/*! mixsln 2013-06-06 */
+/*! mixsln 2013-06-07 */
 (function(win, app, undef) {
 
 function EventSource() {
@@ -1839,10 +1839,17 @@ var Transition = {
 		var offset = anim.getTransformOffset(element)
 			;
 
+		element.style.webkitBackfaceVisibility = 'hidden';
+		element.style.webkitTransformStyle = 'preserve-3d';
+
 		anim.translate(element,
 			'0.4s', 'ease', '0s',
 			offset.x + offsetX, offset.y + offsetY,
-			callback
+			function() {
+				element.style.webkitBackfaceVisibility = 'initial';
+				element.style.webkitTransformStyle = 'flat';
+				callback && callback();
+			}
 		)
 	},
 
@@ -1867,11 +1874,17 @@ var Transition = {
 
 		element.style.webkitTransition = '';
 		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
+		element.style.webkitBackfaceVisibility = 'hidden';
+		element.style.webkitTransformStyle = 'preserve-3d';
 
 		anim.translate(element,
 			'0.4s', 'ease', '0s',
 			newXY.x, newXY.y,
-			callback
+			function() {
+				element.style.webkitBackfaceVisibility = 'initial';
+				element.style.webkitTransformStyle = 'flat';
+				callback && callback();
+			}
 		);		
 	},
 
@@ -1900,6 +1913,8 @@ var Transition = {
 		element.style.webkitTransition = '';
 		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
 		element.style.opacity = opacity;
+		element.style.webkitBackfaceVisibility = 'hidden';
+		element.style.webkitTransformStyle = 'preserve-3d';
 
 		anim.doTransition(element, {
 			opacity: opacity === 1?0:1,
@@ -1907,7 +1922,11 @@ var Transition = {
 		}, {
 			duration: '0.4s',
 			timingFunction: 'ease',
-			callback : callback
+			callback : function() {
+				element.style.webkitBackfaceVisibility = 'initial';
+				element.style.webkitTransformStyle = 'flat';
+				callback && callback();
+			}
 		});
 	},
 
@@ -1934,70 +1953,85 @@ app.module.Transition = Transition;
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
 
-var Message = app.module.MessageScope
+var doc = win.document
 	;
 
-function NavBar(wrapEl, options) {
+function _setButton(btn, options) {
+	(options.id != null) && btn.setAttribute('id', options.id);
+	(options['class'] != null) && (btn.className = options['class']);
+	(options.text != null) && (btn.innerHTML = options.text);
+	(options.bg != null) && (btn.style.background = options.bg);
+	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" />');
+	(options.hide === true) ? (btn.style.display = 'none'):(btn.style.display = '');
+	if (options.handler) {
+		btn.handler && btn.removeEventListener('click', btn.handler, false);
+		btn.addEventListener('click', (btn.handler = options.handler), false);
+	}
+}
+
+function Navbar(wrapEl, options) {
 	options || (options = {});
 
 	this._wrapEl = wrapEl;
-	this._options = options;
-
-	if (!options.backWrapEl) {
-		options.backWrapEl = wrapEl.querySelector('back-wrap');
-	}
-
-	if (!options.funcWrapEl) {
-		options.funcWrapEl = wrapEl.querySelector('func-wrap');
-	}
-
-	if (!options.titleWrapEl) {
-		options.titleWrapEl = wrapEl.querySelector('title-wrap');
-	}
+	this._backWrapEl = options.backWrapEl;
+	this._funcWrapEl = options.funcWrapEl;
+	this._titleWrapEl = options.titleWrapEl;
 }
 
-var NavBarProto = {
+var NavbarProto = {
     setTitle: function(title) {
-    	this._options.titleWrapEl.innerHTML = title;
+    	this._titleWrapEl && (this._titleWrapEl.innerHTML = title);
     },
 
     setButton: function(options) {
-    	var backWrapEl = this._options.backWrapEl,
-    		backBtnEl = backWrapEl.querySelector('button'),
-    		funcWrapEl = this._options.funcWrapEl
-    		;
-
+    	var wrap, btn;
     	if (options.type === 'back') {
-    		options.hide == null || (options.hide = false);
-
-    		options.id && backWrapEl.setAttribute('id', options.id);
-    		options.text && (backWrapEl.innerText = options.text);
-    		options.bg && (backWrapEl.style.background = options.bg);
-    		if (options.icon) {
-    			
-    		}
-    		if (options.handler) {
-    			!backWrapEl.handler && backWrapEl.addEventListener('click', function(e) {
-    				backWrapEl.handler.apply(this, arguments);
-    			}, false);
-    			backWrapEl.handler = handler;
-    		}
-    		options.hide ? (backWrapEl.style.display = 'none'):(backWrapEl.style.display = '');
+    		wrap = this._backWrapEl;
+    		btn = wrap.querySelector('button');
     	} else if (options.type === 'func') {
-
+    		wrap = this._funcWrapEl;
+    		btn = wrap.querySelector('#' + options.id);
+    	} else if (options.id) {
+    		btn = this._wrapEl.querySelector('#' + options.id);
+    		btn && (wrap = btn.parentNode);
     	}
+
+		if (!btn && wrap) {
+			btn = doc.createElement('button');
+			wrap.appendChild(btn);
+		}
+		_setButton(btn, options);
     },
 
     getButton: function(id) {
+    	return this._wrapEl.querySelector('button#' + id);
+    },
 
+    removeButton: function(id) {
+    	if (!id) {
+    		var btns = this._wrapEl.querySelectorAll('button');
+    		for (var i = 0; i < btns.length; i++) {
+    			this.removeButton(btns[i]);
+    		}
+    	} else {
+	    	if (typeof id === 'string') {
+	    		var btn = this.getButton(id);
+	    	} else if (id instanceof HTMLElement) {
+	    		var btn = id;
+	    	}
+			if (btn) {
+				btn.handler && btn.removeEventListener('click', btn.handler);
+				btn.parentNode.removeChild(btn);
+			}
+		}
     }
 }
 
-for (var p in NavBarProto) {
-	NavBar.prototype[p] = NavBarProto[p];
+for (var p in NavbarProto) {
+	Navbar.prototype[p] = NavbarProto[p];
 }
 
-app.module.NavBar = NavBar;
+app.module.Navbar = Navbar;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {

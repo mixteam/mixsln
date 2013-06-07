@@ -31,10 +31,17 @@ var Transition = {
 		var offset = anim.getTransformOffset(element)
 			;
 
+		element.style.webkitBackfaceVisibility = 'hidden';
+		element.style.webkitTransformStyle = 'preserve-3d';
+
 		anim.translate(element,
 			'0.4s', 'ease', '0s',
 			offset.x + offsetX, offset.y + offsetY,
-			callback
+			function() {
+				element.style.webkitBackfaceVisibility = 'initial';
+				element.style.webkitTransformStyle = 'flat';
+				callback && callback();
+			}
 		)
 	},
 
@@ -59,11 +66,17 @@ var Transition = {
 
 		element.style.webkitTransition = '';
 		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
+		element.style.webkitBackfaceVisibility = 'hidden';
+		element.style.webkitTransformStyle = 'preserve-3d';
 
 		anim.translate(element,
 			'0.4s', 'ease', '0s',
 			newXY.x, newXY.y,
-			callback
+			function() {
+				element.style.webkitBackfaceVisibility = 'initial';
+				element.style.webkitTransformStyle = 'flat';
+				callback && callback();
+			}
 		);		
 	},
 
@@ -92,6 +105,8 @@ var Transition = {
 		element.style.webkitTransition = '';
 		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
 		element.style.opacity = opacity;
+		element.style.webkitBackfaceVisibility = 'hidden';
+		element.style.webkitTransformStyle = 'preserve-3d';
 
 		anim.doTransition(element, {
 			opacity: opacity === 1?0:1,
@@ -99,7 +114,11 @@ var Transition = {
 		}, {
 			duration: '0.4s',
 			timingFunction: 'ease',
-			callback : callback
+			callback : function() {
+				element.style.webkitBackfaceVisibility = 'initial';
+				element.style.webkitTransformStyle = 'flat';
+				callback && callback();
+			}
 		});
 	},
 
