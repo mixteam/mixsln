@@ -1,11 +1,11 @@
 (function(win, app, undef) {
 
 
-function Viewport() {
+function Content() {
 
 }
 
-var viewportProto = {
+var ContentProto = {
 	getActive : function() {},
 	getInactive: function() {},
 	switchActive: function() {},
@@ -13,6 +13,10 @@ var viewportProto = {
 	fill: function(html) {}
 }
 
-app.module.Viewport = Viewport;
+for (var p in ContentProto) {
+	Content.prototype[p] = ContentProto[p];
+}
+
+app.module.Content = Content;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));

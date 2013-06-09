@@ -1,3 +1,6 @@
+//@require gesture
+//@require animation
+
 (function(win, app, undef) {
 
 var doc = win.document,
@@ -271,6 +274,10 @@ var Scroll = {
 		    	y = touchBoundary(-y - (element.bounceTop || 0));
 				element.style.webkitTransition = '';
 		        element.style.webkitTransform = anim.makeTranslateString(x, y);
+		    }
+
+		    element.scollToElement = function(el) {
+		    	
 		    }
 
 		    element.getBoundaryOffset = function() {

@@ -1,3 +1,5 @@
+//@require animation
+
 (function(win, app, undef) {
 
 var doc = win.document,

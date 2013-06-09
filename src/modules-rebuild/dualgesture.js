@@ -1,3 +1,5 @@
+//@require gesture
+
 (function(win, app, undef) {
 
 var doc = win.document,

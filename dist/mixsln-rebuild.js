@@ -1,4 +1,512 @@
-/*! mixsln 2013-06-07 */
+(function(win, app, undef) {
+
+var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+), [-\d.]+, \d+\)/,
+	MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+)\)$/,
+	TRANSFORM_REG = /^(translate|rotate|scale)(X|Y|Z|3d)?|(matrix)(3d)?|(perspective)|(skew)(X|Y)?$/i,
+
+    isAndroid = (/android/gi).test(navigator.appVersion),
+    isIOS = (/iphone|ipad/gi).test(navigator.appVersion),
+    has3d = 'WebKitCSSMatrix' in window && 'm11' in new WebKitCSSMatrix()
+    ;
+
+function addPx(v) {
+	v += '';
+
+	if (v.indexOf('px') < 0 && v.indexOf('%') < 0 && v !== '0') {
+		v += 'px';
+	}
+	return v;
+}
+
+function addDeg(v) {
+	v += '';
+
+	if (v.indexOf('deg') < 0 & v !== '0') {
+		v += 'deg';
+	}
+
+	return v;
+}
+
+function toCamelCase(str, sep) {
+	sep || (sep = '-');
+
+	str.replace(new RegExp(sep + '[a-z]', 'g'), function(v) {
+		return v.split(sep)[1].toUpperCase();
+	})
+
+	return str;
+}
+
+function toDelimiterCase(str, sep) {
+	sep || (sep = '-');
+
+	return str.replace(/[a-z][A-Z]/g, '$1' + sep +'$2').toLowerCase();
+}
+
+var Animation = {
+    translate: function(element, duration, timingFunction, delay, x, y, callback) {
+	    this.doTransition(element, {
+	    	translate: [x, y]
+	    }, {
+	    	duration: duration,
+	    	timingFunction: timingFunction,
+	    	delay: delay,
+	    	callback: callback
+	    });
+    },
+
+    doTransition: function(element, properties, options) {
+    	var postfix = [options.duration, options.timingFunction || 'ease', options.delay || '0s'].join(' '),
+    		matches, transform = '', transition = [], styles = {}
+    		;
+
+    	for (var p in properties) {
+    		var v = properties[p];
+    		if ((matches = p.match(TRANSFORM_REG))) {
+	    		if (!(v instanceof Array)) {
+	    			v = [v];
+	    		}
+
+    			var a = matches[1] || matches[3] || matches[5] || matches[6],
+    				b = matches[2] || matches[4] || matches[7] || ''
+    				;
+
+    			if (a === 'translate' && b === '' && has3d) {
+    				b = '3d';
+    				v.push(0);
+    			}
+    			if (a === 'translate') {
+    				v = v.map(addPx);
+    			} else if (a === 'rotate' || a === 'skew') {
+    				v = v.map(addDeg);
+    			}
+    			transform += a + b + '(' + v.join(',') + ')';
+    		} else {
+    			transition.push(toDelimiterCase(p) + ' ' + postfix);
+    			styles[p] = v;
+    		}
+
+    		transform && transition.push('-webkit-transform ' + postfix);
+    	}
+
+    	options.callback && element.addEventListener('webkitTransitionEnd', function(e){
+	    	element.removeEventListener('webkitTransitionEnd', arguments.callee, false);
+	        if(e.srcElement !== element) return;
+	        setTimeout(options.callback, 10);
+	    }, false);
+
+    	setTimeout(function() {
+	    	element.style.webkitTransition = transition.join(', ');
+	    	if (transform.length) {
+	    		element.style.webkitTransform = transform;
+	    	}
+	    	for (var p in styles) {
+	    		element.style[p] = styles[p];
+	    	}
+    	}, 10);
+    },
+
+    genCubicBezier: function(a, b) {
+		return [[(a / 3 + (a + b) / 3 - a) / (b - a), (a * a / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a)],
+        	[(b / 3 + (a + b) / 3 - a) / (b - a), (b * b / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a)]];
+    },
+
+    makeTranslateString: function(x, y) {
+		x = addPx(x);
+		y = addPx(y);
+
+	    if (has3d) {
+	        return 'translate3d(' + x + ', ' + y + ', 0)';
+	    } else {
+	        return 'translate(' + x + ', ' + y + ')';
+	    }
+    },
+
+    getTransformOffset: function(el) {
+	    var offset = {
+	    		x: 0,
+	    		y: 0
+	    	}, 
+	    	transform = getComputedStyle(el).webkitTransform, 
+	    	matchs, reg;
+
+	    if (transform !== 'none') {
+	    	reg = transform.indexOf('matrix3d') > -1 ? MATRIX3D_REG : MATRIX_REG;
+	        if((matchs = transform.match(reg))) {
+	            offset.x = parseInt(matchs[1]) || 0;
+	            offset.y = parseInt(matchs[2]) || 0;
+	        }
+	    }
+
+	    return offset;
+    }
+}
+
+app.module.Animation = Animation;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}));
+(function(win, app, undef) {
+
+
+function Content() {
+
+}
+
+var ContentProto = {
+	getActive : function() {},
+	getInactive: function() {},
+	switchActive: function() {},
+	toggleClass: function() {},
+	fill: function(html) {}
+}
+
+for (var p in ContentProto) {
+	Content.prototype[p] = ContentProto[p];
+}
+
+app.module.Content = Content;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}));
+(function(win, app, undef) {
+
+var doc = win.document,
+    docEl = doc.documentElement,
+    slice = Array.prototype.slice,
+    gestures = {}, lastTap = null
+    ;
+
+function getCommonAncestor (el1, el2) {
+    var el = el1;
+    while (el) {
+        if (el.contains(el2) || el == el2) {
+            return el;
+        }
+        el = el.parentNode;
+    }    
+    return null;
+}
+
+function fireEvent(element, type, extra) {
+    var event = doc.createEvent('HTMLEvents');
+    event.initEvent(type, false, true);
+
+    if(typeof extra === 'object') {
+        for(var p in extra) {
+            event[p] = extra[p];
+        }
+    }
+
+    while(event.cancelBubble === false && element) {
+        element.dispatchEvent(event);
+        element = element.parentNode;
+    }
+}
+
+function calc(x1, y1, x2, y2, x3, y3, x4, y4) {
+    var rotate = Math.atan2(y4 - y3, x4 - x3) - Math.atan2(y2 - y1, x2 - x1),
+        scale = Math.sqrt((Math.pow(y4 - y3, 2) + Math.pow(x4 - x3, 2)) / (Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2))),
+        translate = [x3 - scale * x1 * Math.cos(rotate) + scale * y1 * Math.sin(rotate), y3 - scale * y1 * Math.cos(rotate) - scale * x1 * Math.sin(rotate)]
+        ;
+    return {
+        rotate: rotate,
+        scale: scale,
+        translate: translate,
+        matrix: [
+            [scale * Math.cos(rotate), -scale * Math.sin(rotate), translate[0]],
+            [scale * Math.sin(rotate), scale * Math.cos(rotate), translate[1]],
+            [0, 0, 1]
+        ]
+    }
+}
+
+function touchstartHandler(event) {
+
+    if (Object.keys(gestures).length === 0) {
+        docEl.addEventListener('touchmove', touchmoveHandler, false);
+        docEl.addEventListener('touchend', touchendHandler, false);
+        docEl.addEventListener('touchcancel', touchcancelHandler, false);
+    }
+    
+    for(var i = 0 ; i < event.changedTouches.length ; i++ ) {
+        var touch = event.changedTouches[i],
+            touchRecord = {};
+
+        for (var p in touch) {
+            touchRecord[p] = touch[p];
+        }
+
+        var gesture = {
+            startTouch: touchRecord,
+            startTime: Date.now(),
+            status: 'tapping',
+            element: event.srcElement,
+            pressingHandler: setTimeout(function(element) {
+                return function () {
+                    if (gesture.status === 'tapping') {
+                        gesture.status = 'pressing';
+
+                        fireEvent(element, 'press', {
+                            touchEvent:event
+                        });
+                    }
+
+                    clearTimeout(gesture.pressingHandler);
+                    gesture.pressingHandler = null;
+                }
+            }(event.srcElement), 500)
+        }
+        gestures[touch.identifier] = gesture;
+    }
+
+    if (Object.keys(gestures).length == 2) {
+        var elements = [];
+
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
+
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchstart', {
+            touches: slice.call(event.touches),
+            touchEvent: event
+        });
+    }
+}
+
+
+function touchmoveHandler() {
+
+    for(var i = 0 ; i < event.changedTouches.length ; i++ ) {
+        var touch = event.changedTouches[i],
+            gesture = gestures[touch.identifier];
+
+        if (!gesture) {
+            return;
+        }
+
+        var displacementX = touch.clientX - gesture.startTouch.clientX,
+            displacementY = touch.clientY - gesture.startTouch.clientY,
+            distance = Math.sqrt(Math.pow(displacementX, 2) + Math.pow(displacementY, 2));
+
+        // magic number 10: moving 10px means pan, not tap
+        if (gesture.status === 'tapping' && distance > 10) {
+            gesture.status = 'panning';
+            fireEvent(gesture.element, 'panstart', {
+                touch:touch,
+                touchEvent:event
+            });
+
+            if(Math.abs(displacementX) > Math.abs(displacementY)) {
+                fireEvent(gesture.element, 'horizontalpanstart', {
+                    touch: touch,
+                    touchEvent: event
+                });
+                gesture.isVertical = false;
+            } else {
+                fireEvent(gesture.element, 'verticalpanstart', {
+                    touch: touch,
+                    touchEvent: event
+                });
+                gesture.isVertical = true;
+            }
+        }
+
+        if (gesture.status === 'panning') {
+            gesture.panTime = Date.now();
+            fireEvent(gesture.element, 'pan', {
+                displacementX: displacementX,
+                displacementY: displacementY,
+                touch: touch,
+                touchEvent: event
+            });
+
+
+            if(gesture.isVertical) {
+                fireEvent(gesture.element, 'verticalpan',{
+                    displacementY: displacementY,
+                    touch: touch,
+                    touchEvent: event
+                });
+            } else {
+                fireEvent(gesture.element, 'horizontalpan',{
+                    displacementX: displacementX,
+                    touch: touch,
+                    touchEvent: event
+                });
+            }
+        }
+    }
+
+    if (Object.keys(gestures).length == 2) {
+        var position = [],
+            current = [],
+            elements = [],
+            transform
+            ;
+        
+        for(var i = 0 ; i < event.touches.length ; i++ ) {
+            var touch = event.touches[i];
+            var gesture = gestures[touch.identifier];
+            position.push([gesture.startTouch.clientX, gesture.startTouch.clientY]);
+            current.push([touch.clientX, touch.clientY]);
+        }
+
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
+
+        transform = calc(position[0][0], position[0][1], position[1][0], position[1][1], current[0][0], current[0][1], current[1][0], current[1][1]);
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouch',{
+            transform : transform,
+            touches : event.touches,
+            touchEvent: event
+        });
+    }
+}
+
+
+function touchendHandler() {
+
+    if (Object.keys(gestures).length == 2) {
+        var elements = [];
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchend', {
+            touches: slice.call(event.touches),
+            touchEvent: event
+        });
+    }
+    
+    for (var i = 0; i < event.changedTouches.length; i++) {
+        var touch = event.changedTouches[i],
+            id = touch.identifier,
+            gesture = gestures[id];
+
+        if (!gesture) continue;
+
+        if (gesture.pressingHandler) {
+            clearTimeout(gesture.pressingHandler);
+            gesture.pressingHandler = null;
+        }
+
+        if (gesture.status === 'tapping') {
+            gesture.timestamp = Date.now();
+            fireEvent(gesture.element, 'tap', {
+                touch: touch,
+                touchEvent: event
+            });
+
+            if(lastTap && gesture.timestamp - lastTap.timestamp < 300) {
+                fireEvent(gesture.element, 'doubletap', {
+                    touch: touch,
+                    touchEvent: event
+                });
+            }
+
+            this.lastTap = gesture;
+        }
+
+        if (gesture.status === 'panning') {
+            fireEvent(gesture.element, 'panend', {
+                touch: touch,
+                touchEvent: event
+            });
+
+            var duration = Date.now() - gesture.startTime,
+                velocityX = (touch.clientX - gesture.startTouch.clientX) / duration,
+                velocityY = (touch.clientY - gesture.startTouch.clientY) / duration,
+                displacementX = touch.clientX - gesture.startTouch.clientX,
+                displacementY = touch.clientY - gesture.startTouch.clientY
+                ;
+            
+            if (duration < 300) {
+                fireEvent(gesture.element, 'flick', {
+                    duration: duration,
+                    velocityX: velocityX,
+                    velocityY: velocityY,
+                    displacementX: displacementX,
+                    displacementY: displacementY,
+                    touch: touch,
+                    touchEvent: event
+                });
+
+                if(gesture.isVertical) {
+                    fireEvent(gesture.element, 'verticalflick', {
+                        duration: duration,
+                        velocityY: velocityY,
+                        displacementY: displacementY,
+                        touch: touch,
+                        touchEvent: event
+                    });
+                } else {
+                    fireEvent(gesture.element, 'horizontalflick', {
+                        duration: duration,
+                        velocityX: velocityX,
+                        displacementX: displacementX,
+                        touch: touch,
+                        touchEvent: event
+                    });
+                }
+            }
+        }
+
+        if (gesture.status === 'pressing') {
+            fireEvent(gesture.element, 'pressend', {
+                touch: touch,
+                touchEvent: event
+            });
+        }
+
+        delete gestures[id];
+    }
+
+    if (Object.keys(gestures).length === 0) {
+        docEl.removeEventListener('touchmove', touchmoveHandler, false);
+        docEl.removeEventListener('touchend', touchendHandler, false);
+        docEl.removeEventListener('touchcancel', touchcancelHandler, false);
+    }
+}
+
+function touchcancelHandler() {
+
+    if (Object.keys(gestures).length == 2) {
+        var elements = [];
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchend', {
+            touches: slice.call(event.touches),
+            touchEvent: event
+        });
+    }
+
+    for (var i = 0; i < event.changedTouches.length; i++) {
+        if (gesture.status === 'panning') {
+            fireEvent(gesture.element, 'panend', {
+                touch: touch,
+                touchEvent: event
+            });
+        }
+        if (gesture.status === 'pressing') {
+            fireEvent(gesture.element, 'pressend', {
+                touch: touch,
+                touchEvent: event
+            });
+        }
+        delete gestures[event.changedTouches[i].identifier];
+    }
+
+    if (Object.keys(gestures).length === 0) {
+        docEl.removeEventListener('touchmove', touchmoveHandler, false);
+        docEl.removeEventListener('touchend', touchendHandler, false);
+        docEl.removeEventListener('touchcancel', touchcancelHandler, false);
+    }
+}
+
+docEl.addEventListener('touchstart', touchstartHandler, false);
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
 
 function EventSource() {
@@ -225,285 +733,85 @@ app.module.MessageScope = MessageScope;
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
 
-var Message = app.module.MessageScope,
-	mid = 0, cid = 0;
-
-function Model(data) {
-	var that = this,
-		initializing  = true,
-		children = {}
-		;
-
-	Message.mixto(that, 'model-' + mid++);
-
-	that.addProperty = function(key, value) {
-		Object.defineProperty(that, key, {
-			get: function() {
-				return children[key] || data[key];
-			},
-			set: function(value) {
-				if (children[key]) {
-					children[key].destory();
-					delete children[key];
-				}
-
-				if (value != null) {
-					data[key] = value;
-					if (typeof value === 'object') {
-						children[key] = new Model(value);
-						children[key].on('propertyChange',  function(e) {
-							that.trigger('propertyChange', {
-								target: e.target,
-								value: e.value,
-								name: e.name,
-								path: key + '.' + e.path
-							});
-						});
-					}
-				}
-
-				!initializing && that.trigger('propertyChange', {
-					target: that,
-					value: children[key] || data[key],
-					name: key,
-					path: key
-				});
-			}
-		});
-
-		that[key] = value;
-	}
-
-	that.update = function(data) {
-		if (data instanceof Array) {
-			for (var i = 0; i < data.length; i++) {
-				if (!(data[i] instanceof Model)) {
-					this.addProperty(i, data[i]);
-				}
-			}
-		} else {
-			for (var key in data) {
-				if (that.hasOwnProperty(key)) {
-					throw new Error('property conflict "' + key + '"');
-				}
-
-				if (data.hasOwnProperty(key) && !(data[key] instanceof Model)) {
-					this.addProperty(key, data[key]);
-				}
-			}
-		}
-	}
-
-	that.destory = function() {
-		for (var key in children) {
-			children[key].destory();
-		}
-		that.off();
-	}
-
-	that.on('propertyChange', function(e) {
-		that.trigger('change:' + e.path, e.value);
-	});
-
-	that.update(data);
-
-	initializing = false;
-}
-
-function Collection(data) {
-	var that = this
-		;
-
-	if (!data instanceof Array) return;
-
-	that.length = data.length;
-
-	that.push = function(value) {
-		data.push(value);
-		that.length = data.length;
-		that.addProperty(data.length - 1, value);
-	}
-
-	that.pop = function() {
-		var value = data.pop();
-		that.length = data.length;
-		that[data.length] = null;
-		return value;
-	}
-
-	Model.call(that, data);
-}
-
-app.module.Model = Model;
-app.module.Collection = Collection;
-
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
-
-var doc = win.document,
-	views = {}
-	;
-
-function extend(target, properties) {
-	for (var key in properties) {
-		if (properties.hasOwnProperty(key)) {
-			target[key] = properties[key];
-		}
-	}
-}
-
-function inherit(child, parent) {
-	function Ctor() {}
-	Ctor.prototype = parent.prototype;
-	var proto = new Ctor();
-	extend(proto, child.prototype);
-	proto.constructor = child;
-	child.prototype = proto;
-}
-	
-function View() {
-	var el, $el, $ = win['$'];
-
-
-	Object.defineProperty(this, 'el', {
-		get: function() {
-			return el;
-		},
-
-		set: function(element) {
-			var $;
-
-			if (typeof element === 'string') {
-				el = doc.querySelector(element);
-			} else if (element instanceof HTMLElement) {
-				el = element;
-			}
-
-			$ && ($el = $(el));
-		}
-	});
-
-	Object.defineProperty(this, '$el', {
-		get: function() {
-			return $el;
-		},
-
-		set: function(element) {
-			if (typeof element === 'string' && $) {
-				$el = $(element);
-			} else {
-				$el = element;
-			}
-
-			$el && (el = $el[0]);
-		}
-	});
-}
-
-var ViewProto = {
-	render: function(callback) {/*implement*/},
-	destory: function(callback) {/*implement*/}
-}
-
-for (var p in ViewProto) {
-	View.prototype[p] = ViewProto[p];
-} 
-
-View.fn = {};
-
-View.extend = function(properties) {
-	function ChildView() {
-		View.apply(this, arguments);
-		this.initialize && this.initialize.apply(this, arguments);
-		extend(this, View.fn);
-		extend(this, properties);
-	}
-	inherit(ChildView, View);
-	
-	return (views[properties.name] = ChildView);
-}
-
-View.get = function(name) {
-	return views[name];
-}
-
-app.module.View = View;
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
-
 var doc = win.document
 	;
 
-function Template(url) {
-	this.url = url;
-}
-
-var TemplateProto = {
-	load: function(url, callback) {
-		// can overwrite
-		var that = this,
-			engine = app.config.templateEngine
-			;
-
-		if (arguments.length === 1) {
-			callback = arguments[0];
-			url = that.url;
-		} else {
-			that.url = url;
-		}
-
-		function loaded(text) {
-			callback && callback(text);
-		}
-
-		if (engine && engine.load && typeof url === 'string') {
-			engine.load(url, loaded);
-		} else {
-			loaded(url);
-		}
-	},
-
-	compile: function(text) {
-		// can overwrite
-		var that = this,
-			engine = app.config.templateEngine
-			;
-
-		that.originTemplate = text;
-
-		if (engine && engine.compile && typeof text === 'string') {
-			that.compiledTemplate = engine.compile(text);
-		} else {
-			that.compiledTemplate = text;
-		}
-
-		return that.compiledTemplate;
-	},
-
-	render: function(datas) {
-		// can overwrite
-		var that = this,
-			engine = app.config.templateEngine,
-			compiledTemplate = that.compiledTemplate
-			;
-
-		if (engine && engine.render && typeof datas === 'object' && compiledTemplate) {
-			that.content = engine.render(compiledTemplate, datas);
-		} else {
-			that.content = compiledTemplate;
-		}
-
-		return that.content;
+function _setButton(btn, options) {
+	(options.id != null) && btn.setAttribute('id', options.id);
+	(options['class'] != null) && (btn.className = options['class']);
+	(options.text != null) && (btn.innerHTML = options.text);
+	(options.bg != null) && (btn.style.background = options.bg);
+	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" />');
+	(options.hide === true) ? (btn.style.display = 'none'):(btn.style.display = '');
+	if (options.handler) {
+		btn.handler && btn.removeEventListener('click', btn.handler, false);
+		btn.addEventListener('click', (btn.handler = options.handler), false);
 	}
 }
 
-for (var p in TemplateProto) {
-	Template.prototype[p] = TemplateProto[p];
-} 
+function Navbar(wrapEl, options) {
+	options || (options = {});
 
-app.module.Template = Template;
+	this._wrapEl = wrapEl;
+	this._backWrapEl = options.backWrapEl;
+	this._funcWrapEl = options.funcWrapEl;
+	this._titleWrapEl = options.titleWrapEl;
+}
+
+var NavbarProto = {
+    setTitle: function(title) {
+    	this._titleWrapEl && (this._titleWrapEl.innerHTML = title);
+    },
+
+    setButton: function(options) {
+    	var wrap, btn;
+    	if (options.type === 'back') {
+    		wrap = this._backWrapEl;
+    		btn = wrap.querySelector('button');
+    	} else if (options.type === 'func') {
+    		wrap = this._funcWrapEl;
+    		btn = wrap.querySelector('#' + options.id);
+    	} else if (options.id) {
+    		btn = this._wrapEl.querySelector('#' + options.id);
+    		btn && (wrap = btn.parentNode);
+    	}
+
+		if (!btn && wrap) {
+			btn = doc.createElement('button');
+			wrap.appendChild(btn);
+		}
+		_setButton(btn, options);
+    },
+
+    getButton: function(id) {
+    	return this._wrapEl.querySelector('button#' + id);
+    },
+
+    removeButton: function(id) {
+    	if (!id) {
+    		var btns = this._wrapEl.querySelectorAll('button');
+    		for (var i = 0; i < btns.length; i++) {
+    			this.removeButton(btns[i]);
+    		}
+    	} else {
+	    	if (typeof id === 'string') {
+	    		var btn = this.getButton(id);
+	    	} else if (id instanceof HTMLElement) {
+	    		var btn = id;
+	    	}
+			if (btn) {
+				btn.handler && btn.removeEventListener('click', btn.handler);
+				btn.parentNode.removeChild(btn);
+			}
+		}
+    }
+}
+
+for (var p in NavbarProto) {
+	Navbar.prototype[p] = NavbarProto[p];
+}
+
+app.module.Navbar = Navbar;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
@@ -858,6 +1166,8 @@ app.module.StateStack = StateStack;
 app.module.Navigation = Navigation;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
+//@reqiure message
+
 (function(win, app, undef) {
 
 
@@ -971,491 +1281,344 @@ app.module.Page = Page;
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
 
-var doc = win.document,
-    docEl = doc.documentElement,
-    slice = Array.prototype.slice,
-    gestures = {}, lastTap = null
-    ;
+var doc = win.document
+	;
 
-function getCommonAncestor (el1, el2) {
-    var el = el1;
-    while (el) {
-        if (el.contains(el2) || el == el2) {
-            return el;
-        }
-        el = el.parentNode;
-    }    
-    return null;
+function Template(url) {
+	this.url = url;
 }
 
-function fireEvent(element, type, extra) {
-    var event = doc.createEvent('HTMLEvents');
-    event.initEvent(type, false, true);
+var TemplateProto = {
+	load: function(url, callback) {
+		// can overwrite
+		var that = this,
+			engine = app.config.templateEngine
+			;
 
-    if(typeof extra === 'object') {
-        for(var p in extra) {
-            event[p] = extra[p];
-        }
-    }
+		if (arguments.length === 1) {
+			callback = arguments[0];
+			url = that.url;
+		} else {
+			that.url = url;
+		}
 
-    while(event.cancelBubble === false && element) {
-        element.dispatchEvent(event);
-        element = element.parentNode;
-    }
+		function loaded(text) {
+			callback && callback(text);
+		}
+
+		if (engine && engine.load && typeof url === 'string') {
+			engine.load(url, loaded);
+		} else {
+			loaded(url);
+		}
+	},
+
+	compile: function(text) {
+		// can overwrite
+		var that = this,
+			engine = app.config.templateEngine
+			;
+
+		that.originTemplate = text;
+
+		if (engine && engine.compile && typeof text === 'string') {
+			that.compiledTemplate = engine.compile(text);
+		} else {
+			that.compiledTemplate = text;
+		}
+
+		return that.compiledTemplate;
+	},
+
+	render: function(datas) {
+		// can overwrite
+		var that = this,
+			engine = app.config.templateEngine,
+			compiledTemplate = that.compiledTemplate
+			;
+
+		if (engine && engine.render && typeof datas === 'object' && compiledTemplate) {
+			that.content = engine.render(compiledTemplate, datas);
+		} else {
+			that.content = compiledTemplate;
+		}
+
+		return that.content;
+	}
 }
 
-function calc(x1, y1, x2, y2, x3, y3, x4, y4) {
-    var rotate = Math.atan2(y4 - y3, x4 - x3) - Math.atan2(y2 - y1, x2 - x1),
-        scale = Math.sqrt((Math.pow(y4 - y3, 2) + Math.pow(x4 - x3, 2)) / (Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2))),
-        translate = [x3 - scale * x1 * Math.cos(rotate) + scale * y1 * Math.sin(rotate), y3 - scale * y1 * Math.cos(rotate) - scale * x1 * Math.sin(rotate)]
-        ;
-    return {
-        rotate: rotate,
-        scale: scale,
-        translate: translate,
-        matrix: [
-            [scale * Math.cos(rotate), -scale * Math.sin(rotate), translate[0]],
-            [scale * Math.sin(rotate), scale * Math.cos(rotate), translate[1]],
-            [0, 0, 1]
-        ]
-    }
-}
+for (var p in TemplateProto) {
+	Template.prototype[p] = TemplateProto[p];
+} 
 
-function touchstartHandler(event) {
-
-    if (Object.keys(gestures).length === 0) {
-        docEl.addEventListener('touchmove', touchmoveHandler, false);
-        docEl.addEventListener('touchend', touchendHandler, false);
-        docEl.addEventListener('touchcancel', touchcancelHandler, false);
-    }
-    
-    for(var i = 0 ; i < event.changedTouches.length ; i++ ) {
-        var touch = event.changedTouches[i],
-            touchRecord = {};
-
-        for (var p in touch) {
-            touchRecord[p] = touch[p];
-        }
-
-        var gesture = {
-            startTouch: touchRecord,
-            startTime: Date.now(),
-            status: 'tapping',
-            element: event.srcElement,
-            pressingHandler: setTimeout(function(element) {
-                return function () {
-                    if (gesture.status === 'tapping') {
-                        gesture.status = 'pressing';
-
-                        fireEvent(element, 'press', {
-                            touchEvent:event
-                        });
-                    }
-
-                    clearTimeout(gesture.pressingHandler);
-                    gesture.pressingHandler = null;
-                }
-            }(event.srcElement), 500)
-        }
-        gestures[touch.identifier] = gesture;
-    }
-
-    if (Object.keys(gestures).length == 2) {
-        var elements = [];
-
-        for(var p in gestures) {
-            elements.push(gestures[p].element);
-        }
-
-        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchstart', {
-            touches: slice.call(event.touches),
-            touchEvent: event
-        });
-    }
-}
-
-
-function touchmoveHandler() {
-
-    for(var i = 0 ; i < event.changedTouches.length ; i++ ) {
-        var touch = event.changedTouches[i],
-            gesture = gestures[touch.identifier];
-
-        if (!gesture) {
-            return;
-        }
-
-        var displacementX = touch.clientX - gesture.startTouch.clientX,
-            displacementY = touch.clientY - gesture.startTouch.clientY,
-            distance = Math.sqrt(Math.pow(displacementX, 2) + Math.pow(displacementY, 2));
-
-        // magic number 10: moving 10px means pan, not tap
-        if (gesture.status === 'tapping' && distance > 10) {
-            gesture.status = 'panning';
-            fireEvent(gesture.element, 'panstart', {
-                touch:touch,
-                touchEvent:event
-            });
-
-            if(Math.abs(displacementX) > Math.abs(displacementY)) {
-                fireEvent(gesture.element, 'horizontalpanstart', {
-                    touch: touch,
-                    touchEvent: event
-                });
-                gesture.isVertical = false;
-            } else {
-                fireEvent(gesture.element, 'verticalpanstart', {
-                    touch: touch,
-                    touchEvent: event
-                });
-                gesture.isVertical = true;
-            }
-        }
-
-        if (gesture.status === 'panning') {
-            gesture.panTime = Date.now();
-            fireEvent(gesture.element, 'pan', {
-                displacementX: displacementX,
-                displacementY: displacementY,
-                touch: touch,
-                touchEvent: event
-            });
-
-
-            if(gesture.isVertical) {
-                fireEvent(gesture.element, 'verticalpan',{
-                    displacementY: displacementY,
-                    touch: touch,
-                    touchEvent: event
-                });
-            } else {
-                fireEvent(gesture.element, 'horizontalpan',{
-                    displacementX: displacementX,
-                    touch: touch,
-                    touchEvent: event
-                });
-            }
-        }
-    }
-
-    if (Object.keys(gestures).length == 2) {
-        var position = [],
-            current = [],
-            elements = [],
-            transform
-            ;
-        
-        for(var i = 0 ; i < event.touches.length ; i++ ) {
-            var touch = event.touches[i];
-            var gesture = gestures[touch.identifier];
-            position.push([gesture.startTouch.clientX, gesture.startTouch.clientY]);
-            current.push([touch.clientX, touch.clientY]);
-        }
-
-        for(var p in gestures) {
-            elements.push(gestures[p].element);
-        }
-
-        transform = calc(position[0][0], position[0][1], position[1][0], position[1][1], current[0][0], current[0][1], current[1][0], current[1][1]);
-        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouch',{
-            transform : transform,
-            touches : event.touches,
-            touchEvent: event
-        });
-    }
-}
-
-
-function touchendHandler() {
-
-    if (Object.keys(gestures).length == 2) {
-        var elements = [];
-        for(var p in gestures) {
-            elements.push(gestures[p].element);
-        }
-        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchend', {
-            touches: slice.call(event.touches),
-            touchEvent: event
-        });
-    }
-    
-    for (var i = 0; i < event.changedTouches.length; i++) {
-        var touch = event.changedTouches[i],
-            id = touch.identifier,
-            gesture = gestures[id];
-
-        if (!gesture) continue;
-
-        if (gesture.pressingHandler) {
-            clearTimeout(gesture.pressingHandler);
-            gesture.pressingHandler = null;
-        }
-
-        if (gesture.status === 'tapping') {
-            gesture.timestamp = Date.now();
-            fireEvent(gesture.element, 'tap', {
-                touch: touch,
-                touchEvent: event
-            });
-
-            if(lastTap && gesture.timestamp - lastTap.timestamp < 300) {
-                fireEvent(gesture.element, 'doubletap', {
-                    touch: touch,
-                    touchEvent: event
-                });
-            }
-
-            this.lastTap = gesture;
-        }
-
-        if (gesture.status === 'panning') {
-            fireEvent(gesture.element, 'panend', {
-                touch: touch,
-                touchEvent: event
-            });
-
-            var duration = Date.now() - gesture.startTime,
-                velocityX = (touch.clientX - gesture.startTouch.clientX) / duration,
-                velocityY = (touch.clientY - gesture.startTouch.clientY) / duration,
-                displacementX = touch.clientX - gesture.startTouch.clientX,
-                displacementY = touch.clientY - gesture.startTouch.clientY
-                ;
-            
-            if (duration < 300) {
-                fireEvent(gesture.element, 'flick', {
-                    duration: duration,
-                    velocityX: velocityX,
-                    velocityY: velocityY,
-                    displacementX: displacementX,
-                    displacementY: displacementY,
-                    touch: touch,
-                    touchEvent: event
-                });
-
-                if(gesture.isVertical) {
-                    fireEvent(gesture.element, 'verticalflick', {
-                        duration: duration,
-                        velocityY: velocityY,
-                        displacementY: displacementY,
-                        touch: touch,
-                        touchEvent: event
-                    });
-                } else {
-                    fireEvent(gesture.element, 'horizontalflick', {
-                        duration: duration,
-                        velocityX: velocityX,
-                        displacementX: displacementX,
-                        touch: touch,
-                        touchEvent: event
-                    });
-                }
-            }
-        }
-
-        if (gesture.status === 'pressing') {
-            fireEvent(gesture.element, 'pressend', {
-                touch: touch,
-                touchEvent: event
-            });
-        }
-
-        delete gestures[id];
-    }
-
-    if (Object.keys(gestures).length === 0) {
-        docEl.removeEventListener('touchmove', touchmoveHandler, false);
-        docEl.removeEventListener('touchend', touchendHandler, false);
-        docEl.removeEventListener('touchcancel', touchcancelHandler, false);
-    }
-}
-
-function touchcancelHandler() {
-
-    if (Object.keys(gestures).length == 2) {
-        var elements = [];
-        for(var p in gestures) {
-            elements.push(gestures[p].element);
-        }
-        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchend', {
-            touches: slice.call(event.touches),
-            touchEvent: event
-        });
-    }
-
-    for (var i = 0; i < event.changedTouches.length; i++) {
-        if (gesture.status === 'panning') {
-            fireEvent(gesture.element, 'panend', {
-                touch: touch,
-                touchEvent: event
-            });
-        }
-        if (gesture.status === 'pressing') {
-            fireEvent(gesture.element, 'pressend', {
-                touch: touch,
-                touchEvent: event
-            });
-        }
-        delete gestures[event.changedTouches[i].identifier];
-    }
-
-    if (Object.keys(gestures).length === 0) {
-        docEl.removeEventListener('touchmove', touchmoveHandler, false);
-        docEl.removeEventListener('touchend', touchendHandler, false);
-        docEl.removeEventListener('touchcancel', touchcancelHandler, false);
-    }
-}
-
-docEl.addEventListener('touchstart', touchstartHandler, false);
+app.module.Template = Template;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
 
-var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+), [-\d.]+, \d+\)/,
-	MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+)\)$/,
-	TRANSFORM_REG = /^(translate|rotate|scale)(X|Y|Z|3d)?|(matrix)(3d)?|(perspective)|(skew)(X|Y)?$/i,
+var doc = win.document
+	;
 
-    isAndroid = (/android/gi).test(navigator.appVersion),
-    isIOS = (/iphone|ipad/gi).test(navigator.appVersion),
-    has3d = 'WebKitCSSMatrix' in window && 'm11' in new WebKitCSSMatrix()
-    ;
 
-function addPx(v) {
-	v += '';
+function Toolbar(wrapEl, options) {
+	options || (options = {});
 
-	if (v.indexOf('px') < 0 && v.indexOf('%') < 0 && v !== '0') {
-		v += 'px';
-	}
-	return v;
+	this._wrapEl = wrapEl;
 }
 
-function addDeg(v) {
-	v += '';
-
-	if (v.indexOf('deg') < 0 & v !== '0') {
-		v += 'deg';
-	}
-
-	return v;
+var ToolbarProto = {
+    
 }
 
-function toCamelCase(str, sep) {
-	sep || (sep = '-');
-
-	str.replace(new RegExp(sep + '[a-z]', 'g'), function(v) {
-		return v.split(sep)[1].toUpperCase();
-	})
-
-	return str;
+for (var p in ToolbarProto) {
+	Toolbar.prototype[p] = ToolbarProto[p];
 }
 
-function toDelimiterCase(str, sep) {
-	sep || (sep = '-');
-
-	return str.replace(/[a-z][A-Z]/g, '$1' + sep +'$2').toLowerCase();
-}
-
-var Animation = {
-    translate: function(element, duration, timingFunction, delay, x, y, callback) {
-	    this.doTransition(element, {
-	    	translate: [x, y]
-	    }, {
-	    	duration: duration,
-	    	timingFunction: timingFunction,
-	    	delay: delay,
-	    	callback: callback
-	    });
-    },
-
-    doTransition: function(element, properties, options) {
-    	var postfix = [options.duration, options.timingFunction || 'ease', options.delay || '0s'].join(' '),
-    		matches, transform = '', transition = [], styles = {}
-    		;
-
-    	for (var p in properties) {
-    		var v = properties[p];
-    		if ((matches = p.match(TRANSFORM_REG))) {
-	    		if (!(v instanceof Array)) {
-	    			v = [v];
-	    		}
-
-    			var a = matches[1] || matches[3] || matches[5] || matches[6],
-    				b = matches[2] || matches[4] || matches[7] || ''
-    				;
-
-    			if (a === 'translate' && b === '' && has3d) {
-    				b = '3d';
-    				v.push(0);
-    			}
-    			if (a === 'translate') {
-    				v = v.map(addPx);
-    			} else if (a === 'rotate' || a === 'skew') {
-    				v = v.map(addDeg);
-    			}
-    			transform += a + b + '(' + v.join(',') + ')';
-    		} else {
-    			transition.push(toDelimiterCase(p) + ' ' + postfix);
-    			styles[p] = v;
-    		}
-
-    		transform && transition.push('-webkit-transform ' + postfix);
-    	}
-
-    	options.callback && element.addEventListener('webkitTransitionEnd', function(e){
-	    	element.removeEventListener('webkitTransitionEnd', arguments.callee, false);
-	        if(e.srcElement !== element) return;
-	        setTimeout(options.callback, 10);
-	    }, false);
-
-    	setTimeout(function() {
-	    	element.style.webkitTransition = transition.join(', ');
-	    	if (transform.length) {
-	    		element.style.webkitTransform = transform;
-	    	}
-	    	for (var p in styles) {
-	    		element.style[p] = styles[p];
-	    	}
-    	}, 10);
-    },
-
-    genCubicBezier: function(a, b) {
-		return [[(a / 3 + (a + b) / 3 - a) / (b - a), (a * a / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a)],
-        	[(b / 3 + (a + b) / 3 - a) / (b - a), (b * b / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a)]];
-    },
-
-    makeTranslateString: function(x, y) {
-		x = addPx(x);
-		y = addPx(y);
-
-	    if (has3d) {
-	        return 'translate3d(' + x + ', ' + y + ', 0)';
-	    } else {
-	        return 'translate(' + x + ', ' + y + ')';
-	    }
-    },
-
-    getTransformOffset: function(el) {
-	    var offset = {
-	    		x: 0,
-	    		y: 0
-	    	}, 
-	    	transform = getComputedStyle(el).webkitTransform, 
-	    	matchs, reg;
-
-	    if (transform !== 'none') {
-	    	reg = transform.indexOf('matrix3d') > -1 ? MATRIX3D_REG : MATRIX_REG;
-	        if((matchs = transform.match(reg))) {
-	            offset.x = parseInt(matchs[1]) || 0;
-	            offset.y = parseInt(matchs[2]) || 0;
-	        }
-	    }
-
-	    return offset;
-    }
-}
-
-app.module.Animation = Animation;
+app.module.Toolbar = Toolbar;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
+(function(win, app, undef) {
+
+var doc = win.document,
+	views = {}
+	;
+
+function extend(target, properties) {
+	for (var key in properties) {
+		if (properties.hasOwnProperty(key)) {
+			target[key] = properties[key];
+		}
+	}
+}
+
+function inherit(child, parent) {
+	function Ctor() {}
+	Ctor.prototype = parent.prototype;
+	var proto = new Ctor();
+	extend(proto, child.prototype);
+	proto.constructor = child;
+	child.prototype = proto;
+}
+	
+function View() {
+	var el, $el, $ = win['$'];
+
+
+	Object.defineProperty(this, 'el', {
+		get: function() {
+			return el;
+		},
+
+		set: function(element) {
+			var $;
+
+			if (typeof element === 'string') {
+				el = doc.querySelector(element);
+			} else if (element instanceof HTMLElement) {
+				el = element;
+			}
+
+			$ && ($el = $(el));
+		}
+	});
+
+	Object.defineProperty(this, '$el', {
+		get: function() {
+			return $el;
+		},
+
+		set: function(element) {
+			if (typeof element === 'string' && $) {
+				$el = $(element);
+			} else {
+				$el = element;
+			}
+
+			$el && (el = $el[0]);
+		}
+	});
+}
+
+var ViewProto = {
+	render: function(callback) {/*implement*/},
+	destory: function(callback) {/*implement*/}
+}
+
+for (var p in ViewProto) {
+	View.prototype[p] = ViewProto[p];
+} 
+
+View.fn = {};
+
+View.extend = function(properties) {
+	function ChildView() {
+		View.apply(this, arguments);
+		this.initialize && this.initialize.apply(this, arguments);
+		extend(this, View.fn);
+		extend(this, properties);
+	}
+	inherit(ChildView, View);
+	
+	return (views[properties.name] = ChildView);
+}
+
+View.get = function(name) {
+	return views[name];
+}
+
+app.module.View = View;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}));
+
+
+(function(win, app, undef) {
+
+var doc = win.document,
+	anim = app.module.Animation,
+	TYPE_XY = {
+		'L': 'x',
+		'R': 'x',
+		'T': 'y',
+		'B': 'y'
+	},
+	TYPE_IO = {
+		'I': -1,
+		'O': 1
+	}
+	;
+
+
+var Transition = {
+	TYPE : {
+		LEFT_IN: 'LI',
+		LEFT_OUT: 'LO',
+		RIGHT_IN: 'RI',
+		RIGHT_OUT: 'RO',
+		TOP_IN: 'TI',
+		TOP_OUT: 'TO',
+		BOTTOM_IN: 'BI',
+		BOTTOM_OUT: 'BO'
+	},
+
+	move: function(element, offsetX, offsetY, callback) {
+		var offset = anim.getTransformOffset(element)
+			;
+
+		element.style.webkitBackfaceVisibility = 'hidden';
+		element.style.webkitTransformStyle = 'preserve-3d';
+
+		anim.translate(element,
+			'0.4s', 'ease', '0s',
+			offset.x + offsetX, offset.y + offsetY,
+			function() {
+				element.style.webkitBackfaceVisibility = 'initial';
+				element.style.webkitTransformStyle = 'flat';
+				callback && callback();
+			}
+		)
+	},
+
+	slide: function(element, type, offset, callback) {
+		var TYPE = this.TYPE, xy, io,
+			originXY = anim.getTransformOffset(element),
+			newXY = {
+				x: originXY.x,
+				y: originXY.y
+			}
+			;
+
+		type = type.split('');
+		xy = TYPE_XY[type[0]];
+		io = TYPE_IO[type[1]];
+
+		if (type[1] === 'I') {
+			originXY[xy] += io * offset;
+		} else {
+			newXY[xy] += io * offset;
+		}
+
+		element.style.webkitTransition = '';
+		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
+		element.style.webkitBackfaceVisibility = 'hidden';
+		element.style.webkitTransformStyle = 'preserve-3d';
+
+		anim.translate(element,
+			'0.4s', 'ease', '0s',
+			newXY.x, newXY.y,
+			function() {
+				element.style.webkitBackfaceVisibility = 'initial';
+				element.style.webkitTransformStyle = 'flat';
+				callback && callback();
+			}
+		);		
+	},
+
+	float: function(element, type, offset, callback) {
+		var TYPE = this.TYPE, xy, io,
+			originXY = anim.getTransformOffset(element),
+			newXY = {
+				x: originXY.x,
+				y: originXY.y
+			},
+			opacity
+			;
+
+		type = type.split('');
+		xy = TYPE_XY[type[0]];
+		io = TYPE_IO[type[1]];
+
+		if (type[1] === 'I') {
+			originXY[xy] += io * offset;
+			opacity = 0;
+		} else {
+			newXY[xy] += io * offset;
+			opacity = 1;
+		}
+
+		element.style.webkitTransition = '';
+		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
+		element.style.opacity = opacity;
+		element.style.webkitBackfaceVisibility = 'hidden';
+		element.style.webkitTransformStyle = 'preserve-3d';
+
+		anim.doTransition(element, {
+			opacity: opacity === 1?0:1,
+			translate: [newXY.x, newXY.y]
+		}, {
+			duration: '0.4s',
+			timingFunction: 'ease',
+			callback : function() {
+				element.style.webkitBackfaceVisibility = 'initial';
+				element.style.webkitTransformStyle = 'flat';
+				callback && callback();
+			}
+		});
+	},
+
+	fadeIn: function(element, options) {
+		
+	},
+
+	fadeOut: function(element, options) {
+
+	},
+
+
+	zoomIn: function(element, options) {
+
+	},
+
+	zoomOut: function(element, options) {
+
+	}
+}
+
+app.module.Transition = Transition;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}));
+
+
+
 (function(win, app, undef) {
 
 var doc = win.document,
@@ -1731,6 +1894,10 @@ var Scroll = {
 		        element.style.webkitTransform = anim.makeTranslateString(x, y);
 		    }
 
+		    element.scollToElement = function(el) {
+		    	
+		    }
+
 		    element.getBoundaryOffset = function() {
 			    var y = anim.getTransformOffset(element).y;
 			    return getBoundaryOffset(y);
@@ -1806,252 +1973,135 @@ var Scroll = {
 app.module.Scroll = Scroll;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
+
+
 (function(win, app, undef) {
 
-var doc = win.document,
-	anim = app.module.Animation,
-	TYPE_XY = {
-		'L': 'x',
-		'R': 'x',
-		'T': 'y',
-		'B': 'y'
-	},
-	TYPE_IO = {
-		'I': -1,
-		'O': 1
-	}
-	;
+var Message = app.module.MessageScope,
+	mid = 0, cid = 0;
 
+function Model(data) {
+	var that = this,
+		initializing  = true,
+		children = {}
+		;
 
-var Transition = {
-	TYPE : {
-		LEFT_IN: 'LI',
-		LEFT_OUT: 'LO',
-		RIGHT_IN: 'RI',
-		RIGHT_OUT: 'RO',
-		TOP_IN: 'TI',
-		TOP_OUT: 'TO',
-		BOTTOM_IN: 'BI',
-		BOTTOM_OUT: 'BO'
-	},
+	Message.mixto(that, 'model-' + mid++);
 
-	move: function(element, offsetX, offsetY, callback) {
-		var offset = anim.getTransformOffset(element)
-			;
-
-		element.style.webkitBackfaceVisibility = 'hidden';
-		element.style.webkitTransformStyle = 'preserve-3d';
-
-		anim.translate(element,
-			'0.4s', 'ease', '0s',
-			offset.x + offsetX, offset.y + offsetY,
-			function() {
-				element.style.webkitBackfaceVisibility = 'initial';
-				element.style.webkitTransformStyle = 'flat';
-				callback && callback();
-			}
-		)
-	},
-
-	slide: function(element, type, offset, callback) {
-		var TYPE = this.TYPE, xy, io,
-			originXY = anim.getTransformOffset(element),
-			newXY = {
-				x: originXY.x,
-				y: originXY.y
-			}
-			;
-
-		type = type.split('');
-		xy = TYPE_XY[type[0]];
-		io = TYPE_IO[type[1]];
-
-		if (type[1] === 'I') {
-			originXY[xy] += io * offset;
-		} else {
-			newXY[xy] += io * offset;
-		}
-
-		element.style.webkitTransition = '';
-		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
-		element.style.webkitBackfaceVisibility = 'hidden';
-		element.style.webkitTransformStyle = 'preserve-3d';
-
-		anim.translate(element,
-			'0.4s', 'ease', '0s',
-			newXY.x, newXY.y,
-			function() {
-				element.style.webkitBackfaceVisibility = 'initial';
-				element.style.webkitTransformStyle = 'flat';
-				callback && callback();
-			}
-		);		
-	},
-
-	float: function(element, type, offset, callback) {
-		var TYPE = this.TYPE, xy, io,
-			originXY = anim.getTransformOffset(element),
-			newXY = {
-				x: originXY.x,
-				y: originXY.y
+	that.addProperty = function(key, value) {
+		Object.defineProperty(that, key, {
+			get: function() {
+				return children[key] || data[key];
 			},
-			opacity
-			;
+			set: function(value) {
+				if (children[key]) {
+					children[key].destory();
+					delete children[key];
+				}
 
-		type = type.split('');
-		xy = TYPE_XY[type[0]];
-		io = TYPE_IO[type[1]];
+				if (value != null) {
+					data[key] = value;
+					if (typeof value === 'object') {
+						children[key] = new Model(value);
+						children[key].on('propertyChange',  function(e) {
+							that.trigger('propertyChange', {
+								target: e.target,
+								value: e.value,
+								name: e.name,
+								path: key + '.' + e.path
+							});
+						});
+					}
+				}
 
-		if (type[1] === 'I') {
-			originXY[xy] += io * offset;
-			opacity = 0;
-		} else {
-			newXY[xy] += io * offset;
-			opacity = 1;
-		}
-
-		element.style.webkitTransition = '';
-		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
-		element.style.opacity = opacity;
-		element.style.webkitBackfaceVisibility = 'hidden';
-		element.style.webkitTransformStyle = 'preserve-3d';
-
-		anim.doTransition(element, {
-			opacity: opacity === 1?0:1,
-			translate: [newXY.x, newXY.y]
-		}, {
-			duration: '0.4s',
-			timingFunction: 'ease',
-			callback : function() {
-				element.style.webkitBackfaceVisibility = 'initial';
-				element.style.webkitTransformStyle = 'flat';
-				callback && callback();
+				!initializing && that.trigger('propertyChange', {
+					target: that,
+					value: children[key] || data[key],
+					name: key,
+					path: key
+				});
 			}
 		});
-	},
 
-	fadeIn: function(element, options) {
-		
-	},
-
-	fadeOut: function(element, options) {
-
-	},
-
-
-	zoomIn: function(element, options) {
-
-	},
-
-	zoomOut: function(element, options) {
-
+		that[key] = value;
 	}
-}
 
-app.module.Transition = Transition;
+	that.update = function(data) {
+		if (data instanceof Array) {
+			for (var i = 0; i < data.length; i++) {
+				if (!(data[i] instanceof Model)) {
+					this.addProperty(i, data[i]);
+				}
+			}
+		} else {
+			for (var key in data) {
+				if (that.hasOwnProperty(key)) {
+					throw new Error('property conflict "' + key + '"');
+				}
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
-
-var doc = win.document
-	;
-
-function _setButton(btn, options) {
-	(options.id != null) && btn.setAttribute('id', options.id);
-	(options['class'] != null) && (btn.className = options['class']);
-	(options.text != null) && (btn.innerHTML = options.text);
-	(options.bg != null) && (btn.style.background = options.bg);
-	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" />');
-	(options.hide === true) ? (btn.style.display = 'none'):(btn.style.display = '');
-	if (options.handler) {
-		btn.handler && btn.removeEventListener('click', btn.handler, false);
-		btn.addEventListener('click', (btn.handler = options.handler), false);
-	}
-}
-
-function Navbar(wrapEl, options) {
-	options || (options = {});
-
-	this._wrapEl = wrapEl;
-	this._backWrapEl = options.backWrapEl;
-	this._funcWrapEl = options.funcWrapEl;
-	this._titleWrapEl = options.titleWrapEl;
-}
-
-var NavbarProto = {
-    setTitle: function(title) {
-    	this._titleWrapEl && (this._titleWrapEl.innerHTML = title);
-    },
-
-    setButton: function(options) {
-    	var wrap, btn;
-    	if (options.type === 'back') {
-    		wrap = this._backWrapEl;
-    		btn = wrap.querySelector('button');
-    	} else if (options.type === 'func') {
-    		wrap = this._funcWrapEl;
-    		btn = wrap.querySelector('#' + options.id);
-    	} else if (options.id) {
-    		btn = this._wrapEl.querySelector('#' + options.id);
-    		btn && (wrap = btn.parentNode);
-    	}
-
-		if (!btn && wrap) {
-			btn = doc.createElement('button');
-			wrap.appendChild(btn);
-		}
-		_setButton(btn, options);
-    },
-
-    getButton: function(id) {
-    	return this._wrapEl.querySelector('button#' + id);
-    },
-
-    removeButton: function(id) {
-    	if (!id) {
-    		var btns = this._wrapEl.querySelectorAll('button');
-    		for (var i = 0; i < btns.length; i++) {
-    			this.removeButton(btns[i]);
-    		}
-    	} else {
-	    	if (typeof id === 'string') {
-	    		var btn = this.getButton(id);
-	    	} else if (id instanceof HTMLElement) {
-	    		var btn = id;
-	    	}
-			if (btn) {
-				btn.handler && btn.removeEventListener('click', btn.handler);
-				btn.parentNode.removeChild(btn);
+				if (data.hasOwnProperty(key) && !(data[key] instanceof Model)) {
+					this.addProperty(key, data[key]);
+				}
 			}
 		}
-    }
+	}
+
+	that.destory = function() {
+		for (var key in children) {
+			children[key].destory();
+		}
+		that.off();
+	}
+
+	that.on('propertyChange', function(e) {
+		that.trigger('change:' + e.path, e.value);
+	});
+
+	that.update(data);
+
+	initializing = false;
 }
 
-for (var p in NavbarProto) {
-	Navbar.prototype[p] = NavbarProto[p];
+function Collection(data) {
+	var that = this
+		;
+
+	if (!data instanceof Array) return;
+
+	that.length = data.length;
+
+	that.push = function(value) {
+		data.push(value);
+		that.length = data.length;
+		that.addProperty(data.length - 1, value);
+	}
+
+	that.pop = function() {
+		var value = data.pop();
+		that.length = data.length;
+		that[data.length] = null;
+		return value;
+	}
+
+	Model.call(that, data);
 }
 
-app.module.Navbar = Navbar;
+app.module.Model = Model;
+app.module.Collection = Collection;
+
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
 
 
-function Viewport() {
 
-}
 
-var viewportProto = {
-	getActive : function() {},
-	getInactive: function() {},
-	switchActive: function() {},
-	toggleClass: function() {},
-	fill: function(html) {}
-}
 
-app.module.Viewport = Viewport;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+
+
+
+
+
 (function(win, app, undef) {
 
 app.config = {}

@@ -1,3 +1,5 @@
+//@reqiure message
+
 (function(win, app, undef) {
 
 

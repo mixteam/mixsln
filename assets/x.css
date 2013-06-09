@@ -1,3 +1,5 @@
+@import url(base.css);
+
 header.navibar {
     -webkit-box-shadow:inset 0 1px 1px white;
     background: -webkit-gradient(linear, left top, left bottom, from(rgb(110,132,161)), to(rgb(180,191,205)), color-stop(0.5, rgb(137,155,178)), color-stop(0.51, rgb(127,148,176)));

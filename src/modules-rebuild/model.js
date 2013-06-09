@@ -1,3 +1,5 @@
+//@require message
+
 (function(win, app, undef) {
 
 var Message = app.module.MessageScope,
