@@ -20,6 +20,7 @@ function Navbar(wrapEl, options) {
 	options || (options = {});
 
 	this._wrapEl = wrapEl;
+	this._animWrapEl = options.animWrapEl;
 	this._backWrapEl = options.backWrapEl;
 	this._funcWrapEl = options.funcWrapEl;
 	this._titleWrapEl = options.titleWrapEl;
@@ -51,12 +52,12 @@ var NavbarProto = {
     },
 
     getButton: function(id) {
-    	return this._wrapEl.querySelector('button#' + id);
+    	return this._funcWrapEl.querySelector('button#' + id);
     },
 
     removeButton: function(id) {
     	if (!id) {
-    		var btns = this._wrapEl.querySelectorAll('button');
+    		var btns = this._funcWrapEl.querySelectorAll('button');
     		for (var i = 0; i < btns.length; i++) {
     			this.removeButton(btns[i]);
     		}

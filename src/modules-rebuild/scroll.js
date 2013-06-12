@@ -52,6 +52,9 @@ function touchstartHandler(e) {
 	}
 
 	element = parentElement.boundScrollElement;
+
+	if (!element) return;
+
 	element.style.webkitTransition = '';
 	element.style.webkitTransform = getComputedStyle(element).webkitTransform;
 }
@@ -66,7 +69,7 @@ function touchendHandler(e) {
 }
 
 function panstartHandler(e) {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 
 	offset = anim.getTransformOffset(element);
 	minScrollTop = getMinScrollTop(element);
@@ -77,7 +80,7 @@ function panstartHandler(e) {
 }
 
 function panHandler(e) {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 
     var y = offset.y + e.displacementY
         ;
@@ -106,7 +109,7 @@ function panHandler(e) {
 }
 
 function panendHandler(e) {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 
 	var y = anim.getTransformOffset(element).y
 	if (getBoundaryOffset(y)) {
@@ -135,7 +138,7 @@ function touchBoundary(y) {
 }
 
 function bounceStart(v) {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 
     var s0 = anim.getTransformOffset(element).y,
     	a = 0.008 * ( v / Math.abs(v));
@@ -153,7 +156,7 @@ function bounceStart(v) {
 }
 
 function bounceEnd() {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 
 	var y = anim.getTransformOffset(element).y;
 	y = touchBoundary(y);
@@ -169,7 +172,7 @@ function bounceEnd() {
 }
 
 function flickHandler(e) {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 	
     var s0 = anim.getTransformOffset(element).y,
         v, a, t, s,
@@ -224,6 +227,8 @@ function flickHandler(e) {
 }
 
 function scrollEnd() {
+	if (stopBounce || !element) return;
+	
 	cancelScrollEnd = false;
 
 	setTimeout(function() {

@@ -149,16 +149,60 @@ app.module.Animation = Animation;
 (function(win, app, undef) {
 
 
-function Content() {
+function Content(wrapEl, options) {
+	options || (options = {});
 
+	this._wrapEl = wrapEl;
+	this._cacheWrapEl = options.cacheWrapEl;
+	this._cacheLength  = options.cacheLength;
+	this._cacheIndex = 0;
+
+	var cacheDomHtml = '';
+	for (var i = 0; i < this._cacheLength; i++) {
+		cacheDomHtml += '<div class="inactive"></div>';
+	}
+	this._cacheWrapEl.innerHTML = cacheDomHtml;
+
+	this.getActive().className = 'active';
+	this.getNext().className += ' next';
+	this.getPrevious().className += ' prev';
 }
 
 var ContentProto = {
-	getActive : function() {},
-	getInactive: function() {},
-	switchActive: function() {},
-	toggleClass: function() {},
-	fill: function(html) {}
+	getActive : function() {
+		var index =  this._cacheIndex;
+		return this._cacheWrapEl.querySelector('div:nth-child(' + (index + 1) + ')');
+	},
+
+	getNext: function() {
+		var index = (this._cacheIndex + 1) % this._cacheLength;
+		return this._cacheWrapEl.querySelector('div:nth-child(' + (index + 1) + ')');
+	},
+
+	getPrevious: function() {
+		var index = (this._cacheIndex - 1 + this._cacheLength) % this._cacheLength;
+		return this._cacheWrapEl.querySelector('div:nth-child(' + (index + 1) + ')');
+	},
+
+	next: function() {
+		this.getNext().className = 'active';
+		this.getActive().className = 'inactive prev';
+		this.getPrevious().className = 'inactive';
+		this._cacheIndex = (this._cacheIndex + 1) % this._cacheLength;
+		this.getNext().className = 'inactive next';
+	},
+
+	previous: function() {
+		this.getPrevious().className = 'active';
+		this.getActive().className = 'inactive next';
+		this.getNext().className = 'inactive';
+		this._cacheIndex = (this._cacheIndex - 1 + this._cacheLength) % this._cacheLength;
+		this.getPrevious().className = 'inactive prev';
+	},
+
+	html: function(html) {
+		this.getActive().innerHTML = html;
+	}
 }
 
 for (var p in ContentProto) {
@@ -753,6 +797,7 @@ function Navbar(wrapEl, options) {
 	options || (options = {});
 
 	this._wrapEl = wrapEl;
+	this._animWrapEl = options.animWrapEl;
 	this._backWrapEl = options.backWrapEl;
 	this._funcWrapEl = options.funcWrapEl;
 	this._titleWrapEl = options.titleWrapEl;
@@ -784,12 +829,12 @@ var NavbarProto = {
     },
 
     getButton: function(id) {
-    	return this._wrapEl.querySelector('button#' + id);
+    	return this._funcWrapEl.querySelector('button#' + id);
     },
 
     removeButton: function(id) {
     	if (!id) {
-    		var btns = this._wrapEl.querySelectorAll('button');
+    		var btns = this._funcWrapEl.querySelectorAll('button');
     		for (var i = 0; i < btns.length; i++) {
     			this.removeButton(btns[i]);
     		}
@@ -1241,8 +1286,8 @@ var PageProto = {
 	},
 
 	content: {
-		fill: function(html) {
-			pm.trigger('content:fill', html);
+		html: function(html) {
+			pm.trigger('content:html', html);
 		},
 		el: null,
 		$el: null
@@ -1364,10 +1409,23 @@ function Toolbar(wrapEl, options) {
 	options || (options = {});
 
 	this._wrapEl = wrapEl;
+	options.html && (this._wrapEl.innerHTML = options.html);
+	options.height && (this._wrapEl.style.height = options.height + 'px');
 }
 
 var ToolbarProto = {
-    
+    show: function(html, options) {
+    	options || (options = {});
+		html && (this._wrapEl.innerHTML = html);
+		options.height && (this._wrapEl.style.height = options.height + 'px');
+    	this._wrapEl.style.display = '';
+    	return this._wrapEl;
+    },
+
+    hide: function() {
+    	this._wrapEl.style.display = 'none';
+    	return this._wrapEl;
+    }
 }
 
 for (var p in ToolbarProto) {
@@ -1670,6 +1728,9 @@ function touchstartHandler(e) {
 	}
 
 	element = parentElement.boundScrollElement;
+
+	if (!element) return;
+
 	element.style.webkitTransition = '';
 	element.style.webkitTransform = getComputedStyle(element).webkitTransform;
 }
@@ -1684,7 +1745,7 @@ function touchendHandler(e) {
 }
 
 function panstartHandler(e) {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 
 	offset = anim.getTransformOffset(element);
 	minScrollTop = getMinScrollTop(element);
@@ -1695,7 +1756,7 @@ function panstartHandler(e) {
 }
 
 function panHandler(e) {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 
     var y = offset.y + e.displacementY
         ;
@@ -1724,7 +1785,7 @@ function panHandler(e) {
 }
 
 function panendHandler(e) {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 
 	var y = anim.getTransformOffset(element).y
 	if (getBoundaryOffset(y)) {
@@ -1753,7 +1814,7 @@ function touchBoundary(y) {
 }
 
 function bounceStart(v) {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 
     var s0 = anim.getTransformOffset(element).y,
     	a = 0.008 * ( v / Math.abs(v));
@@ -1771,7 +1832,7 @@ function bounceStart(v) {
 }
 
 function bounceEnd() {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 
 	var y = anim.getTransformOffset(element).y;
 	y = touchBoundary(y);
@@ -1787,7 +1848,7 @@ function bounceEnd() {
 }
 
 function flickHandler(e) {
-	if (stopBounce) return;
+	if (stopBounce || !element) return;
 	
     var s0 = anim.getTransformOffset(element).y,
         v, a, t, s,
@@ -1842,6 +1903,8 @@ function flickHandler(e) {
 }
 
 function scrollEnd() {
+	if (stopBounce || !element) return;
+	
 	cancelScrollEnd = false;
 
 	setTimeout(function() {
@@ -2102,13 +2165,258 @@ app.module.Collection = Collection;
 
 
 
+
 (function(win, app, undef) {
 
-app.config = {}
-app.start = function() {}
-app.registerPlugin = function() {}
+var doc = win.document
+	;
 
-app.view = app.module.View;
-app.page = app.module.Page;
+var Message = app.module.Message,
+	Navigation = app.module.Navigation,
+	Template = app.module.Template,
+	View = app.module.View,
+	Page = app.module.Page,
+	Navbar = app.module.Navbar,
+	Toolbar = app.module.Toolbar,
+	Content = app.module.Content,
+	Scroll = app.module.Scroll,
+	Transition = app.module.Transition
+	;
+
+var hooks = {
+	defineView: [],
+	definePage : [],
+	navigation: []
+};
+
+function q(selector, el) {
+	el || (el = doc);
+	return el.querySelector(selector);
+}
+
+var ConfigInitial = (function () {
+	return function() {
+		var config = app.config;
+
+		Navbar || (config.enableNavbar = false);
+		Toolbar || (config.enableToolbar = false);
+		Scroll || (config.enableScroll = false);
+		Transition || (config.enableTransition = false);
+
+		config.enableNavbar === 'true' && (config.enableNavbar = {});
+		config.enableToolbar === 'true' && (config.enableToolbar = {});
+		config.enableContent === 'true' && (config.enableContent = {});
+		config.enableScroll === 'true' && (config.enableScroll = {});
+		config.enableTransition === 'true' && (config.enableTransition = {});
+	}
+})();
+
+var MessageInitial = (function () {
+	return function() {
+
+	}
+})();
+
+var NavigationInitial = (function() {
+	var H_definePage = hooks.definePage,
+		H_navigation = hooks.navigation,
+		navigation = Navigation.instance;
+
+	H_definePage.push(function(page) {
+		name = page.name;
+		route = page.route;
+
+		if (!route) {
+			route = {name: name, 'default': true}
+		} else if (typeof route === 'string') {
+			route = {name: name, text: route}
+		}
+
+		navigation.instance.addRoute(route.name, route.text, {
+			'default': route['default'],
+			callback: route.callback,
+			last: route.last
+		});
+	});
+
+	return function() {
+		navigation.on('forward backward', function(state) {
+			var page = Page.get(state.name);
+			H_navigation.forEach(function(func) {
+				func(state, page);
+			});
+		});
+	}
+})();
+
+var UIInitial = (function () {
+	var H_navigation = hooks.navigation;
+
+	H_navigation.push(function(state, page){
+		var config = app.config,
+			c_navbar = config.enableNavbar,
+			c_toolbar = config.enableToolbar,
+			c_content = config.enableContent,
+			c_transition = config.enableTransition,
+			c_scroll = config.enableScroll
+			;
+
+		var move = state.move,
+			transition = state.transition,
+			contentMove
+			;
+
+		if (c_navbar) {
+			c_navbar.instance.setTitle(page.title);
+			c_navbar.removeButton();
+			page.buttons && page.buttons.forEach(function(button) {
+				c_navbar.setButton(button);
+			});
+
+			if (c_navbar.animWrapEl) {
+				var type = transition === 'backward' ? 'RI' : 'LI',
+					offset = 50;
+
+				Transition.float(c_navbar.animWrapEl, type, offset);
+			}
+		}
+
+		if (c_toolbar) {
+			if (page.toolbar) {
+				c_toolbar.instance.show(page.toolbar);
+			} else {
+				c_toolbar.instance.hide();
+			}
+		}
+
+		if (c_content) {
+			c_transition && (c_transition.wrapEl = c_content.cacheWrapEl);
+
+			if (c_scroll) {
+				Scroll.disable(c_scroll.wrapEl);
+				c_scroll.wrapEl = (move === 'backward' ? c_content.instance.getPrevious() : c_content.instance.getNext())
+			}
+
+			contentMove = function() {
+				move === 'backward' ? c_content.instance.previous() : c_contentinstance.next();
+			}
+		}
+
+		if (c_scroll) {
+			Scroll.enable(c_scroll.wrapEl, page.scroll || {});
+		}
+
+		if (c_transition) {
+			var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1);
+				className = c_transition.wrapEl.className += ' ' + transition;
+
+			Transition.move(c_transition.wrapEl, offsetX, 0, function() {
+				c_transition.wrapEl.className = className.replace(' ' + transition, '');
+				contentMove && contentMove();
+			});
+		} else {
+			contentMove && contentMove();
+		}
+
+	});
+
+	return function() {
+		var config = app.config;
+
+		config.viewport || (config.viewport = q('.viewport'));
+
+		if (config.enableNavbar) {
+			var c_navbar = config.enableNavbar;
+			c_navbar.wrapEl || (c_navbar.wrapEl = q('header.navbar', config.viewport));
+			c_navbar.animWrapEl || (c_navbar.animWrapEl = q('header.navbar > ul', config.viewport));
+			c_navbar.titleWrapEl || (c_navbar.titleWrapEl = q('header.navbar > ul > li:nth-child(2)', config.viewport));
+			c_navbar.backWrapEl || (c_navbar.backWrapEl = q('header.navbar > ul > li:nth-child(2)', config.viewport));
+			c_navbar.funcWrapEl || (c_navbar.funcWrapEl = q('header.navbar > ul > li:last-child', config.viewport));
+			c_navbar.instance = new Navbar(c_navbar.wrapEl, c_navbar);
+		}
+
+		if (config.enableToolbar) {
+			var c_toolbar = config.enableToolbar;
+			c_toolbar.wrapEl || (c_toolbar.wrapEl = q('footer.toolbar', config.viewport));
+			c_toolbar.instance = new Toolbar(c_toolbar.wrapEl, c_toolbar);
+		}
+
+		if (config.enableContent) {
+			var c_content = config.enableContent;
+			c_content.wrapEl || (c_content.wrapEl = q('section.content', config.viewport));
+			c_content.cacheWrapEl || (c_content.cacheWrapEl = q('section.content > div', content.viewport));
+			c_content.cacheLength || (c_content.cacheLength = 5);
+			c_content.instance = new Content(c_content.wrapEl, c_content);
+		}
+
+		if (config.enableTransition) {
+			var c_transition = config.enableTransition;
+			c_transition.wrapEl || (c_content.wrapEl = q('section.content > div', config.viewport));
+		}
+
+		if (config.enableScroll) {
+			var c_scroll = config.enableScroll;
+			c_scroll.wrapEl || (c_scroll.wrapEl = q('section.content > div', config.viewport));
+		}
+	}
+})();
+
+var AnimInitial = (function () {
+	return function() {
+		
+	}
+})();
+
+var TemplateInitial = (function () {
+	return function() {
+		
+	}
+})();
+
+var ViewIntial = (function () {
+	return function() {
+		
+	}
+})();
+
+var PageInitial = (function () {
+	return function() {
+		
+	}
+})();
+
+var PluginInitial = (function () {
+	return function() {
+		
+	}
+})();
+
+
+app.config = {
+	viewport : null,
+	enableNavbar : false,
+	enableToolbar : false,
+	enableContent: false,
+	enableScroll : false,
+	enableTransition : false,
+	templateEngine : null
+}
+
+app.start = function() {}
+
+app.extendView = function(properties) {
+	var view = View.extend(properties);
+	return view;
+}
+
+app.definePage = function(properties) {
+	var page = Page.define(properties);
+
+	hooks.definePage.forEach(function(func) {
+		func(page);
+	});
+
+	return page;
+}
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));

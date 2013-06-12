@@ -15,7 +15,7 @@ function testPage() {
 				this.navigation.setData('b', 2);
 				this.navigation.setTitle('demo');
 				this.navigation.setButton({type:'back'});
-				this.content.fill('abcd');
+				this.content.html('abcd');
 
 				this.trigger('show');
 			},
@@ -56,8 +56,8 @@ function testPage() {
 		log('setButton', options);
 	});
 
-	pm.on('content:fill', function(html) {
-		log('fill', html);
+	pm.on('content:html', function(html) {
+		log('html', html);
 	});
 
 	page.on('show', function() {

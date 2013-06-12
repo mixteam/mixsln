@@ -73,8 +73,8 @@ var PageProto = {
 	},
 
 	content: {
-		fill: function(html) {
-			pm.trigger('content:fill', html);
+		html: function(html) {
+			pm.trigger('content:html', html);
 		},
 		el: null,
 		$el: null

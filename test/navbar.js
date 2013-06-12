@@ -1,4 +1,4 @@
-function testButton() {
+function testNavbar() {
 	var Navbar = app.module.Navbar,
 		activeEl = document.querySelector('.viewport .active');
 
