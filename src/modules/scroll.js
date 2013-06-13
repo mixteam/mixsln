@@ -1,270 +1,362 @@
+//@require gesture
+//@require animation
+
 (function(win, app, undef) {
 
-var util = app.util,
-    Gesture = app._module.gesture,
-    Transform = app._module.transform,
-    prevented = false,
-    doc = win.document
-    ;
+var doc = win.document,
+	docEl = doc.documentElement,
+	anim = app.module.Animation,
+	element, offset, minScrollTop, maxScrollTop,
+	panFixRatio = 2,
+	cancelScrollEnd = false,
+	stopBounce = false,
+	prevented = false
+	;
+
+function getMinScrollTop(el) {
+	return 0 - (el.bounceTop || 0);
+}
 
 function getMaxScrollTop(el) {
-    var parentStyle = getComputedStyle(el.parentNode)
-        ;
+    // var parentStyle = getComputedStyle(el.parentNode),
+    //     maxTop = 0 - el.offsetHeight + parseInt(parentStyle.height) - 
+    //             parseInt(parentStyle.paddingTop) - 
+    //             parseInt(parentStyle.paddingBottom);
 
-    var maxTop = 0 - el.offsetHeight + parseInt(parentStyle.height) - 
-                parseInt(parentStyle.paddingTop) - 
-                parseInt(parentStyle.paddingBottom)/* - 
-                parseInt(parentStyle.marginTop) - 
-                parseInt(parentStyle.marginBottom)*/;
+    var rect = el.getBoundingClientRect(),
+    	pRect = el.parentNode.getBoundingClientRect(),
+    	maxTop = 0 - rect.height + pRect.height
+    	;
 
     if (maxTop > 0) maxTop = 0;
-    
-    return maxTop;
+
+    return maxTop + (el.bounceBottom || 0);
 }
 
-function Scroll(element) {
-    var that = this
+function fireEvent(element, eventName, extra) {
+	var event = doc.createEvent('HTMLEvents');
+	event.initEvent(eventName, false, true);
+	for (var p in extra) {
+		event[p] = extra[p];
+	}
+    element.dispatchEvent(event);
+}
+
+function touchstartHandler(e) {
+	if (stopBounce) return;
+
+	var parentElement = e.srcElement;
+
+	while (!parentElement.boundScrollEvent) {
+		parentElement = parentElement.parentNode || parentElement.offsetParent;
+	}
+
+	element = parentElement.boundScrollElement;
+
+	if (!element) return;
+
+	element.style.webkitTransition = '';
+	element.style.webkitTransform = getComputedStyle(element).webkitTransform;
+}
+
+function touchmoveHandler(e) {
+	e.preventDefault();
+	return false;
+}
+
+function touchendHandler(e) {
+	// TODO
+}
+
+function panstartHandler(e) {
+	if (stopBounce || !element) return;
+
+	offset = anim.getTransformOffset(element);
+	minScrollTop = getMinScrollTop(element);
+	maxScrollTop = getMaxScrollTop(element);
+	panFixRatio = 2.5;
+	stopBounce = false;
+	cancelScrollEnd = false;
+}
+
+function panHandler(e) {
+	if (stopBounce || !element) return;
+
+    var y = offset.y + e.displacementY
         ;
 
-    that._wrap = element;
-    that._scroller = element.children[0];
-    that._gesture = new Gesture(that._scroller);
-    that._originalX = null;
-    that._originalY = null;
-    that._currentY = null;
-    that._scrollHeight = null;
-    that._scrollEndHandler = null;
-    that._scrollEndCancel = false;
-    that._refreshed = false;
+    if(y > minScrollTop) {
+    	y = minScrollTop + (y - minScrollTop) / panFixRatio;
+    	panFixRatio *= 1.003;
+    	if (panFixRatio > 4) panFixRatio = 4;
+    } else if(y < maxScrollTop) {
+    	y = maxScrollTop - (maxScrollTop - y) / panFixRatio;
+    	panFixRatio *= 1.003;
+    	if (panFixRatio > 4) panFixRatio = 4;
+    }
 
-    that._preventBodyTouch = util.bindContext(that._preventBodyTouch, that);
-    that._onTouchStart = util.bindContext(that._onTouchStart, that);
-    that._onPanStart = util.bindContext(that._onPanStart, that);
-    that._onPan = util.bindContext(that._onPan, that);
-    that._onPanEnd = util.bindContext(that._onPanEnd, that);
-    that._onFlick = util.bindContext(that._onFlick, that);
-    that._onScrollEnd = util.bindContext(that._onScrollEnd, that);
+    if ((getBoundaryOffset(y))) {
+    	if (y > minScrollTop) {
+    		var name = 'pulldown';
+    	} else if (y < maxScrollTop) {
+    		var name = 'pullup';
+    	}
+    	fireEvent(element, name);
+    }
+
+    element.style.webkitTransition = '';
+    element.style.webkitTransform = anim.makeTranslateString(offset.x, y);
 }
 
-var proto = {
-    enable : function() {
-        var that = this,
-            scroller = that._scroller
-            ;
+function panendHandler(e) {
+	if (stopBounce || !element) return;
 
-        that._gesture.enable();
+	var y = anim.getTransformOffset(element).y
+	if (getBoundaryOffset(y)) {
+		bounceEnd();
+	} else {
+		scrollEnd();
+	}
+}
 
-        scroller.addEventListener('touchstart', that._onTouchStart, false);
-        scroller.addEventListener('panstart', that._onPanStart, false);
-        scroller.addEventListener('pan', that._onPan, false);
-        scroller.addEventListener('panend', that._onPanEnd, false);
-        scroller.addEventListener('flick', that._onFlick, false);
-
-        if (!prevented) {
-            prevented = true;
-            doc.body.addEventListener('touchmove', that._preventBodyTouch, false);
-        }
-    },
-
-    disable : function() {
-        var that = this,
-            scroller = that._scroller
-            ;
-
-        that._gesture.disable();
-
-        scroller.removeEventListener('touchstart', that._onTouchStart, false);
-        scroller.removeEventListener('panstart', that._onPanStart, false);
-        scroller.removeEventListener('pan', that._onPan, false);
-        scroller.removeEventListener('panend', that._onPanEnd, false);
-        scroller.removeEventListener('flick', that._onFlick, false);
-
-        if (prevented) {
-            prevented = false;
-            doc.body.removeEventListener('touchmove', that._preventBodyTouch, false);
-        }
-    },
-
-    refresh : function() {
-        this._scroller.style.height = 'auto';
-        this._refreshed = true;
-    },
-
-    getHeight : function() {
-        return this._scroller.offsetHeight;
-    },
-
-    getTop : function() {
-        return -Transform.getY(this._scroller);
-    },
-
-    to : function(top) {
-        var that = this,
-            scroller = that._scroller,
-            left = Transform.getX(scroller),
-            maxScrollTop = getMaxScrollTop(scroller)
-            ;
-
-        top = -top;
-
-        if (top < maxScrollTop) {
-            top = maxScrollTop;
-        } else if (top > 0) {
-            top = 0;
-        }
-
-        scroller.style.webkitTransform = Transform.getTranslate(left, top);
-        that._onScrollEnd();
-    },
-
-    _preventBodyTouch : function(e) {
-        e.preventDefault();
-        return false;
-    },
-
-    _onTouchStart : function(e) {
-        var that = this,
-            scroller = that._scroller
-            ;
-
-        scroller.style.webkitTransition = 'none';
-        scroller.style.webkitTransform = getComputedStyle(scroller).webkitTransform;
-
-        if (that._refreshed) {
-            that._refreshed = false;
-            that._scrollHeight = scroller.offsetHeight;
-            scroller.style.height = that._scrollHeight + 'px';
-        }
-    },
-
-    _onPanStart : function(e) {
-        var that = this,
-            scroller = that._scroller
-            ;
-
-        that._originalX = Transform.getX(scroller);
-        that._originalY = Transform.getY(scroller);
-    },
-
-    _onPan : function(e) {
-        var that = this,
-            scroller = that._scroller,
-            maxScrollTop = getMaxScrollTop(scroller),
-            originalX = that._originalX,
-            originalY = that._originalY,
-            currentY = that._currentY = originalY + e.displacementY
-            ;
-
-        
-        if(currentY > 0) {
-            scroller.style.webkitTransform = Transform.getTranslate(originalX, currentY / 2);
-        } else if(currentY < maxScrollTop) {
-            scroller.style.webkitTransform = Transform.getTranslate(originalX, (maxScrollTop - currentY) / 2 + currentY);
-        } else {
-            scroller.style.webkitTransform = Transform.getTranslate(originalX, currentY);
-        }
-    },
-
-    _onPanEnd : function(e) {
-        var that = this,
-            scroller = that._scroller,
-            originalX = that._originalX,
-            currentY = that._currentY,
-            maxScrollTop = getMaxScrollTop(scroller),
-            translateY = null
-            ;
-
-        if(currentY > 0) {
-            translateY = 0;
-        }
-
-        if(currentY < maxScrollTop) {
-            translateY = maxScrollTop;
-        }
-
-        if (translateY != null) {
-            Transform.start(scroller, '0.4s', 'ease-out', '0s', originalX, translateY, that._onScrollEnd);
-        } else {
-            that._onScrollEnd();
-        }
-    },
-
-    _onFlick : function(e) {
-        var that = this,
-            scroller = that._scroller,
-            originalX = that._originalX,
-            currentY = that._currentY,
-            maxScrollTop = getMaxScrollTop(scroller)
-            ;
-
-        that._scrollEndCancel = true;
-
-        if(currentY < maxScrollTop || currentY > 0)
-            return;
-
-        var s0 = Transform.getY(scroller), v0 = e.valocityY;
-
-        if(v0 > 1.5) v0 = 1.5;
-        if(v0 < -1.5) v0 = -1.5;
-        
-        var a = 0.0015 * (v0 / Math.abs(v0)),
-            t = v0 / a,
-            s = s0 + t * v0 / 2
-            ;
-
-        if( s > 0 || s < maxScrollTop) {
-            var sign = s > 0 ? 1 : -1,
-                edge = s > 0 ? 0 : maxScrollTop
-                ;
-
-            s = (s - edge) / 2 + edge;
-            t = (sign * Math.sqrt(2*a*(s-s0)+v0*v0)-v0)/a;
-            v = v0 - a * t;
-            
-            Transform.start(
-                scroller, 
-                t.toFixed(0) + 'ms', 'cubic-bezier(' + Transform.getBezier(-v0/a, -v0/a+t) + ')', '0s',
-                originalX, s.toFixed(0), 
-                function() {
-                    v0 = v;
-                    s0 = s;
-                    a = 0.0045 * (v0 / Math.abs(v0));
-                    t = -v0 / a;
-                    s = edge;
-
-                    Transform.start(
-                        scroller,
-                        (0-t).toFixed(0) + 'ms', 'cubic-bezier(' + Transform.getBezier(-t, 0) + ')', '0s',
-                        originalX, s.toFixed(0),
-                        that._onScrollEnd
-                    );
-                }
-            );
-        } else {
-            Transform.start(
-                scroller,
-                t.toFixed(0) + 'ms', 'cubic-bezier(' + Transform.getBezier(-t, 0) + ')', '0s',
-                originalX, s.toFixed(0),
-                that._onScrollEnd
-            );
-        }
-    },
-
-    _onScrollEnd : function() {
-        var that = this
-            ;
-
-        that._scrollEndCancel = false;
-        setTimeout(function() {
-            if (!that._scrollEndCancel) {
-                that._scrollEndHandler && that._scrollEndHandler();
-                
-            }
-        }, 10);
+function getBoundaryOffset(y) {
+	if(y > minScrollTop) {
+        return y - minScrollTop;
+    } else if (y < maxScrollTop){
+        return maxScrollTop - y;
     }
 }
-util.extend(Scroll.prototype, proto);
 
-app._module.scroll = Scroll;
+function touchBoundary(y) {
+	if (y > minScrollTop) {
+		y = minScrollTop;
+	} else if (y < maxScrollTop) {
+		y = maxScrollTop;
+	}
 
-})(window, window['app']||(window['app']={_module:{},plugin:{}}));
+	return y;
+}
+
+function bounceStart(v) {
+	if (stopBounce || !element) return;
+
+    var s0 = anim.getTransformOffset(element).y,
+    	a = 0.008 * ( v / Math.abs(v));
+    	t = v / a;
+    	s = s0 + t * v / 2
+    	;
+
+    fireEvent(element, 'bouncestart');
+
+    anim.translate(element, 
+    	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
+    	offset.x, s.toFixed(0),
+		bounceEnd
+    );
+}
+
+function bounceEnd() {
+	if (stopBounce || !element) return;
+
+	var y = anim.getTransformOffset(element).y;
+	y = touchBoundary(y);
+
+    anim.translate(element, 
+    	'0.4s', 'ease-in-out', '0s', 
+    	offset.x, y,
+    	function() {
+    		fireEvent(element, 'bounceend');
+    		scrollEnd();
+    	}
+    );
+}
+
+function flickHandler(e) {
+	if (stopBounce || !element) return;
+	
+    var s0 = anim.getTransformOffset(element).y,
+        v, a, t, s,
+        _v, _s, _t
+        ;
+
+    cancelScrollEnd = true;
+
+    if(s0 > minScrollTop || s0 < maxScrollTop) {
+    	bounceStart(v);
+    } else {
+    	v = e.velocityY;
+        if (v > 1.5) v = 1.5;
+        if (v < -1.5) v = -1.5;
+        a = 0.0015 * ( v / Math.abs(v));
+		t = v / a;
+        s = s0 + t * v / 2;
+
+        if (s > minScrollTop) {
+    	    _s = minScrollTop - s0;
+            _t = (v - Math.sqrt(-2 * a *_s + v * v)) / a;
+            _v = v - a * _t;
+
+	        anim.translate(element, 
+	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
+	        	offset.x, minScrollTop,
+	        	function() {
+	        		bounceStart(_v)
+	        	}
+	        );
+            
+        } else if (s < maxScrollTop) {
+            _s = maxScrollTop - s0;
+            _t = (v + Math.sqrt(-2 * a * _s + v * v)) / a;
+            _v = v - a * _t;
+
+	        anim.translate(element, 
+	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
+	        	offset.x, maxScrollTop,
+	        	function() {
+	        		bounceStart(_v)
+	        	}
+	        );
+        } else {
+	        anim.translate(element, 
+	        	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
+	        	offset.x, s.toFixed(0),
+	        	scrollEnd
+	        );
+        }
+	}
+}
+
+function scrollEnd() {
+	if (stopBounce || !element) return;
+	
+	cancelScrollEnd = false;
+
+	setTimeout(function() {
+		if (!cancelScrollEnd) {
+			fireEvent(element, 'scrollend');
+		}
+	}, 10);
+}
+
+var Scroll = {
+	enable: function(element, options) {
+		var parentElement = element.parentNode || element.offsetParent
+			;
+
+	    if (!prevented) {
+	    	prevented = true;
+	    	docEl.addEventListener('touchmove', touchmoveHandler, false);
+	    }
+
+	    if (!parentElement.boundScrollEvent) {
+	    	parentElement.boundScrollEvent = true;
+			parentElement.addEventListener('touchstart', touchstartHandler, false);
+			parentElement.addEventListener('touchend', touchendHandler, false);
+		    parentElement.addEventListener('panstart', panstartHandler, false);
+		    parentElement.addEventListener('pan', panHandler, false);
+		    parentElement.addEventListener('panend', panendHandler, false);
+		    parentElement.addEventListener('flick', flickHandler, false);
+	    }
+	    parentElement.boundScrollElement = element;
+
+	    if (!element.refresh) {
+	    	element.getScrollHeight = function() {
+	    		return element.scrollHeight - (element.bounceTop||0) - (element.bounceBottom||0);
+	    	}
+
+		    element.getScrollTop = function() {
+		    	var offset = anim.getTransformOffset(element);
+	    		return -(offset.y + (element.bounceTop||0));
+	    	}
+
+		    element.refresh = function() {
+		        element.style.height = 'auto';
+		        element.style.height = element.offsetHeight + 'px';
+		    }
+
+		    element.scrollTo = function(y) {
+		    	var x = anim.getTransformOffset(element).x;
+		    	y = touchBoundary(-y - (element.bounceTop || 0));
+				element.style.webkitTransition = '';
+		        element.style.webkitTransform = anim.makeTranslateString(x, y);
+		    }
+
+		    element.scollToElement = function(el) {
+		    	
+		    }
+
+		    element.getBoundaryOffset = function() {
+			    var y = anim.getTransformOffset(element).y;
+			    return getBoundaryOffset(y);
+		    }
+
+		    element.getViewHeight = function() {
+		    	return getMinScrollTop(element) - getMaxScrollTop(element);
+		    }
+
+		    element.stopBounce = function() {
+		    	stopBounce = true;
+
+		    	var y = anim.getTransformOffset(element).y,
+		    		minScrollTop = getMinScrollTop(element),
+		    		maxScrollTop = getMaxScrollTop(element),
+		    		_y
+		    		;
+
+		    	if (y > minScrollTop + (element.bounceTop||0)) {
+		    		_y = minScrollTop + (element.bounceTop||0);
+		    	} else if (y < maxScrollTop - (element.bounceBottom||0)) {
+		    		_y = maxScrollTop - (element.bounceBottom||0);
+		    	}
+
+		    	if (_y != null) {
+		    		anim.translate(element,
+		    			'0.4s', 'ease-in-out', '0s',
+		    			offset.x, _y);
+		    	}
+		    }
+
+		    element.resumeBounce = function() {
+		    	stopBounce = false;
+
+		    	var y = anim.getTransformOffset(element).y,
+		    		minScrollTop = getMinScrollTop(element),
+		    		maxScrollTop = getMaxScrollTop(element),
+		    		_y
+		    		;
+
+		    	if (y > minScrollTop) {
+		    		_y = minScrollTop;
+		    	} else if (y < maxScrollTop){
+		    		_y = maxScrollTop;
+		    	}
+
+		    	if (_y != null) {
+		    		anim.translate(element,
+		    			'0.4s', 'ease-in-out', '0s',
+		    			offset.x, _y);
+		    	}
+		    }
+		}
+
+		if (options) {
+			element.bounceTop = options.bounceTop;
+			element.bounceBottom = options.bounceBottom;
+		}
+		element.scrollTo(0);
+
+	    return element;
+	},
+
+	disable: function(element) {
+		var parentElement = element.parentNode || element.offsetParent;
+
+		if (parentElement.boundScrollElement === element) {
+			parentElement.boundScrollElement = null;
+		}
+	}
+}
+
+app.module.Scroll = Scroll;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}));

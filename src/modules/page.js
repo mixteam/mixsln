@@ -1,153 +1,113 @@
+//@reqiure message
+
 (function(win, app, undef) {
 
-var util = app.util,
-    Message = app._module.message,
-    navigate = app._module.navigate.instance,
-    View = app.view,
 
-    STATUS = {
-		'DEFINED' : 0,
-		'UNLOADED' : 1,
-		'LOADED' : 2,
-		'READY' : 3
-	},
+var Message = app.module.MessageScope,
+	pm = Message.get('page'),
 	pages = {}
 	;
 
-function Page() {
-	var that = this,
-		name = that.name,
-		msgContext = new Message('page.' + name)
-		;
-
-	Message.mixto(this, msgContext);
-	View.apply(that, arguments);
-	that.status = STATUS.DEFINED;
-}
-
-var proto = {
-	getTitle : function() {
-		//can overrewite
-		return this.title;
-	},
-
-	navigation: {
-		push: function(fragment, options) {
-			app.navigation.push(fragment,  options);
-		},
-		pop: function() {
-			app.navigation.pop();
-		},
-		getParameter: function(name) {
-			return app.navigation.getParameter(name);
-		},
-		getData: function(name) {
-			return app.navigation.getData(name);
-		},
-		setData: function(name, value) {
-			return app.navigation.setData(name, value);
-		},
-		setTitle: function(title) {
-			if (app.hybrid) {
-				app.hybrid.setTitle(title);
-			} else if (app.config.enableNavibar){
-				app.component.get('navibar').fn.set(title);
-			}
-			
-		},
-		setButtons: function(options) {
-			if (app.hybrid) {
-
-			} else if (app.config.enableNavibar) {
-				var btn = options.type==='back'?app.component.get('backBtn'):app.component.get('funcBtn');
-				btn.fn.setText(options.text);
-				if (!options.handler && type === 'back') {
-					btn.fn.handler = function() {
-						navigate.backward();
-					}
-				} else {
-					btn.fn.handler = options.handler;
-				}
-			}
+function extend(target, properties) {
+	for (var key in properties) {
+		if (properties.hasOwnProperty(key)) {
+			target[key] = properties[key];
 		}
-	},
-
-	viewport: {
-		el: null,
-		$el: null,
-		fill : function(html) {
-			app.component.fillActiveContent(html);
-		}
-	},
-
-	ready : function() {/*implement*/},
-	unload : function() {/*implement*/}
-}
-
-util.inherit(Page, View);
-util.extend(Page.prototype, proto);
-
-Page.STATUS = STATUS;
-Page.global = {};
-Page.fn = {};
-var isExtend = false;
-function extendPageFn() {
-	if (!isExtend) {
-		isExtend = true;
-		util.extend(Page.prototype, Page.fn);
 	}
 }
-Page.define = function(properties) {
-	extendPageFn();
 
+function inherit(child, parent) {
+	function Ctor() {}
+	Ctor.prototype = parent.prototype;
+	var proto = new Ctor();
+	extend(proto, child.prototype);
+	proto.constructor = child;
+	child.prototype = proto;
+}
+
+function Page() {
+}
+
+var PageProto = {
+	navigation: {
+		push: function(fragment, options) {
+			pm.trigger('navigation:push', fragment, options);
+		},
+
+		pop: function() {
+			pm.trigger('navigation:pop');
+		},
+
+		getParameter: function(name) {
+			var value;
+
+			pm.once('navigation:getParameter:callback', function(v) {
+				value = v;
+			})
+			pm.trigger('navigation:getParameter', name);
+			return value;
+		},
+
+		getData: function(name) {
+			var value;
+			
+			pm.once('navigation:getData:callback', function(v) {
+				value = v;
+			})
+			pm.trigger('navigation:getData', name);	
+
+			return value;
+		},
+
+		setData: function(name, value) {
+			pm.trigger('navigation:setData', name, value);
+		},
+
+		setTitle: function(title) {
+			pm.trigger('navigation:setTitle', title);	
+		},
+
+		setButton: function(options) {
+			pm.trigger('navigation:setButton', options);
+		}
+	},
+
+	content: {
+		html: function(html) {
+			pm.trigger('content:html', html);
+		},
+		el: null,
+		$el: null
+	},
+
+	startup : function() {/*implement*/},
+	teardown : function() {/*implement*/}	
+}
+
+for (var p in PageProto) {
+	Page.prototype[p] = PageProto[p];
+} 
+
+Page.fn = {};
+
+Page.define = function(properties) {
 	function ChildPage() {
 		Page.apply(this, arguments);
 		this.initialize && this.initialize.apply(this, arguments);
+
+		extend(this, Page.fn);
+		extend(this, properties);
+		Message.mixto(this, 'page.' + this.name);
 	}
-	util.inherit(ChildPage, Page);
-	util.extend(ChildPage.prototype, properties);
+	inherit(ChildPage, Page);
 
-	var	iPage = new ChildPage(),
-		name, route
-		;
-
-	util.each(Page.global, function(val, name) {
-		var type = util.isTypeof(val);
-
-		switch (type){
-			case 'array':
-				iPage[name] = val.slice(0).concat(iPage[name] || []);
-				break;
-			case 'object':
-				iPage[name] = util.extend(val, iPage[name] || {});
-				break;
-			case 'string':
-			case 'number':
-				(iPage[name] == null) && (iPage[name] = val);
-				break;
-		}
-	});
-
-	name = iPage.name;
-	route = iPage.route;
-
-	if (!route) {
-		route = {name: 'default', 'default': true}
-	} else if (util.isTypeof(route, 'string')) {
-		route = {name: 'anonymous', text: route}
-	}
-
-	navigate.addRoute(name + '.' + route.name, route.text, route);
-
-	return (pages[iPage.name] = iPage);
+	return (pages[properties.name] = new ChildPage());
 }
+
 Page.get = function(name) {
 	return pages[name];
 }
-Page.each = function(delegate) {
-	util.each(pages, delegate);
-}
 
-app.page = app._module.page = Page;
+app.module.Page = Page;
 
-})(window, window['app']||(window['app']={_module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}));

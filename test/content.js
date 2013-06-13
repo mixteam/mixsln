@@ -1,25 +1,28 @@
 function testContent() {
 	var Content = app.module.Content,
-		activeEl = document.querySelector('.viewport .active'),
+		viewport = document.querySelector('.viewport'),
 		ss = document.styleSheets[0];
 
-	activeEl.innerHTML = '<button class="prev">前一个</button><button class="next">后一个</button><div></div>';
-	activeEl.setAttribute('id', 'testContent');
+	viewport.setAttribute('id', 'testContent');
 
-	var content = new Content(activeEl, {
-		cacheWrapEl: activeEl.querySelector('div'),
-		cacheLength: 5
+	var content = new Content(viewport, {
+		cacheLength: 4
 	});
 
-	activeEl.querySelector('button.prev').addEventListener('click', function() {
+
+	viewport.innerHTML += '<button class="prev">前一个</button><button class="next">后一个</button>';
+
+	viewport.querySelector('button.prev').addEventListener('click', function() {
 		var date = new Date();
 		content.previous();
+		content.setClassName();
 		content.html(date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds());
 	});
 
-	activeEl.querySelector('button.next').addEventListener('click', function() {
+	viewport.querySelector('button.next').addEventListener('click', function() {
 		var date = new Date();
 		content.next();
+		content.setClassName();
 		content.html(date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds());
 	});
 

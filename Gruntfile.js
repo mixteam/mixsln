@@ -18,10 +18,10 @@ function runTask(grunt) {
 		
 			js: {
 				options : {
-					except: ['dualgesture.js'],
+					except: ['dualgesture.js', 'matrix.js'],
 				},
-				src: ['<%= context.srcPath %>/<%= context.modulePath %>-rebuild/*.js'],
-				dest: '<%= context.distPath %>/<%= context.name %>-rebuild.js'
+				src: ['<%= context.srcPath %>/<%= context.modulePath %>/*.js'],
+				dest: '<%= context.distPath %>/<%= context.name %>.js'
 			},
 
 			css: {
@@ -30,54 +30,10 @@ function runTask(grunt) {
 			}
 		},
 
-		concatTask = {
-			options: {
-				banner: '/*! <%= context.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
-				separator: '\n',
-				stripBanners: true
-			},
-			
-			main: {
-				src: [
-					'<%= context.srcPath %>/<%= context.modulePath %>/util.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/message.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/router.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/navigate.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/gesture.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/transform.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/scroll.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/component.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/view.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/page.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/navigation.js',
-					'<%= context.srcPath %>/app.js'
-				],
-				dest: '<%= context.distPath %>/<%= context.name %>.js'
-			},
-
-			hybrid: {
-				src: [
-					'<%= context.srcPath %>/<%= context.modulePath %>/util.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/message.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/router.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/navigate.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/gesture.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/transform.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/scroll.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/component.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/view.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/page.js',
-					'<%= context.srcPath %>/<%= context.modulePath %>/navigation.js',
-					'<%= context.srcPath %>/app-hybrid.js'
-				],
-				dest: '<%= context.distPath %>/<%= context.name %>-hybrid.js'
-			}
-		},
-
 		uglifyTask = {
 			main: {
 				files: {
-					'<%= context.distPath %>/<%= context.name %>.min.js': '<%= concat.main.dest %>'
+					'<%= context.distPath %>/<%= context.name %>.min.js': '<%= depconcat.js.dest %>'
 				}
 			},
 
@@ -106,13 +62,8 @@ function runTask(grunt) {
 
 		watchTask = {
 			'main_js' : {
-				files: ['<%= concat.main.src %>'],
-				tasks: ['concat:main', 'uglify:main']
-			},
-
-			'rebuild_js' : {
 				files: ['<%= depconcat.js.src %>'],
-				tasks: ['depconcat:js']
+				tasks: ['depconcat:js', 'uglify:main']
 			},
 
 			'plugin_js' :  {
@@ -131,19 +82,17 @@ function runTask(grunt) {
 	grunt.initConfig({
 		context: context,
 		depconcat: depconcatTask,
-		concat: concatTask,
 		uglify: uglifyTask,
 		watch: watchTask,
 		cssmin: cssminTask
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-depconcat');
 
-	grunt.registerTask('dist', ['concat', 'depconcat', 'uglify', 'cssmin']);
+	grunt.registerTask('dist', ['depconcat', 'uglify', 'cssmin']);
 	grunt.registerTask('dev', ['watch']);
 	
 	grunt.registerTask('default', ['dist']);

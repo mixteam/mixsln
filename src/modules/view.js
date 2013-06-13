@@ -1,105 +1,92 @@
 (function(win, app, undef) {
 
-var util = app.util,
-	viewIdx = 0,
+var doc = win.document,
 	views = {}
 	;
 
-function View() {
-	var that = this,
-		name = that.name
-		;
-
-	that._vid = name + '-' + Date.now() + '-' + (viewIdx++);
-	that.views || (that.views = {});
-}
-
-var proto = {
-	loadTemplate: function(url, callback) {
-		// can overwrite
-		var that = this
-			;
-
-		if (arguments.length === 1) {
-			callback = arguments[0];
-			url = that.template;
-		}
-
-		if (url) {
-			util.loadFile(url, callback);
-		} else {
-			callback();
-		}
-	},
-
-	compileTemplate: function(text, callback) {
-		// can overwrite
-		var that = this,
-			engine = app.config.templateEngine
-			;
-
-		if (engine && engine.compile && util.isTypeof(text, 'string')) {
-			text = engine.compile(text);
-		}
-
-		if (callback) {
-			callback(text);
-		} else {
-			return text;
-		}
-	},
-
-	renderTemplate: function(datas, callback) {
-		// can overwrite
-		var that = this,
-			engine = app.config.templateEngine,
-			compiledTemplate = that.compiledTemplate,
-			content = ''
-			;
-
-		if (engine && engine.render && util.isTypeof(datas, 'object') && compiledTemplate) {
-			content = engine.render(compiledTemplate, datas);
-		} else {
-			content = compiledTemplate;
-		}
-
-		if (callback) {
-			callback(content);
-		} else {
-			return content;
+function extend(target, properties) {
+	for (var key in properties) {
+		if (properties.hasOwnProperty(key)) {
+			target[key] = properties[key];
 		}
 	}
 }
-util.extend(View.prototype, proto);
+
+function inherit(child, parent) {
+	function Ctor() {}
+	Ctor.prototype = parent.prototype;
+	var proto = new Ctor();
+	extend(proto, child.prototype);
+	proto.constructor = child;
+	child.prototype = proto;
+}
+	
+function View() {
+	var el, $el, $ = win['$'];
+
+
+	Object.defineProperty(this, 'el', {
+		get: function() {
+			return el;
+		},
+
+		set: function(element) {
+			var $;
+
+			if (typeof element === 'string') {
+				el = doc.querySelector(element);
+			} else if (element instanceof HTMLElement) {
+				el = element;
+			}
+
+			$ && ($el = $(el));
+		}
+	});
+
+	Object.defineProperty(this, '$el', {
+		get: function() {
+			return $el;
+		},
+
+		set: function(element) {
+			if (typeof element === 'string' && $) {
+				$el = $(element);
+			} else {
+				$el = element;
+			}
+
+			$el && (el = $el[0]);
+		}
+	});
+}
+
+var ViewProto = {
+	render: function(callback) {/*implement*/},
+	destory: function(callback) {/*implement*/}
+}
+
+for (var p in ViewProto) {
+	View.prototype[p] = ViewProto[p];
+} 
 
 View.fn = {};
-var isExtend = false;
-function extendViewFn() {
-	if (!isExtend) {
-		isExtend = true;
-		util.extend(View.prototype, View.fn);
-	}
-}
-View.define = function(properties) {
-	extendViewFn();
 
+View.extend = function(properties) {
 	function ChildView() {
 		View.apply(this, arguments);
 		this.initialize && this.initialize.apply(this, arguments);
+		extend(this, View.fn);
+		extend(this, properties);
 	}
-	util.inherit(ChildView, View);
-	util.extend(ChildView.prototype, properties);
+	inherit(ChildView, View);
 	
-
 	return (views[properties.name] = ChildView);
 }
+
 View.get = function(name) {
 	return views[name];
 }
-View.each = function(delegate) {
-	util.each(views, delegate);
-}
 
-app.view = app._module.view = View;
+app.module.View = View;
 
-})(window, window['app']||(window['app']={_module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}));
