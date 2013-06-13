@@ -1,6 +1,6 @@
 (function(app, undef) {
 
-	app.page.define({
+	app.definePage({
 		name : 'default',
 		title : '请搜索商品',
 		template : './pages/default/default.tpl',
@@ -17,25 +17,23 @@
 			['submit', '#J_searchForm', '_submitFormHandler']
 		],
 
-		_pid : 0,
-
 		_submitFormHandler : function(e, that) {
 			e.preventDefault();
 
-			var word = that.viewport.$el.find('#J_searchForm .bton-keyword').val()
+			var word = that.content.$el.find('#J_searchForm .bton-keyword').val()
 				;
 
 			that.navigation.push('list/' + encodeURIComponent(word) + '/');
 		},
 
-		ready : function() {
+		startup : function() {
 			// implement super.ready
-			var html = this.renderTemplate({});
+			//var html = this.template.render({});
 
-			this.viewport.fill(html);
+			this.content.html('hello, world');
 		},
 
-		unload : function() {
+		teardown : function() {
 			// implement super.unload
 		}
 	});

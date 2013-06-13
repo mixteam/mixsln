@@ -1133,8 +1133,8 @@ var NavigationProto = {
 
 		this._stack.reset();
 	    this._started = true;
-
 		win.addEventListener('hashchange', this, false);
+		this.handleEvent();
 		return true;
 	},
 
@@ -2191,7 +2191,8 @@ var Message = app.module.Message,
 var hooks = {
 	extendView: [],
 	definePage: [],
-	switchNavigation: []
+	switchNavigation: [],
+	appStart: []
 };
 
 app.config = {
@@ -2209,8 +2210,9 @@ function q(selector, el) {
 	return el.querySelector(selector);
 }
 
-var ConfigInitial = (function () {
-	return function() {
+// Config Initial
+void function () {
+	hooks.appStart.push(function() {
 		var config = app.config;
 
 		Navbar || (config.enableNavbar = false);
@@ -2224,16 +2226,19 @@ var ConfigInitial = (function () {
 		config.enableTransition === true && (config.enableTransition = {});
 		typeof config.enableContent !== 'object' && (config.enableContent = {});
 
-	}
-})();
+	})
+}();
 
-var MessageInitial = (function () {
-	return function() {
+// Message Initial
+void function () {
+	hooks.appStart.push(function() {
 
-	}
-})();
+	});
+}();
 
-var NavigationInitial = (function() {
+// Navigation Initial
+
+void function() {
 	var H_definePage = hooks.definePage,
 		H_switchNavigation = hooks.switchNavigation,
 		navigation = Navigation.instance;
@@ -2248,30 +2253,32 @@ var NavigationInitial = (function() {
 			route = {name: name, text: route}
 		}
 
-		navigation.instance.addRoute(route.name, route.text, {
+		navigation.addRoute(route.name, route.text, {
 			'default': route['default'],
 			callback: route.callback,
 			last: route.last
 		});
 	});
 
-	return function() {
+	hooks.appStart.push(function() {
 		navigation.on('forward backward', function(state) {
 			var page = Page.get(state.name);
 			H_switchNavigation.forEach(function(func) {
 				func(state, page);
 			});
 		});
-	}
-})();
+	});
+}();
 
-var UIInitial = (function () {
+// UI Initial
+void function () {
 	var H_switchNavigation = hooks.switchNavigation;
 
 	H_switchNavigation.push(function(state, page){
 		var config = app.config,
 			c_navbar = config.enableNavbar,
-			c_toolbar = config.enableToolbar
+			c_toolbar = config.enableToolbar,
+			transition = state.transition
 			;
 
 		if (c_navbar) {
@@ -2292,14 +2299,13 @@ var UIInitial = (function () {
 			}
 		}
 
-		if (c_toolbar && page.toolbar) {
-			i_navbar.show(page.toolbar);
-		} else {
-			i_navbar.hide();
+		if (c_toolbar) {
+			var i_toolbar = c_toolbar.instance;
+			page.toolbar?i_toolbar.show(page.toolbar):i_toolbar.hide();
 		}
 	});
 
-	return function() {
+	hooks.appStart.push(function() {
 		var config = app.config,
 			c_navbar = config.enableNavbar,
 			c_toolbar = config.enableToolbar,
@@ -2309,14 +2315,16 @@ var UIInitial = (function () {
 		config.viewport || (config.viewport = q('.viewport'));
 
 		if (c_navbar) {
+			config.viewport.className += 'enableNavbar ';
 			c_navbar.wrapEl || (c_navbar.wrapEl = q('header.navbar', config.viewport));
-			c_navbar.titleWrapEl || (c_navbar.titleWrapEl = q('header.navbar > ul > li:nth-child(2)', config.viewport));
+			c_navbar.titleWrapEl || (c_navbar.titleWrapEl = q('header.navbar > ul > li:first-child', config.viewport));
 			c_navbar.backWrapEl || (c_navbar.backWrapEl = q('header.navbar > ul > li:nth-child(2)', config.viewport));
 			c_navbar.funcWrapEl || (c_navbar.funcWrapEl = q('header.navbar > ul > li:last-child', config.viewport));
 			c_navbar.instance = new Navbar(c_navbar.wrapEl, c_navbar);
 		}
 
 		if (c_toolbar) {
+			config.viewport.className += 'enableToolbar ';
 			c_toolbar.wrapEl || (c_toolbar.wrapEl = q('footer.toolbar', config.viewport));
 			c_toolbar.instance = new Toolbar(c_toolbar.wrapEl, c_toolbar);
 		}
@@ -2326,10 +2334,12 @@ var UIInitial = (function () {
 		c_content.instance = new Content(c_content.wrapEl, {
 			cacheLength: c_content.cacheLength
 		});
-	}
-})();
+	});
+}();
 
-var AnimInitial = (function () {
+//Animation Initial
+
+void function () {
 	var H_switchNavigation = hooks.switchNavigation;
 
 	H_switchNavigation.push(function(state, page){
@@ -2344,12 +2354,14 @@ var AnimInitial = (function () {
 		move === 'backward' ? i_content.previous() : i_content.next();
 
 		if (c_scroll) {
+			config.viewport.className += 'enableScroll ';
 			Scroll.disable(c_scroll.wrapEl);
 			c_scroll.wrapEl = i_content.getActive();
 			Scroll.enable(c_scroll.wrapEl, page.scroll);
 		}
 
 		if (c_transition) {
+			config.viewport.className += 'enableTransition ';
 			var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
 				className = c_transition.wrapEl.className += ' ' + transition
 				;
@@ -2364,7 +2376,7 @@ var AnimInitial = (function () {
 
 	});
 
-	return function() {
+	hooks.appStart.push(function() {
 		var config = app.config,
 			i_content = config.enableContent.instance,
 			c_transition = config.enableTransition,
@@ -2378,28 +2390,28 @@ var AnimInitial = (function () {
 		if (c_transition) {
 			c_transition.wrapEl = i_content.getActive().parentNode;
 		}
-	}
-})();
+	});
 
-var TemplateInitial = (function () {
-	return function() {
+}();
+
+//Template Initial
+void function () {
+	hooks.appStart.push(function() {
 		
-	}
-})();
+	});
+}();
 
-var ViewIntial = (function () {
-	return function() {
+//View Intial
+void function () {
+	hooks.appStart.push(function() {
 		
-	}
-})();
+	});
+}();
 
-var PageInitial = (function () {
+//Page Initial
+void function () {
 	var H_switchNavigation = hooks.switchNavigation,
-
 		config = app.config,
-		i_content = config.enableContent.instance,
-		c_navbar = config.enableNavbar,
-		c_toolbar = config.enableNavbar,
 		navigation = Navigation.instance,
 
 		protoExtension = {
@@ -2435,21 +2447,21 @@ var PageInitial = (function () {
 				},
 
 				setTitle: function(title) {
-					if (c_navbar) {
-						c_navbar.instance.setTitle(title);
+					if (config.enableNavbar) {
+						config.enableNavbar.instance.setTitle(title);
 					}
 				},
 
 				setButton: function(options) {
-					if (c_navbar) {
-						c_navbar.instance.setButton(options);
+					if (config.enableNavbar) {
+						config.enableNavbar.instance.setButton(options);
 					}
 				}
 			},
 
 			content: {
 				html: function(html) {
-					i_content.html(html);
+					config.enableContent.instance.html(html);
 				}
 			}
 		}
@@ -2476,18 +2488,24 @@ var PageInitial = (function () {
 		page.startup();
 	});
 
-	return function() {
+	hooks.appStart.push(function() {
 		
-	}
-})();
+	});
+}();
 
-var PluginInitial = (function () {
-	return function() {
+//Plugin Initial
+void function () {
+	hooks.appStart.push(function() {
 		
-	}
-})();
+	});
+}();
 
-app.start = function() {}
+app.start = function() {
+	hooks.appStart.forEach(function(func) {
+		func();
+	});
+	Navigation.instance.start();
+}
 
 app.extendView = function(properties) {
 	var view = View.extend(properties);

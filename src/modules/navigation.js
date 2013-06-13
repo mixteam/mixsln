@@ -268,8 +268,8 @@ var NavigationProto = {
 
 		this._stack.reset();
 	    this._started = true;
-
 		win.addEventListener('hashchange', this, false);
+		this.handleEvent();
 		return true;
 	},
 

@@ -166,7 +166,7 @@ footer.toolbar {
 }
 
 
-.viewport.enableNavibar > header.navbar {
+.viewport.enableNavbar > header.navbar {
     display: block;
 }
 
