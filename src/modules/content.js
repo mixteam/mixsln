@@ -9,7 +9,7 @@ function Content(wrapEl, options) {
 
 	var html = '';
 	for (var i = 0; i < this._cacheLength; i++) {
-		html += '<div class="inactive"></div>';
+		html += '<div class="inactive" index="' + i + '"></div>';
 	}
 	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div>';
 

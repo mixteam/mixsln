@@ -10,6 +10,7 @@ function _setButton(btn, options) {
 	(options.bg != null) && (btn.style.background = options.bg);
 	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" />');
 	(options.hide === true) ? (btn.style.display = 'none'):(btn.style.display = '');
+	options.onChange && options.onChange.call(btn, options);
 	if (options.handler) {
 		btn.handler && btn.removeEventListener('click', btn.handler, false);
 		btn.addEventListener('click', (btn.handler = options.handler), false);

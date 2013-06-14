@@ -6,8 +6,12 @@
 		template : './pages/default/default.tpl',
 		buttons : [
 			{
-				type : 'back',
-				text : '返回'
+				type: 'back',
+				text: '淘宝网',
+				autoHide: false,
+				handler: function(e) {
+					location.href = 'http://www.taobao.com'
+				}
 			}
 		],
 		plugins: {

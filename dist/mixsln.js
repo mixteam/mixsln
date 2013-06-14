@@ -157,7 +157,7 @@ function Content(wrapEl, options) {
 
 	var html = '';
 	for (var i = 0; i < this._cacheLength; i++) {
-		html += '<div class="inactive"></div>';
+		html += '<div class="inactive" index="' + i + '"></div>';
 	}
 	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div>';
 
@@ -791,6 +791,7 @@ function _setButton(btn, options) {
 	(options.bg != null) && (btn.style.background = options.bg);
 	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" />');
 	(options.hide === true) ? (btn.style.display = 'none'):(btn.style.display = '');
+	options.onChange && options.onChange.call(btn, options);
 	if (options.handler) {
 		btn.handler && btn.removeEventListener('click', btn.handler, false);
 		btn.addEventListener('click', (btn.handler = options.handler), false);
@@ -946,6 +947,7 @@ var StateStackProto = {
 
 		cur.move = move;
 		cur.transition = transition;
+		cur.index = stateIdx;
 
 		that.move = null;
 		that.transition = null;
@@ -1543,11 +1545,57 @@ var doc = win.document,
 		'T': 'y',
 		'B': 'y'
 	},
-	TYPE_IO = {
-		'I': -1,
-		'O': 1
+	TYPE_RATIO = {
+		'L': -1,
+		'R': 1,
+		'T': -1,
+		'B': 1
 	}
 	;
+
+function anime(element, type, delegate, callback) {
+	var TYPE = this.TYPE, xy, ratio,
+		offset = anim.getTransformOffset(element),
+		from = {
+			translate: {
+				x: offset.x,
+				y: offset.y
+			}
+		},
+		to = {
+			translate: {
+				x: offset.x,
+				y: offset.y
+			}
+		}
+		;
+
+	type = type.split('');
+	delegate(from, to, type[0], type[1]);
+
+	for (var p in from) {
+		if (p === 'translate') {
+			element.style.webkitTransition = '';
+			element.style.webkitTransform = anim.makeTranslateString(from[p].x, from[p].y);
+		} else {
+			element.style[p] = from[p];
+		}
+	}
+	to.translate = [to.translate.x, to.translate.y];
+	
+	element.style.webkitBackfaceVisibility = 'hidden';
+	element.style.webkitTransformStyle = 'preserve-3d';
+
+	anim.doTransition(element, to, {
+		duration: '0.4s',
+		timingFunction: 'ease',
+		callback : function() {
+			element.style.webkitBackfaceVisibility = 'initial';
+			element.style.webkitTransformStyle = 'flat';
+			callback && callback();
+		}
+	});	 
+}
 
 
 var Transition = {
@@ -1581,88 +1629,57 @@ var Transition = {
 	},
 
 	slide: function(element, type, offset, callback) {
-		var TYPE = this.TYPE, xy, io,
-			originXY = anim.getTransformOffset(element),
-			newXY = {
-				x: originXY.x,
-				y: originXY.y
+		anime(element, type, function(from, to, type1, type2) {
+			var xy = TYPE_XY[type1],
+				ratio = TYPE_RATIO[type1];
+
+			if (type2 === 'I') {
+				from.translate[xy] += ratio * offset;
+			} else {
+				to.translate[xy] += ratio * offset;
 			}
-			;
-
-		type = type.split('');
-		xy = TYPE_XY[type[0]];
-		io = TYPE_IO[type[1]];
-
-		if (type[1] === 'I') {
-			originXY[xy] += io * offset;
-		} else {
-			newXY[xy] += io * offset;
-		}
-
-		element.style.webkitTransition = '';
-		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
-		element.style.webkitBackfaceVisibility = 'hidden';
-		element.style.webkitTransformStyle = 'preserve-3d';
-
-		anim.translate(element,
-			'0.4s', 'ease', '0s',
-			newXY.x, newXY.y,
-			function() {
-				element.style.webkitBackfaceVisibility = 'initial';
-				element.style.webkitTransformStyle = 'flat';
-				callback && callback();
-			}
-		);		
+		}, callback);		
 	},
 
 	float: function(element, type, offset, callback) {
-		var TYPE = this.TYPE, xy, io,
-			originXY = anim.getTransformOffset(element),
-			newXY = {
-				x: originXY.x,
-				y: originXY.y
-			},
-			opacity
-			;
+		anime(element, type, function(from, to, type1, type2) {
+			var xy = TYPE_XY[type1],
+				ratio = TYPE_RATIO[type1];
 
-		type = type.split('');
-		xy = TYPE_XY[type[0]];
-		io = TYPE_IO[type[1]];
-
-		if (type[1] === 'I') {
-			originXY[xy] += io * offset;
-			opacity = 0;
-		} else {
-			newXY[xy] += io * offset;
-			opacity = 1;
-		}
-
-		element.style.webkitTransition = '';
-		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
-		element.style.opacity = opacity;
-		element.style.webkitBackfaceVisibility = 'hidden';
-		element.style.webkitTransformStyle = 'preserve-3d';
-
-		anim.doTransition(element, {
-			opacity: opacity === 1?0:1,
-			translate: [newXY.x, newXY.y]
-		}, {
-			duration: '0.4s',
-			timingFunction: 'ease',
-			callback : function() {
-				element.style.webkitBackfaceVisibility = 'initial';
-				element.style.webkitTransformStyle = 'flat';
-				callback && callback();
+			if (type2 === 'I') {
+				from.translate[xy] += ratio * offset;
+				from.opacity = 0;
+				to.opacity = 1;
+			} else {
+				to.translate[xy] += ratio * offset;
+				from.opacity = 1;
+				to.opacity = 0;
 			}
-		});
+		}, callback);
 	},
 
-	fadeIn: function(element, options) {
-		
+	fadeIn: function(element, callback) {
+		anime(element, 'FI', function(from, to, type1, type2) {
+			if (type2 === 'I') {
+				from.opacity = 0;
+				to.opacity = 1;
+			} else {
+				from.opacity = 1;
+				to.opacity = 0;
+			}
+		}, callback);
 	},
 
 	fadeOut: function(element, options) {
-
+		anime(element, 'FO', function(from, to, type1, type2) {
+			if (type2 === 'I') {
+				from.opacity = 0;
+				to.opacity = 1;
+			} else {
+				from.opacity = 1;
+				to.opacity = 0;
+			}
+		}, callback);
 	},
 
 
@@ -2185,6 +2202,7 @@ var Message = app.module.Message,
 	Toolbar = app.module.Toolbar,
 	Content = app.module.Content,
 	Scroll = app.module.Scroll,
+	Animation = app.module.Animation,
 	Transition = app.module.Transition
 	;
 
@@ -2192,6 +2210,7 @@ var hooks = {
 	extendView: [],
 	definePage: [],
 	switchNavigation: [],
+	changeOrientation: [],
 	appStart: []
 };
 
@@ -2272,7 +2291,25 @@ void function() {
 
 // UI Initial
 void function () {
-	var H_switchNavigation = hooks.switchNavigation;
+	var H_switchNavigation = hooks.switchNavigation,
+		H_changeOrientation = hooks.changeOrientation;
+
+	function refreshContent() {
+		var config = app.config
+			c_navbar = config.enableNavbar,
+			c_toolbar = config.enableToolbar,
+			c_content = config.enableContent
+			;
+
+		var offsetHeight = config.viewport.offsetHeight;
+		if (c_navbar) {
+			offsetHeight -= c_navbar.wrapEl.offsetHeight;
+		}
+		if (c_toolbar) {
+			offsetHeight -= c_toolbar.wrapEl.offsetHeight;
+		}
+		c_content.wrapEl.style.height = offsetHeight + 'px';
+	}
 
 	H_switchNavigation.push(function(state, page){
 		var config = app.config,
@@ -2289,13 +2326,16 @@ void function () {
 
 			if (page.buttons) {
 				page.buttons.forEach(function(button) {
+					if (button.type === 'back' && button.autoHide !== false && state.index <= 1) {
+						button.hide = true;
+					}
 					i_navbar.setButton(button);
 				});
 			}
 
 			if (c_navbar.titleWrapEl.parentNode === c_navbar.backWrapEl.parentNode && 
 					c_navbar.titleWrapEl.parentNode === c_navbar.funcWrapEl.parentNode) {
-				Transition.float(c_navbar.titleWrapEl.parentNode, transition === 'backward' ? 'RI' : 'LI', 50);
+				Transition.float(c_navbar.titleWrapEl.parentNode, transition === 'backward'?'LI':'RI', 50);
 			}
 		}
 
@@ -2304,6 +2344,9 @@ void function () {
 			page.toolbar?i_toolbar.show(page.toolbar):i_toolbar.hide();
 		}
 	});
+
+	H_switchNavigation.push(refreshContent);
+	H_changeOrientation.push(refreshContent);
 
 	hooks.appStart.push(function() {
 		var config = app.config,
@@ -2315,7 +2358,7 @@ void function () {
 		config.viewport || (config.viewport = q('.viewport'));
 
 		if (c_navbar) {
-			config.viewport.className += 'enableNavbar ';
+			config.viewport.className += ' enableNavbar';
 			c_navbar.wrapEl || (c_navbar.wrapEl = q('header.navbar', config.viewport));
 			c_navbar.titleWrapEl || (c_navbar.titleWrapEl = q('header.navbar > ul > li:first-child', config.viewport));
 			c_navbar.backWrapEl || (c_navbar.backWrapEl = q('header.navbar > ul > li:nth-child(2)', config.viewport));
@@ -2324,13 +2367,13 @@ void function () {
 		}
 
 		if (c_toolbar) {
-			config.viewport.className += 'enableToolbar ';
+			config.viewport.className += ' enableToolbar';
 			c_toolbar.wrapEl || (c_toolbar.wrapEl = q('footer.toolbar', config.viewport));
 			c_toolbar.instance = new Toolbar(c_toolbar.wrapEl, c_toolbar);
 		}
 
 		c_content.wrapEl || (c_content.wrapEl = q('section.content', config.viewport));	
-		c_content.cacheLength || (c_content.cacheLength = 3);
+		c_content.cacheLength || (c_content.cacheLength = 5);
 		c_content.instance = new Content(c_content.wrapEl, {
 			cacheLength: c_content.cacheLength
 		});
@@ -2354,20 +2397,29 @@ void function () {
 		move === 'backward' ? i_content.previous() : i_content.next();
 
 		if (c_scroll) {
-			config.viewport.className += 'enableScroll ';
+			config.viewport.className += ' enableScroll';
 			Scroll.disable(c_scroll.wrapEl);
 			c_scroll.wrapEl = i_content.getActive();
 			Scroll.enable(c_scroll.wrapEl, page.scroll);
 		}
 
 		if (c_transition) {
-			config.viewport.className += 'enableTransition ';
+			config.viewport.className += ' enableTransition';
 			var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
-				className = c_transition.wrapEl.className += ' ' + transition
+				className = c_transition.wrapEl.className += ' ' + transition,
+				activeEl = i_content.getActive(),
+				index = parseInt(activeEl.getAttribute('index'))
 				;
+
+			if (transition === 'backward' && index === c_content.cacheLength - 1) {
+				console.log('moveback');
+			} else if (transition === 'forward' && index === 0) {
+				console.log('movefor');
+			}
 
 			Transition.move(c_transition.wrapEl, offsetX, 0, function() {
 				c_transition.wrapEl.className = className.replace(' ' + transition, '');
+				c_transition.wrapEl.style.left = (-Animation.getTransformOffset(c_transition.wrapEl).x) + 'px';
 				i_content.setClassName();
 			});
 		} else {

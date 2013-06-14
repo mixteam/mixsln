@@ -10,11 +10,57 @@ var doc = win.document,
 		'T': 'y',
 		'B': 'y'
 	},
-	TYPE_IO = {
-		'I': -1,
-		'O': 1
+	TYPE_RATIO = {
+		'L': -1,
+		'R': 1,
+		'T': -1,
+		'B': 1
 	}
 	;
+
+function anime(element, type, delegate, callback) {
+	var TYPE = this.TYPE, xy, ratio,
+		offset = anim.getTransformOffset(element),
+		from = {
+			translate: {
+				x: offset.x,
+				y: offset.y
+			}
+		},
+		to = {
+			translate: {
+				x: offset.x,
+				y: offset.y
+			}
+		}
+		;
+
+	type = type.split('');
+	delegate(from, to, type[0], type[1]);
+
+	for (var p in from) {
+		if (p === 'translate') {
+			element.style.webkitTransition = '';
+			element.style.webkitTransform = anim.makeTranslateString(from[p].x, from[p].y);
+		} else {
+			element.style[p] = from[p];
+		}
+	}
+	to.translate = [to.translate.x, to.translate.y];
+	
+	element.style.webkitBackfaceVisibility = 'hidden';
+	element.style.webkitTransformStyle = 'preserve-3d';
+
+	anim.doTransition(element, to, {
+		duration: '0.4s',
+		timingFunction: 'ease',
+		callback : function() {
+			element.style.webkitBackfaceVisibility = 'initial';
+			element.style.webkitTransformStyle = 'flat';
+			callback && callback();
+		}
+	});	 
+}
 
 
 var Transition = {
@@ -48,88 +94,57 @@ var Transition = {
 	},
 
 	slide: function(element, type, offset, callback) {
-		var TYPE = this.TYPE, xy, io,
-			originXY = anim.getTransformOffset(element),
-			newXY = {
-				x: originXY.x,
-				y: originXY.y
+		anime(element, type, function(from, to, type1, type2) {
+			var xy = TYPE_XY[type1],
+				ratio = TYPE_RATIO[type1];
+
+			if (type2 === 'I') {
+				from.translate[xy] += ratio * offset;
+			} else {
+				to.translate[xy] += ratio * offset;
 			}
-			;
-
-		type = type.split('');
-		xy = TYPE_XY[type[0]];
-		io = TYPE_IO[type[1]];
-
-		if (type[1] === 'I') {
-			originXY[xy] += io * offset;
-		} else {
-			newXY[xy] += io * offset;
-		}
-
-		element.style.webkitTransition = '';
-		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
-		element.style.webkitBackfaceVisibility = 'hidden';
-		element.style.webkitTransformStyle = 'preserve-3d';
-
-		anim.translate(element,
-			'0.4s', 'ease', '0s',
-			newXY.x, newXY.y,
-			function() {
-				element.style.webkitBackfaceVisibility = 'initial';
-				element.style.webkitTransformStyle = 'flat';
-				callback && callback();
-			}
-		);		
+		}, callback);		
 	},
 
 	float: function(element, type, offset, callback) {
-		var TYPE = this.TYPE, xy, io,
-			originXY = anim.getTransformOffset(element),
-			newXY = {
-				x: originXY.x,
-				y: originXY.y
-			},
-			opacity
-			;
+		anime(element, type, function(from, to, type1, type2) {
+			var xy = TYPE_XY[type1],
+				ratio = TYPE_RATIO[type1];
 
-		type = type.split('');
-		xy = TYPE_XY[type[0]];
-		io = TYPE_IO[type[1]];
-
-		if (type[1] === 'I') {
-			originXY[xy] += io * offset;
-			opacity = 0;
-		} else {
-			newXY[xy] += io * offset;
-			opacity = 1;
-		}
-
-		element.style.webkitTransition = '';
-		element.style.webkitTransform = anim.makeTranslateString(originXY.x, originXY.y);
-		element.style.opacity = opacity;
-		element.style.webkitBackfaceVisibility = 'hidden';
-		element.style.webkitTransformStyle = 'preserve-3d';
-
-		anim.doTransition(element, {
-			opacity: opacity === 1?0:1,
-			translate: [newXY.x, newXY.y]
-		}, {
-			duration: '0.4s',
-			timingFunction: 'ease',
-			callback : function() {
-				element.style.webkitBackfaceVisibility = 'initial';
-				element.style.webkitTransformStyle = 'flat';
-				callback && callback();
+			if (type2 === 'I') {
+				from.translate[xy] += ratio * offset;
+				from.opacity = 0;
+				to.opacity = 1;
+			} else {
+				to.translate[xy] += ratio * offset;
+				from.opacity = 1;
+				to.opacity = 0;
 			}
-		});
+		}, callback);
 	},
 
-	fadeIn: function(element, options) {
-		
+	fadeIn: function(element, callback) {
+		anime(element, 'FI', function(from, to, type1, type2) {
+			if (type2 === 'I') {
+				from.opacity = 0;
+				to.opacity = 1;
+			} else {
+				from.opacity = 1;
+				to.opacity = 0;
+			}
+		}, callback);
 	},
 
 	fadeOut: function(element, options) {
-
+		anime(element, 'FO', function(from, to, type1, type2) {
+			if (type2 === 'I') {
+				from.opacity = 0;
+				to.opacity = 1;
+			} else {
+				from.opacity = 1;
+				to.opacity = 0;
+			}
+		}, callback);
 	},
 
 

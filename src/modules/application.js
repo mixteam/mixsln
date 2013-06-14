@@ -25,6 +25,7 @@ var Message = app.module.Message,
 	Toolbar = app.module.Toolbar,
 	Content = app.module.Content,
 	Scroll = app.module.Scroll,
+	Animation = app.module.Animation,
 	Transition = app.module.Transition
 	;
 
@@ -32,6 +33,7 @@ var hooks = {
 	extendView: [],
 	definePage: [],
 	switchNavigation: [],
+	changeOrientation: [],
 	appStart: []
 };
 
@@ -112,7 +114,25 @@ void function() {
 
 // UI Initial
 void function () {
-	var H_switchNavigation = hooks.switchNavigation;
+	var H_switchNavigation = hooks.switchNavigation,
+		H_changeOrientation = hooks.changeOrientation;
+
+	function refreshContent() {
+		var config = app.config
+			c_navbar = config.enableNavbar,
+			c_toolbar = config.enableToolbar,
+			c_content = config.enableContent
+			;
+
+		var offsetHeight = config.viewport.offsetHeight;
+		if (c_navbar) {
+			offsetHeight -= c_navbar.wrapEl.offsetHeight;
+		}
+		if (c_toolbar) {
+			offsetHeight -= c_toolbar.wrapEl.offsetHeight;
+		}
+		c_content.wrapEl.style.height = offsetHeight + 'px';
+	}
 
 	H_switchNavigation.push(function(state, page){
 		var config = app.config,
@@ -129,13 +149,16 @@ void function () {
 
 			if (page.buttons) {
 				page.buttons.forEach(function(button) {
+					if (button.type === 'back' && button.autoHide !== false && state.index <= 1) {
+						button.hide = true;
+					}
 					i_navbar.setButton(button);
 				});
 			}
 
 			if (c_navbar.titleWrapEl.parentNode === c_navbar.backWrapEl.parentNode && 
 					c_navbar.titleWrapEl.parentNode === c_navbar.funcWrapEl.parentNode) {
-				Transition.float(c_navbar.titleWrapEl.parentNode, transition === 'backward' ? 'RI' : 'LI', 50);
+				Transition.float(c_navbar.titleWrapEl.parentNode, transition === 'backward'?'LI':'RI', 50);
 			}
 		}
 
@@ -144,6 +167,9 @@ void function () {
 			page.toolbar?i_toolbar.show(page.toolbar):i_toolbar.hide();
 		}
 	});
+
+	H_switchNavigation.push(refreshContent);
+	H_changeOrientation.push(refreshContent);
 
 	hooks.appStart.push(function() {
 		var config = app.config,
@@ -155,7 +181,7 @@ void function () {
 		config.viewport || (config.viewport = q('.viewport'));
 
 		if (c_navbar) {
-			config.viewport.className += 'enableNavbar ';
+			config.viewport.className += ' enableNavbar';
 			c_navbar.wrapEl || (c_navbar.wrapEl = q('header.navbar', config.viewport));
 			c_navbar.titleWrapEl || (c_navbar.titleWrapEl = q('header.navbar > ul > li:first-child', config.viewport));
 			c_navbar.backWrapEl || (c_navbar.backWrapEl = q('header.navbar > ul > li:nth-child(2)', config.viewport));
@@ -164,13 +190,13 @@ void function () {
 		}
 
 		if (c_toolbar) {
-			config.viewport.className += 'enableToolbar ';
+			config.viewport.className += ' enableToolbar';
 			c_toolbar.wrapEl || (c_toolbar.wrapEl = q('footer.toolbar', config.viewport));
 			c_toolbar.instance = new Toolbar(c_toolbar.wrapEl, c_toolbar);
 		}
 
 		c_content.wrapEl || (c_content.wrapEl = q('section.content', config.viewport));	
-		c_content.cacheLength || (c_content.cacheLength = 3);
+		c_content.cacheLength || (c_content.cacheLength = 5);
 		c_content.instance = new Content(c_content.wrapEl, {
 			cacheLength: c_content.cacheLength
 		});
@@ -194,20 +220,29 @@ void function () {
 		move === 'backward' ? i_content.previous() : i_content.next();
 
 		if (c_scroll) {
-			config.viewport.className += 'enableScroll ';
+			config.viewport.className += ' enableScroll';
 			Scroll.disable(c_scroll.wrapEl);
 			c_scroll.wrapEl = i_content.getActive();
 			Scroll.enable(c_scroll.wrapEl, page.scroll);
 		}
 
 		if (c_transition) {
-			config.viewport.className += 'enableTransition ';
+			config.viewport.className += ' enableTransition';
 			var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
-				className = c_transition.wrapEl.className += ' ' + transition
+				className = c_transition.wrapEl.className += ' ' + transition,
+				activeEl = i_content.getActive(),
+				index = parseInt(activeEl.getAttribute('index'))
 				;
+
+			if (transition === 'backward' && index === c_content.cacheLength - 1) {
+				console.log('moveback');
+			} else if (transition === 'forward' && index === 0) {
+				console.log('movefor');
+			}
 
 			Transition.move(c_transition.wrapEl, offsetX, 0, function() {
 				c_transition.wrapEl.className = className.replace(' ' + transition, '');
+				c_transition.wrapEl.style.left = (-Animation.getTransformOffset(c_transition.wrapEl).x) + 'px';
 				i_content.setClassName();
 			});
 		} else {

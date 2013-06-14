@@ -81,6 +81,7 @@ var StateStackProto = {
 
 		cur.move = move;
 		cur.transition = transition;
+		cur.index = stateIdx;
 
 		that.move = null;
 		that.transition = null;
