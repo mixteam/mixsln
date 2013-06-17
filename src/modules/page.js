@@ -29,57 +29,6 @@ function Page() {
 }
 
 var PageProto = {
-	navigation: {
-		push: function(fragment, options) {
-			pm.trigger('navigation:push', fragment, options);
-		},
-
-		pop: function() {
-			pm.trigger('navigation:pop');
-		},
-
-		getParameter: function(name) {
-			var value;
-
-			pm.once('navigation:getParameter:callback', function(v) {
-				value = v;
-			})
-			pm.trigger('navigation:getParameter', name);
-			return value;
-		},
-
-		getData: function(name) {
-			var value;
-			
-			pm.once('navigation:getData:callback', function(v) {
-				value = v;
-			})
-			pm.trigger('navigation:getData', name);	
-
-			return value;
-		},
-
-		setData: function(name, value) {
-			pm.trigger('navigation:setData', name, value);
-		},
-
-		setTitle: function(title) {
-			pm.trigger('navigation:setTitle', title);	
-		},
-
-		setButton: function(options) {
-			pm.trigger('navigation:setButton', options);
-		}
-	},
-
-	content: {
-		html: function(html) {
-			pm.trigger('content:html', html);
-		},
-		el: null,
-		$el: null
-	},
-
 	startup : function() {/*implement*/},
 	teardown : function() {/*implement*/}	
 }
@@ -94,12 +43,11 @@ Page.define = function(properties) {
 	function ChildPage() {
 		Page.apply(this, arguments);
 		this.initialize && this.initialize.apply(this, arguments);
-
-		extend(this, Page.fn);
-		extend(this, properties);
 		Message.mixto(this, 'page.' + this.name);
 	}
 	inherit(ChildPage, Page);
+	extend(ChildPage.prototype, Page.fn);
+	extend(ChildPage.prototype, properties);
 
 	return (pages[properties.name] = new ChildPage());
 }

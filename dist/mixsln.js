@@ -322,8 +322,7 @@ function touchstartHandler(event) {
 }
 
 
-function touchmoveHandler() {
-
+function touchmoveHandler(event) {
     for(var i = 0 ; i < event.changedTouches.length ; i++ ) {
         var touch = event.changedTouches[i],
             gesture = gestures[touch.identifier];
@@ -413,7 +412,7 @@ function touchmoveHandler() {
 }
 
 
-function touchendHandler() {
+function touchendHandler(event) {
 
     if (Object.keys(gestures).length == 2) {
         var elements = [];
@@ -516,7 +515,7 @@ function touchendHandler() {
     }
 }
 
-function touchcancelHandler() {
+function touchcancelHandler(event) {
 
     if (Object.keys(gestures).length == 2) {
         var elements = [];
@@ -743,7 +742,9 @@ var MessageScopeProto = {
 	},
 
     log : function(event, args) {
-        console.log('[Message]', {scope:this._scope, event: event, args:args});
+    	if (app.config && app.config.enableMessageLog) {
+        	console.log('[Message]', {scope:this._scope, event: event, args:args});
+    	}
     }
 }
 
@@ -908,7 +909,8 @@ var StateStackProto = {
 				fragment : fragment,
 				params : params || {},
 				args : args || {},
-				datas : datas || {}
+				datas : datas || {},
+				update : true,
 			}
 			;
 
@@ -925,6 +927,7 @@ var StateStackProto = {
 				states.unshift(cur);
 			} else if (stateIdx > 0) {
 				stateIdx--;
+				cur.update = false;
 				cur = prev;
 			}
 		} else if (move === 'forward') {
@@ -935,6 +938,7 @@ var StateStackProto = {
 				states.push(cur);
 			} else if (!datas && StateStack.isEquals(next, cur)){
 				stateIdx++;
+				cur.update = false;
 				cur = next;
 			} else if (StateStack.isEquals(states[stateIdx], cur)){
 				cur = states[stateIdx];
@@ -1160,7 +1164,7 @@ var NavigationProto = {
 		stack.move = 'forward';
 		stack.transition = 'forward';
 
-		if (fragment) {
+		if (fragment != null) {
 			if (!state || state.fragment !== fragment || 
 					options.data) {
 
@@ -1248,57 +1252,6 @@ function Page() {
 }
 
 var PageProto = {
-	navigation: {
-		push: function(fragment, options) {
-			pm.trigger('navigation:push', fragment, options);
-		},
-
-		pop: function() {
-			pm.trigger('navigation:pop');
-		},
-
-		getParameter: function(name) {
-			var value;
-
-			pm.once('navigation:getParameter:callback', function(v) {
-				value = v;
-			})
-			pm.trigger('navigation:getParameter', name);
-			return value;
-		},
-
-		getData: function(name) {
-			var value;
-			
-			pm.once('navigation:getData:callback', function(v) {
-				value = v;
-			})
-			pm.trigger('navigation:getData', name);	
-
-			return value;
-		},
-
-		setData: function(name, value) {
-			pm.trigger('navigation:setData', name, value);
-		},
-
-		setTitle: function(title) {
-			pm.trigger('navigation:setTitle', title);	
-		},
-
-		setButton: function(options) {
-			pm.trigger('navigation:setButton', options);
-		}
-	},
-
-	content: {
-		html: function(html) {
-			pm.trigger('content:html', html);
-		},
-		el: null,
-		$el: null
-	},
-
 	startup : function() {/*implement*/},
 	teardown : function() {/*implement*/}	
 }
@@ -1313,12 +1266,11 @@ Page.define = function(properties) {
 	function ChildPage() {
 		Page.apply(this, arguments);
 		this.initialize && this.initialize.apply(this, arguments);
-
-		extend(this, Page.fn);
-		extend(this, properties);
 		Message.mixto(this, 'page.' + this.name);
 	}
 	inherit(ChildPage, Page);
+	extend(ChildPage.prototype, Page.fn);
+	extend(ChildPage.prototype, properties);
 
 	return (pages[properties.name] = new ChildPage());
 }
@@ -1342,9 +1294,12 @@ function Template(url) {
 var TemplateProto = {
 	load: function(url, callback) {
 		// can overwrite
-		var that = this,
-			engine = app.config.templateEngine
+		var that = this, engine
 			;
+
+		if (app && app.config) {
+			engine = app.config.templateEngine;
+		}
 
 		if (arguments.length === 1) {
 			callback = arguments[0];
@@ -1366,9 +1321,12 @@ var TemplateProto = {
 
 	compile: function(text) {
 		// can overwrite
-		var that = this,
-			engine = app.config.templateEngine
+		var that = this, engine 
 			;
+
+		if (app && app.config) {
+			engine = app.config.templateEngine;
+		}
 
 		that.originTemplate = text;
 
@@ -1383,10 +1341,13 @@ var TemplateProto = {
 
 	render: function(datas) {
 		// can overwrite
-		var that = this,
-			engine = app.config.templateEngine,
+		var that = this, engine,
 			compiledTemplate = that.compiledTemplate
 			;
+
+		if (app && app.config) {
+			engine = app.config.templateEngine;
+		}
 
 		if (engine && engine.render && typeof datas === 'object' && compiledTemplate) {
 			that.content = engine.render(compiledTemplate, datas);
@@ -1518,10 +1479,10 @@ View.extend = function(properties) {
 	function ChildView() {
 		View.apply(this, arguments);
 		this.initialize && this.initialize.apply(this, arguments);
-		extend(this, View.fn);
-		extend(this, properties);
 	}
 	inherit(ChildView, View);
+	extend(ChildView.prototype, View.fn);
+	extend(ChildView.prototype, properties);
 	
 	return (views[properties.name] = ChildView);
 }
@@ -1752,11 +1713,13 @@ function touchstartHandler(e) {
 
 	if (!element) return;
 
+	element.style.webkitBackfaceVisibility = 'hidden';
+	element.style.webkitTransformStyle = 'preserve-3d';
 	element.style.webkitTransition = '';
 	element.style.webkitTransform = getComputedStyle(element).webkitTransform;
 }
 
-function touchmoveHandler(e) {
+function touchmoveHandler(e) {	
 	e.preventDefault();
 	return false;
 }
@@ -1773,7 +1736,7 @@ function panstartHandler(e) {
 	maxScrollTop = getMaxScrollTop(element);
 	panFixRatio = 2.5;
 	stopBounce = false;
-	cancelScrollEnd = false;
+	cancelScrollEnd = false;	
 }
 
 function panHandler(e) {
@@ -1930,6 +1893,8 @@ function scrollEnd() {
 
 	setTimeout(function() {
 		if (!cancelScrollEnd) {
+			element.style.webkitBackfaceVisibility = 'initial';
+			element.style.webkitTransformStyle = 'flat';
 			fireEvent(element, 'scrollend');
 		}
 	}, 10);
@@ -2193,7 +2158,8 @@ var doc = win.document,
 	$ = win['$']
 	;
 
-var Message = app.module.Message,
+var StateStack = app.module.StateStack,
+	Message = app.module.MessageScope,
 	Navigation = app.module.Navigation,
 	Template = app.module.Template,
 	View = app.module.View,
@@ -2203,19 +2169,13 @@ var Message = app.module.Message,
 	Content = app.module.Content,
 	Scroll = app.module.Scroll,
 	Animation = app.module.Animation,
-	Transition = app.module.Transition
+	Transition = app.module.Transition,
+	hooks = Message.get('hooks');
 	;
-
-var hooks = {
-	extendView: [],
-	definePage: [],
-	switchNavigation: [],
-	changeOrientation: [],
-	appStart: []
-};
 
 app.config = {
 	viewport : null,
+	enableMessageLog: false,
 	enableNavbar : false,
 	enableToolbar : false,
 	enableContent: true,
@@ -2231,7 +2191,7 @@ function q(selector, el) {
 
 // Config Initial
 void function () {
-	hooks.appStart.push(function() {
+	hooks.on('app:start', function() {
 		var config = app.config;
 
 		Navbar || (config.enableNavbar = false);
@@ -2244,25 +2204,29 @@ void function () {
 		config.enableScroll === true && (config.enableScroll = {});
 		config.enableTransition === true && (config.enableTransition = {});
 		typeof config.enableContent !== 'object' && (config.enableContent = {});
-
-	})
+	});
 }();
 
 // Message Initial
 void function () {
-	hooks.appStart.push(function() {
+}();
 
-	});
+
+//DOM Event Initial
+void function() {
+	var orientationEvent = 'onorientationchange' in win?'orientationchange':'resize';
+	window.addEventListener(orientationEvent, function(e){
+		setTimeout(function() {
+			hooks.trigger('orientaion:change');
+		}, 10);
+	}, false);
 }();
 
 // Navigation Initial
-
 void function() {
-	var H_definePage = hooks.definePage,
-		H_switchNavigation = hooks.switchNavigation,
-		navigation = Navigation.instance;
+	var navigation = Navigation.instance;
 
-	H_definePage.push(function(page) {
+	hooks.on('page:define', function(page) {
 		name = page.name;
 		route = page.route;
 
@@ -2279,24 +2243,30 @@ void function() {
 		});
 	});
 
-	hooks.appStart.push(function() {
+	hooks.on('app:start', function() {
+		var lastState, lastPage;
+
 		navigation.on('forward backward', function(state) {
-			var page = Page.get(state.name);
-			H_switchNavigation.forEach(function(func) {
-				func(state, page);
+			var page = Page.get(state.name)
+			
+			hooks.trigger('navigation:switch', state, page, {
+				lastState: lastState,
+				lastPage: lastPage,
+				isSamePage: lastPage && (lastPage.name === page.name),
+				isSameState: lastState && StateStack.isEquals(lastState, state)
 			});
+			lastState = state;
+			lastPage = page;
 		});
 	});
 }();
 
 // UI Initial
 void function () {
-	var H_switchNavigation = hooks.switchNavigation,
-		H_changeOrientation = hooks.changeOrientation;
+	var config = app.config;
 
 	function refreshContent() {
-		var config = app.config
-			c_navbar = config.enableNavbar,
+		var c_navbar = config.enableNavbar,
 			c_toolbar = config.enableToolbar,
 			c_content = config.enableContent
 			;
@@ -2311,9 +2281,8 @@ void function () {
 		c_content.wrapEl.style.height = offsetHeight + 'px';
 	}
 
-	H_switchNavigation.push(function(state, page){
-		var config = app.config,
-			c_navbar = config.enableNavbar,
+	hooks.on('navigation:switch', function(state, page, options){
+		var c_navbar = config.enableNavbar,
 			c_toolbar = config.enableToolbar,
 			transition = state.transition
 			;
@@ -2326,14 +2295,31 @@ void function () {
 
 			if (page.buttons) {
 				page.buttons.forEach(function(button) {
-					if (button.type === 'back' && button.autoHide !== false && state.index <= 1) {
-						button.hide = true;
+					var handler = button.handler;
+
+					if (button.type === 'back') {
+						if (button.autoHide !== false && state.index < 1) {
+							button.hide = true;
+						}
+						if (!handler) {
+							handler = button.handler = function() {
+								page.navigation.pop();
+							}
+						}
 					}
+
+					if (typeof handler === 'string') {
+						handler = page[handler];
+					}
+					button.handler = function() {
+						handler.apply(page, arguments);
+					}
+
 					i_navbar.setButton(button);
 				});
 			}
 
-			if (c_navbar.titleWrapEl.parentNode === c_navbar.backWrapEl.parentNode && 
+			if (!options.isSamePage && c_navbar.titleWrapEl.parentNode === c_navbar.backWrapEl.parentNode && 
 					c_navbar.titleWrapEl.parentNode === c_navbar.funcWrapEl.parentNode) {
 				Transition.float(c_navbar.titleWrapEl.parentNode, transition === 'backward'?'LI':'RI', 50);
 			}
@@ -2345,12 +2331,10 @@ void function () {
 		}
 	});
 
-	H_switchNavigation.push(refreshContent);
-	H_changeOrientation.push(refreshContent);
+	hooks.on('navigation:switch orientaion:change', refreshContent);
 
-	hooks.appStart.push(function() {
-		var config = app.config,
-			c_navbar = config.enableNavbar,
+	hooks.on('app:start', function() {
+		var c_navbar = config.enableNavbar,
 			c_toolbar = config.enableToolbar,
 			c_content = config.enableContent
 			;
@@ -2381,11 +2365,10 @@ void function () {
 }();
 
 //Animation Initial
-
 void function () {
-	var H_switchNavigation = hooks.switchNavigation;
+	hooks.on('navigation:switch', function(state, page, options){
+		if (options.isSamePage) return;
 
-	H_switchNavigation.push(function(state, page){
 		var config = app.config,
 			i_content = config.enableContent.instance,
 			c_transition = config.enableTransition,
@@ -2407,15 +2390,8 @@ void function () {
 			config.viewport.className += ' enableTransition';
 			var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
 				className = c_transition.wrapEl.className += ' ' + transition,
-				activeEl = i_content.getActive(),
-				index = parseInt(activeEl.getAttribute('index'))
+				activeEl = i_content.getActive()
 				;
-
-			if (transition === 'backward' && index === c_content.cacheLength - 1) {
-				console.log('moveback');
-			} else if (transition === 'forward' && index === 0) {
-				console.log('movefor');
-			}
 
 			Transition.move(c_transition.wrapEl, offsetX, 0, function() {
 				c_transition.wrapEl.className = className.replace(' ' + transition, '');
@@ -2425,10 +2401,9 @@ void function () {
 		} else {
 			i_content.setClassName();
 		}
-
 	});
 
-	hooks.appStart.push(function() {
+	hooks.on('app:start', function() {
 		var config = app.config,
 			i_content = config.enableContent.instance,
 			c_transition = config.enableTransition,
@@ -2448,86 +2423,145 @@ void function () {
 
 //Template Initial
 void function () {
-	hooks.appStart.push(function() {
-		
+	var templatCaches = {};
+
+	function compileTemplate(tpl) {
+		if (typeof tpl === 'string') {
+			var template = new Template();
+
+			if (templatCaches[tpl]) {
+				return templatCaches[tpl];
+			} else if (tpl.match(/\.tpl$/g)) {
+				return (templatCaches[tpl] = function(datas, callback) {
+					if (!template.compileTemplate) {
+						template.load(tpl, function(text) {
+							template.compile(text);
+							callback(template.render(datas));
+						});
+					} else {
+						var html = template.render(datas);
+						callback(html);
+						return html;
+					}
+				});
+			} else {
+				template.compile(tpl);
+				return (templatCaches[tpl] = function(datas, callback) {
+					var html = template.render(datas);
+					callback(html);
+					return html;
+				});
+			}
+		} else if (typeof tpl === 'function'){
+			return tpl;
+		} else if (typeof tpl === 'object') {
+			for (var name in tpl) {
+				tpl[name] = compileTemplate(tpl[name]);
+			}
+			return tpl;
+		}
+	}
+
+	hooks.on('view:extend', function(view) {
+		if (view.prototype.template) {
+			view.prototype.template = compileTemplate(view.prototype.template);
+		}
+	});
+
+	hooks.on('page:define', function(page) {
+		if (page.template) {
+			page.template = compileTemplate(page.template);
+		}
 	});
 }();
 
+var NavigationExtension = {
+	push: function(fragment, options) {
+		Navigation.instance.push(fragment, options);
+	},
+
+	pop: function() {
+		Navigation.instance.pop();
+	},
+
+	getParameter: function(name) {
+		var stack = Navigation.instance.getStack(),
+			state = stack.getState();
+
+		return state.params[name] || state.args[name] || state.datas[name];
+	},
+
+	getData: function(name) {
+		var stack = Navigation.instance.getStack(),
+			state = stack.getState();
+
+		return state.datas[name];
+	},
+
+	setData: function(name, value) {
+		var stack = Navigation.instance.getStack(),
+			state = stack.getState();
+
+		state.datas[name] = value;
+	},
+
+	setTitle: function(title) {
+		if (app.config.enableNavbar) {
+			app.config.enableNavbar.instance.setTitle(title);
+		}
+	},
+
+	setButton: function(options) {
+		if (app.config.enableNavbar) {
+			app.config.enableNavbar.instance.setButton(options);
+		}
+	}
+}
+
 //View Intial
 void function () {
-	hooks.appStart.push(function() {
-		
+	View.prototype.navigation = NavigationExtension;
+
+	hooks.on('view:extend', function(view) {
+		var render = view.prototype.render,
+			destory = view.prototype.destory
+			;
+
+		view.prototype.render = function() {
+			hooks.trigger('view:render', this, arguments);
+			render.apply(this, arguments);
+		}
+
+		view.prototype.destory = function() {
+			hooks.trigger('view:destory', this, arguments);
+			destory.apply(this, arguments);
+		}
 	});
 }();
 
 //Page Initial
 void function () {
-	var H_switchNavigation = hooks.switchNavigation,
-		config = app.config,
-		navigation = Navigation.instance,
-
+	var config = app.config,
 		protoExtension = {
-			navigation: {
-				push: function(fragment, options) {
-					navigation.push(fragment, options);
-				},
-
-				pop: function() {
-					navigation.pop();
-				},
-
-				getParameter: function(name) {
-					var stack = navigation.getStack(),
-						state = stack.getState();
-
-					return state.params[name] || state.args[name] || state.datas[name];
-				},
-
-				getData: function(name) {
-					var stack = navigation.getStack(),
-						state = stack.getState();
-
-					return state.datas[name];
-				},
-
-				setData: function(name, value) {
-					var stack = navigation.getStack(),
-						state = stack.getState();
-
-					state.datas[name] = value;
-
-				},
-
-				setTitle: function(title) {
-					if (config.enableNavbar) {
-						config.enableNavbar.instance.setTitle(title);
-					}
-				},
-
-				setButton: function(options) {
-					if (config.enableNavbar) {
-						config.enableNavbar.instance.setButton(options);
-					}
-				}
-			},
-
+			navigation: NavigationExtension,
 			content: {
 				html: function(html) {
 					config.enableContent.instance.html(html);
 				}
 			}
-		}
+		},
+		stateCaches = [], stateCacheIndex = 0;
 
 	Object.defineProperty(protoExtension.content, 'el', {
 		get: function() {
-			return i_content.getActive();
+			return config.enableContent.instance.getActive();
 		}
 	});
 
 	if ($) {
 		Object.defineProperty(protoExtension.content, '$el', {
 			get: function() {
-				return $(i_content.getActive());
+				return $(config.enableContent.instance.getActive());
 			}
 		});
 	}
@@ -2536,47 +2570,90 @@ void function () {
 		Page.prototype[p] = protoExtension[p];
 	}
 
-	H_switchNavigation.push(function(state, page) {
-		page.startup();
-	});
+	hooks.on('navigation:switch', function(state, page, options) {
+		if (page.content.el.getAttribute('data-fragment') == state.fragment) {
+			return;
+		}
+		page.content.el.setAttribute('data-fragment', state.fragment);
 
-	hooks.appStart.push(function() {
-		
+		if (options.lastState && options.lastPage) {
+			hooks.trigger('page:teardown', options.lastState, options.lastPage);
+			options.lastPage.teardown();
+		}
+		hooks.trigger('page:startup', state, page);
+		page.startup();
 	});
 }();
 
 //Plugin Initial
 void function () {
-	hooks.appStart.push(function() {
-		
+	hooks.on('page:startup', function(state, page) {
+		if (page.plugins) {
+			for (var name in page.plugins) {
+				var plugin = app.plugin[name], pluginOpt
+					;
+
+				if (plugin && page.plugins[name]) {
+					state.plugins || (state.plugins = {});
+					pluginOpt = state.plugins[name] || (state.plugins[name] = {});
+					if (typeof page.plugins[name] === 'object') {
+						for (var p in page.plugins[name]) {
+							pluginOpt[name] = page.plugins[name][p];
+						}
+					}
+
+					plugin.on && plugin.on(page, pluginOpt);
+				}
+			}
+		}
+	});
+
+	hooks.on('page:teardown', function(state, page) {
+		if (page.plugins) {
+			for (var name in page.plugins) {
+				var plugin = app.plugin[name], pluginOpt = state.plugins[name]
+					;
+
+				if (plugin && page.plugins[name]) {
+					plugin.off && plugin.off(page, pluginOpt);
+				}
+			}
+		}
 	});
 }();
 
 app.start = function() {
-	hooks.appStart.forEach(function(func) {
-		func();
-	});
-	Navigation.instance.start();
+	// var placeholder = doc.createElement('div');
+	// placeholder.style.cssText = 'width:100%;height:200%;'
+	// doc.body.appendChild(placeholder);
+	// doc.body.style.height = "200%";
+
+	// setTimeout(scrollTo, 0, 0, 1);
+	setTimeout(function(){
+		//doc.body.removeChild(placeholder);
+		hooks.trigger('app:start');
+		Navigation.instance.start();
+	}, 500);
 }
 
 app.extendView = function(properties) {
-	var view = View.extend(properties);
+	var ChildView = View.extend(properties);
+	hooks.trigger('view:extend', ChildView);
+	return ChildView;
+}
 
-	hooks.extendView.forEach(function(func) {
-		func(view);
-	})
-
-	return view;
+app.getView = function(name) {
+	return new (View.get(name));
 }
 
 app.definePage = function(properties) {
 	var page = Page.define(properties);
-
-	hooks.definePage.forEach(function(func) {
-		func(page);
-	});
-
+	hooks.trigger('page:define', page);
 	return page;
+}
+
+app.getPage = function(name) {
+	return Page.get(name);
 }
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));

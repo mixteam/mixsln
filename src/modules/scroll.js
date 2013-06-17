@@ -55,11 +55,13 @@ function touchstartHandler(e) {
 
 	if (!element) return;
 
+	element.style.webkitBackfaceVisibility = 'hidden';
+	element.style.webkitTransformStyle = 'preserve-3d';
 	element.style.webkitTransition = '';
 	element.style.webkitTransform = getComputedStyle(element).webkitTransform;
 }
 
-function touchmoveHandler(e) {
+function touchmoveHandler(e) {	
 	e.preventDefault();
 	return false;
 }
@@ -76,7 +78,7 @@ function panstartHandler(e) {
 	maxScrollTop = getMaxScrollTop(element);
 	panFixRatio = 2.5;
 	stopBounce = false;
-	cancelScrollEnd = false;
+	cancelScrollEnd = false;	
 }
 
 function panHandler(e) {
@@ -233,6 +235,8 @@ function scrollEnd() {
 
 	setTimeout(function() {
 		if (!cancelScrollEnd) {
+			element.style.webkitBackfaceVisibility = 'initial';
+			element.style.webkitTransformStyle = 'flat';
 			fireEvent(element, 'scrollend');
 		}
 	}, 10);

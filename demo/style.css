@@ -7,23 +7,23 @@
 	margin: 0 auto;
 	overflow: hidden;
 }
-
-.viewport .content .wrap div:nth-child(1) {
+/*
+.viewport > .content > .wrap > div:nth-child(1) {
 	background-color: red;
 }
 
-.viewport .content .wrap div:nth-child(2) {
+.viewport > .content > .wrap > div:nth-child(2) {
 	background-color: orange;
 }
 
-.viewport .content .wrap div:nth-child(3) {
+.viewport > .content > .wrap > div:nth-child(3) {
 	background-color: yellow;
 }
 
-.viewport .content .wrap div:nth-child(4) {
+.viewport > .content > .wrap > div:nth-child(4) {
 	background-color: green;
 }
 
-.viewport .content .wrap div:nth-child(5) {
+.viewport > .content > .wrap > div:nth-child(5) {
 	background-color: cyan;
-}
+}*/

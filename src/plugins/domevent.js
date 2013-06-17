@@ -1,64 +1,25 @@
 (function(win, app){
-	var util = app.util,
-		doc = win.document,
-		$ = win.Zepto || win.$
-		;
-
-	app.page.fn.delegate = function(event, selector, calllback) {
-		var options = app.plugin.domevent._options, 
-			cache = options.page.cache,
-			content = $(app.component.getActiveContent())
-			;
-
-		if (arguments.length === 3) {
-			cache.push([event, selector, calllback]);
-		} else if (arguments.length === 3) {
-			util.each(arguments[0], function(callback, event) {
-				cache.push([event, selector, callback]);
-			});
-		}
-
-		content.on.apply(content, arguments);
-	}
-
-	app.page.fn.undelegate = function(event, selector, calllback) {
-		var content = $(app.component.getActiveContent())
-
-		content.off.apply(content, arguments);
-	}
-
 	app.plugin.domevent = {
-		_options : null,
+		delegateEvents: function($el, events, context) {
+			events.forEach(function(ev) {
+				context[ev[2]] && (ev[2] = context[ev[2]]);
 
-		on : function(page, options) {
-			var that = this
-				;
-
-			that._options = options;
-			options.page.cache = [];
-
-			util.each(page.events, function(ev) {
-				var handler = ev[2];
-
-				if (util.isTypeof(handler, 'string')) {
-					handler = page[handler];
-				}
-
-				page.delegate(ev[0], ev[1], function(e) {
-					handler.call(this, e, page);
+				$el && $el.on(ev[0], ev[1], function(e) {
+					ev[2].apply(context, arguments);
 				});
 			});
 		},
 
-		off : function(page,  options) {
-			var options = this._options
-				;
+		undelegateEvents: function($el) {
+			$el && $el.off();
+		},
 
-			util.each(options.page.cache, function(dv) {
-				page.undelegate(dv[0], dv[1], dv[2]);
-			});
+		on : function(page, options) {
+			this.delegateEvents(page.content.$el, page.events, page);
+		},
 
-			delete options.page.cache;
+		off : function(page, options) {
+			this.undelegateEvents(page.content.$el);
 		}
 	}
 })(window, window['app'])

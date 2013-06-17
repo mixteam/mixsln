@@ -42,7 +42,8 @@ var StateStackProto = {
 				fragment : fragment,
 				params : params || {},
 				args : args || {},
-				datas : datas || {}
+				datas : datas || {},
+				update : true,
 			}
 			;
 
@@ -59,6 +60,7 @@ var StateStackProto = {
 				states.unshift(cur);
 			} else if (stateIdx > 0) {
 				stateIdx--;
+				cur.update = false;
 				cur = prev;
 			}
 		} else if (move === 'forward') {
@@ -69,6 +71,7 @@ var StateStackProto = {
 				states.push(cur);
 			} else if (!datas && StateStack.isEquals(next, cur)){
 				stateIdx++;
+				cur.update = false;
 				cur = next;
 			} else if (StateStack.isEquals(states[stateIdx], cur)){
 				cur = states[stateIdx];
@@ -294,7 +297,7 @@ var NavigationProto = {
 		stack.move = 'forward';
 		stack.transition = 'forward';
 
-		if (fragment) {
+		if (fragment != null) {
 			if (!state || state.fragment !== fragment || 
 					options.data) {
 

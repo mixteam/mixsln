@@ -186,7 +186,9 @@ var MessageScopeProto = {
 	},
 
     log : function(event, args) {
-        console.log('[Message]', {scope:this._scope, event: event, args:args});
+    	if (app.config && app.config.enableMessageLog) {
+        	console.log('[Message]', {scope:this._scope, event: event, args:args});
+    	}
     }
 }
 

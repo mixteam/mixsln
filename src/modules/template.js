@@ -10,9 +10,12 @@ function Template(url) {
 var TemplateProto = {
 	load: function(url, callback) {
 		// can overwrite
-		var that = this,
-			engine = app.config.templateEngine
+		var that = this, engine
 			;
+
+		if (app && app.config) {
+			engine = app.config.templateEngine;
+		}
 
 		if (arguments.length === 1) {
 			callback = arguments[0];
@@ -34,9 +37,12 @@ var TemplateProto = {
 
 	compile: function(text) {
 		// can overwrite
-		var that = this,
-			engine = app.config.templateEngine
+		var that = this, engine 
 			;
+
+		if (app && app.config) {
+			engine = app.config.templateEngine;
+		}
 
 		that.originTemplate = text;
 
@@ -51,10 +57,13 @@ var TemplateProto = {
 
 	render: function(datas) {
 		// can overwrite
-		var that = this,
-			engine = app.config.templateEngine,
+		var that = this, engine,
 			compiledTemplate = that.compiledTemplate
 			;
+
+		if (app && app.config) {
+			engine = app.config.templateEngine;
+		}
 
 		if (engine && engine.render && typeof datas === 'object' && compiledTemplate) {
 			that.content = engine.render(compiledTemplate, datas);

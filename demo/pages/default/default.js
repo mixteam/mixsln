@@ -21,24 +21,25 @@
 			['submit', '#J_searchForm', '_submitFormHandler']
 		],
 
-		_submitFormHandler : function(e, that) {
+		_submitFormHandler : function(e) {
 			e.preventDefault();
 
-			var word = that.content.$el.find('#J_searchForm .bton-keyword').val()
+			var word = this.content.$el.find('#J_searchForm .bton-keyword').val()
 				;
 
-			that.navigation.push('list/' + encodeURIComponent(word) + '/');
+			this.navigation.push('list/' + encodeURIComponent(word) + '/');
 		},
 
 		startup : function() {
-			// implement super.ready
-			//var html = this.template.render({});
-
-			this.content.html('hello, world');
+			// implement super.startup
+			var that = this;
+			this.template({}, function(html) {
+				that.content.html(html);
+			});
 		},
 
 		teardown : function() {
-			// implement super.unload
+			// implement super.teardown
 		}
 	});
 

@@ -1,23 +1,24 @@
 (function(app, undef) {
-	app.view.define({
+	app.extendView({
 		name : 'searchItems',
 		template : './pages/list/searchItems.tpl',
 		word : null,
-		page : 1,
+		pageno : 1,
 
-		_itemClickHandler : function(e, that) {
-			var el = this
-				;
+		events: [
+			['click', 'a', '_itemClickHandler']
+		],
 
+		_itemClickHandler : function(e) {
 			e.preventDefault();
-			app.navigation.push('detail/' + el.getAttribute('dataid') + '/');
+			this.navigation.push('detail/' + e.srcElement.getAttribute('dataid') + '/');
 		},
 
 		_getSearchItems : function(callback) {
 			var that = this,
 				word = that.word,
-				page = that.page,
-				url = 'http://s.m.taobao.com/search_turn_page_iphone.htm?q=' + encodeURIComponent(word) + '&sst=1&wlsort=5&abtest=5&page=' + page
+				pageno = that.pageno,
+				url = 'http://s.m.taobao.com/search_turn_page_iphone.htm?q=' + encodeURIComponent(word) + '&sst=1&wlsort=5&abtest=5&page=' + pageno
 				;
 
 			$.ajax({
@@ -34,18 +35,16 @@
 				;
 
 			that._getSearchItems(function(datas) {
-				that.renderTemplate(datas, function(html) {
-					that._el = $(html);
-					that._el.on('click', 'a', that._itemClickHandler);
-					callback(that._el);
+				that.template(datas, function(html) {
+					that.$el = $(html);
+					app.plugin.domevent.delegateEvents(that.$el, that.events, that);
+					callback(that.$el);
 				});
 			});
 		},
 
 		destroy : function() {
-			if (this._el) {
-				this._el.off('click', 'a', this._itemClickHandler);
-			}
+			app.plugin.domevent.undelegateEvents(this.$el);
 		}
 	});
 

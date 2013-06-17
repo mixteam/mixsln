@@ -75,10 +75,10 @@ View.extend = function(properties) {
 	function ChildView() {
 		View.apply(this, arguments);
 		this.initialize && this.initialize.apply(this, arguments);
-		extend(this, View.fn);
-		extend(this, properties);
 	}
 	inherit(ChildView, View);
+	extend(ChildView.prototype, View.fn);
+	extend(ChildView.prototype, properties);
 	
 	return (views[properties.name] = ChildView);
 }

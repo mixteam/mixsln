@@ -142,7 +142,6 @@ header.navbar button.back:before {
 }
 
 footer.toolbar {
-    box-sizing: border-box;
     position: relative;
     z-index: 99;
 }
@@ -157,7 +156,6 @@ footer.toolbar {
 }
 
 .viewport > section.content {
-    /*box-sizing: border-box;*/
     overflow: auto;
     width: auto;
     height: auto;
@@ -167,19 +165,11 @@ footer.toolbar {
     display: none;
 }
 
-.viewport > section.content > div {
+.viewport > section.content > div,
+    .viewport > section.content > div > div {
     width: 100%;
-    left: 0;
     min-height: 100%;
-    /*background-color: white;*/
-    /*outline: solid rgba(0, 0, 0, 0.7) 1px;*/
 }
-
-.viewport > section.content > div > div{
-    width: 100%;
-    left: 0;
-}
-
 
 .viewport > section.content .active{
     display: block;
@@ -189,59 +179,35 @@ footer.toolbar {
     display: none;
 }
 
-.viewport > section.content > .forward > .next {
-    display: block;
+.viewport > section.content > .forward,
+    .viewport > section.content > .backward {
+    /*display: -webkit-box;*/
 }
 
-.viewport > section.content > .backward > .prev {
-    display: block;
+.viewport > section.content > .forward > .next,
+    .viewport > section.content > .backward > .prev {
+    /*display: block;*/
 }
-
 
 .viewport.enableNavbar > header.navbar {
     display: block;
 }
 
 .viewport.enableToolbar > footer.toolbar {
-    /*display: block;*/
-}
-
-.viewport.enableNavibar > section.content {
-    /*
-    margin-top: -43px;
-    padding-top: 43px;
-    */
 }
 
 .viewport.enableScroll,
-    .viewport.enableScroll > section.content {
+    .viewport.enableScroll > section.content,
+    .viewport.enableScroll > section.content > div {
+    position: relative;
     overflow-y: hidden;
     height: 100%;
 }
 
-.viewport.enableScroll > section.content > div > div{
-    position: relative;
-    -webkit-backface-visibility: hidden;
-    -webkit-transform-style: preserve-3d;
-    height: auto;
-}
-
 .viewport.enableTransition,
-    .viewport.enableTransition > section.content {
+    .viewport.enableTransition > section.content,
+    .viewport.enableTransition > section.content > div {
+    position: relative;
     overflow-x: hidden;
-    width: 100%;
-}
-
-.viewport.enableTransition > section.content > div{
-    position: relative;
-    -webkit-backface-visibility: hidden;
-    -webkit-transform-style: preserve-3d;
-    width: 100%;
-    display: -webkit-box;
-}
-
-.viewport.enableTransition > section.content > div > div {
-    min-height: 100%;
-    position: relative;
     width: 100%;
 }

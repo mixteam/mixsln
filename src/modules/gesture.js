@@ -104,8 +104,7 @@ function touchstartHandler(event) {
 }
 
 
-function touchmoveHandler() {
-
+function touchmoveHandler(event) {
     for(var i = 0 ; i < event.changedTouches.length ; i++ ) {
         var touch = event.changedTouches[i],
             gesture = gestures[touch.identifier];
@@ -195,7 +194,7 @@ function touchmoveHandler() {
 }
 
 
-function touchendHandler() {
+function touchendHandler(event) {
 
     if (Object.keys(gestures).length == 2) {
         var elements = [];
@@ -298,7 +297,7 @@ function touchendHandler() {
     }
 }
 
-function touchcancelHandler() {
+function touchcancelHandler(event) {
 
     if (Object.keys(gestures).length == 2) {
         var elements = [];
