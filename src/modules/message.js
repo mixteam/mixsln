@@ -8,21 +8,21 @@ var EventSourceProto = {
 	addEventListener: function(type, handler) {
 		var handlers = this._handlers, list;
 
-		list = handlers[event] || (handlers[event] = []);
+		list = handlers[type] || (handlers[type] = []);
 		list.push(handler);
 	},
 
 	removeEventListener: function(type, handler) {
 		var handlers = this._handlers;
 
-		if (!handlers[event]) return;
+		if (!handlers[type]) return;
 
-		handlers[event] = handlers[event].filter(function(h) {
+		handlers[type] = handlers[type].filter(function(h) {
 			return h != handler;
 		});
 
-		if (!handlers[event].length) {
-			delete handlers[event];
+		if (!handlers[type].length) {
+			delete handlers[type];
 		}
 	},
 
@@ -56,7 +56,7 @@ function MessageScope(scope) {
 
 	this._handler = function(e) {
 		var type = e.type, args = e.args,
-			list = that._cache[event]
+			list = that._cache[type]
 			;
 
         for (var i = 0; i < list.length; i += 2) {
@@ -72,7 +72,7 @@ var MessageScopeProto = {
 		var that = this,
 			cache = that._cache,
 			source = that._source,
-			list
+			list, event
 			;
 
 		if (!callback) return that;
@@ -94,7 +94,7 @@ var MessageScopeProto = {
 		var that = this,
 			cache = that._cache,
 			source = that._source,
-			list
+			list, event
 			;
 
         if (events) {
@@ -165,7 +165,7 @@ var MessageScopeProto = {
 		var that = this,
 			cache = that._cache,
 			source = that._source,
-			args
+			args, event
 			;
 
 		events = events.split(SPLITER_REG);

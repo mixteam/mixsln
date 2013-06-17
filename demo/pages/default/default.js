@@ -23,18 +23,15 @@
 
 		_submitFormHandler : function(e) {
 			e.preventDefault();
-
-			var word = this.content.$el.find('#J_searchForm .bton-keyword').val()
-				;
-
-			this.navigation.push('list/' + encodeURIComponent(word) + '/');
+			var word = this.$el.find('#J_searchForm .bton-keyword').val();
+			app.navigation.push('list/' + encodeURIComponent(word) + '/');
 		},
 
 		startup : function() {
 			// implement super.startup
 			var that = this;
 			this.template({}, function(html) {
-				that.content.html(html);
+				that.html(html);
 			});
 		},
 

@@ -1,25 +1,45 @@
 (function(win, app){
-	app.plugin.domevent = {
-		delegateEvents: function($el, events, context) {
-			events.forEach(function(ev) {
+	var View = app.module.View,
+		Page = app.module.Page
+		;
+
+	View.fn.delegateEvents = Page.fn.delegateEvents = 
+		function(events) {
+			var $el = this.$el, context = this;
+
+			$el && events.forEach(function(ev) {
 				context[ev[2]] && (ev[2] = context[ev[2]]);
 
 				$el && $el.on(ev[0], ev[1], function(e) {
 					ev[2].apply(context, arguments);
 				});
 			});
+		}
+
+	View.fn.undelegateEvents = Page.fn.undelegateEvents = 
+		function() {
+			this.$el && this.$el.off();
+		}
+
+	app.plugin.domevent = {
+		onPageStartup : function(page, options) {
+			page.delegateEvents(page.events);
 		},
 
-		undelegateEvents: function($el) {
-			$el && $el.off();
+		onPageTeardown : function(page, options) {
+			page.undelegateEvents();
 		},
 
-		on : function(page, options) {
-			this.delegateEvents(page.content.$el, page.events, page);
+		onViewRender : function(view, options) {
+			if (!view._isDelegateEvents) {
+				view._isDelegateEvents = true;
+				view.delegateEvents(view.events);
+			}
 		},
 
-		off : function(page, options) {
-			this.undelegateEvents(page.content.$el);
+		onViewDestory : function(view, options) {
+			view.undelegateEvents();
+			view._isDelegateEvents = false;
 		}
 	}
 })(window, window['app'])

@@ -58,21 +58,24 @@
 			['submit', '#J_searchForm', '_submitFormHandler']
 		],
 
-		_submitFormHandler : function(e, that) {
+		plugins: {
+			domevent: true
+		},
+
+		_submitFormHandler : function(e) {
 			e.preventDefault();
-			var word = that.content.$el.find('#J_searchForm .bton-keyword').val()
-				;
-			that.navigation.push('list/' + encodeURIComponent(word) + '/');
+			var word = this.$el.find('#J_searchForm .bton-keyword').val();
+			app.navigation.push('list/' + encodeURIComponent(word) + '/');
 		},
 
 		startup : function() {
 			// implement super.startup
 			var that = this,
-				pid = that.navigation.getParameter('pid')
+				pid = app.navigation.getParameter('pid')
 				;
 
 			that.template({}, function(html) {
-				that.content.html(html);
+				that.html(html);
 			});
 		},
 

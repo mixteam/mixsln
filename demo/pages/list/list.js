@@ -36,40 +36,29 @@
 		_submitFormHandler : function(e, that) {
 			e.preventDefault();
 
-			var word = this.content.$el.find('#J_topSearchForm .c-form-search input').val()
+			var word = this.$el.find('#J_topSearchForm .c-form-search input').val()
 				;
 
-			this.navigation.push('list/' + encodeURIComponent(word) + '/');
-		},
-
-		_renderItems : function(callback) {
-			var that = this,
-				searchItems = that.views.searchItems,
-				searchContent = that.content.$el.find('.searchcontent')
-				;
-
-			searchItems.render(function(dom) {
-				searchContent.html('').append(dom);
-				callback && callback();
-			});
+			app.navigation.push('list/' + encodeURIComponent(word) + '/');
 		},
 
 		startup : function() {
 			// implement super.startup
 			var that = this,
-				word = decodeURIComponent(that.navigation.getParameter('word')),
+				word = decodeURIComponent(app.navigation.getParameter('word')),
 				searchItems = that.views.searchItems
 				;
 
 			searchItems.word = word;
 			searchItems.pageno = 1;
-			that.navigation.setTitle('"' + word + '" 的搜索列表');
+			app.navigation.setTitle('"' + word + '" 的搜索列表');
 			
 			that.template({searchWord: word}, function(html) {
-				that.content.html(html);
-				that._renderItems(function() {
-					app.plugin.scrollpos.reset();
-					//app.plugin.lazyload.check();
+				that.html(html);
+				that.$el.find('.searchcontent').append(searchItems.el);
+				searchItems.render(function() {
+					//app.plugin.scrollpos.reset();
+					app.plugin.lazyload.check();
 				});
 			});
 		},

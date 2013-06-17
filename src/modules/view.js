@@ -22,42 +22,35 @@ function inherit(child, parent) {
 }
 	
 function View() {
-	var el, $el, $ = win['$'];
+	var el, $el, $ = win['$'], matches;
+
+	if (this.el) {
+		if ((matches = this.el.match(/^(\w+)?(?:\#([^.]+))?(?:\.(.+))?$/i))) {
+			el = document.createElement(matches[1] || 'div');
+			matches[2] && el.setAttribute('id', matches[2]);
+			matches[3] && (el.className = matches[3]);
+		} else {
+			var wrap = document.createElement('div');
+			wrap.innerHTML = this.el;
+			el = wrap.removeChild(wrap.childNodes[0]);
+		}
+	}
 
 
 	Object.defineProperty(this, 'el', {
 		get: function() {
 			return el;
-		},
-
-		set: function(element) {
-			var $;
-
-			if (typeof element === 'string') {
-				el = doc.querySelector(element);
-			} else if (element instanceof HTMLElement) {
-				el = element;
-			}
-
-			$ && ($el = $(el));
 		}
 	});
 
-	Object.defineProperty(this, '$el', {
-		get: function() {
-			return $el;
-		},
-
-		set: function(element) {
-			if (typeof element === 'string' && $) {
-				$el = $(element);
-			} else {
-				$el = element;
+	if ($) {
+		$el = $(el);
+		Object.defineProperty(this, '$el', {
+			get: function() {
+				return $el;
 			}
-
-			$el && (el = $el[0]);
-		}
-	});
+		});
+	}
 }
 
 var ViewProto = {

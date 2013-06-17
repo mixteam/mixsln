@@ -2,6 +2,7 @@
 	app.definePage({
 		name: 'index',
 		title: '首页',
+		route: 'index\\/[^\\/]+\\/?',
 		buttons: [
 			{
 				type: 'back',
@@ -14,14 +15,13 @@
 				handler: '_searchClickHandler'
 			}
 		],
-		route: 'index\\/[^\\/]+\\/?',
 
 		_searchClickHandler: function() {
-			this.navigation.push('');
+			app.navigation.push('');
 		},
 
 		startup: function() {
-			this.content.html('index');
+			this.html('index');
 		}
 	});
 })(window['app']);

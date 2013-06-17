@@ -123,25 +123,13 @@ void function() {
 void function () {
 	var config = app.config;
 
-	function refreshContent() {
-		var c_navbar = config.enableNavbar,
-			c_toolbar = config.enableToolbar,
-			c_content = config.enableContent
-			;
-
-		var offsetHeight = config.viewport.offsetHeight;
-		if (c_navbar) {
-			offsetHeight -= c_navbar.wrapEl.offsetHeight;
-		}
-		if (c_toolbar) {
-			offsetHeight -= c_toolbar.wrapEl.offsetHeight;
-		}
-		c_content.wrapEl.style.height = offsetHeight + 'px';
-	}
-
 	hooks.on('navigation:switch', function(state, page, options){
 		var c_navbar = config.enableNavbar,
 			c_toolbar = config.enableToolbar,
+			c_content = config.enableContent,
+			c_transition = config.enableTransition,
+			c_scroll = config.enableScroll,
+			move = state.move,
 			transition = state.transition
 			;
 
@@ -161,7 +149,7 @@ void function () {
 						}
 						if (!handler) {
 							handler = button.handler = function() {
-								page.navigation.pop();
+								app.navigation.pop();
 							}
 						}
 					}
@@ -187,17 +175,68 @@ void function () {
 			var i_toolbar = c_toolbar.instance;
 			page.toolbar?i_toolbar.show(page.toolbar):i_toolbar.hide();
 		}
+
+		if (!options.isSamePage) {
+			var i_content = c_content.instance;
+			
+			move === 'backward' ? i_content.previous() : i_content.next();
+
+			if (c_scroll) {
+				config.viewport.className += ' enableScroll';
+				Scroll.disable(c_scroll.wrapEl);
+				c_scroll.wrapEl = i_content.getActive();
+				Scroll.enable(c_scroll.wrapEl, page.scroll);
+			}
+
+			if (c_transition) {
+				config.viewport.className += ' enableTransition';
+				var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
+					className = c_transition.wrapEl.className += ' ' + transition,
+					activeEl = i_content.getActive()
+					;
+
+				Transition.move(c_transition.wrapEl, offsetX, 0, function() {
+					c_transition.wrapEl.className = className.replace(' ' + transition, '');
+					c_transition.wrapEl.style.left = (-Animation.getTransformOffset(c_transition.wrapEl).x) + 'px';
+					i_content.setClassName();
+				});
+			} else {
+				i_content.setClassName();
+			}
+		}
 	});
 
-	hooks.on('navigation:switch orientaion:change', refreshContent);
-
-	hooks.on('app:start', function() {
+	hooks.on('navigation:switch orientaion:change', function() {
 		var c_navbar = config.enableNavbar,
 			c_toolbar = config.enableToolbar,
 			c_content = config.enableContent
 			;
 
+		var offsetHeight = config.viewport.offsetHeight;
+		if (c_navbar) {
+			offsetHeight -= c_navbar.wrapEl.offsetHeight;
+		}
+		if (c_toolbar) {
+			offsetHeight -= c_toolbar.wrapEl.offsetHeight;
+		}
+		c_content.wrapEl.style.height = offsetHeight + 'px';
+	});
+
+	hooks.on('app:start', function() {
+		var c_navbar = config.enableNavbar,
+			c_toolbar = config.enableToolbar,
+			c_content = config.enableContent, i_content,
+			c_transition = config.enableTransition,
+			c_scroll = config.enableScroll
+			;
+
 		config.viewport || (config.viewport = q('.viewport'));
+
+		c_content.wrapEl || (c_content.wrapEl = q('section.content', config.viewport));	
+		c_content.cacheLength || (c_content.cacheLength = 5);
+		i_content = c_content.instance = new Content(c_content.wrapEl, {
+			cacheLength: c_content.cacheLength
+		});
 
 		if (c_navbar) {
 			config.viewport.className += ' enableNavbar';
@@ -214,60 +253,6 @@ void function () {
 			c_toolbar.instance = new Toolbar(c_toolbar.wrapEl, c_toolbar);
 		}
 
-		c_content.wrapEl || (c_content.wrapEl = q('section.content', config.viewport));	
-		c_content.cacheLength || (c_content.cacheLength = 5);
-		c_content.instance = new Content(c_content.wrapEl, {
-			cacheLength: c_content.cacheLength
-		});
-	});
-}();
-
-//Animation Initial
-void function () {
-	hooks.on('navigation:switch', function(state, page, options){
-		if (options.isSamePage) return;
-
-		var config = app.config,
-			i_content = config.enableContent.instance,
-			c_transition = config.enableTransition,
-			c_scroll = config.enableScroll,
-			move = state.move,
-			transition = state.transition
-			;
-
-		move === 'backward' ? i_content.previous() : i_content.next();
-
-		if (c_scroll) {
-			config.viewport.className += ' enableScroll';
-			Scroll.disable(c_scroll.wrapEl);
-			c_scroll.wrapEl = i_content.getActive();
-			Scroll.enable(c_scroll.wrapEl, page.scroll);
-		}
-
-		if (c_transition) {
-			config.viewport.className += ' enableTransition';
-			var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
-				className = c_transition.wrapEl.className += ' ' + transition,
-				activeEl = i_content.getActive()
-				;
-
-			Transition.move(c_transition.wrapEl, offsetX, 0, function() {
-				c_transition.wrapEl.className = className.replace(' ' + transition, '');
-				c_transition.wrapEl.style.left = (-Animation.getTransformOffset(c_transition.wrapEl).x) + 'px';
-				i_content.setClassName();
-			});
-		} else {
-			i_content.setClassName();
-		}
-	});
-
-	hooks.on('app:start', function() {
-		var config = app.config,
-			i_content = config.enableContent.instance,
-			c_transition = config.enableTransition,
-			c_scroll = config.enableScroll
-			;
-
 		if (c_scroll) {
 			c_scroll.wrapEl = i_content.getActive();
 		}
@@ -276,7 +261,6 @@ void function () {
 			c_transition.wrapEl = i_content.getActive().parentNode;
 		}
 	});
-
 }();
 
 //Template Initial
@@ -333,7 +317,187 @@ void function () {
 	});
 }();
 
-var NavigationExtension = {
+
+//Plugin Initial
+void function () {
+
+	hooks.on('app:start', function() {
+		for (var name in app.plugin) {
+			var plugin = app.plugin[name];
+			plugin.onAppStart && plugin.onAppStart();
+		}
+	});
+
+	hooks.on('view:render', function(view) {
+		if (view.plugins) {
+			for (var name in view.plugins) {
+				var plugin = app.plugin[name], pluginOpt = view.plugins[name]
+					;
+
+				pluginOpt === true && (pluginOpt = view.plugins[name] = {});
+				if (plugin && pluginOpt) {
+					plugin.onViewRender && plugin.onViewRender(view, pluginOpt);
+				}
+			}
+		}
+	});
+
+	hooks.on('view:destory', function(view) {
+		if (view.plugins) {
+			for (var name in view.plugins) {
+				var plugin = app.plugin[name], pluginOpt = view.plugins[name]
+					;
+
+				if (plugin && pluginOpt) {
+					plugin.onViewTeardown && plugin.onViewTeardown(view, pluginOpt);
+				}
+			}
+		}
+	});
+
+	hooks.on('navigation:switch', function(state, page) {
+		if (page.plugins) {
+			for (var name in page.plugins) {
+				var plugin = app.plugin[name], pluginOpt = page.plugins[name]
+					;
+
+				if (plugin && pluginOpt) {
+					state.plugins || (state.plugins = {});
+					state.plugins[name] || (state.plugins[name] = {});
+					if (typeof pluginOpt === 'object') {
+						for (var p in pluginOpt) {
+							state.plugins[name][p] = pluginOpt[p];
+						}
+					}
+					plugin.onNavigationSwitch && plugin.onNavigationSwitch(page, state.plugins[name]);
+				}
+			}
+		}
+	});
+
+	hooks.on('page:startup', function(state, page) {
+		if (page.plugins) {
+			for (var name in page.plugins) {
+				var plugin = app.plugin[name], pluginOpt = state.plugins[name]
+					;
+
+				if (plugin && pluginOpt) {
+					plugin.onPageStartup && plugin.onPageStartup(page, pluginOpt);
+				}
+			}
+		}
+	});
+
+	hooks.on('page:teardown', function(state, page) {
+		if (page.plugins) {
+			for (var name in page.plugins) {
+				var plugin = app.plugin[name], pluginOpt = state.plugins[name]
+					;
+
+				if (plugin && page.plugins[name]) {
+					plugin.onPageTeardown && plugin.onPageTeardown(page, pluginOpt);
+				}
+			}
+		}
+	});
+}();
+
+//View Intial
+void function () {
+	hooks.on('view:extend', function(view) {
+		var render = view.prototype.render,
+			destory = view.prototype.destory
+			;
+
+		view.prototype.render = function() {
+			hooks.trigger('view:render', this, arguments);
+			render.apply(this, arguments);
+		}
+
+		view.prototype.destory = function() {
+			hooks.trigger('view:destory', this, arguments);
+			destory.apply(this, arguments);
+		}
+	});
+}();
+
+//Page Initial
+void function () {
+	var config = app.config;
+
+	hooks.on('page:define', function(page) {
+		page.html = function(html) {
+			config.enableContent.instance.html(html);
+		}
+
+		Object.defineProperty(page, 'el', {
+			get: function() {
+				return config.enableContent.instance.getActive();
+			}
+		});
+
+		if ($) {
+			Object.defineProperty(page, '$el', {
+				get: function() {
+					return $(config.enableContent.instance.getActive());
+				}
+			});
+		}
+	});
+
+	hooks.on('navigation:switch', function(state, page, options) {
+		var lastDataFragment = page.el.getAttribute('data-fragment'),
+			curDataFragment = state.fragment;
+
+		if (lastDataFragment === curDataFragment) {
+			return;
+		}
+		page.el.setAttribute('data-fragment', curDataFragment);
+
+		if (options.lastState && options.lastPage) {
+			hooks.trigger('page:teardown', options.lastState, options.lastPage);
+			options.lastPage.teardown();
+		}
+		hooks.trigger('page:startup', state, page);
+		page.startup();
+	});
+}();
+
+app.start = function() {
+	// var placeholder = doc.createElement('div');
+	// placeholder.style.cssText = 'width:100%;height:200%;'
+	// doc.body.appendChild(placeholder);
+	// doc.body.style.height = "200%";
+
+	// setTimeout(scrollTo, 0, 0, 1);
+	setTimeout(function(){
+		//doc.body.removeChild(placeholder);
+		hooks.trigger('app:start');
+		Navigation.instance.start();
+	}, 500);
+}
+
+app.extendView = function(properties) {
+	var ChildView = View.extend(properties);
+	hooks.trigger('view:extend', ChildView);
+	return ChildView;
+}
+
+app.getView = function(name) {
+	return new (View.get(name));
+}
+
+app.definePage = function(properties) {
+	var page = Page.define(properties);
+	hooks.trigger('page:define', page);
+	return page;
+}
+
+app.getPage = function(name) {
+	return Page.get(name);
+}
+
+app.navigation = {
 	push: function(fragment, options) {
 		Navigation.instance.push(fragment, options);
 	},
@@ -374,144 +538,6 @@ var NavigationExtension = {
 			app.config.enableNavbar.instance.setButton(options);
 		}
 	}
-}
-
-//View Intial
-void function () {
-	View.prototype.navigation = NavigationExtension;
-
-	hooks.on('view:extend', function(view) {
-		var render = view.prototype.render,
-			destory = view.prototype.destory
-			;
-
-		view.prototype.render = function() {
-			hooks.trigger('view:render', this, arguments);
-			render.apply(this, arguments);
-		}
-
-		view.prototype.destory = function() {
-			hooks.trigger('view:destory', this, arguments);
-			destory.apply(this, arguments);
-		}
-	});
-}();
-
-//Page Initial
-void function () {
-	var config = app.config,
-		protoExtension = {
-			navigation: NavigationExtension,
-			content: {
-				html: function(html) {
-					config.enableContent.instance.html(html);
-				}
-			}
-		},
-		stateCaches = [], stateCacheIndex = 0;
-
-	Object.defineProperty(protoExtension.content, 'el', {
-		get: function() {
-			return config.enableContent.instance.getActive();
-		}
-	});
-
-	if ($) {
-		Object.defineProperty(protoExtension.content, '$el', {
-			get: function() {
-				return $(config.enableContent.instance.getActive());
-			}
-		});
-	}
-
-	for (var p in protoExtension) {
-		Page.prototype[p] = protoExtension[p];
-	}
-
-	hooks.on('navigation:switch', function(state, page, options) {
-		if (page.content.el.getAttribute('data-fragment') == state.fragment) {
-			return;
-		}
-		page.content.el.setAttribute('data-fragment', state.fragment);
-
-		if (options.lastState && options.lastPage) {
-			hooks.trigger('page:teardown', options.lastState, options.lastPage);
-			options.lastPage.teardown();
-		}
-		hooks.trigger('page:startup', state, page);
-		page.startup();
-	});
-}();
-
-//Plugin Initial
-void function () {
-	hooks.on('page:startup', function(state, page) {
-		if (page.plugins) {
-			for (var name in page.plugins) {
-				var plugin = app.plugin[name], pluginOpt
-					;
-
-				if (plugin && page.plugins[name]) {
-					state.plugins || (state.plugins = {});
-					pluginOpt = state.plugins[name] || (state.plugins[name] = {});
-					if (typeof page.plugins[name] === 'object') {
-						for (var p in page.plugins[name]) {
-							pluginOpt[name] = page.plugins[name][p];
-						}
-					}
-
-					plugin.on && plugin.on(page, pluginOpt);
-				}
-			}
-		}
-	});
-
-	hooks.on('page:teardown', function(state, page) {
-		if (page.plugins) {
-			for (var name in page.plugins) {
-				var plugin = app.plugin[name], pluginOpt = state.plugins[name]
-					;
-
-				if (plugin && page.plugins[name]) {
-					plugin.off && plugin.off(page, pluginOpt);
-				}
-			}
-		}
-	});
-}();
-
-app.start = function() {
-	// var placeholder = doc.createElement('div');
-	// placeholder.style.cssText = 'width:100%;height:200%;'
-	// doc.body.appendChild(placeholder);
-	// doc.body.style.height = "200%";
-
-	// setTimeout(scrollTo, 0, 0, 1);
-	setTimeout(function(){
-		//doc.body.removeChild(placeholder);
-		hooks.trigger('app:start');
-		Navigation.instance.start();
-	}, 500);
-}
-
-app.extendView = function(properties) {
-	var ChildView = View.extend(properties);
-	hooks.trigger('view:extend', ChildView);
-	return ChildView;
-}
-
-app.getView = function(name) {
-	return new (View.get(name));
-}
-
-app.definePage = function(properties) {
-	var page = Page.define(properties);
-	hooks.trigger('page:define', page);
-	return page;
-}
-
-app.getPage = function(name) {
-	return Page.get(name);
 }
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));

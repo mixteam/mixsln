@@ -6,10 +6,6 @@
 		SS_PREIX = 'mix_storage_001_'
 		;
 
-	navigation.on('forward backward', function() {
-		app.plugin.stateStorage.saveAll();
-	});
-
 	app.plugin.stateStorage = {
 		saveAll: function() {
 			var strStateIdx = statestack._stateIdx + '',
@@ -58,8 +54,14 @@
 			for (var i = 0; i < len; i++) {
 				ss.removeItem(SS_PREIX + 'state_item[' + i + ']');
 			}
+		},
+
+		onNavigationSwtich: function() {
+			this.saveAll();
+		},
+
+		onAppStart: function() {
+			this.loadAll();
 		}
 	};
-
-	app.plugin.stateStorage.loadAll();
 })(window, window['app']);

@@ -1,6 +1,7 @@
 (function(app, undef) {
 	app.extendView({
 		name : 'searchItems',
+		el: 'div#J_searchList.search-list',
 		template : './pages/list/searchItems.tpl',
 		word : null,
 		pageno : 1,
@@ -9,9 +10,13 @@
 			['click', 'a', '_itemClickHandler']
 		],
 
+		plugins: {
+			domevent: true
+		},
+
 		_itemClickHandler : function(e) {
 			e.preventDefault();
-			this.navigation.push('detail/' + e.srcElement.getAttribute('dataid') + '/');
+			app.navigation.push('detail/' + e.srcElement.getAttribute('dataid') + '/');
 		},
 
 		_getSearchItems : function(callback) {
@@ -31,20 +36,20 @@
 		},
 
 		render : function(callback) {
+			// implement super.render
 			var that = this
 				;
 
 			that._getSearchItems(function(datas) {
 				that.template(datas, function(html) {
-					that.$el = $(html);
-					app.plugin.domevent.delegateEvents(that.$el, that.events, that);
-					callback(that.$el);
+					that.$el.html(html);
+					callback && callback();
 				});
 			});
 		},
 
 		destroy : function() {
-			app.plugin.domevent.undelegateEvents(this.$el);
+			// implement super.destory
 		}
 	});
 

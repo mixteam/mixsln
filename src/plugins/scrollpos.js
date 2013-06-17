@@ -3,7 +3,7 @@
 		;
 
 	function getScrollTop(el) {
-		if (el.refresh) {
+		if (el && el.getScrollTop) {
 			return el.getScrollTop();
 		} else {
 			return doc.body.scrollTop;
@@ -11,7 +11,7 @@
 	}
 
 	function scrollTo(pos, el) {
-		if (el.refresh) {
+		if (el && el.scrollTo) {
 			el.scrollTo(pos);
 		} else {
 			win.scrollTo(0, pos);
@@ -42,21 +42,20 @@
 			scrollTo(options.pos, this._el);
 		},
 
-		on : function(page, options) {
-			var el = page.content.el;
-
-			this._el = el;
+		onNavigationSwitch : function(page, options) {
+			var el = this._el = page.el;
 			this._options = options;
-
+			
 			if (el.refresh) {
 				el.addEventListener('scrollend', this, false);
 			} else {
 				doc.addEventListener('touchend', this, false);
 			}
+			this.reset();
 		},
 
-		off : function(page, options) {
-			var el = page.content.el;
+		onPageTeardown : function(page, options) {
+			var el = page.el;
 
 			if (el.refresh) {
 				el.removeEventListener('scrollend', this);

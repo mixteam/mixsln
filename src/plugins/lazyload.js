@@ -3,70 +3,76 @@
 		navigator = win.navigator,
 	    appVersion = navigator.appVersion,
     	isAndroid = (/android/gi).test(appVersion),
-    	isIOS = (/iphone|ipad/gi).test(appVersion),
-		scroll
+    	isIOS = (/iphone|ipad/gi).test(appVersion)
 		;
 
-	function getScrollTop() {
-		if (scroll) {
-			return scroll.fn.getScrollTop();
+	function getScrollTop(el) {
+		if (el && el.getScrollTop) {
+			return el.getScrollTop();
 		} else {
 			return doc.body.scrollTop;
 		}
 	}
 
-	function getScrollHeight() {
-		if (scroll) {
-			return scroll.fn.getScrollHeight(); 
+	function getScrollHeight(el) {
+		if (el && el.getScrollHeight) {
+			return el.getScrollHeight();
 		} else {
 			return doc.body.scrollHeight;
 		}
 	}
 
-	function getViewHeight() {
-		if (scroll) {
-			return scroll.offsetHeight;
+	function getViewHeight(el) {
+		if (el && el.refresh) {
+			return el.parentNode.offsetHeight;
 		} else {
 			return doc.body.clientHeight;
 		}
 	}
 
+	function getParent(el) {
+		return el.parentNode;
+	}
+
+	function getOffset(img, el) {
+		var cStyle = getComputedStyle(img),
+			offsetHeight = parseFloat(img.getAttribute('height') || img.offsetHeight || cStyle.height),
+			offsetTop = parseFloat(img.offsetTop),
+			offsetParent, offsetContent = 0
+			;
+
+		if (!el.refresh) {
+			for (offsetParent = getParent(el); offsetParent && offsetParent != doc.body;) {
+				offsetContent += parseFloat(offsetParent.offsetTop || 0);
+				offsetParent = getParent(offsetParent);
+			}
+		}
+
+		for (offsetParent = getParent(img); offsetParent && offsetParent != el;) {
+            offsetTop += parseFloat(offsetParent.offsetTop || 0);
+            offsetParent = getParent(offsetParent);
+        }
+
+		return {
+			top : offsetTop + offsetContent,
+			bottom : offsetTop + offsetHeight + offsetContent
+		}
+	}
+
 	app.plugin.lazyload = {
+		_el: null,
 		_options: null,
 		_startScrollTime: 0,
 		_endScrollTime: 0,
 		_scrollFlickTime: 200,
 
-		_getParent : function(node) {
-			return node.offsetParent || node.parentNode;
-		},
-
-		_getOffset : function(img) {
-			var content = app.component.getActiveContent(),
-				cStyle = getComputedStyle(img),
-				offsetHeight = parseFloat(img.getAttribute('height') || img.offsetHeight || cStyle.height),
-				offsetParent,
-				offsetTop = parseFloat(img.offsetTop),
-				offsetContent = 0
-				;
-
-			if (!scroll) {
-				offsetParent = this._getParent(content);
-				while (offsetParent && offsetParent != doc.body) {
-					offsetContent += parseFloat(offsetParent.offsetTop);
-					offsetParent = this._getParent(offsetParent);
-				}
-			}
-
-            offsetParent = this._getParent(img);
-            while (offsetParent && offsetParent != content) {
-                offsetTop += parseFloat(offsetParent.offsetTop || 0);
-                offsetParent = this._getParent(offsetParent);
-            }
-
-			return {
-				top : offsetTop + offsetContent,
-				bottom : offsetTop + offsetHeight + offsetContent
+		handleEvent: function(e) {
+			if (e.type === 'scrollend' || e.type === 'scroll') {
+				this.check();
+			} else if (e.type === 'touchstart') {
+				this._checkStart();
+			} else if (e.type === 'touchend') {
+				this._checkEnd();
 			}
 		},
 
@@ -80,7 +86,7 @@
 			this._endScrollTime = Date.now();
 			if (this._endScrollTime - this._startScrollTime < this._scrollFlickTime) {
 				if (isIOS) {
-					window.addEventListener('scroll', this.check);
+					window.addEventListener('scroll', this, false);
 				} else {
 					var scrollTop = doc.body.scrollTop,
 						scrollId = setInterval(function(){
@@ -98,17 +104,17 @@
 		},
 
 		check: function() {
-			var options = this._options,
-				dataAttr = options.page.dataAttr || 'data-src',
-				content = app.component.getActiveContent(),
-				imgs = content.querySelectorAll('img[' + dataAttr + ']'),
-				viewportTop = getScrollTop(),
-				viewportBottom = getScrollTop() + getViewHeight()
+			var el = this._el,
+				options = this._options,
+				dataAttr = options.dataAttr || 'data-src',
+				imgs = el.querySelectorAll('img[' + dataAttr + ']'),
+				viewportTop = getScrollTop(el),
+				viewportBottom = getScrollTop(el) + getViewHeight(el)
 				;
 
 			for (var i = 0; i < imgs.length; i++) {
 				var img = imgs[i],
-					offset = this._getOffset(img),
+					offset = getOffset(img, el),
 					src
 					;
 
@@ -123,27 +129,26 @@
 			}
 		},
 
-		on : function(page, options) {
+		onPageStartup : function(page, options) {
+			var el = this._el = page.el;
 			this._options = options;
-			scroll = app.component.get('scroll');
-			this._checkStart = this._checkStart.bind(this);
-			this._checkEnd = this._checkEnd.bind(this);
-			this.check = this.check.bind(this);
 
-			if (scroll) {
-				app.component.on('scrollEnd', this.check);
+			if (el.refresh) {
+				el.addEventListener('scrollend', this, false)
 			} else {
-				doc.addEventListener('touchstart', this._checkStart, false);
-				doc.addEventListener('touchend', this._checkEnd, false);
+				doc.addEventListener('touchstart', this, false);
+				doc.addEventListener('touchend', this, false);
 			}
 		},
 
-		off : function(page, options) {
-			if (scroll) {
-				app.component.off('scrollEnd', this.check);
+		onPageTeardown : function(page, options) {
+			var el = this._el;
+
+			if (el.refresh) {
+				el.removeEventListener('scrollend', this);
 			} else {
-				doc.removeEventListener('touchstart', this._checkStart, false);
-				doc.removeEventListener('touchend', this._checkEnd, false);
+				doc.removeEventListener('touchstart', this);
+				doc.removeEventListener('touchend', this);
 			}
 		}
 	}
