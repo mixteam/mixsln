@@ -1,37 +1,35 @@
 (function(win, app){
-	var doc = win.document,
-		scroll
+	var doc = win.document
 		;
 
-	function getScrollTop() {
-		if (scroll) {
-			return scroll.fn.getScrollTop();
+	function getScrollTop(el) {
+		if (el.refresh) {
+			return el.getScrollTop();
 		} else {
 			return doc.body.scrollTop;
 		}
 	}
 
-	function getScrollHeight() {
-		if (scroll) {
-			return scroll.fn.getScrollHeight(); 
+	function scrollTo(pos, el) {
+		if (el.refresh) {
+			el.scrollTo(pos);
 		} else {
-			return doc.body.scrollHeight;
-		}
-	}
-
-	function scroll2(pos) {
-		if (scroll) {
-			scroll.fn.scrollTo(pos);
-		} else {
-			scrollTo(0, pos);
+			win.scrollTo(0, pos);
 		}
 	}
 
 	app.plugin.scrollpos = {
+		_el : null,
 		_options : null,
 
-		_setPos : function(pos) {
-			this._options.state.pos = (typeof pos === 'number' ? pos: getScrollTop());
+		handleEvent: function(e) {
+			if (e.type === 'scrollend' || e.type === 'touchend') {
+				this.setPos();
+			}
+		},
+
+		setPos : function(pos) {
+			this._options.pos = (typeof pos === 'number' ? pos: getScrollTop(this._el));
 		},
 
 		reset : function(pos) {
@@ -39,29 +37,31 @@
 				;
 
 			if (pos != null) {
-				this._setPos(pos);
+				this.setPos(pos);
 			}
-			scroll2(options.state.pos);
+			scrollTo(options.pos, this._el);
 		},
 
 		on : function(page, options) {
-			scroll = app.component.get('scroll');
+			var el = page.content.el;
 
+			this._el = el;
 			this._options = options;
-			this._setPos = this._setPos.bind(this);
 
-			if (scroll) {
-				app.component.on('scrollEnd', this._setPos);
+			if (el.refresh) {
+				el.addEventListener('scrollend', this, false);
 			} else {
-				doc.addEventListener('touchend', this._setPos);
+				doc.addEventListener('touchend', this, false);
 			}
 		},
 
 		off : function(page, options) {
-			if (scroll) {
-				app.component.off('scrollEnd', this._setPos);
+			var el = page.content.el;
+
+			if (el.refresh) {
+				el.removeEventListener('scrollend', this);
 			} else {
-				doc.removeEventListener('touchend', this._setPos);
+				doc.removeEventListener('touchend', this);
 			}
 		}
 	}

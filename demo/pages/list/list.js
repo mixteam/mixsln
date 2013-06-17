@@ -68,7 +68,7 @@
 			that.template({searchWord: word}, function(html) {
 				that.content.html(html);
 				that._renderItems(function() {
-					//app.plugin.scrollpos.reset();
+					app.plugin.scrollpos.reset();
 					//app.plugin.lazyload.check();
 				});
 			});

@@ -270,7 +270,6 @@ var NavigationProto = {
 	start: function() {
 		if(this._started) return false;
 
-		this._stack.reset();
 	    this._started = true;
 		win.addEventListener('hashchange', this, false);
 		this.handleEvent();
@@ -281,6 +280,7 @@ var NavigationProto = {
     	if (!this._started) return false;
     	
     	this._routes = {};
+    	this._stack.reset();
     	this._started = false;
     	win.removeEventListener('hashchange', this, false);
     	return true;
