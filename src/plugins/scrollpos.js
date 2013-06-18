@@ -3,23 +3,22 @@
 		;
 
 	function getScrollTop(el) {
-		if (el && el.getScrollTop) {
-			return el.getScrollTop();
+		if (app.scroll) {
+			return app.scroll.getScrollTop();
 		} else {
 			return doc.body.scrollTop;
 		}
 	}
 
 	function scrollTo(pos, el) {
-		if (el && el.scrollTo) {
-			el.scrollTo(pos);
+		if (app.scroll) {
+			app.scroll.scrollTo(pos, true);
 		} else {
 			win.scrollTo(0, pos);
 		}
 	}
 
 	app.plugin.scrollpos = {
-		_el : null,
 		_options : null,
 
 		handleEvent: function(e) {
@@ -29,7 +28,7 @@
 		},
 
 		setPos : function(pos) {
-			this._options.pos = (typeof pos === 'number' ? pos: getScrollTop(this._el));
+			this._options.pos = (typeof pos === 'number' ? pos: getScrollTop());
 		},
 
 		reset : function(pos) {
@@ -39,20 +38,19 @@
 			if (pos != null) {
 				this.setPos(pos);
 			}
-			scrollTo(options.pos, this._el);
+			scrollTo(options.pos);
 		},
 
 		onNavigationSwitch : function(page, options) {
-			var el = this._el = page.el;
 			this._options = options;
 			this.reset();
 		},
 
 		onPageStartup : function(page,  options) {
-			var el = this._el = page.el;
+			var el = page.el;
 			this._options = options;
 			
-			if (el.refresh) {
+			if (app.scroll) {
 				el.addEventListener('scrollend', this, false);
 			} else {
 				doc.addEventListener('touchend', this, false);
@@ -62,7 +60,7 @@
 		onPageTeardown : function(page, options) {
 			var el = page.el;
 
-			if (el.refresh) {
+			if (app.scroll) {
 				el.removeEventListener('scrollend', this);
 			} else {
 				doc.removeEventListener('touchend', this);

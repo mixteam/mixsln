@@ -41,7 +41,7 @@
 			}
 		},
 
-		onNavigationSwitch: function(page, options) {
+		onPageDefine: function(page, options) {
 			page.scroll = {
 				bounceTop: options.top || 0,
 				bounceBottom: options.bottom || 0

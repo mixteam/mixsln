@@ -15,10 +15,8 @@
 			app.navigation.push('list/' + encodeURIComponent(word) + '/');
 		},
 		render: function() {
-			var that = this;
-			this.template({}, function(html) {
-				that.$el.html(html);
-			});
+			var html = this.template({});
+			this.$el.html(html);
 		},
 		destory: function() {
 

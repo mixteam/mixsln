@@ -112,22 +112,21 @@
 			// implement super.startup
 			var that = this,
 				word = decodeURIComponent(app.navigation.getParameter('word')),
-				searchItems = that.views.searchItems
+				searchItems = this.views.searchItems
 				;
 
 			searchItems.word = word;
 			searchItems.pageno = 1;
 			app.navigation.setTitle('"' + word + '" 的搜索列表');
 			
-			that.template({searchWord: word}, function(html) {
-				that.html(html);
-				that.$el.find('.searchcontent').append(searchItems.el);
-				searchItems.render(function() {
-					//app.plugin.scrollpos.reset();
-					setTimeout(function(){
-						app.plugin.lazyload.check();	
-					}, 500);
-				});
+			var html = this.template({searchWord: word});
+			this.html(html);
+			this.$el.find('.searchcontent').append(searchItems.el);
+			searchItems.render(function() {
+				that.$el.find('#J_pullRefresh, #J_pullUpdate').css('visibility', 'auto');
+				setTimeout(function(){
+					app.plugin.lazyload.check();	
+				}, 500);
 			});
 		},
 

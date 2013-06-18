@@ -3,8 +3,7 @@
 var doc = win.document
 	;
 
-function Template(url) {
-	this.url = url;
+function Template() {
 }
 
 var TemplateProto = {
@@ -15,13 +14,6 @@ var TemplateProto = {
 
 		if (app && app.config) {
 			engine = app.config.templateEngine;
-		}
-
-		if (arguments.length === 1) {
-			callback = arguments[0];
-			url = that.url;
-		} else {
-			that.url = url;
 		}
 
 		function loaded(text) {

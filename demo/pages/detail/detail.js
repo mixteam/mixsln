@@ -38,15 +38,14 @@
 
 		startup : function() {
 			// implement super.startup
-			var that = this,
-				pid = app.navigation.getParameter('pid')
+			var pid = app.navigation.getParameter('pid'),
+				html = this.template({}),
+				searchbar = this.views.searchbar
 				;
 
-			that.template({}, function(html) {
-				that.html(html);
-				app.navigation.setToolbar(that.views.searchbar.el);
-				that.views.searchbar.render();
-			});
+			this.html(html);
+			app.navigation.setToolbar(searchbar.el);
+			searchbar.render();
 		},
 
 		teardown : function() {

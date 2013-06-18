@@ -6,25 +6,17 @@
     	isIOS = (/iphone|ipad/gi).test(appVersion)
 		;
 
-	function getScrollTop(el) {
-		if (el && el.getScrollTop) {
-			return el.getScrollTop();
+	function getScrollTop() {
+		if (app.scroll) {
+			return app.scroll.getScrollTop();
 		} else {
 			return doc.body.scrollTop;
 		}
 	}
 
-	function getScrollHeight(el) {
-		if (el && el.getScrollHeight) {
-			return el.getScrollHeight();
-		} else {
-			return doc.body.scrollHeight;
-		}
-	}
-
-	function getViewHeight(el) {
-		if (el && el.refresh) {
-			return el.parentNode.offsetHeight;
+	function getViewHeight() {
+		if (app.scroll) {
+			return app.scroll.getViewHeight();
 		} else {
 			return doc.body.clientHeight;
 		}
@@ -34,21 +26,21 @@
 		return el.offsetParent || el.parentNode;
 	}
 
-	function getOffset(img, el) {
+	function getOffset(img) {
 		var cStyle = getComputedStyle(img),
 			offsetHeight = parseFloat(img.getAttribute('height') || img.offsetHeight || cStyle.height),
 			offsetTop = parseFloat(img.offsetTop),
 			offsetParent, offsetContent = 0
 			;
 
-		if (!el.refresh) {
-			for (offsetParent = getParent(el); offsetParent && offsetParent != doc.body;) {
-				offsetContent += parseFloat(offsetParent.offsetTop || 0);
-				offsetParent = getParent(offsetParent);
-			}
-		}
+		// if (!app.scroll) {
+		// 	for (offsetParent = getParent(el); offsetParent && offsetParent != doc.body;) {
+		// 		offsetContent += parseFloat(offsetParent.offsetTop || 0);
+		// 		offsetParent = getParent(offsetParent);
+		// 	}
+		// }
 
-		for (offsetParent = getParent(img); offsetParent && offsetParent != el;) {
+		for (offsetParent = getParent(img); offsetParent && offsetParent != app.scroll;) {
             offsetTop += parseFloat(offsetParent.offsetTop || 0);
             offsetParent = getParent(offsetParent);
         }
@@ -104,17 +96,16 @@
 		},
 
 		check: function() {
-			var el = this._el,
-				options = this._options,
+			var options = this._options,
 				dataAttr = options.dataAttr || 'data-src',
-				imgs = el.querySelectorAll('img[' + dataAttr + ']'),
-				viewportTop = getScrollTop(el),
-				viewportBottom = getScrollTop(el) + getViewHeight(el)
+				imgs = app.scroll.querySelectorAll('img[' + dataAttr + ']'),
+				viewportTop = getScrollTop(),
+				viewportBottom = getScrollTop() + getViewHeight()
 				;
 
 			for (var i = 0; i < imgs.length; i++) {
 				var img = imgs[i],
-					offset = getOffset(img, el),
+					offset = getOffset(img),
 					src
 					;
 
@@ -130,11 +121,11 @@
 		},
 
 		onPageStartup : function(page, options) {
-			var el = this._el = page.el;
+			var el = page.el;
 			this._options = options;
 
-			if (el.refresh) {
-				el.addEventListener('scrollend', this, false)
+			if (app.scroll) {
+				app.scroll.addEventListener('scrollend', this, false);
 			} else {
 				doc.addEventListener('touchstart', this, false);
 				doc.addEventListener('touchend', this, false);
@@ -142,10 +133,10 @@
 		},
 
 		onPageTeardown : function(page, options) {
-			var el = this._el;
+			var el = page.el;
 
-			if (el.refresh) {
-				el.removeEventListener('scrollend', this);
+			if (app.scroll) {
+				app.scroll.removeEventListener('scrollend', this);
 			} else {
 				doc.removeEventListener('touchstart', this);
 				doc.removeEventListener('touchend', this);

@@ -41,10 +41,9 @@
 				;
 
 			that._getSearchItems(function(datas) {
-				that.template(datas, function(html) {
-					that.$el.find('ul').html(html);
-					callback && callback();
-				});
+				var html = that.template(datas);
+				that.$el.find('ul').html(html);
+				callback && callback();
 			});
 		},
 
@@ -55,10 +54,9 @@
 			that.pageno++;
 
 			that._getSearchItems(function(datas) {
-				that.template(datas, function(html) {
-					that.$el.find('ul').append(html);
-					callback && callback();
-				});
+				var html = that.template(datas);
+				that.$el.find('ul').append(html);
+				callback && callback();
 			});
 		},
 

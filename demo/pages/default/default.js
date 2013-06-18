@@ -29,10 +29,8 @@
 
 		startup : function() {
 			// implement super.startup
-			var that = this;
-			this.template({}, function(html) {
-				that.html(html);
-			});
+			var html = this.template({});
+			this.html(html);
 		},
 
 		teardown : function() {
