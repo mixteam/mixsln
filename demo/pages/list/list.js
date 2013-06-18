@@ -30,7 +30,42 @@
 		plugins : {
 			domevent: true,
 			lazyload: true,
-			scrollpos: true
+			scrollpos: true,
+			pullbounce: {
+				top: 50,
+				bottom: 50,
+				onPullDown: function(offset) {
+					var that = this,
+						span = this.$el.find('#J_pullRefresh span'),
+						text = span.text();
+
+					if (offset > 50 && text !== '松开即刷新') {
+						span.text('松开即刷新');
+					} else if (offset < 50 && text !== '下拉可刷新'){
+						span.text('下拉可刷新');
+					}
+
+					return function(callback) {
+						that.refresh(callback);
+					}
+				},
+
+				onPullUp: function(offset) {
+					var that = this,
+						span = this.$el.find('#J_pullRefresh span'),
+						text = span.text();
+
+					if (offset > 50 && text !== '松开即加载更多') {
+						span.text('松开即加载更多');
+					} else if (offset < 50 && text !== '上拉可加载更多'){
+						span.text('上拉可加载更多');
+					}
+
+					return function(callback) {
+						that.more(callback);
+					}
+				}
+			}
 		},
 
 		_submitFormHandler : function(e, that) {
@@ -40,6 +75,25 @@
 				;
 
 			app.navigation.push('list/' + encodeURIComponent(word) + '/');
+		},
+
+		refresh : function(callback) {
+			this.views.searchItems.pageno = 1;
+			this.views.searchItems.render(function() {
+				callback();
+				setTimeout(function(){
+					app.plugin.lazyload.check();	
+				}, 500);
+			});
+		},
+
+		more : function(callback) {
+			this.views.searchItems.renderMore(function() {
+				callback();
+				setTimeout(function(){
+					app.plugin.lazyload.check();
+				}, 500);
+			});
 		},
 
 		startup : function() {

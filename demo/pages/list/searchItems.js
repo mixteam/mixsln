@@ -1,7 +1,7 @@
 (function(app, undef) {
 	app.extendView({
 		name : 'searchItems',
-		el: 'div#J_searchList.search-list',
+		el: 'div#J_searchList.search-list > ul',
 		template : './pages/list/searchItems.tpl',
 		word : null,
 		pageno : 1,
@@ -42,7 +42,21 @@
 
 			that._getSearchItems(function(datas) {
 				that.template(datas, function(html) {
-					that.$el.html(html);
+					that.$el.find('ul').html(html);
+					callback && callback();
+				});
+			});
+		},
+
+		renderMore : function(callback) {
+			var that = this
+				;
+
+			that.pageno++;
+
+			that._getSearchItems(function(datas) {
+				that.template(datas, function(html) {
+					that.$el.find('ul').append(html);
 					callback && callback();
 				});
 			});

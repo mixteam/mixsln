@@ -231,7 +231,6 @@ var NavigationProto = {
 		function routeHandler(fragment, params, args) {
 			var state = that._stack.pushState(name, fragment, params, args);
 			options.callback && options.callback(state);
-
 			that.trigger(state.move, state);
 		}
 
@@ -265,6 +264,10 @@ var NavigationProto = {
 		if (this._routes[name]) {
 			delete this._routes[name];
 		}
+	},
+
+	hasRoute: function(name) {
+		return !!this._routes[name];
 	},
 
 	start: function() {

@@ -22,18 +22,27 @@ function inherit(child, parent) {
 }
 	
 function View() {
-	var el, $el, $ = win['$'], matches;
+	var el = document.createElement('div'), $el, $ = win['$'];
 
 	if (this.el) {
-		if ((matches = this.el.match(/^(\w+)?(?:\#([^.]+))?(?:\.(.+))?$/i))) {
-			el = document.createElement(matches[1] || 'div');
-			matches[2] && el.setAttribute('id', matches[2]);
-			matches[3] && (el.className = matches[3]);
-		} else {
-			var wrap = document.createElement('div');
-			wrap.innerHTML = this.el;
-			el = wrap.removeChild(wrap.childNodes[0]);
-		}
+		var selectors = this.el.split(/\s*\>\s*/),
+			wrap = el
+			;
+
+		selectors.forEach(function(selector) {
+			var matches;
+			if ((matches = selector.match(/^(\w+)?(?:\#([^.]+))?(?:\.(.+))?$/i))) {
+				var node = document.createElement(matches[1] || 'div');
+				matches[2] && node.setAttribute('id', matches[2]);
+				matches[3] && (node.className = matches[3]);
+				wrap.appendChild(node);
+			} else {
+				wrap.innerHTML = selector;
+			}
+			wrap = wrap.childNodes[0];
+		});
+
+		el = el.childNodes[0];
 	}
 
 

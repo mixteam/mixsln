@@ -346,6 +346,9 @@ var Scroll = {
 		if (options) {
 			element.bounceTop = options.bounceTop;
 			element.bounceBottom = options.bounceBottom;
+		} else {
+			element.bounceTop = 0;
+			element.bounceBottom = 0;
 		}
 		element.scrollTo(0);
 

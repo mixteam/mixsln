@@ -1,28 +1,24 @@
 function testView() {
 	var DemoView = app.module.View.extend({
 			name: 'demo',
-			el: '.viewport .active',
+			el: 'div',
 
 			render: function(callback) {
-				this.el.innerHTML = 'demo view';
+				this.el.innerHTML = 'remder demo view';
 			},
 
 			destory: function(callback) {
-				this.el.innerHTML = '';
+				this.el.innerHTML = 'destory demo view';
 			}
 		}),
 		demo = new DemoView()
 		;
 
 
+	$('.viewport .active').html('').append(demo.el);
 	demo.render();
-	log($('.viewport .active').html())
-
-	demo.$el = $('.viewport .inactive');
-	demo.render();
-	log($('.viewport .inactive').html())
+	log(demo.$el.html())
 
 	demo.destory();
-	log($('.viewport .active').html());
-	log($('.viewport .inactive').html());
+	log(demo.$el.html());
 }

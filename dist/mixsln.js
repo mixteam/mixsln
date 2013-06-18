@@ -1098,7 +1098,6 @@ var NavigationProto = {
 		function routeHandler(fragment, params, args) {
 			var state = that._stack.pushState(name, fragment, params, args);
 			options.callback && options.callback(state);
-
 			that.trigger(state.move, state);
 		}
 
@@ -1132,6 +1131,10 @@ var NavigationProto = {
 		if (this._routes[name]) {
 			delete this._routes[name];
 		}
+	},
+
+	hasRoute: function(name) {
+		return !!this._routes[name];
 	},
 
 	start: function() {
@@ -1426,18 +1429,27 @@ function inherit(child, parent) {
 }
 	
 function View() {
-	var el, $el, $ = win['$'], matches;
+	var el = document.createElement('div'), $el, $ = win['$'];
 
 	if (this.el) {
-		if ((matches = this.el.match(/^(\w+)?(?:\#([^.]+))?(?:\.(.+))?$/i))) {
-			el = document.createElement(matches[1] || 'div');
-			matches[2] && el.setAttribute('id', matches[2]);
-			matches[3] && (el.className = matches[3]);
-		} else {
-			var wrap = document.createElement('div');
-			wrap.innerHTML = this.el;
-			el = wrap.removeChild(wrap.childNodes[0]);
-		}
+		var selectors = this.el.split(/\s*\>\s*/),
+			wrap = el
+			;
+
+		selectors.forEach(function(selector) {
+			var matches;
+			if ((matches = selector.match(/^(\w+)?(?:\#([^.]+))?(?:\.(.+))?$/i))) {
+				var node = document.createElement(matches[1] || 'div');
+				matches[2] && node.setAttribute('id', matches[2]);
+				matches[3] && (node.className = matches[3]);
+				wrap.appendChild(node);
+			} else {
+				wrap.innerHTML = selector;
+			}
+			wrap = wrap.childNodes[0];
+		});
+
+		el = el.childNodes[0];
 	}
 
 
@@ -1997,6 +2009,9 @@ var Scroll = {
 		if (options) {
 			element.bounceTop = options.bounceTop;
 			element.bounceBottom = options.bounceBottom;
+		} else {
+			element.bounceTop = 0;
+			element.bounceBottom = 0;
 		}
 		element.scrollTo(0);
 
@@ -2163,23 +2178,45 @@ var StateStack = app.module.StateStack,
 	Scroll = app.module.Scroll,
 	Animation = app.module.Animation,
 	Transition = app.module.Transition,
-	hooks = Message.get('hooks');
+	hooks = Message.get('hooks'),
+	pagemeta = {}
 	;
 
 app.config = {
 	viewport : null,
+	templateEngine : null,
 	enableMessageLog: false,
+	enableContent: true,
 	enableNavbar : false,
 	enableToolbar : false,
-	enableContent: true,
 	enableScroll : false,
-	enableTransition : false,
-	templateEngine : null
+	enableTransition : false
 }
 
 function q(selector, el) {
 	el || (el = doc);
 	return el.querySelector(selector);
+}
+
+function loadScript(url, callback) {
+	var script = document.createElement('script'), loaded = false;
+	script.async = true;
+	script.onload = script.onreadystatechange  = function() {
+		if (!loaded) {
+			loaded = true;
+			callback && callback(url);
+		}
+	}
+	script.src = url;
+	doc.body.appendChild(script);
+}
+
+function loadCss(url) {
+	var link = document.createElement('link');
+	link.type = 'text/css';
+	link.rel = 'stylesheet';
+	link.href = url;
+	doc.body.appendChild(link);
 }
 
 // Config Initial
@@ -2196,7 +2233,13 @@ void function () {
 		config.enableToolbar === true && (config.enableToolbar = {});
 		config.enableScroll === true && (config.enableScroll = {});
 		config.enableTransition === true && (config.enableTransition = {});
-		typeof config.enableContent !== 'object' && (config.enableContent = {});
+		if (typeof config.enableContent === 'number') {
+			config.enableContent = {cacheLength: config.enableContent};
+		} else if (config.enableContent instanceof HTMLElement) {
+			config.enableContent = {wrapEl: config.enableContent};
+		} else if (typeof config.enableContent !== 'object') {
+			config.enableContent = {};
+		}
 	});
 }();
 
@@ -2219,9 +2262,11 @@ void function() {
 void function() {
 	var navigation = Navigation.instance;
 
-	hooks.on('page:define', function(page) {
-		name = page.name;
-		route = page.route;
+	hooks.on('page:define page:defineMeta', function(page) {
+		var name = page.name,
+			route = page.route;
+
+		if (navigation.hasRoute(name)) return;
 
 		if (!route) {
 			route = {name: name, 'default': true}
@@ -2236,12 +2281,13 @@ void function() {
 		});
 	});
 
-	hooks.on('app:start', function() {
-		var lastState, lastPage;
+	var lastState, lastPage;
+	navigation.on('forward backward', function(state) {
+		var page = Page.get(state.name), meta;
 
-		navigation.on('forward backward', function(state) {
-			var page = Page.get(state.name)
-			
+		function pageReady() {
+			var page = Page.get(state.name);
+
 			hooks.trigger('navigation:switch', state, page, {
 				lastState: lastState,
 				lastPage: lastPage,
@@ -2250,7 +2296,122 @@ void function() {
 			});
 			lastState = state;
 			lastPage = page;
-		});
+		}
+
+		if (!page) {
+			var meta = pagemeta[state.name],
+				basePath = app.config.pageBasePath || '.',
+				jsLoaded = {};
+
+			if (meta.css) {
+				for (var i = 0; i < meta.css.length; i++) {
+					var url = basePath + '/' + meta.name + '/' + meta.css[i];
+					loadCss(url);
+				}
+			}
+
+			if (meta.js) {
+				for (var i =  0; i < meta.js.length; i++) {
+					var url = basePath + '/' + meta.name + '/' + meta.js[i];
+					jsLoaded[url] = false;
+					loadScript(url, function(url) {
+						jsLoaded[url] = true;
+						var allLoaded = true;
+						for (var name in jsLoaded) {
+							allLoaded = allLoaded && jsLoaded[name];
+						}
+						allLoaded && pageReady();
+					});
+				}
+			}
+		} else {
+			pageReady();
+		}
+	});
+}();
+
+
+//Plugin Initial
+void function () {
+
+	hooks.on('app:start', function() {
+		for (var name in app.plugin) {
+			var plugin = app.plugin[name];
+			plugin.onAppStart && plugin.onAppStart();
+		}
+	});
+
+	hooks.on('view:render', function(view) {
+		if (view.plugins) {
+			for (var name in view.plugins) {
+				var plugin = app.plugin[name], pluginOpt = view.plugins[name]
+					;
+
+				pluginOpt === true && (pluginOpt = view.plugins[name] = {});
+				if (plugin && pluginOpt) {
+					plugin.onViewRender && plugin.onViewRender(view, pluginOpt);
+				}
+			}
+		}
+	});
+
+	hooks.on('view:destory', function(view) {
+		if (view.plugins) {
+			for (var name in view.plugins) {
+				var plugin = app.plugin[name], pluginOpt = view.plugins[name]
+					;
+
+				if (plugin && pluginOpt) {
+					plugin.onViewTeardown && plugin.onViewTeardown(view, pluginOpt);
+				}
+			}
+		}
+	});
+
+	hooks.on('navigation:switch', function(state, page) {
+		if (page.plugins) {
+			for (var name in page.plugins) {
+				var plugin = app.plugin[name], pluginOpt = page.plugins[name]
+					;
+
+				if (plugin && pluginOpt) {
+					state.plugins || (state.plugins = {});
+					state.plugins[name] || (state.plugins[name] = {});
+					if (typeof pluginOpt === 'object') {
+						for (var p in pluginOpt) {
+							state.plugins[name][p] = pluginOpt[p];
+						}
+					}
+					plugin.onNavigationSwitch && plugin.onNavigationSwitch(page, state.plugins[name]);
+				}
+			}
+		}
+	});
+
+	hooks.on('page:startup', function(state, page) {
+		if (page.plugins) {
+			for (var name in page.plugins) {
+				var plugin = app.plugin[name], pluginOpt = state.plugins[name]
+					;
+
+				if (plugin && pluginOpt) {
+					plugin.onPageStartup && plugin.onPageStartup(page, pluginOpt);
+				}
+			}
+		}
+	});
+
+	hooks.on('page:teardown', function(state, page) {
+		if (page.plugins) {
+			for (var name in page.plugins) {
+				var plugin = app.plugin[name], pluginOpt = state.plugins[name]
+					;
+
+				if (plugin && page.plugins[name]) {
+					plugin.onPageTeardown && plugin.onPageTeardown(page, pluginOpt);
+				}
+			}
+		}
 	});
 }();
 
@@ -2365,9 +2526,9 @@ void function () {
 			c_scroll = config.enableScroll
 			;
 
-		config.viewport || (config.viewport = q('.viewport'));
+		config.viewport || (config.viewport = q('.viewport')) || doc.body;
 
-		c_content.wrapEl || (c_content.wrapEl = q('section.content', config.viewport));	
+		c_content.wrapEl || (c_content.wrapEl = q('section.content', config.viewport)) || config.viewport;
 		c_content.cacheLength || (c_content.cacheLength = 5);
 		i_content = c_content.instance = new Content(c_content.wrapEl, {
 			cacheLength: c_content.cacheLength
@@ -2448,91 +2609,6 @@ void function () {
 	hooks.on('page:define', function(page) {
 		if (page.template) {
 			page.template = compileTemplate(page.template);
-		}
-	});
-}();
-
-
-//Plugin Initial
-void function () {
-
-	hooks.on('app:start', function() {
-		for (var name in app.plugin) {
-			var plugin = app.plugin[name];
-			plugin.onAppStart && plugin.onAppStart();
-		}
-	});
-
-	hooks.on('view:render', function(view) {
-		if (view.plugins) {
-			for (var name in view.plugins) {
-				var plugin = app.plugin[name], pluginOpt = view.plugins[name]
-					;
-
-				pluginOpt === true && (pluginOpt = view.plugins[name] = {});
-				if (plugin && pluginOpt) {
-					plugin.onViewRender && plugin.onViewRender(view, pluginOpt);
-				}
-			}
-		}
-	});
-
-	hooks.on('view:destory', function(view) {
-		if (view.plugins) {
-			for (var name in view.plugins) {
-				var plugin = app.plugin[name], pluginOpt = view.plugins[name]
-					;
-
-				if (plugin && pluginOpt) {
-					plugin.onViewTeardown && plugin.onViewTeardown(view, pluginOpt);
-				}
-			}
-		}
-	});
-
-	hooks.on('navigation:switch', function(state, page) {
-		if (page.plugins) {
-			for (var name in page.plugins) {
-				var plugin = app.plugin[name], pluginOpt = page.plugins[name]
-					;
-
-				if (plugin && pluginOpt) {
-					state.plugins || (state.plugins = {});
-					state.plugins[name] || (state.plugins[name] = {});
-					if (typeof pluginOpt === 'object') {
-						for (var p in pluginOpt) {
-							state.plugins[name][p] = pluginOpt[p];
-						}
-					}
-					plugin.onNavigationSwitch && plugin.onNavigationSwitch(page, state.plugins[name]);
-				}
-			}
-		}
-	});
-
-	hooks.on('page:startup', function(state, page) {
-		if (page.plugins) {
-			for (var name in page.plugins) {
-				var plugin = app.plugin[name], pluginOpt = state.plugins[name]
-					;
-
-				if (plugin && pluginOpt) {
-					plugin.onPageStartup && plugin.onPageStartup(page, pluginOpt);
-				}
-			}
-		}
-	});
-
-	hooks.on('page:teardown', function(state, page) {
-		if (page.plugins) {
-			for (var name in page.plugins) {
-				var plugin = app.plugin[name], pluginOpt = state.plugins[name]
-					;
-
-				if (plugin && page.plugins[name]) {
-					plugin.onPageTeardown && plugin.onPageTeardown(page, pluginOpt);
-				}
-			}
 		}
 	});
 }();
@@ -2622,6 +2698,11 @@ app.definePage = function(properties) {
 	var page = Page.define(properties);
 	hooks.trigger('page:define', page);
 	return page;
+}
+
+app.definePageMeta = function(meta)  {
+	pagemeta[meta.name] = meta;
+	hooks.trigger('page:defineMeta', meta);
 }
 
 app.getPage = function(name) {

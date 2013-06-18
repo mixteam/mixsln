@@ -121,7 +121,14 @@ body > div {
 	});
 
 	function log() {
-		logDiv.innerHTML = Array.prototype.slice.apply(arguments).map(function(v) {if (typeof v === 'object') {return JSON.stringify(v)}else{return v;}}) + '<br />' + logDiv.innerHTML;
+		logDiv.innerHTML = Array.prototype.slice.apply(arguments)
+			.map(function(v) {
+				if (typeof v === 'object') {
+					return JSON.stringify(v)
+				} else {
+					return v;
+				}
+			}) + '<br />' + logDiv.innerHTML;
 		console.log.apply(console, arguments)
 	}
 
