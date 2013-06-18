@@ -56,7 +56,7 @@
 			}
 		},
 
-		onNavigationSwtich: function() {
+		onNavigationSwitch: function() {
 			this.saveAll();
 		},
 

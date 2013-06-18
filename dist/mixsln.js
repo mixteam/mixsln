@@ -2311,18 +2311,17 @@ void function() {
 			}
 
 			if (meta.js) {
-				for (var i =  0; i < meta.js.length; i++) {
-					var url = basePath + '/' + meta.name + '/' + meta.js[i];
-					jsLoaded[url] = false;
-					loadScript(url, function(url) {
-						jsLoaded[url] = true;
-						var allLoaded = true;
-						for (var name in jsLoaded) {
-							allLoaded = allLoaded && jsLoaded[name];
-						}
-						allLoaded && pageReady();
-					});
-				}
+				var i = 0, len = meta.js.length,
+					url = basePath + '/' + meta.name + '/' + meta.js[i++];
+
+				loadScript(url, function(url) {
+					if (i < len) {
+						url = basePath + '/' + meta.name + '/' + meta.js[i++];
+						loadScript(url, arguments.callee);
+					} else {
+						pageReady();
+					}
+				});
 			}
 		} else {
 			pageReady();
@@ -2369,21 +2368,22 @@ void function () {
 	});
 
 	hooks.on('navigation:switch', function(state, page) {
-		if (page.plugins) {
-			for (var name in page.plugins) {
-				var plugin = app.plugin[name], pluginOpt = page.plugins[name]
-					;
+		for (var name in app.plugin) {
+			var plugin = app.plugin[name], pluginOpt;
 
-				if (plugin && pluginOpt) {
-					state.plugins || (state.plugins = {});
-					state.plugins[name] || (state.plugins[name] = {});
-					if (typeof pluginOpt === 'object') {
-						for (var p in pluginOpt) {
-							state.plugins[name][p] = pluginOpt[p];
-						}
+			if (page.plugins) {
+				pluginOpt = page.plugins[name];
+			}
+
+			if (plugin) {
+				state.plugins || (state.plugins = {});
+				state.plugins[name] || (state.plugins[name] = {});
+				if (typeof pluginOpt === 'object') {
+					for (var p in pluginOpt) {
+						state.plugins[name][p] = pluginOpt[p];
 					}
-					plugin.onNavigationSwitch && plugin.onNavigationSwitch(page, state.plugins[name]);
 				}
+				plugin.onNavigationSwitch && plugin.onNavigationSwitch(page, state.plugins[name]);
 			}
 		}
 	});
@@ -2442,6 +2442,8 @@ void function () {
 					if (button.type === 'back') {
 						if (button.autoHide !== false && state.index < 1) {
 							button.hide = true;
+						} else {
+							button.hide = false;
 						}
 						if (!handler) {
 							handler = button.handler = function() {

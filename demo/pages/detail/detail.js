@@ -9,6 +9,22 @@
 			{
 				type: 'back',
 				text: '搜索列表'
+			},
+			{
+				id: 'comment',
+				type: 'func',
+				text: '评论',
+				handler: function() {
+					alert('go comment');
+				}
+			},
+			{
+				id: 'shop',
+				type: 'func',
+				text: '店铺',
+				handler: function() {
+					alert('go shop');
+				}
 			}
 		],
 		toolbar: 50,

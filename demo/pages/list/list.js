@@ -19,10 +19,22 @@
 				text : '返回'
 			},
 			{
+				id : 'filter',
 				type : 'func',
 				text : '筛选',
 				handler : function(e) {
-					alert('TODO filter');
+					var btn = e.srcElement;
+					if (btn.innerText === '筛选') {
+						app.navigation.setButton({
+							id: 'filter',
+							text: '完成'
+						});
+					} else if (btn.innerText === '完成') {
+						app.navigation.setButton({
+							id: 'filter',
+							text: '筛选'
+						});
+					}
 				}
 			}
 		],
