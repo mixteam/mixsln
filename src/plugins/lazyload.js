@@ -31,7 +31,7 @@
 	}
 
 	function getParent(el) {
-		return el.parentNode;
+		return el.offsetParent || el.parentNode;
 	}
 
 	function getOffset(img, el) {

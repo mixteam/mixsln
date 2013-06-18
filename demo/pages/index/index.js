@@ -21,7 +21,7 @@
 		},
 
 		startup: function() {
-			this.html('index');
+			this.html('<h1>index</h1>');
 		}
 	});
 })(window['app']);

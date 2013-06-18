@@ -194,6 +194,7 @@ footer.toolbar {
 }
 
 .viewport.enableToolbar > footer.toolbar {
+    display: block;
 }
 
 .viewport.enableScroll,

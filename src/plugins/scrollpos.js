@@ -45,13 +45,18 @@
 		onNavigationSwitch : function(page, options) {
 			var el = this._el = page.el;
 			this._options = options;
+			this.reset();
+		},
+
+		onPageStartup : function(page,  options) {
+			var el = this._el = page.el;
+			this._options = options;
 			
 			if (el.refresh) {
 				el.addEventListener('scrollend', this, false);
 			} else {
 				doc.addEventListener('touchend', this, false);
 			}
-			this.reset();
 		},
 
 		onPageTeardown : function(page, options) {

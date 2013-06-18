@@ -23,7 +23,7 @@
 
 	app.plugin.domevent = {
 		onPageStartup : function(page, options) {
-			page.delegateEvents(page.events);
+			page.events && page.delegateEvents(page.events);
 		},
 
 		onPageTeardown : function(page, options) {
@@ -31,7 +31,7 @@
 		},
 
 		onViewRender : function(view, options) {
-			if (!view._isDelegateEvents) {
+			if (!view._isDelegateEvents && view.events) {
 				view._isDelegateEvents = true;
 				view.delegateEvents(view.events);
 			}

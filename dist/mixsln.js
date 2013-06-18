@@ -2308,7 +2308,7 @@ void function () {
 
 		if (c_toolbar) {
 			var i_toolbar = c_toolbar.instance;
-			page.toolbar?i_toolbar.show(page.toolbar):i_toolbar.hide();
+			page.toolbar?i_toolbar.show('', {height:page.toolbar}):i_toolbar.hide();
 		}
 
 		if (!options.isSamePage) {
@@ -2558,7 +2558,7 @@ void function () {
 
 //Page Initial
 void function () {
-	var config = app.config;
+	var config = app.config, pageCaches = {};
 
 	hooks.on('page:define', function(page) {
 		page.html = function(html) {
@@ -2582,16 +2582,21 @@ void function () {
 
 	hooks.on('navigation:switch', function(state, page, options) {
 		var lastDataFragment = page.el.getAttribute('data-fragment'),
-			curDataFragment = state.fragment;
+			curDataFragment = state.fragment
+			;
 
 		if (lastDataFragment === curDataFragment) {
 			return;
 		}
+		var lastCache = pageCaches[lastDataFragment];
+
+		delete pageCaches[lastDataFragment];
+		pageCaches[curDataFragment] = {state:state, page:page};
 		page.el.setAttribute('data-fragment', curDataFragment);
 
-		if (options.lastState && options.lastPage) {
-			hooks.trigger('page:teardown', options.lastState, options.lastPage);
-			options.lastPage.teardown();
+		if (lastCache) {
+			hooks.trigger('page:teardown', lastCache.state, lastCache.page);
+			lastCache.page.teardown();
 		}
 		hooks.trigger('page:startup', state, page);
 		page.startup();
@@ -2599,17 +2604,8 @@ void function () {
 }();
 
 app.start = function() {
-	// var placeholder = doc.createElement('div');
-	// placeholder.style.cssText = 'width:100%;height:200%;'
-	// doc.body.appendChild(placeholder);
-	// doc.body.style.height = "200%";
-
-	// setTimeout(scrollTo, 0, 0, 1);
-	setTimeout(function(){
-		//doc.body.removeChild(placeholder);
-		hooks.trigger('app:start');
-		Navigation.instance.start();
-	}, 500);
+	hooks.trigger('app:start');
+	Navigation.instance.start();
 }
 
 app.extendView = function(properties) {
@@ -2671,6 +2667,18 @@ app.navigation = {
 	setButton: function(options) {
 		if (app.config.enableNavbar) {
 			app.config.enableNavbar.instance.setButton(options);
+		}
+	},
+
+	setToolbar: function(el) {
+		if (app.config.enableToolbar) {
+			var c_toolbar = app.config.enableToolbar;
+			if (typeof el === 'string') {
+				c_toolbar.wrapEl.innerHTML = el;
+			} else {
+				c_toolbar.wrapEl.innerHTML = '';
+				c_toolbar.wrapEl.appendChild(el);
+			}
 		}
 	}
 }

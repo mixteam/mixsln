@@ -58,7 +58,9 @@
 				that.$el.find('.searchcontent').append(searchItems.el);
 				searchItems.render(function() {
 					//app.plugin.scrollpos.reset();
-					app.plugin.lazyload.check();
+					setTimeout(function(){
+						app.plugin.lazyload.check();	
+					}, 500);
 				});
 			});
 		},
