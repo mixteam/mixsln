@@ -22,32 +22,11 @@
 		}
 	}
 
-	function getParent(el) {
-		return el.offsetParent || el.parentNode;
-	}
-
 	function getOffset(img) {
-		var cStyle = getComputedStyle(img),
-			offsetHeight = parseFloat(img.getAttribute('height') || img.offsetHeight || cStyle.height),
-			offsetTop = parseFloat(img.offsetTop),
-			offsetParent, offsetContent = 0
-			;
-
-		// if (!app.scroll) {
-		// 	for (offsetParent = getParent(el); offsetParent && offsetParent != doc.body;) {
-		// 		offsetContent += parseFloat(offsetParent.offsetTop || 0);
-		// 		offsetParent = getParent(offsetParent);
-		// 	}
-		// }
-
-		for (offsetParent = getParent(img); offsetParent && offsetParent != app.scroll;) {
-            offsetTop += parseFloat(offsetParent.offsetTop || 0);
-            offsetParent = getParent(offsetParent);
-        }
-
-		return {
-			top : offsetTop + offsetContent,
-			bottom : offsetTop + offsetHeight + offsetContent
+		if (app.scroll) {
+			return app.scroll.offset(img);
+		} else {
+			return img.getBoundingClientRect();
 		}
 	}
 
@@ -104,18 +83,13 @@
 				;
 
 			for (var i = 0; i < imgs.length; i++) {
-				var img = imgs[i],
-					offset = getOffset(img),
-					src
-					;
+				var img = imgs[i], offset = getOffset(img), src;
 
-				if (offset.top > viewportTop && offset.top < viewportBottom ||
-						offset.bottom > viewportTop && offset.bottom < viewportBottom) {
-					src = img.getAttribute(dataAttr);
-					if (src) {
-						img.setAttribute('src', src);
-						img.removeAttribute(dataAttr);
-					}
+				if (((offset.top > viewportTop && offset.top < viewportBottom) ||
+						(offset.bottom > viewportTop && offset.bottom < viewportBottom)) && 
+							(src = img.getAttribute(dataAttr))) {
+					img.setAttribute('src', src);
+					img.removeAttribute(dataAttr);
 				}
 			}
 		},

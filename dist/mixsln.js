@@ -1681,6 +1681,7 @@ var doc = win.document,
 	element, offset, minScrollTop, maxScrollTop,
 	panFixRatio = 2,
 	cancelScrollEnd = false,
+	lockTouched = 0;
 	stopBounce = false,
 	prevented = false
 	;
@@ -1695,8 +1696,6 @@ function getMaxScrollTop(el) {
     	minTop = getMinScrollTop(el),
     	maxTop = 0 - rect.height + pRect.height
     	;
-
-    if (maxTop > 0) maxTop = 0;
 
     return Math.min(maxTop + (el.bounceBottom || 0), minTop);
 }
@@ -1714,15 +1713,12 @@ function touchstartHandler(e) {
 	if (stopBounce) return;
 
 	var parentElement = e.srcElement;
-
 	while (!parentElement.boundScrollEvent) {
 		parentElement = parentElement.parentNode || parentElement.offsetParent;
 	}
-
 	element = parentElement.boundScrollElement;
 
 	if (!element) return;
-
 	element.style.webkitBackfaceVisibility = 'hidden';
 	element.style.webkitTransformStyle = 'preserve-3d';
 	element.style.webkitTransition = '';
@@ -1941,7 +1937,7 @@ var Scroll = {
 
 	    if (!element.refresh) {
 	    	element.getScrollHeight = function() {
-	    		return element.scrollHeight - (element.bounceTop||0) - (element.bounceBottom||0);
+	    		return element.getBoundingClientRect().height - (element.bounceTop||0) - (element.bounceBottom||0);
 	    	}
 
 		    element.getScrollTop = function() {
@@ -1955,6 +1951,16 @@ var Scroll = {
 		        offset = anim.getTransformOffset(element);
 		        minScrollTop = getMinScrollTop(element);
 		        maxScrollTop = getMaxScrollTop(element);
+		        this.scrollTo(offset.y);
+		    }
+
+		    element.offset = function(el) {
+		    	var elRect = el.getBoundingClientRect(), 
+		    		elementRect = element.getBoundingClientRect(), 
+		    		top = elRect.top - (element.bounceTop + elementRect.top),
+		    		bottom = top + elRect.height;
+
+		        return { top: top, bottom: bottom}
 		    }
 
 		    element.scrollTo = function(y) {
@@ -1967,7 +1973,8 @@ var Scroll = {
 		    }
 
 		    element.scollToElement = function(el) {
-		    	
+		    	var offset = this.offset(el);
+		    	this.scrollTo(offset.y);
 		    }
 
 		    element.getBoundaryOffset = function() {
