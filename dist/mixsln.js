@@ -984,9 +984,9 @@ StateStack.isEquals = function(state1, state2) {
 	return true;
 }
 
-var NAMED_REGEXP = /\:(\w\w*)/g,
-	SPLAT_REGEXP = /\*(\w\w*)/g,
-	PERL_REGEXP = /P\<(\w\w*?)\>/g,
+var NAMED_REGEXP = /\:([a-z0-9_-][a-z0-9_-]*)/gi,
+	SPLAT_REGEXP = /\*([a-z0-9_-][a-z0-9_-]*)/gi,
+	PERL_REGEXP = /P\<([a-z0-9_-][a-z0-9_-]*?)\>/gi,
 	ARGS_SPLITER = '!',
 	his = win.history,
 	loc = win.location,
@@ -1011,11 +1011,13 @@ function extractNames(routeText) {
 	return names;
 }
 
-function extractArgs(args) {
-	var split = args.split('&')
+function extractArgs(str) {
+	if (!str) return {};
+
+	var split = str.substring(1).split('&'),
+		args = {}
 		;
 
-	args = {};
 	split.forEach(function(pair) {
 		if (pair) {
 			var s = pair.split('=')
@@ -1109,6 +1111,7 @@ var NavigationProto = {
 			routeReg = parseRoute(routeText);
 
 			that._routes[name] = {
+				routeText: routeText,
 				routeReg: routeReg,
 				callback: function(fragment) {
 					var matched = fragment.match(routeReg).slice(2),
@@ -1211,6 +1214,20 @@ var NavigationProto = {
 		}
 
 		his.back();
+	},
+
+	resolve: function(name, params) {
+		var route = this._routes[name], routeText, resolved = '';
+
+		if (route) {
+			routeText = route.routeText;
+			resolved = routeText.replace(/\(P<[a-z0-9_-][a-z0-9_-]*?>.*?\)/g, function(m) {
+				var name = PERL_REGEXP.exec(m)[1];
+				return params[name] || 'undefined';
+			}).replace('\\', '');
+		}
+
+		return resolved;
 	}
 }
 
@@ -2178,6 +2195,7 @@ var doc = win.document,	$ = win['$'],
 	pagecache = {},
 	pagemeta = {},
 	templatecache = {}, 
+	resourcecache = {},
 	config = app.config = {
 		viewport : null,
 		templateEngine : null,
@@ -2224,27 +2242,6 @@ window.addEventListener(orientationEvent, function(e){
 // Navigation Initial
 var lastState, lastPage;
 
-function loadScript(url, callback) {
-	var script = document.createElement('script'), loaded = false;
-	script.async = true;
-	script.onload = script.onreadystatechange  = function() {
-		if (!loaded) {
-			loaded = true;
-			callback && callback(url);
-		}
-	}
-	script.src = url;
-	doc.body.appendChild(script);
-}
-
-function loadCss(url) {
-	var link = document.createElement('link');
-	link.type = 'text/css';
-	link.rel = 'stylesheet';
-	link.href = url;
-	doc.body.appendChild(link);
-}
-
 hooks.on('page:define page:defineMeta', function(page) {
 	var name = page.name,
 		route = page.route;
@@ -2279,29 +2276,11 @@ navigation.on('forward backward', function(state) {
 	}
 
 	if (!page) {
-		var meta = pagemeta[state.name],
-			basePath = app.config.pageBasePath || '.',
-			jsLoaded = {};
+		if ((meta = pagemeta[state.name])) {
+			var	jsLoaded = {};
 
-		if (meta.css) {
-			for (var i = 0; i < meta.css.length; i++) {
-				var url = basePath + '/' + meta.name + '/' + meta.css[i];
-				loadCss(url);
-			}
-		}
-
-		if (meta.js) {
-			var i = 0, len = meta.js.length,
-				url = basePath + '/' + meta.name + '/' + meta.js[i++];
-
-			loadScript(url, function(url) {
-				if (i < len) {
-					url = basePath + '/' + meta.name + '/' + meta.js[i++];
-					loadScript(url, arguments.callee);
-				} else {
-					pageReady();
-				}
-			});
+			meta.css && app.loadResource(meta.css);
+			meta.js && app.loadResource(meta.js, pageReady);
 		}
 	} else {
 		pageReady();
@@ -2761,6 +2740,56 @@ app.getPage = function(name) {
 	return Page.get(name);
 }
 
+var aEl = document.createElement('a');
+app.loadResource = function(urls, callback) {
+	if (typeof urls === 'string') {
+		urls = [urls];
+	} else {
+		urls = urls.slice(0);
+	}
+
+	function load(url, callback) {
+		aEl.href = url;
+		url = aEl.href;
+
+		if (resourcecache[url]) {
+			callback();
+		} else {
+			var id = resourcecache[url] = 'resource-' + Date.now() + '-' + Object.keys(resourcecache).length;
+
+			if (url.match(/\.js$/)) {
+				var script = document.createElement('script'), loaded = false;
+				script.id = id;
+				script.async = true;
+				script.onload = script.onreadystatechange  = function() {
+					if (!loaded) {
+						loaded = true;
+						callback && callback(url);
+					}
+				}
+				script.src = url;
+				doc.body.appendChild(script);
+			} else if (url.match(/\.css$/)) {
+				var link = document.createElement('link');
+				link.id = id;
+				link.type = 'text/css';
+				link.rel = 'stylesheet';
+				link.href = url;
+				doc.body.appendChild(link);
+				callback();
+			}
+		}
+	}
+
+	load(urls.shift(), function() {
+		if (urls.length) {
+			load(urls.shift(), arguments.callee);
+		} else {
+			callback && callback();
+		}
+	});
+}
+
 app.navigation = {
 	push: function(fragment, options) {
 		navigation.push(fragment, options);
@@ -2770,11 +2799,35 @@ app.navigation = {
 		navigation.pop();
 	},
 
+	resolve: function(name, params) {
+		navigation.resolve(name, params);
+	},
+
 	getParameter: function(name) {
 		var stack = navigation.getStack(),
 			state = stack.getState();
 
 		return state.params[name] || state.args[name] || state.datas[name];
+	},
+
+	getParameters: function() {
+		var stack = navigation.getStack(),
+			state = stack.getState(),
+			params = {};
+
+		for (var n in state.params) {
+			params[n] = state.params[n];
+		}
+
+		for (var n in state.args) {
+			params[n] = state.args[n];
+		}
+
+		for (var n in state.datas) {
+			params[n] = state.datas[n];
+		}
+
+		return params;
 	},
 
 	getData: function(name) {

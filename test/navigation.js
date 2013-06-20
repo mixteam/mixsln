@@ -27,6 +27,8 @@ function testNavigation() {
 		callback: test3,
 	});
 
+	log(navigation.resolve('test2', {p1:'1234'}));
+
 	navigation.start();
 
 	var steps = [

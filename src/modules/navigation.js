@@ -117,9 +117,9 @@ StateStack.isEquals = function(state1, state2) {
 	return true;
 }
 
-var NAMED_REGEXP = /\:(\w\w*)/g,
-	SPLAT_REGEXP = /\*(\w\w*)/g,
-	PERL_REGEXP = /P\<(\w\w*?)\>/g,
+var NAMED_REGEXP = /\:([a-z0-9_-][a-z0-9_-]*)/gi,
+	SPLAT_REGEXP = /\*([a-z0-9_-][a-z0-9_-]*)/gi,
+	PERL_REGEXP = /P\<([a-z0-9_-][a-z0-9_-]*?)\>/gi,
 	ARGS_SPLITER = '!',
 	his = win.history,
 	loc = win.location,
@@ -144,11 +144,13 @@ function extractNames(routeText) {
 	return names;
 }
 
-function extractArgs(args) {
-	var split = args.split('&')
+function extractArgs(str) {
+	if (!str) return {};
+
+	var split = str.substring(1).split('&'),
+		args = {}
 		;
 
-	args = {};
 	split.forEach(function(pair) {
 		if (pair) {
 			var s = pair.split('=')
@@ -242,6 +244,7 @@ var NavigationProto = {
 			routeReg = parseRoute(routeText);
 
 			that._routes[name] = {
+				routeText: routeText,
 				routeReg: routeReg,
 				callback: function(fragment) {
 					var matched = fragment.match(routeReg).slice(2),
@@ -344,6 +347,20 @@ var NavigationProto = {
 		}
 
 		his.back();
+	},
+
+	resolve: function(name, params) {
+		var route = this._routes[name], routeText, resolved = '';
+
+		if (route) {
+			routeText = route.routeText;
+			resolved = routeText.replace(/\(P<[a-z0-9_-][a-z0-9_-]*?>.*?\)/g, function(m) {
+				var name = PERL_REGEXP.exec(m)[1];
+				return params[name] || 'undefined';
+			}).replace('\\', '');
+		}
+
+		return resolved;
 	}
 }
 
