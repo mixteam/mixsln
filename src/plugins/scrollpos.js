@@ -12,7 +12,7 @@
 
 	function scrollTo(pos, el) {
 		if (app.scroll) {
-			app.scroll.scrollTo(pos, true);
+			app.scroll.scrollTo(pos);
 		} else {
 			win.scrollTo(0, pos);
 		}

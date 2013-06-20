@@ -20,12 +20,13 @@ function getMinScrollTop(el) {
 function getMaxScrollTop(el) {
     var rect = el.getBoundingClientRect(),
     	pRect = el.parentNode.getBoundingClientRect(),
+    	minTop = getMinScrollTop(el),
     	maxTop = 0 - rect.height + pRect.height
     	;
 
     if (maxTop > 0) maxTop = 0;
 
-    return maxTop + (el.bounceBottom || 0);
+    return Math.min(maxTop + (el.bounceBottom || 0), minTop);
 }
 
 function fireEvent(element, eventName, extra) {
@@ -258,6 +259,14 @@ var Scroll = {
 	    }
 	    parentElement.boundScrollElement = element;
 
+		if (options) {
+			element.bounceTop = options.bounceTop;
+			element.bounceBottom = options.bounceBottom;
+		} else {
+			element.bounceTop = 0;
+			element.bounceBottom = 0;
+		}
+
 	    if (!element.refresh) {
 	    	element.getScrollHeight = function() {
 	    		return element.scrollHeight - (element.bounceTop||0) - (element.bounceBottom||0);
@@ -271,21 +280,16 @@ var Scroll = {
 		    element.refresh = function() {
 		        element.style.height = 'auto';
 		        element.style.height = element.offsetHeight + 'px';
+		        offset = anim.getTransformOffset(element);
+		        minScrollTop = getMinScrollTop(element);
+		        maxScrollTop = getMaxScrollTop(element);
 		    }
 
-		    element.scrollTo = function(y, force) {
+		    element.scrollTo = function(y) {
 		    	var x = anim.getTransformOffset(element).x,
-		    		y = -y - (element.bounceTop || 0), 
-		    		minScrollTop, maxScrollTop;
+		    		y = -y - (element.bounceTop || 0);
 
-		    	if (force !== true) {
-					if (y > (minScrollTop = getMinScrollTop(element))) {
-						y = minScrollTop;
-					} else if (y < (maxScrollTop = getMinScrollTop(element))) {
-						y = maxScrollTop;
-					}
-				}
-				
+		    	y = touchBoundary(y);
 				element.style.webkitTransition = '';
 		        element.style.webkitTransform = anim.makeTranslateString(x, y);
 		    }
@@ -348,15 +352,11 @@ var Scroll = {
 		    }
 		}
 
-		if (options) {
-			element.bounceTop = options.bounceTop;
-			element.bounceBottom = options.bounceBottom;
-		} else {
-			element.bounceTop = 0;
-			element.bounceBottom = 0;
-		}
+		var x = anim.getTransformOffset(element).x,
+			y = - element.bounceTop;
 
-		element.scrollTo(0);
+		element.style.webkitTransition = ''
+		element.style.webkitTransform = anim.makeTranslateString(x, y);
 	},
 
 	disable: function(element) {

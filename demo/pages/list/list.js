@@ -123,7 +123,7 @@
 			this.html(html);
 			this.$el.find('.searchcontent').append(searchItems.el);
 			searchItems.render(function() {
-				that.$el.find('#J_pullRefresh, #J_pullUpdate').css('visibility', 'auto');
+				that.$el.find('#J_pullRefresh, #J_pullUpdate').css('visibility', 'visible');
 				setTimeout(function(){
 					app.plugin.lazyload.check();	
 				}, 500);
