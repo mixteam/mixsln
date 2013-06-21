@@ -1,4 +1,5 @@
 (function(app, undef) {
+	var searchbar = app.getView('searchbar');
 
 	app.definePage({
 		name: 'detail',
@@ -27,14 +28,16 @@
 				}
 			}
 		],
-		toolbar: 50,
+		toolbar: {
+			height: 50,
+			el: searchbar.el
+		},
 		views: {
-			searchbar: app.getView('searchbar'),
+			searchbar: searchbar,
 		},
 		plugins: {
 			domevent: true
 		},
-
 
 		startup : function() {
 			// implement super.startup
@@ -44,7 +47,6 @@
 				;
 
 			this.html(html);
-			app.navigation.setToolbar(searchbar.el);
 			searchbar.render();
 		},
 

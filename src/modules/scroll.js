@@ -279,7 +279,7 @@ var Scroll = {
 		        offset = anim.getTransformOffset(element);
 		        minScrollTop = getMinScrollTop(element);
 		        maxScrollTop = getMaxScrollTop(element);
-		        this.scrollTo(offset.y);
+		        this.scrollTo(-offset.y-element.bounceTop);
 		    }
 
 		    element.offset = function(el) {
@@ -302,7 +302,7 @@ var Scroll = {
 
 		    element.scollToElement = function(el) {
 		    	var offset = this.offset(el);
-		    	this.scrollTo(offset.y);
+		    	this.scrollTo(offset.top);
 		    }
 
 		    element.getBoundaryOffset = function() {
@@ -362,7 +362,7 @@ var Scroll = {
 		var x = anim.getTransformOffset(element).x,
 			y = - element.bounceTop;
 
-		element.style.webkitTransition = ''
+		element.style.webkitTransition = '';
 		element.style.webkitTransform = anim.makeTranslateString(x, y);
 	},
 
@@ -370,6 +370,7 @@ var Scroll = {
 		var parentElement = element.parentNode || element.offsetParent;
 
 		if (parentElement.boundScrollElement === element) {
+			element.style.webkitTransition = '';
 			parentElement.boundScrollElement = null;
 		}
 	}

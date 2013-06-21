@@ -37,6 +37,7 @@ var doc = win.document,	$ = win['$'],
 		viewport : null,
 		templateEngine : null,
 		enableMessageLog: false,
+		resourceBase: './',
 		enableContent: true,
 		enableNavbar : false,
 		enableToolbar : false,
@@ -99,10 +100,10 @@ hooks.on('page:define page:defineMeta', function(page) {
 });
 
 navigation.on('forward backward', function(state) {
-	var page = Page.get(state.name), meta;
+	var meta, page = Page.get(state.name);
 
 	function pageReady() {
-		var page = Page.get(state.name);
+		page = Page.get(state.name);
 
 		hooks.trigger('navigation:switch', state, page, {
 			isSamePage: lastPage && (lastPage.name === page.name),
@@ -112,6 +113,7 @@ navigation.on('forward backward', function(state) {
 		lastPage = page;
 	}
 
+	state.pageMeta || (state.pageMeta = {});
 	if (!page) {
 		if ((meta = pagemeta[state.name])) {
 			var	jsLoaded = {};
@@ -141,13 +143,16 @@ hooks.on('navigation:switch', function(state, page, options){
 		;
 
 	if (c_navbar) {
-		var i_navbar = c_navbar.instance;
+		var i_navbar = c_navbar.instance
+			title = state.pageMeta.title || page.title,
+			buttons = state.pageMeta.buttons || page.buttons
+			;
 
-		i_navbar.setTitle(page.title);
+		app.navigation.setTitle(title);
 		i_navbar.removeButton();
 
-		if (page.buttons) {
-			page.buttons.forEach(function(button) {
+		if (buttons) {
+			buttons.forEach(function(button) {
 				var handler = button.handler;
 
 				if (button.type === 'back') {
@@ -170,19 +175,29 @@ hooks.on('navigation:switch', function(state, page, options){
 					handler.apply(page, arguments);
 				}
 
-				i_navbar.setButton(button);
+				app.navigation.setButton(button);
 			});
 		}
 
-		if (!options.isSamePage && c_navbar.titleWrapEl.parentNode === c_navbar.backWrapEl.parentNode && 
-				c_navbar.titleWrapEl.parentNode === c_navbar.funcWrapEl.parentNode) {
+		if (!options.isSamePage){
 			Transition.float(c_navbar.titleWrapEl.parentNode, transition === 'backward'?'LI':'RI', 50);
 		}
 	}
 
 	if (c_toolbar) {
-		var i_toolbar = c_toolbar.instance;
-		page.toolbar?i_toolbar.show('', {height:page.toolbar}):i_toolbar.hide();
+		var i_toolbar = c_toolbar.instance, 
+			o_toolbar = state.pageMeta.toolbar || page.toolbar
+			;
+
+		if (typeof o_toolbar === 'number') {
+			o_toolbar = {height: o_toolbar};
+		}
+		if (o_toolbar) {
+			app.navigation.setToolbar(o_toolbar);
+			i_toolbar.show();
+		} else {
+			i_toolbar.hide();
+		}
 	}
 
 	if (!options.isSamePage) {
@@ -586,7 +601,7 @@ app.loadResource = function(urls, callback) {
 	}
 
 	function load(url, callback) {
-		aEl.href = url;
+		aEl.href = app.config.resourceBase + url;
 		url = aEl.href;
 
 		if (resourcecache[url]) {
@@ -627,6 +642,10 @@ app.loadResource = function(urls, callback) {
 	});
 }
 
+function getState() {
+	return navigation.getStack().getState();
+}
+
 app.navigation = {
 	push: function(fragment, options) {
 		navigation.push(fragment, options);
@@ -636,20 +655,17 @@ app.navigation = {
 		navigation.pop();
 	},
 
-	resolve: function(name, params) {
+	resolveFragment: function(name, params) {
 		navigation.resolve(name, params);
 	},
 
 	getParameter: function(name) {
-		var stack = navigation.getStack(),
-			state = stack.getState();
-
+		var state = getState();
 		return state.params[name] || state.args[name] || state.datas[name];
 	},
 
 	getParameters: function() {
-		var stack = navigation.getStack(),
-			state = stack.getState(),
+		var state = getState(),
 			params = {};
 
 		for (var n in state.params) {
@@ -668,41 +684,51 @@ app.navigation = {
 	},
 
 	getData: function(name) {
-		var stack = navigation.getStack(),
-			state = stack.getState();
-
+		var state = getState();
 		return state.datas[name];
 	},
 
 	setData: function(name, value) {
-		var stack = navigation.getStack(),
-			state = stack.getState();
-
+		var state = getState();
 		state.datas[name] = value;
 	},
 
 	setTitle: function(title) {
+		var state = getState();
 		if (app.config.enableNavbar) {
 			app.config.enableNavbar.instance.setTitle(title);
 		}
+		state.pageMeta.title = title;
 	},
 
 	setButton: function(options) {
+		var state = getState();
 		if (app.config.enableNavbar) {
 			app.config.enableNavbar.instance.setButton(options);
 		}
+		if (!state.pageMeta.buttons) {
+			state.pageMeta.buttons = [options];
+		} else {
+			for (var i = 0; i < state.pageMeta.buttons.length; i++) {
+				var button = state.pageMeta.buttons[i];
+				if (button.type === 'back' && options.type === 'back' ||
+						button.id === options.id) {
+					for (var p in options) {
+						button[p] = options[p];
+					}
+					return;
+				}
+			}
+			state.pageMeta.buttons.push(options);
+		}
 	},
 
-	setToolbar: function(el) {
+	setToolbar: function(options) {
+		var state = getState();
 		if (app.config.enableToolbar) {
-			var c_toolbar = app.config.enableToolbar;
-			if (typeof el === 'string') {
-				c_toolbar.wrapEl.innerHTML = el;
-			} else {
-				c_toolbar.wrapEl.innerHTML = '';
-				c_toolbar.wrapEl.appendChild(el);
-			}
+			app.config.enableToolbar.instance.set(options);
 		}
+		state.toolbar = options;
 	}
 }
 

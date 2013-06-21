@@ -8,22 +8,25 @@ function Toolbar(wrapEl, options) {
 	options || (options = {});
 
 	this._wrapEl = wrapEl;
-	options.html && (this._wrapEl.innerHTML = options.html);
-	options.height && (this._wrapEl.style.height = options.height + 'px');
+    this.set(options);
 }
 
 var ToolbarProto = {
-    show: function(html, options) {
-    	options || (options = {});
-		html && (this._wrapEl.innerHTML = html);
-		options.height && (this._wrapEl.style.height = options.height + 'px');
+    set: function(options) {
+        options || (options = {});
+        this._wrapEl.innerHTML = '';
+        options.html && (this._wrapEl.innerHTML = options.html);
+        options.el && (this._wrapEl.appendChild(options.el));
+        options.height && (this._wrapEl.style.height = options.height + 'px');
+    },
+
+    show: function(options) {
+        options && this.set(options);
     	this._wrapEl.style.display = '';
-    	return this._wrapEl;
     },
 
     hide: function() {
     	this._wrapEl.style.display = 'none';
-    	return this._wrapEl;
     }
 }
 
