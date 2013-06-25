@@ -78,7 +78,7 @@ window.addEventListener(orientationEvent, function(e){
 }, false);
 
 // Navigation Initial
-var lastState, lastPage;
+var lastState, lastPage, isFirstSwitch = true;
 
 hooks.on('page:define page:defineMeta', function(page) {
 	var name = page.name,
@@ -107,10 +107,12 @@ navigation.on('forward backward', function(state) {
 
 		hooks.trigger('navigation:switch', state, page, {
 			isSamePage: lastPage && (lastPage.name === page.name),
-			isSameState: lastState && StateStack.isEquals(lastState, state)
+			isSameState: lastState && StateStack.isEquals(lastState, state),
+			isFirstSwitch: isFirstSwitch
 		});
 		lastState = state;
 		lastPage = page;
+		isFirstSwitch = false;
 	}
 
 	state.pageMeta || (state.pageMeta = {});
@@ -171,15 +173,15 @@ hooks.on('navigation:switch', function(state, page, options){
 				if (typeof handler === 'string') {
 					handler = page[handler];
 				}
-				button.handler = function() {
-					handler.apply(page, arguments);
+				button.handler = function(e) {
+					handler.call(page, e, state.index);
 				}
 
 				app.navigation.setButton(button);
 			});
 		}
 
-		if (!options.isSamePage){
+		if (!options.isSamePage && !options.isFirstSwitch){
 			Transition.float(c_navbar.titleWrapEl.parentNode, transition === 'backward'?'LI':'RI', 50);
 		}
 	}
@@ -212,7 +214,7 @@ hooks.on('navigation:switch', function(state, page, options){
 			Scroll.enable(c_scroll.wrapEl, page.scroll);
 		}
 
-		if (c_transition) {
+		if (c_transition && !options.isFirstSwitch) {
 			config.viewport.className += ' enableTransition';
 			var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
 				className = c_transition.wrapEl.className += ' ' + transition,
