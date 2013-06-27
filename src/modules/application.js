@@ -134,6 +134,46 @@ function q(selector, el) {
 	return el.querySelector(selector);
 }
 
+hooks.on('app:start', function() {
+	var c_navbar = config.enableNavbar,
+		c_toolbar = config.enableToolbar,
+		c_content = config.enableContent, i_content,
+		c_transition = config.enableTransition,
+		c_scroll = config.enableScroll
+		;
+
+	config.viewport || (config.viewport = q('.viewport') || doc.body);
+
+	c_content.wrapEl || (c_content.wrapEl = q('.content', config.viewport) || config.viewport);
+	c_content.cacheLength || (c_content.cacheLength = (c_content.wrapEl === config.viewport?1:5));
+	i_content = c_content.instance = new Content(c_content.wrapEl, {
+		cacheLength: c_content.cacheLength
+	});
+
+	if (c_navbar) {
+		config.viewport.className += ' enableNavbar';
+		c_navbar.wrapEl || (c_navbar.wrapEl = q('.navbar', config.viewport));
+		c_navbar.titleWrapEl || (c_navbar.titleWrapEl = q('.navbar > ul > li:first-child', config.viewport));
+		c_navbar.backWrapEl || (c_navbar.backWrapEl = q('.navbar > ul > li:nth-child(2)', config.viewport));
+		c_navbar.funcWrapEl || (c_navbar.funcWrapEl = q('.navbar > ul > li:last-child', config.viewport));
+		c_navbar.instance = new Navbar(c_navbar.wrapEl, c_navbar);
+	}
+
+	if (c_toolbar) {
+		config.viewport.className += ' enableToolbar';
+		c_toolbar.wrapEl || (c_toolbar.wrapEl = q('.toolbar', config.viewport));
+		c_toolbar.instance = new Toolbar(c_toolbar.wrapEl, c_toolbar);
+	}
+
+	if (c_scroll) {
+		c_scroll.wrapEl = i_content.getActive();
+	}
+
+	if (c_transition) {
+		c_transition.wrapEl = i_content.getActive().parentNode;
+	}
+});
+
 hooks.on('navigation:switch', function(state, page, options){
 	var c_navbar = config.enableNavbar,
 		c_toolbar = config.enableToolbar,
@@ -178,6 +218,15 @@ hooks.on('navigation:switch', function(state, page, options){
 				}
 
 				app.navigation.setButton(button);
+			});
+		} else {
+			app.navigation.setButton({
+				type: 'back',
+				text: 'back',
+				hide: state.index < 1?true:false,
+				handler: function() {
+					app.navigation.pop();
+				}
 			});
 		}
 
@@ -246,46 +295,6 @@ hooks.on('navigation:switch orientaion:change', function() {
 		offsetHeight -= c_toolbar.wrapEl.offsetHeight;
 	}
 	c_content.wrapEl.style.height = offsetHeight + 'px';
-});
-
-hooks.on('app:start', function() {
-	var c_navbar = config.enableNavbar,
-		c_toolbar = config.enableToolbar,
-		c_content = config.enableContent, i_content,
-		c_transition = config.enableTransition,
-		c_scroll = config.enableScroll
-		;
-
-	config.viewport || (config.viewport = q('.viewport')) || doc.body;
-
-	c_content.wrapEl || (c_content.wrapEl = q('section.content', config.viewport)) || config.viewport;
-	c_content.cacheLength || (c_content.cacheLength = 5);
-	i_content = c_content.instance = new Content(c_content.wrapEl, {
-		cacheLength: c_content.cacheLength
-	});
-
-	if (c_navbar) {
-		config.viewport.className += ' enableNavbar';
-		c_navbar.wrapEl || (c_navbar.wrapEl = q('header.navbar', config.viewport));
-		c_navbar.titleWrapEl || (c_navbar.titleWrapEl = q('header.navbar > ul > li:first-child', config.viewport));
-		c_navbar.backWrapEl || (c_navbar.backWrapEl = q('header.navbar > ul > li:nth-child(2)', config.viewport));
-		c_navbar.funcWrapEl || (c_navbar.funcWrapEl = q('header.navbar > ul > li:last-child', config.viewport));
-		c_navbar.instance = new Navbar(c_navbar.wrapEl, c_navbar);
-	}
-
-	if (c_toolbar) {
-		config.viewport.className += ' enableToolbar';
-		c_toolbar.wrapEl || (c_toolbar.wrapEl = q('footer.toolbar', config.viewport));
-		c_toolbar.instance = new Toolbar(c_toolbar.wrapEl, c_toolbar);
-	}
-
-	if (c_scroll) {
-		c_scroll.wrapEl = i_content.getActive();
-	}
-
-	if (c_transition) {
-		c_transition.wrapEl = i_content.getActive().parentNode;
-	}
 });
 
 //Plugin Initial
@@ -519,11 +528,13 @@ hooks.on('page:define', function(page) {
 });
 
 hooks.on('navigation:switch', function(state, page, options) {
-	var lastDataFragment = page.el.getAttribute('data-fragment'),
-		curDataFragment = state.fragment, lastCache, templateLoaded = {}
+	var c_content = app.config.enableContent,
+		lastDataFragment = page.el.getAttribute('data-fragment'),
+		curDataFragment = state.fragment, 
+		lastCache, templateLoaded = {}
 		;
 
-	if (lastDataFragment === curDataFragment) return;
+	if (lastDataFragment === curDataFragment && state.move === 'backward') return;
 
 	if ((lastCache = pagecache[lastDataFragment])) {
 		lastCache.page.teardown(lastCache.state);
@@ -556,7 +567,10 @@ hooks.on('app:start', function() {
 	}
 });
 
-app.start = function() {
+app.start = function(config) {
+	for (var p in config) {
+		app.config[p] = config[p];
+	}
 	hooks.trigger('app:start');
 	navigation.start();
 }
@@ -661,9 +675,14 @@ app.navigation = {
 		navigation.resolve(name, params);
 	},
 
+	getReferer: function() {
+		var state = getState();
+		return state.referer;
+	},
+
 	getParameter: function(name) {
 		var state = getState();
-		return state.params[name] || state.args[name] || state.datas[name];
+		return state.params[name] || state.datas[name];
 	},
 
 	getParameters: function() {
@@ -674,20 +693,11 @@ app.navigation = {
 			params[n] = state.params[n];
 		}
 
-		for (var n in state.args) {
-			params[n] = state.args[n];
-		}
-
 		for (var n in state.datas) {
 			params[n] = state.datas[n];
 		}
 
 		return params;
-	},
-
-	getData: function(name) {
-		var state = getState();
-		return state.datas[name];
 	},
 
 	setData: function(name, value) {
@@ -730,7 +740,7 @@ app.navigation = {
 		if (app.config.enableToolbar) {
 			app.config.enableToolbar.instance.set(options);
 		}
-		state.toolbar = options;
+		state.pageMeta.toolbar = options;
 	}
 }
 

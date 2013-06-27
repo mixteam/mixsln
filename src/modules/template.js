@@ -41,7 +41,7 @@ var TemplateProto = {
 		if (engine && engine.compile && typeof text === 'string') {
 			that.compiledTemplate = engine.compile(text);
 		} else {
-			that.compiledTemplate = text;
+			that.compiledTemplate = function() {return text};
 		}
 
 		return that.compiledTemplate;
@@ -60,7 +60,7 @@ var TemplateProto = {
 		if (engine && engine.render && typeof datas === 'object' && compiledTemplate) {
 			that.content = engine.render(compiledTemplate, datas);
 		} else {
-			that.content = compiledTemplate;
+			that.content = compiledTemplate(datas);
 		}
 
 		return that.content;

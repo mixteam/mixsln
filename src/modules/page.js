@@ -1,10 +1,7 @@
-//@reqiure message
-
 (function(win, app, undef) {
 
 
 var Message = app.module.MessageScope,
-	pm = Message.get('page'),
 	pages = {}
 	;
 

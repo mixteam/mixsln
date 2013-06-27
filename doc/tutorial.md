@@ -1,236 +1,161 @@
 # 十分钟快速开发WebApp
 
-## 获取代码（v0.3.x）
+## 获取代码（v0.4.x）
 
-**解决方案代码**
+- [js开发版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln-debug.js)
+- [js压缩版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.js)
+- [css下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.css)
 
-- [js开发版下载](https://raw.github.com/mixteam/mixsln/v0.3.x_dev/mixsln-debug.js)
-- [js压缩版下载](https://raw.github.com/mixteam/mixsln/v0.3.x_dev/mixsln.js)
-- [css下载](https://raw.github.com/mixteam/mixsln/v0.3.x_dev/mixsln.css)
-
-**以下js框架可选**
-
-* [mustache模版引擎](https://raw.github.com/mixteam/mixsln/v0.3.x_dev/lib/mustache.js)
-* [zepto v1.0rc](https://raw.github.com/mixteam/mixsln/v0.3.x_dev/lib/zepto.js)
-
-
-## 启动应用（App）
+## Hello World
 
 首先新建一个HTML项目页面，并引入框架代码：
 
-	<link type="text/css" rel="styleSheet" href="mixsln.css"/>
-	<script src="zepto.js" type="text/javascript"></script>
-	<script src="mustache.js" type="text/javascript"></script>
-	<script src="mixsln.js" type="text/javascript"></script>
+	<script src="mixsln.js"></script>
 
-我们推荐使用`mustache`以及`zepto`，当然你可以根据喜好使用不同的模版引擎和基础库。
+编写页面代码，输出"Hello World"：
 
-复制以下这段HTML代码到到body中：
-
-	<div class="viewport">
-		<header class="navibar">
-			<ul>
-				<li>Title</li>
-				<li><button class="back">Back Btn</button></li>
-				<li><button class="func">Func Btn</button></li>
-			</ul>
-		</header>
-		<section class="content">
-			<div>
-				<div class="active"></div>
-				<div class="inactive"></div>
-			</div>
-		</section>
-		<footer class="toolbar"></footer>
-	</div>
-
-最后增加这段JS，来启动App：
-
-	<script type="text/javascript">
-		app.config.viewport = document.querySelector('.viewport');
-		app.config.enableNavibar = true;
-		app.config.enableScroll = true;
-		app.config.enableTransition = true;
-		app.config.templateEngine = {
-			compile : function(text) {
-				return Mustache.compile(text);
-			},
-		
-			render : function(compiled, data) {
-				return compiled(data);
-			}
+	app.definePage({
+		name: 'helloworld',
+		title: '你好',
+		startup: function() {
+			this.html('<h1>Hello World!</h1>');
 		}
-		app.start();
-	</script>
+	});
+	app.start();
 
-完整的代码：
+## 使用模板
 
-	<!DOCTYPE HTML>
-	<html>
-	<head>
-	<meta charset="utf-8" />
-	<title>A demo of HTML5 app</title>
-	<link type="text/css" rel="styleSheet" href="mixsln.css"/>
-	</head>
-	<body>
-	<div class="viewport">
-		<header class="navibar">
-			<ul>
-				<li>Title</li>
-				<li><button class="back">Back Btn</button></li>
-				<li><button class="func">Func Btn</button></li>
-			</ul>
-		</header>
-		<section class="content">
-			<div>
-				<div class="active"></div>
-				<div class="inactive"></div>
-			</div>
-		</section>
-		<footer class="toolbar"></footer>
-	</div>
-	
-	<script src="zepto.js" type="text/javascript"></script>
-	<script src="mustache.js" type="text/javascript"></script>
-	<script src="mixsln.js" type="text/javascript"></script>
-	<script type="text/javascript">
-		app.config.viewport = document.querySelector('.viewport');
-		app.config.enableTitlebar = true;
-		app.config.enableScroll = true;
-		app.config.enableTransition = true;
-		app.config.templateEngine = {
-			compile : function(text) {
-				return Mustache.compile(text);
-			},
-		
-			render : function(compiled, data) {
-				return compiled(data);
-			}
+用模板来输出`Hello World!`。
+
+我们选择[Mustache](https://github.com/janl/mustache.js)模板引擎以及[Zepto](https://github.com/madrobby/zepto)，并引入进来
+
+	<script src="mustache.js"></script>
+	<script src="zepto.js"></script>
+
+新建一个`helloworld.tpl`的模板文件，内容如下：
+
+	<h1>Hello World!</h1>
+	<div><input type="text" id="name"><button>say</button></div>
+
+在`app.definePage`之前增加一段模板引擎的配置
+
+	app.config.templateEngine = {
+		load: function(url, callback) {
+			$.get(url, callback);
+		},
+		compile : function(text) {
+			return Mustache.compile(text);
+		},
+		render : function(compiled, data) {
+			return compiled(data);
 		}
-		app.start();
-	</script>
-	</body>
-	</html>
+	}
 
+修改下`Hello World`的页面。在页面中提供一个输入框，输入名字点击按钮后，会改变Hash值。
 
-## 创建页面（Page）
+	app.definePage({
+		name: 'helloworld',
+		title: '你好',
+		template: './helloworld.tpl', // 需要加载的模版，路径相对于HTML文件
+		startup: function() {
+			var that = this,
+				html = this.template({}) //经编译后，template字段会变成一个可渲染的函数
+				;
 
-在MIX中，页面会完成一系列的功能或交互，并且由唯一的路由指向唯一的页面，它是一个特殊的视图（View）。
+			this.html(html);
 
-例如有如下目录结构:
-
-	- [demoapp]
-		- [assets]
-			- hello.css
-		- [templates]
-			- hello.tpl
-		- [pages]
-			- hello.js
-		- mixsln.js
-		- mixsln.css
-		- zepto.js
-		- mustache.js
-		- index.html
-	
-
-`hello.tpl`是页面的`html模板`，内容如下：
-
-	<h1>hello, <em>{{name}}</em></h1>
-
-`hello.js`中定义了一个名为`helloworld`的页面：
-
-	(function(app){
-		app.page.define({
-			name : 'helloworld',	// 指定唯一名称
-			title : '你好',			// 在标题栏上显示的标题
-			route : 'hello\\/(P<name>[^\\/]+)\\/?',	// 指定唯一路由（Perl风格）
-			template : './templates/hello.tpl',	// 需要加载的模版
-			buttons : [				// 设置标题栏上的按钮
-				{					// 左侧返回按钮的文本
-					type : 'back',			
-					text : '返回'
-				},
-				{					// 右侧功能按钮的文本和操作
-					type : 'func',		
-					text : '问候',
-					handler : function(e) {
-						// 点击按钮的句柄
-						var name;
-						if ((name = prompt('输入要问候人的名字'))) {
-							app.navigation.push('hello/' + encodeURIComponent(name))
-						}
-					}
+			// 通过this.el来获取页面中的元素
+			this.el.querySelector('button').addEventListener('click', function(e) {
+				var name = that.el.querySelector('#name').value;
+				if (name) {
+					app.navigation.push('hello/' + name);	// 改变Hash值
 				}
-			],
-			
-			ready : function() {
-				// 在页面已经准备好时，可以进行后续操作
-				// 获取路由中的参数
-				var name = app.navigation.getParameter('name'),
-					data = {name:name}
-					;
-				
-				// 调用fill方法，可以把数据渲染到模版上，最终生成可见的页面
-				this.fill(data, function() {	
-					// 渲染完模版后，可以继续进行绑定事件等操作
-					// TODO
-				});
-			},
-
-			unload : function() {
-				// 在页面被卸载时，可以进行收尾工作
-				// 比如解绑事件，缓存数据等等
-			}
-		})
-	})(window['app']);
-
-最后把hello页面相关的文件引入到项目中，通过hash（#hello/abcd）访问页面，即可完成。
-
-	<script src="zepto.js" type="text/javascript"></script>
-	<script src="mustache.js" type="text/javascript"></script>
-	<script src="mixsln.js" type="text/javascript"></script>
-	<!--##hello页面的代码-->
-	<link type="text/css" rel="styleSheet" href="assets/hello.css"/>
-	<script src="pages/hello.js" type="text/javascript"></script>
-	<!--//hello页面的代码-->
-	<script type="text/javascript">
-		app.config.viewport = document.querySelector('.viewport');
-		app.config.enableNavibar  = true;
-		app.config.enableScroll = true;
-		app.config.enableTransition = true;
-		app.config.templateEngine = {
-			compile : function(text) {
-				return Mustache.compile(text);
-			},
-		
-			render : function(compiled, data) {
-				return compiled(data);
-			}
+			});
 		}
-		app.start();
-	</script>
+	});
 
-## 重要的对象
+比如在文本框中输入`zhuxun`，点击按钮后，网页的Hash会变为`hello/zhuxun`。
 
-### app.view
+## 使用路由
 
-用于定义视图、获取视图
+通过`Hello World`中的输入框，我们可以改变Hash值，例如`hello/zhuxun`。此时我希望获取其中的`zhuxun`，并把它动态输出到页面中。这样就需要用到路由的功能。
+	
+新建一个`hellobuddy.tpl`的模板文件，内容如下：
 
-### app.page
+	<h1>Hello, <em>{{name}}</em></h1>
 
-用于定义页面、获取页面。
+重点是编写`Hello Buddy`的页面代码。
 
-### app.component
+	app.definePage({
+		name : 'hellobuddy',
+		title : '你好啊',
+		template : './hellobuddy.tpl',
+		route : 'hello\\/(P<name>[^\\/]+)\\/?',	// 设置路由（Perl风格），name为参数名
+		
+		startup : function() {
+			var name = app.navigation.getParameter('name'),// 获取路由中的`name`参数值
+				html = this.template({name:name})
+				;
+			
+			this.html(html);
+		}
+	})
 
-用于获取组件，以及当前的活动区域。
+刷新后，页面上会输出`Hello, zhuxun`。
 
-### app.navigation
+## 使用默认主题（iOS）
 
-用于获取路由的参数，以及执行前进后退操作。
+此默认主题中，包含了顶部导航栏，底部工具栏，页面滚动以及转场等。
 
-### app.plugin
+引入框架CSS：
 
-包含自定义的插件
+	<link type="text/css" rel="styleSheet" href="mixsln.css"/>
+
+在body中插入一段HTML：
+
+	<div class="viewport">
+		<header class="navbar">
+			<ul>
+				<li></li>
+				<li><button class="back"></button></li>
+				<li><button class="func"></button></li>
+			</ul>
+		</header>
+		<section class="content"></section>
+		<footer class="toolbar"></footer>
+	</div>
+
+往`app.start`传入配置：
+
+	app.start({
+		enableNavbar: true,
+		enableToolbar: true,
+		enableScroll: true,
+		enableTransition: true
+	});
+
+
+## 上文涉及的方法索引
+
+### app.definePage()
+
+用于定义页面
+
+### app.navigation.push()
+
+前进操作（会改变Hash）
+
+### page.html()
+
+填充页面
+
+### page.template()
+
+渲染模板
+
+### page.el
+
+页面的根结点
 	
 
 	

@@ -70,7 +70,8 @@ function panstartHandler(e) {
 	maxScrollTop = getMaxScrollTop(element);
 	panFixRatio = 2.5;
 	stopBounce = false;
-	cancelScrollEnd = false;	
+	cancelScrollEnd = false;
+	fireEvent(element, 'scrollstart');
 }
 
 function panHandler(e) {
@@ -284,11 +285,14 @@ var Scroll = {
 
 		    element.offset = function(el) {
 		    	var elRect = el.getBoundingClientRect(), 
-		    		elementRect = element.getBoundingClientRect(), 
-		    		top = elRect.top - (element.bounceTop + elementRect.top),
-		    		bottom = top + elRect.height;
+		    		elementRect = element.getBoundingClientRect();
 
-		        return { top: top, bottom: bottom}
+		    	elRect.top -= (element.bounceTop + elementRect.top);
+		    	elRect.bottom = elRect.top + elRect.height;
+		    	elRect.left -= elementRect.left;
+		    	elRect.right -= elementRect.right;
+
+		        return elRect;
 		    }
 
 		    element.scrollTo = function(y) {

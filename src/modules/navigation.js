@@ -1,3 +1,5 @@
+//@require message
+
 (function(win, app, undef) {
 
 function StateStack() {
@@ -19,6 +21,7 @@ var StateStackProto = {
 		that.move = null;
 		that.transition = null;
 		that.datas = null;
+		that.type = null;
 
 		that._states = [];
 		that._stateIdx = 0;
@@ -34,18 +37,22 @@ var StateStackProto = {
 			move = that.move,
 			transition = that.transition,
 			datas = that.datas,
+			type = that.type,
 
 			prev = states[stateIdx - 1],
 			next = states[stateIdx + 1],
 			cur = {
 				name : name,
 				fragment : fragment,
+				type: type,
 				params : params || {},
-				args : args || {},
-				datas : datas || {},
-				update : true,
+				datas : datas || {}
 			}
 			;
+
+		for (var p in args) {
+			cur.datas[p] = args[p];
+		}
 
 		if (move == null) {
 			if (!datas && StateStack.isEquals(prev, cur)) {
@@ -60,18 +67,18 @@ var StateStackProto = {
 				states.unshift(cur);
 			} else if (stateIdx > 0) {
 				stateIdx--;
-				cur.update = false;
 				cur = prev;
 			}
 		} else if (move === 'forward') {
 			if (stateIdx === stateLimit - 1) {
 				states.shift();
 				states.push(cur);
+				cur.referer = location.href.replace(/#[^#]*/, '#' + states[stateIdx - 1].fragment);
 			} else if (stateIdx === 0 && stateLen === 0) {
 				states.push(cur);
+				cur.referer = document.referer || '';
 			} else if (!datas && StateStack.isEquals(next, cur)){
 				stateIdx++;
-				cur.update = false;
 				cur = next;
 			} else if (StateStack.isEquals(states[stateIdx], cur)){
 				cur = states[stateIdx];
@@ -79,6 +86,7 @@ var StateStackProto = {
 				stateIdx++;
 				states.splice(stateIdx);
 				states.push(cur);
+				cur.referer = location.href.replace(/#[^#]*/, '#' + states[stateIdx - 1].fragment);
 			}
 		}
 
@@ -324,6 +332,7 @@ var NavigationProto = {
 					stack.transition = 'backward';
 				}
 
+				stack.type = options.type.toUpperCase();
 				setFragment(fragment + (args.length ? ARGS_SPLITER + args.join('&') : ''));
 			}
 		} else {
