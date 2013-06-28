@@ -1670,7 +1670,10 @@ var Scroll = {
 		var parentElement = element.parentNode || element.offsetParent;
 
 		if (parentElement.boundScrollElement === element) {
+			var offset = anim.getTransformOffset(element);
+			console.log(offset);
 			element.style.webkitTransition = '';
+			element.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
 			parentElement.boundScrollElement = null;
 		}
 	}
@@ -2350,10 +2353,12 @@ hooks.on('app:start', function() {
 	}
 
 	if (c_scroll) {
+		config.viewport.className += ' enableScroll';
 		c_scroll.wrapEl = i_content.getActive();
 	}
 
 	if (c_transition) {
+		config.viewport.className += ' enableTransition';
 		c_transition.wrapEl = i_content.getActive().parentNode;
 	}
 });
@@ -2441,14 +2446,12 @@ hooks.on('navigation:switch', function(state, page, options){
 		move === 'backward' ? i_content.previous() : i_content.next();
 
 		if (c_scroll) {
-			config.viewport.className += ' enableScroll';
 			Scroll.disable(c_scroll.wrapEl);
 			c_scroll.wrapEl = i_content.getActive();
 			Scroll.enable(c_scroll.wrapEl, page.scroll);
 		}
 
 		if (c_transition && !options.isFirstSwitch) {
-			config.viewport.className += ' enableTransition';
 			var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
 				className = c_transition.wrapEl.className += ' ' + transition,
 				activeEl = i_content.getActive()

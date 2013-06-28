@@ -374,7 +374,10 @@ var Scroll = {
 		var parentElement = element.parentNode || element.offsetParent;
 
 		if (parentElement.boundScrollElement === element) {
+			var offset = anim.getTransformOffset(element);
+			console.log(offset);
 			element.style.webkitTransition = '';
+			element.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
 			parentElement.boundScrollElement = null;
 		}
 	}
