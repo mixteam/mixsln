@@ -106,7 +106,7 @@ var Animation = {
 	        setTimeout(options.callback, 10);
 	    }
     	options.callback && element.addEventListener('webkitTransitionEnd', webkitTransitionEnd, false);
-	    setTimeout(webkitTransitionEnd, str2ms(options.duration) * 1.1);
+	    setTimeout(webkitTransitionEnd, str2ms(options.duration) * 1.5);
     	setTimeout(function() {
 	    	element.style.webkitTransition = transition.join(', ');
 	    	if (transform.length) {

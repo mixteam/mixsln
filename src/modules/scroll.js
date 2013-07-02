@@ -6,8 +6,7 @@
 var doc = win.document,
 	docEl = doc.documentElement,
 	anim = app.module.Animation,
-	element, offset, minScrollTop, maxScrollTop,
-	panFixRatio = 2,
+	element, panFixRatio = 2,
 	cancelScrollEnd = false,
 	lockTouched = 0;
 	stopBounce = false,
@@ -28,13 +27,30 @@ function getMaxScrollTop(el) {
     return Math.min(maxTop + (el.bounceBottom || 0), minTop);
 }
 
-function fireEvent(element, eventName, extra) {
+function getBoundaryOffset(el, y) {
+	if(y > el.minScrollTop) {
+        return y - el.minScrollTop;
+    } else if (y < el.maxScrollTop){
+        return el.maxScrollTop - y;
+    }
+}
+
+function touchBoundary(el, y) {
+	if (y > el.minScrollTop) {
+		y = el.minScrollTop;
+	} else if (y < el.maxScrollTop) {
+		y = el.maxScrollTop;
+	}
+	return y;
+}
+
+function fireEvent(el, eventName, extra) {
 	var event = doc.createEvent('HTMLEvents');
 	event.initEvent(eventName, false, true);
 	for (var p in extra) {
 		event[p] = extra[p];
 	}
-    element.dispatchEvent(event);
+    el.dispatchEvent(event);
 }
 
 function touchstartHandler(e) {
@@ -65,9 +81,9 @@ function touchendHandler(e) {
 function panstartHandler(e) {
 	if (stopBounce || !element) return;
 
-	offset = anim.getTransformOffset(element);
-	minScrollTop = getMinScrollTop(element);
-	maxScrollTop = getMaxScrollTop(element);
+	element.transformOffset = anim.getTransformOffset(element);
+	element.minScrollTop = getMinScrollTop(element);
+	element.maxScrollTop = getMaxScrollTop(element);
 	panFixRatio = 2.5;
 	stopBounce = false;
 	cancelScrollEnd = false;
@@ -77,59 +93,41 @@ function panstartHandler(e) {
 function panHandler(e) {
 	if (stopBounce || !element) return;
 
-    var y = offset.y + e.displacementY
+    var y = element.transformOffset.y + e.displacementY
         ;
 
-    if(y > minScrollTop) {
-    	y = minScrollTop + (y - minScrollTop) / panFixRatio;
+    if(y > element.minScrollTop) {
+    	y = element.minScrollTop + (y - element.minScrollTop) / panFixRatio;
     	panFixRatio *= 1.003;
     	if (panFixRatio > 4) panFixRatio = 4;
-    } else if(y < maxScrollTop) {
-    	y = maxScrollTop - (maxScrollTop - y) / panFixRatio;
+    } else if(y < element.maxScrollTop) {
+    	y = element.maxScrollTop - (element.maxScrollTop - y) / panFixRatio;
     	panFixRatio *= 1.003;
     	if (panFixRatio > 4) panFixRatio = 4;
     }
 
-    if ((getBoundaryOffset(y))) {
-    	if (y > minScrollTop) {
+    if ((getBoundaryOffset(element, y))) {
+    	if (y > element.minScrollTop) {
     		var name = 'pulldown';
-    	} else if (y < maxScrollTop) {
+    	} else if (y < element.maxScrollTop) {
     		var name = 'pullup';
     	}
     	fireEvent(element, name);
     }
 
     element.style.webkitTransition = '';
-    element.style.webkitTransform = anim.makeTranslateString(offset.x, y);
+    element.style.webkitTransform = anim.makeTranslateString(element.transformOffset.x, y);
 }
 
 function panendHandler(e) {
 	if (stopBounce || !element) return;
 
 	var y = anim.getTransformOffset(element).y
-	if (getBoundaryOffset(y)) {
+	if (getBoundaryOffset(element, y)) {
 		bounceEnd();
 	} else {
 		scrollEnd();
 	}
-}
-
-function getBoundaryOffset(y) {
-	if(y > minScrollTop) {
-        return y - minScrollTop;
-    } else if (y < maxScrollTop){
-        return maxScrollTop - y;
-    }
-}
-
-function touchBoundary(y) {
-	if (y > minScrollTop) {
-		y = minScrollTop;
-	} else if (y < maxScrollTop) {
-		y = maxScrollTop;
-	}
-
-	return y;
 }
 
 function bounceStart(v) {
@@ -145,7 +143,7 @@ function bounceStart(v) {
 
     anim.translate(element, 
     	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
-    	offset.x, s.toFixed(0),
+    	element.transformOffset.x, s.toFixed(0),
 		bounceEnd
     );
 }
@@ -154,11 +152,11 @@ function bounceEnd() {
 	if (stopBounce || !element) return;
 
 	var y = anim.getTransformOffset(element).y;
-	y = touchBoundary(y);
+	y = touchBoundary(element, y);
 
     anim.translate(element, 
     	'0.4s', 'ease-in-out', '0s', 
-    	offset.x, y,
+    	element.transformOffset.x, y,
     	function() {
     		fireEvent(element, 'bounceend');
     		scrollEnd();
@@ -176,7 +174,7 @@ function flickHandler(e) {
 
     cancelScrollEnd = true;
 
-    if(s0 > minScrollTop || s0 < maxScrollTop) {
+    if(s0 > element.minScrollTop || s0 < element.maxScrollTop) {
     	bounceStart(v);
     } else {
     	v = e.velocityY;
@@ -186,27 +184,27 @@ function flickHandler(e) {
 		t = v / a;
         s = s0 + t * v / 2;
 
-        if (s > minScrollTop) {
-    	    _s = minScrollTop - s0;
+        if (s > element.minScrollTop) {
+    	    _s = element.minScrollTop - s0;
             _t = (v - Math.sqrt(-2 * a *_s + v * v)) / a;
             _v = v - a * _t;
 
 	        anim.translate(element, 
 	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
-	        	offset.x, minScrollTop,
+	        	element.transformOffset.x, element.minScrollTop,
 	        	function() {
 	        		bounceStart(_v)
 	        	}
 	        );
             
-        } else if (s < maxScrollTop) {
-            _s = maxScrollTop - s0;
+        } else if (s < element.maxScrollTop) {
+            _s = element.maxScrollTop - s0;
             _t = (v + Math.sqrt(-2 * a * _s + v * v)) / a;
             _v = v - a * _t;
 
 	        anim.translate(element, 
 	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
-	        	offset.x, maxScrollTop,
+	        	element.transformOffset.x, element.maxScrollTop,
 	        	function() {
 	        		bounceStart(_v)
 	        	}
@@ -214,7 +212,7 @@ function flickHandler(e) {
         } else {
 	        anim.translate(element, 
 	        	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
-	        	offset.x, s.toFixed(0),
+	        	element.transformOffset.x, s.toFixed(0),
 	        	scrollEnd
 	        );
         }
@@ -265,105 +263,7 @@ var Scroll = {
 		}
 
 	    if (!el.refresh) {
-	    	el.getScrollHeight = function() {
-	    		return this.getBoundingClientRect().height - (this.bounceTop||0) - (this.bounceBottom||0);
-	    	}
-
-		    el.getScrollTop = function() {
-		    	var offset = anim.getTransformOffset(this);
-	    		return -(offset.y + (this.bounceTop||0));
-	    	}
-
-		    el.refresh = function() {
-		        this.style.height = 'auto';
-		        this.style.height = this.offsetHeight + 'px';
-		        offset = anim.getTransformOffset(this);
-		        minScrollTop = getMinScrollTop(this);
-		        maxScrollTop = getMaxScrollTop(this);
-		        this.scrollTo( -offset.y - this.bounceTop);
-		    }
-
-		    el.offset = function(el) {
-		    	var elRect = el.getBoundingClientRect(), 
-		    		elementRect = this.getBoundingClientRect(),
-		    		offsetRect = {
-			        	top: elRect.top - (this.bounceTop + elementRect.top),
-			        	bottom: elRect.top - (this.bounceTop + elementRect.top) + elRect.height,
-			        	left: elRect.left - elementRect.left,
-			        	right: elementRect.right - elRect.right,
-			        	width: elRect.width,
-			        	height: elRect.height
-			        };
-
-			    return offsetRect;
-		    }
-
-		    el.scrollTo = function(y) {
-		    	var x = anim.getTransformOffset(this).x,
-		    		y = -y - (this.bounceTop || 0);
-
-		    	y = touchBoundary(y);
-				this.style.webkitTransition = '';
-		        this.style.webkitTransform = anim.makeTranslateString(x, y);
-		    }
-
-		    el.scollToElement = function(el) {
-		    	var offset = this.offset(el);
-		    	this.scrollTo(offset.top);
-		    }
-
-		    el.getBoundaryOffset = function() {
-			    var y = anim.getTransformOffset(this).y;
-			    return getBoundaryOffset(y);
-		    }
-
-		    el.getViewHeight = function() {
-		    	return this.parentNode.getBoundingClientRect().height;
-		    }
-
-		    el.stopBounce = function() {
-		    	stopBounce = true;
-
-		    	var y = anim.getTransformOffset(this).y,
-		    		minScrollTop = getMinScrollTop(this),
-		    		maxScrollTop = getMaxScrollTop(this),
-		    		_y
-		    		;
-
-		    	if (y > minScrollTop + (this.bounceTop||0)) {
-		    		_y = minScrollTop + (this.bounceTop||0);
-		    	} else if (y < maxScrollTop - (this.bounceBottom||0)) {
-		    		_y = maxScrollTop - (this.bounceBottom||0);
-		    	}
-
-		    	if (_y != null) {
-		    		anim.translate(this,
-		    			'0.4s', 'ease-in-out', '0s',
-		    			offset.x, _y);
-		    	}
-		    }
-
-		    el.resumeBounce = function() {
-		    	stopBounce = false;
-
-		    	var y = anim.getTransformOffset(this).y,
-		    		minScrollTop = getMinScrollTop(this),
-		    		maxScrollTop = getMaxScrollTop(this),
-		    		_y
-		    		;
-
-		    	if (y > minScrollTop) {
-		    		_y = minScrollTop;
-		    	} else if (y < maxScrollTop){
-		    		_y = maxScrollTop;
-		    	}
-
-		    	if (_y != null) {
-		    		anim.translate(this,
-		    			'0.4s', 'ease-in-out', '0s',
-		    			offset.x, _y);
-		    	}
-		    }
+	    	
 		}
 
 		var x = anim.getTransformOffset(el).x,
@@ -385,7 +285,107 @@ var Scroll = {
 			}, 50);
 			
 		}
-	}
+	},
+
+	getScrollHeight: function(el) {
+		return el.getBoundingClientRect().height - (el.bounceTop||0) - (el.bounceBottom||0);
+	},
+
+    getScrollTop: function(el) {
+    	var offset = anim.getTransformOffset(el);
+		return -(offset.y + (el.bounceTop||0));
+	},
+
+    refresh: function(el) {
+        el.style.height = 'auto';
+        el.style.height = el.offsetHeight + 'px';
+        el.offset = anim.getTransformOffset(el);
+        el.minScrollTop = getMinScrollTop(el);
+        el.maxScrollTop = getMaxScrollTop(el);
+        this.scrollTo(el, -el.offset.y - el.bounceTop);
+    },
+
+    offset: function(el, child) {
+    	var elRect = el.getBoundingClientRect(),
+    		childRect = child.getBoundingClientRect(),
+    		offsetRect = {
+	        	top: childRect.top - ((el.bounceTop || 0) + elRect.top),
+	        	left: childRect.left - elRect.left,
+	        	right: elRect.right - childRect.right,
+	        	width: childRect.width,
+	        	height: childRect.height
+	        };
+
+	    offsetRect.bottom = offsetRect.top + childRect.height;
+	    return offsetRect;
+    },
+
+    scrollTo: function(el, y) {
+    	var x = anim.getTransformOffset(el).x,
+    		y = -y - (el.bounceTop || 0);
+
+    	y = touchBoundary(el, y);
+		el.style.webkitTransition = '';
+        el.style.webkitTransform = anim.makeTranslateString(x, y);
+    },
+
+    scollToElement: function(el, child) {
+    	var offset = this.offset(el, child);
+    	this.scrollTo(el, offset.top);
+    },
+
+    getViewHeight: function(el) {
+    	return el.parentNode.getBoundingClientRect().height;
+    },
+
+    getBoundaryOffset: function(el) {
+	    var y = anim.getTransformOffset(el).y;
+	    return getBoundaryOffset(el, y);
+    },
+
+    stopBounce: function(el) {
+    	stopBounce = true;
+
+    	var offset = anim.getTransformOffset(el),
+    		minScrollTop = getMinScrollTop(el),
+    		maxScrollTop = getMaxScrollTop(el),
+    		y = null
+    		;
+
+    	if (offset.y > minScrollTop + (el.bounceTop||0)) {
+    		y = minScrollTop + (el.bounceTop||0);
+    	} else if (offset.y < maxScrollTop - (el.bounceBottom||0)) {
+    		y = maxScrollTop - (el.bounceBottom||0);
+    	}
+
+    	if (y != null) {
+    		anim.translate(el,
+    			'0.4s', 'ease-in-out', '0s',
+    			offset.x, y);
+    	}
+    },
+
+    resumeBounce: function(el) {
+    	stopBounce = false;
+
+    	var offset = anim.getTransformOffset(el),
+    		minScrollTop = getMinScrollTop(el),
+    		maxScrollTop = getMaxScrollTop(el),
+    		y
+    		;
+
+    	if (offset.y > minScrollTop) {
+    		y = minScrollTop;
+    	} else if (offset < maxScrollTop){
+    		y = maxScrollTop;
+    	}
+
+    	if (y != null) {
+    		anim.translate(el,
+    			'0.4s', 'ease-in-out', '0s',
+    			offset.x, y);
+    	}
+    }
 }
 
 app.module.Scroll = Scroll;

@@ -13,6 +13,9 @@
 (function(win, app, undef) {
 
 var doc = win.document,	$ = win['$'],
+ 	appVersion = navigator.appVersion,
+	isAndroid = (/android/gi).test(appVersion),
+	isIOS = (/iphone|ipad/gi).test(appVersion),
 
 	am = app.module,
 	StateStack = am.StateStack,
@@ -285,17 +288,18 @@ hooks.on('navigation:switch', function(state, page, options){
 hooks.on('navigation:switch orientaion:change', function() {
 	var c_navbar = config.enableNavbar,
 		c_toolbar = config.enableToolbar,
-		c_content = config.enableContent
+		c_content = config.enableContent,
+		c_scroll = config.enableScroll
 		;
 
-	var offsetHeight = config.viewport.offsetHeight;
+	var offsetHeight = c_scroll?config.viewport.offsetHeight:doc.documentElement.clientHeight;
 	if (c_navbar) {
 		offsetHeight -= c_navbar.wrapEl.offsetHeight;
 	}
 	if (c_toolbar) {
 		offsetHeight -= c_toolbar.wrapEl.offsetHeight;
 	}
-	c_content.wrapEl.style.height = offsetHeight + 'px';
+	c_content.wrapEl.style[c_scroll?'height':'minHeight'] = offsetHeight + 'px';
 });
 
 //Plugin Initial
@@ -327,7 +331,7 @@ hooks.on('navigation:switch', function(state, page) {
 	}
 });
 
-hooks.on('view:render', function(view) {
+function viewPluginRun(view, funcName) {
 	if (view.plugins) {
 		for (var name in view.plugins) {
 			var plugin = app.plugin[name], pluginOpt = view.plugins[name]
@@ -335,62 +339,49 @@ hooks.on('view:render', function(view) {
 
 			pluginOpt === true && (pluginOpt = view.plugins[name] = {});
 			if (plugin && pluginOpt) {
-				plugin.onViewRender && plugin.onViewRender(view, pluginOpt);
+				plugin[funcName] && plugin[funcName](view, pluginOpt);
 			}
 		}
 	}
+}
+
+hooks.on('view:render', function(view) {
+	viewPluginRun(view, 'onViewRender');
 });
 
 hooks.on('view:destory', function(view) {
-	if (view.plugins) {
-		for (var name in view.plugins) {
-			var plugin = app.plugin[name], pluginOpt = view.plugins[name]
-				;
-
-			if (plugin && pluginOpt) {
-				plugin.onViewTeardown && plugin.onViewTeardown(view, pluginOpt);
-			}
-		}
-	}
+	viewPluginRun(view, 'onViewTeardown');
 });
 
-hooks.on('page:define', function(page) {
-	if (page.plugins) {
-		for (var name in page.plugins) {
-			var plugin = app.plugin[name], pluginOpt = page.plugins[name]
-				;
-
-			if (plugin && pluginOpt) {
-				plugin.onPageDefine && plugin.onPageDefine(page, pluginOpt);
-			}
-		}
+function pagePluginRun(state, page, funcName) {
+	if (arguments.length === 2) {
+		funcName = page;
+		page = state;
+		state = null;
 	}
-});
 
-hooks.on('page:startup', function(state, page) {
 	if (page.plugins) {
 		for (var name in page.plugins) {
-			var plugin = app.plugin[name], pluginOpt = state.plugins[name]
-				;
-
-			if (plugin && pluginOpt) {
-				plugin.onPageStartup && plugin.onPageStartup(page, pluginOpt);
-			}
-		}
-	}
-});
-
-hooks.on('page:teardown', function(state, page) {
-	if (page.plugins) {
-		for (var name in page.plugins) {
-			var plugin = app.plugin[name], pluginOpt = state.plugins[name]
+			var plugin = app.plugin[name], pluginOpt = (state||page).plugins[name]
 				;
 
 			if (plugin && page.plugins[name]) {
-				plugin.onPageTeardown && plugin.onPageTeardown(page, pluginOpt);
+				plugin[funcName] && plugin[funcName](page, pluginOpt);
 			}
 		}
 	}
+}
+
+hooks.on('page:define', function(page) {
+	pagePluginRun(page, 'onPageDefine');
+});
+
+hooks.on('page:startup', function(state, page) {
+	pagePluginRun(state, page, 'onPageStartup');
+});
+
+hooks.on('page:teardown', function(state, page) {
+	pagePluginRun(state, page, 'onPageTeardown');
 });
 
 //Template Initial
@@ -530,19 +521,6 @@ hooks.on('navigation:switch', function(state, page, options) {
 	pagecache[curDataFragment] = {state:state, page:page};
 	page.el.setAttribute('data-fragment', curDataFragment);
 	page.startup(state);
-});
-
-// Func Initial
-hooks.on('app:start', function() {
-	var c_scroll = config.enableScroll;
-
-	if (c_scroll) {
-		Object.defineProperty(app, 'scroll', {
-			get: function() {
-				return c_scroll.wrapEl;
-			}
-		})
-	}
 });
 
 app.start = function(config) {
@@ -720,6 +698,159 @@ app.navigation = {
 			app.config.enableToolbar.instance.set(options);
 		}
 		state.pageMeta.toolbar = options;
+	}
+}
+
+function simulateScrollEvent() {
+	if (doc.isSimulateScrollEvent) return;
+	doc.isSimulateScrollEvent = true;
+
+	function fireEvent(el, eventName) {
+		var event = doc.createEvent('HTMLEvents');
+		event.initEvent(eventName, false, true);
+	    el.dispatchEvent(event);
+	}
+
+	var startTime, endTime, flickTime = 200;
+
+	if (isIOS) {
+		window.addEventListener('scroll', function() {
+			fireEvent(doc.body, 'scrollend');
+		}, false);
+	} else if (isAndroid){
+		doc.addEventListener('touchstart', function() {
+			startTime = Date.now();
+		}, false);
+
+		doc.addEventListener('touchend', function() {
+			endTime = Date.now();
+			if (endTime - startTime < flickTime) {
+				var scrollTop = doc.body.scrollTop,
+					scrollId = setInterval(function(){
+						if (scrollTop === doc.body.scrollTop) {
+							clearInterval(scrollId);
+							fireEvent(doc.body, 'scrollend');
+						} else {
+							scrollTop = doc.body.scrollTop
+						}
+					}, 50);
+			} else {
+				fireEvent(doc.body, 'scrollend');
+			}
+		}, false);
+	}
+}
+
+app.scroll = {
+	getScrollHeight: function() {
+		var c_scroll = config.enableScroll;
+
+		if (c_scroll) {
+			return Scroll.getScrollHeight(c_scroll.wrapEl);
+		} else {
+			return doc.body.scrollHeight;
+		}
+	},
+
+	getScrollTop: function() {
+		var c_scroll = config.enableScroll;
+
+		if (c_scroll) {
+			return Scroll.getScrollTop(c_scroll.wrapEl);
+		} else {
+			return doc.body.scrollTop;
+		}
+	},
+
+	refresh: function() {
+		var c_scroll = config.enableScroll;
+
+		if (c_scroll) {
+			Scroll.refresh(c_scroll.wrapEl);
+		}
+	},
+
+	offset: function(el) {
+		var c_scroll = config.enableScroll;
+
+		if (c_scroll) {
+			return Scroll.offset(c_scroll.wrapEl, el);
+		} else {
+			return Scroll.offset(doc.body, el);
+		}
+	},
+
+	scrollTo: function(y) {
+		var c_scroll = config.enableScroll;
+
+		if (c_scroll) {
+			Scroll.scrollTo(c_scroll.wrapEl, y);
+		} else {
+			doc.body.scrollTop = y;
+		}
+	},
+
+	scrollToElement: function(el) {
+		var c_scroll = config.enableScroll;
+
+		if (c_scroll) {
+			Scroll.scrollToElement(c_scroll.wrapEl, el);
+		} else {
+			el.scrollIntoView();
+		}
+	},
+
+	getViewHeight: function() {
+		var c_scroll = config.enableScroll;
+
+		if (c_scroll) {
+			return Scroll.getViewHeight(c_scroll.wrapEl);
+		} else {
+			return document.documentElement.clientHeight;
+		}
+	},
+
+
+	getBoundaryOffset: function() {
+		var c_scroll = config.enableScroll;
+
+		if (c_scroll) {
+			return Scroll.getBoundaryOffset(c_scroll.wrapEl);
+		} else {
+			return 0;
+		}
+	},
+
+	stopBounce: function() {
+		var c_scroll = config.enableScroll;
+
+		if (c_scroll) {
+			Scroll.stopBounce(c_scroll.wrapEl);
+		}
+	},
+
+	resumeBounce: function() {
+		var c_scroll = config.enableScroll;
+
+		if (c_scroll) {
+			Scroll.resumeBounce(c_scroll.wrapEl);
+		}
+	},
+
+	addEventListener: function(name, func, isBubble) {
+		var c_scroll = config.enableScroll;
+		(c_scroll?c_scroll.wrapEl:doc.body).addEventListener(name, func, isBubble);
+		if (!c_scroll) simulateScrollEvent();
+	},
+
+	removeEventListener: function(name, func) {
+		var c_scroll = config.enableScroll;
+		(c_scroll?c_scroll.wrapEl:doc.body).removeEventListener(name, func);
+	},
+
+	getElement: function() {
+		var c_scroll = config.enableScroll;
+		return (c_scroll?c_scroll.wrapEl:doc.body);
 	}
 }
 

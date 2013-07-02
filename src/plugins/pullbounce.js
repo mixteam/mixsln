@@ -1,6 +1,5 @@
 (function(win, app){
 	app.plugin.pullbounce = {
-		_el : null,
 		_options : null,
 		_page : null,
 		_update : false,
@@ -8,10 +7,10 @@
 
 		handleEvent: function(e) {
 			var that = this,
-				el = this._el,
 				page = this._page,
+				el = page.el,
 				options = this._options,
-				offset = el.getBoundaryOffset()
+				offset = app.scroll.getBoundaryOffset()
 				;
 
 			if (e.type === 'pulldown') {
@@ -30,11 +29,11 @@
 				this._updateHandler = options.onPullUp.call(page, offset);
 			} else if (e.type === 'panend') {
 				if (offset && this._update && this._updateHandler) {
-					el.stopBounce();
+					app.scroll.stopBounce();
 					setTimeout(function() {
 						that._updateHandler.call(page, function() {
-							el.refresh();
-							el.resumeBounce();
+							app.scroll.refresh();
+							app.scroll.resumeBounce();
 						});
 					}, 400);
 				}
@@ -49,27 +48,19 @@
 		},
 
 		onPageStartup: function(page, options) {
-			var el = this._el = page.el;
 			this._page = page;
 			this._options = options;
-
-			if (el.refresh) {
-				this._update = false;
-				this._updateHandler = null;
-				options.top && el.addEventListener('pulldown', this, false);
-				options.bottom && el.addEventListener('pullup', this, false);
-				el.addEventListener('panend', this, false);
-			}
+			this._update = false;
+			this._updateHandler = null;
+			options.top && app.scroll.addEventListener('pulldown', this, false);
+			options.bottom && app.scroll.addEventListener('pullup', this, false);
+			app.scroll.addEventListener('panend', this, false);
 		},
 
 		onPageTeardown: function(page, options) {
-			var el = page.el;
-
-			if (el.refresh) {
-				options.top && el.removeEventListener('pulldown', this, false);
-				options.bottom && el.removeEventListener('pullup', this, false);
-				el.removeEventListener('panend', this, false);
-			}
+			options.top && app.scroll.removeEventListener('pulldown', this, false);
+			options.bottom && app.scroll.removeEventListener('pullup', this, false);
+			app.scroll.removeEventListener('panend', this, false);
 		}
 	}
 })(window, window['app']);
