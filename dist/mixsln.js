@@ -44,6 +44,13 @@ function toDelimiterCase(str, sep) {
 	return str.replace(/[a-z][A-Z]/g, '$1' + sep +'$2').toLowerCase();
 }
 
+function str2ms(s) {
+	var unit = (/ms|s|m|h$/).exec(s)[0],
+		convert = {ms:1, s:1000, m:60000, h:3600000};
+
+	return parseFloat(s) * convert[unit];
+}
+
 var Animation = {
     translate: function(element, duration, timingFunction, delay, x, y, callback) {
 	    this.doTransition(element, {
@@ -90,12 +97,16 @@ var Animation = {
     		transform && transition.push('-webkit-transform ' + postfix);
     	}
 
-    	options.callback && element.addEventListener('webkitTransitionEnd', function(e){
-	    	element.removeEventListener('webkitTransitionEnd', arguments.callee, false);
-	        if(e.srcElement !== element) return;
+    	var isTransitionEnd = false;
+    	function webkitTransitionEnd(e){
+    		if (isTransitionEnd) return;
+	    	element.removeEventListener('webkitTransitionEnd', webkitTransitionEnd, false);
+	        if(e && e.srcElement !== element) return;
+	        isTransitionEnd = true;
 	        setTimeout(options.callback, 10);
-	    }, false);
-
+	    }
+    	options.callback && element.addEventListener('webkitTransitionEnd', webkitTransitionEnd, false);
+	    setTimeout(webkitTransitionEnd, str2ms(options.duration) * 1.1);
     	setTimeout(function() {
 	    	element.style.webkitTransition = transition.join(', ');
 	    	if (transform.length) {
@@ -1532,8 +1543,8 @@ function scrollEnd() {
 }
 
 var Scroll = {
-	enable: function(element, options) {
-		var parentElement = element.parentNode || element.offsetParent
+	enable: function(el, options) {
+		var parentElement = el.parentNode || el.offsetParent
 			;
 
 	    if (!prevented) {
@@ -1550,98 +1561,101 @@ var Scroll = {
 		    parentElement.addEventListener('panend', panendHandler, false);
 		    parentElement.addEventListener('flick', flickHandler, false);
 	    }
-	    parentElement.boundScrollElement = element;
+	    parentElement.boundScrollElement = el;
 
 		if (options) {
-			element.bounceTop = options.bounceTop;
-			element.bounceBottom = options.bounceBottom;
+			el.bounceTop = options.bounceTop;
+			el.bounceBottom = options.bounceBottom;
 		} else {
-			element.bounceTop = 0;
-			element.bounceBottom = 0;
+			el.bounceTop = 0;
+			el.bounceBottom = 0;
 		}
 
-	    if (!element.refresh) {
-	    	element.getScrollHeight = function() {
-	    		return element.getBoundingClientRect().height - (element.bounceTop||0) - (element.bounceBottom||0);
+	    if (!el.refresh) {
+	    	el.getScrollHeight = function() {
+	    		return this.getBoundingClientRect().height - (this.bounceTop||0) - (this.bounceBottom||0);
 	    	}
 
-		    element.getScrollTop = function() {
-		    	var offset = anim.getTransformOffset(element);
-	    		return -(offset.y + (element.bounceTop||0));
+		    el.getScrollTop = function() {
+		    	var offset = anim.getTransformOffset(this);
+	    		return -(offset.y + (this.bounceTop||0));
 	    	}
 
-		    element.refresh = function() {
-		        element.style.height = 'auto';
-		        element.style.height = element.offsetHeight + 'px';
-		        offset = anim.getTransformOffset(element);
-		        minScrollTop = getMinScrollTop(element);
-		        maxScrollTop = getMaxScrollTop(element);
-		        this.scrollTo(-offset.y-element.bounceTop);
+		    el.refresh = function() {
+		        this.style.height = 'auto';
+		        this.style.height = this.offsetHeight + 'px';
+		        offset = anim.getTransformOffset(this);
+		        minScrollTop = getMinScrollTop(this);
+		        maxScrollTop = getMaxScrollTop(this);
+		        this.scrollTo( -offset.y - this.bounceTop);
 		    }
 
-		    element.offset = function(el) {
+		    el.offset = function(el) {
 		    	var elRect = el.getBoundingClientRect(), 
-		    		elementRect = element.getBoundingClientRect();
+		    		elementRect = this.getBoundingClientRect(),
+		    		offsetRect = {
+			        	top: elRect.top - (this.bounceTop + elementRect.top),
+			        	bottom: elRect.top - (this.bounceTop + elementRect.top) + elRect.height,
+			        	left: elRect.left - elementRect.left,
+			        	right: elementRect.right - elRect.right,
+			        	width: elRect.width,
+			        	height: elRect.height
+			        };
 
-		    	elRect.top -= (element.bounceTop + elementRect.top);
-		    	elRect.bottom = elRect.top + elRect.height;
-		    	elRect.left -= elementRect.left;
-		    	elRect.right -= elementRect.right;
-
-		        return elRect;
+			    return offsetRect;
 		    }
 
-		    element.scrollTo = function(y) {
-		    	var x = anim.getTransformOffset(element).x,
-		    		y = -y - (element.bounceTop || 0);
+		    el.scrollTo = function(y) {
+		    	var x = anim.getTransformOffset(this).x,
+		    		y = -y - (this.bounceTop || 0);
 
 		    	y = touchBoundary(y);
-				element.style.webkitTransition = '';
-		        element.style.webkitTransform = anim.makeTranslateString(x, y);
+				this.style.webkitTransition = '';
+		        this.style.webkitTransform = anim.makeTranslateString(x, y);
 		    }
 
-		    element.scollToElement = function(el) {
+		    el.scollToElement = function(el) {
 		    	var offset = this.offset(el);
 		    	this.scrollTo(offset.top);
 		    }
 
-		    element.getBoundaryOffset = function() {
-			    var y = anim.getTransformOffset(element).y;
+		    el.getBoundaryOffset = function() {
+			    var y = anim.getTransformOffset(this).y;
 			    return getBoundaryOffset(y);
 		    }
 
-		    element.getViewHeight = function() {
-		    	return element.parentNode.getBoundingClientRect().height;
+		    el.getViewHeight = function() {
+		    	return this.parentNode.getBoundingClientRect().height;
 		    }
 
-		    element.stopBounce = function() {
+		    el.stopBounce = function() {
 		    	stopBounce = true;
 
-		    	var y = anim.getTransformOffset(element).y,
-		    		minScrollTop = getMinScrollTop(element),
-		    		maxScrollTop = getMaxScrollTop(element),
+		    	var y = anim.getTransformOffset(this).y,
+		    		minScrollTop = getMinScrollTop(this),
+		    		maxScrollTop = getMaxScrollTop(this),
 		    		_y
 		    		;
 
-		    	if (y > minScrollTop + (element.bounceTop||0)) {
-		    		_y = minScrollTop + (element.bounceTop||0);
-		    	} else if (y < maxScrollTop - (element.bounceBottom||0)) {
-		    		_y = maxScrollTop - (element.bounceBottom||0);
+		    	if (y > minScrollTop + (this.bounceTop||0)) {
+		    		_y = minScrollTop + (this.bounceTop||0);
+		    	} else if (y < maxScrollTop - (this.bounceBottom||0)) {
+		    		_y = maxScrollTop - (this.bounceBottom||0);
 		    	}
 
 		    	if (_y != null) {
-		    		anim.translate(element,
+		    		anim.translate(this,
 		    			'0.4s', 'ease-in-out', '0s',
 		    			offset.x, _y);
 		    	}
 		    }
 
-		    element.resumeBounce = function() {
+		    el.resumeBounce = function() {
 		    	stopBounce = false;
 
-		    	var y = anim.getTransformOffset(element).y,
-		    		minScrollTop = getMinScrollTop(element),
-		    		maxScrollTop = getMaxScrollTop(element),
+		    	var y = anim.getTransformOffset(this).y,
+		    		minScrollTop = getMinScrollTop(this),
+		    		maxScrollTop = getMaxScrollTop(this),
 		    		_y
 		    		;
 
@@ -1652,29 +1666,31 @@ var Scroll = {
 		    	}
 
 		    	if (_y != null) {
-		    		anim.translate(element,
+		    		anim.translate(this,
 		    			'0.4s', 'ease-in-out', '0s',
 		    			offset.x, _y);
 		    	}
 		    }
 		}
 
-		var x = anim.getTransformOffset(element).x,
-			y = - element.bounceTop;
+		var x = anim.getTransformOffset(el).x,
+			y = - el.bounceTop;
 
-		element.style.webkitTransition = '';
-		element.style.webkitTransform = anim.makeTranslateString(x, y);
+		el.style.webkitTransition = '';
+		el.style.webkitTransform = anim.makeTranslateString(x, y);
 	},
 
-	disable: function(element) {
-		var parentElement = element.parentNode || element.offsetParent;
+	disable: function(el) {
+		var parentElement = el.parentNode || el.offsetParent, offset;
 
-		if (parentElement.boundScrollElement === element) {
-			var offset = anim.getTransformOffset(element);
-			console.log(offset);
-			element.style.webkitTransition = '';
-			element.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
-			parentElement.boundScrollElement = null;
+		if (parentElement.boundScrollElement === el) {
+			offset = anim.getTransformOffset(el);
+			element = parentElement.boundScrollElement = null;
+			setTimeout(function() {
+				el.style.webkitTransition = '';
+				el.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
+			}, 50);
+			
 		}
 	}
 }
@@ -2435,6 +2451,7 @@ hooks.on('navigation:switch', function(state, page, options){
 		if (o_toolbar) {
 			app.navigation.setToolbar(o_toolbar);
 			i_toolbar.show();
+			Transition.fadeIn(c_toolbar.wrapEl);
 		} else {
 			i_toolbar.hide();
 		}
@@ -2657,21 +2674,15 @@ hooks.on('page:define', function(page) {
 //View Intial
 hooks.on('view:extend', function(view) {
 	var render = view.prototype.render,
-		destory = view.prototype.destory,
-		templateLoaded = {}
+		destory = view.prototype.destory
 		;
 
 	view.prototype.render = function() {
 		var that = this, args = arguments;
-		hooks.trigger('view:render', that, arguments);
-		if (!templateLoaded[that.name]) {
-			checkTemplate(that, 'template', function() {
-				templateLoaded[that.name] = true;
-				render.apply(that, args);
-			});
-		} else {
+		checkTemplate(that, 'template', function() {
+			hooks.trigger('view:render', that, arguments);
 			render.apply(that, args);
-		}
+		});
 	}
 
 	view.prototype.destory = function() {
@@ -2686,8 +2697,10 @@ hooks.on('page:define', function(page) {
 		teardown = page.teardown;
 
 	page.startup = function(state) {
-		hooks.trigger('page:startup', state, page);
-		startup.call(page);
+		checkTemplate(page, 'template', function() {
+			hooks.trigger('page:startup', state, page);
+			startup.call(page);
+		});
 	}
 
 	page.teardown = function(state) {
@@ -2698,30 +2711,19 @@ hooks.on('page:define', function(page) {
 	page.html = function(html) {
 		config.enableContent.instance.html(html);
 	}
-
-	Object.defineProperty(page, 'el', {
-		get: function() {
-			return config.enableContent.instance.getActive();
-		}
-	});
-
-	if ($) {
-		Object.defineProperty(page, '$el', {
-			get: function() {
-				return $(config.enableContent.instance.getActive());
-			}
-		});
-	}
 });
 
 hooks.on('navigation:switch', function(state, page, options) {
-	var c_content = app.config.enableContent,
-		lastDataFragment = page.el.getAttribute('data-fragment'),
-		curDataFragment = state.fragment, 
-		lastCache, templateLoaded = {}
+	var i_content = app.config.enableContent.instance,
+		curDataFragment, lastDataFragment, lastCache
 		;
 
-	if (lastDataFragment === curDataFragment && state.move === 'backward') return;
+	page.el = i_content.getActive();
+	$ && (page.$el = $(page.el));
+
+	lastDataFragment = page.el.getAttribute('data-fragment');
+	curDataFragment = state.fragment;
+	if (state.move === 'backward' && lastDataFragment === curDataFragment) return;
 
 	if ((lastCache = pagecache[lastDataFragment])) {
 		lastCache.page.teardown(lastCache.state);
@@ -2730,15 +2732,7 @@ hooks.on('navigation:switch', function(state, page, options) {
 
 	pagecache[curDataFragment] = {state:state, page:page};
 	page.el.setAttribute('data-fragment', curDataFragment);
-
-	if (!templateLoaded[page.name]) {
-		checkTemplate(page, 'template', function() {
-			templateLoaded[page.name] = true;
-			page.startup(state);
-		});
-	} else {
-		page.startup(state);
-	}
+	page.startup(state);
 });
 
 // Func Initial
@@ -2787,8 +2781,11 @@ app.definePage = function(properties) {
 }
 
 app.definePageMeta = function(meta)  {
-	pagemeta[meta.name] = meta;
-	hooks.trigger('page:defineMeta', meta);
+	if (!(meta instanceof Array)) meta = [meta]
+	meta.forEach(function(m) {
+		pagemeta[m.name] = m;
+		hooks.trigger('page:defineMeta', m);
+	});
 }
 
 app.getPage = function(name) {
@@ -2863,8 +2860,7 @@ app.navigation = {
 	},
 
 	getReferer: function() {
-		var state = getState();
-		return state.referer;
+		return getState().referer;
 	},
 
 	getParameter: function(name) {
@@ -2888,8 +2884,7 @@ app.navigation = {
 	},
 
 	setData: function(name, value) {
-		var state = getState();
-		state.datas[name] = value;
+		getState().datas[name] = value;
 	},
 
 	setTitle: function(title) {

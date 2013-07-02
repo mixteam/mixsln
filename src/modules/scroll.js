@@ -236,8 +236,8 @@ function scrollEnd() {
 }
 
 var Scroll = {
-	enable: function(element, options) {
-		var parentElement = element.parentNode || element.offsetParent
+	enable: function(el, options) {
+		var parentElement = el.parentNode || el.offsetParent
 			;
 
 	    if (!prevented) {
@@ -254,98 +254,101 @@ var Scroll = {
 		    parentElement.addEventListener('panend', panendHandler, false);
 		    parentElement.addEventListener('flick', flickHandler, false);
 	    }
-	    parentElement.boundScrollElement = element;
+	    parentElement.boundScrollElement = el;
 
 		if (options) {
-			element.bounceTop = options.bounceTop;
-			element.bounceBottom = options.bounceBottom;
+			el.bounceTop = options.bounceTop;
+			el.bounceBottom = options.bounceBottom;
 		} else {
-			element.bounceTop = 0;
-			element.bounceBottom = 0;
+			el.bounceTop = 0;
+			el.bounceBottom = 0;
 		}
 
-	    if (!element.refresh) {
-	    	element.getScrollHeight = function() {
-	    		return element.getBoundingClientRect().height - (element.bounceTop||0) - (element.bounceBottom||0);
+	    if (!el.refresh) {
+	    	el.getScrollHeight = function() {
+	    		return this.getBoundingClientRect().height - (this.bounceTop||0) - (this.bounceBottom||0);
 	    	}
 
-		    element.getScrollTop = function() {
-		    	var offset = anim.getTransformOffset(element);
-	    		return -(offset.y + (element.bounceTop||0));
+		    el.getScrollTop = function() {
+		    	var offset = anim.getTransformOffset(this);
+	    		return -(offset.y + (this.bounceTop||0));
 	    	}
 
-		    element.refresh = function() {
-		        element.style.height = 'auto';
-		        element.style.height = element.offsetHeight + 'px';
-		        offset = anim.getTransformOffset(element);
-		        minScrollTop = getMinScrollTop(element);
-		        maxScrollTop = getMaxScrollTop(element);
-		        this.scrollTo(-offset.y-element.bounceTop);
+		    el.refresh = function() {
+		        this.style.height = 'auto';
+		        this.style.height = this.offsetHeight + 'px';
+		        offset = anim.getTransformOffset(this);
+		        minScrollTop = getMinScrollTop(this);
+		        maxScrollTop = getMaxScrollTop(this);
+		        this.scrollTo( -offset.y - this.bounceTop);
 		    }
 
-		    element.offset = function(el) {
+		    el.offset = function(el) {
 		    	var elRect = el.getBoundingClientRect(), 
-		    		elementRect = element.getBoundingClientRect();
+		    		elementRect = this.getBoundingClientRect(),
+		    		offsetRect = {
+			        	top: elRect.top - (this.bounceTop + elementRect.top),
+			        	bottom: elRect.top - (this.bounceTop + elementRect.top) + elRect.height,
+			        	left: elRect.left - elementRect.left,
+			        	right: elementRect.right - elRect.right,
+			        	width: elRect.width,
+			        	height: elRect.height
+			        };
 
-		    	elRect.top -= (element.bounceTop + elementRect.top);
-		    	elRect.bottom = elRect.top + elRect.height;
-		    	elRect.left -= elementRect.left;
-		    	elRect.right -= elementRect.right;
-
-		        return elRect;
+			    return offsetRect;
 		    }
 
-		    element.scrollTo = function(y) {
-		    	var x = anim.getTransformOffset(element).x,
-		    		y = -y - (element.bounceTop || 0);
+		    el.scrollTo = function(y) {
+		    	var x = anim.getTransformOffset(this).x,
+		    		y = -y - (this.bounceTop || 0);
 
 		    	y = touchBoundary(y);
-				element.style.webkitTransition = '';
-		        element.style.webkitTransform = anim.makeTranslateString(x, y);
+				this.style.webkitTransition = '';
+		        this.style.webkitTransform = anim.makeTranslateString(x, y);
 		    }
 
-		    element.scollToElement = function(el) {
+		    el.scollToElement = function(el) {
 		    	var offset = this.offset(el);
 		    	this.scrollTo(offset.top);
 		    }
 
-		    element.getBoundaryOffset = function() {
-			    var y = anim.getTransformOffset(element).y;
+		    el.getBoundaryOffset = function() {
+			    var y = anim.getTransformOffset(this).y;
 			    return getBoundaryOffset(y);
 		    }
 
-		    element.getViewHeight = function() {
-		    	return element.parentNode.getBoundingClientRect().height;
+		    el.getViewHeight = function() {
+		    	return this.parentNode.getBoundingClientRect().height;
 		    }
 
-		    element.stopBounce = function() {
+		    el.stopBounce = function() {
 		    	stopBounce = true;
 
-		    	var y = anim.getTransformOffset(element).y,
-		    		minScrollTop = getMinScrollTop(element),
-		    		maxScrollTop = getMaxScrollTop(element),
+		    	var y = anim.getTransformOffset(this).y,
+		    		minScrollTop = getMinScrollTop(this),
+		    		maxScrollTop = getMaxScrollTop(this),
 		    		_y
 		    		;
 
-		    	if (y > minScrollTop + (element.bounceTop||0)) {
-		    		_y = minScrollTop + (element.bounceTop||0);
-		    	} else if (y < maxScrollTop - (element.bounceBottom||0)) {
-		    		_y = maxScrollTop - (element.bounceBottom||0);
+		    	if (y > minScrollTop + (this.bounceTop||0)) {
+		    		_y = minScrollTop + (this.bounceTop||0);
+		    	} else if (y < maxScrollTop - (this.bounceBottom||0)) {
+		    		_y = maxScrollTop - (this.bounceBottom||0);
 		    	}
 
 		    	if (_y != null) {
-		    		anim.translate(element,
+		    		anim.translate(this,
 		    			'0.4s', 'ease-in-out', '0s',
 		    			offset.x, _y);
 		    	}
 		    }
 
-		    element.resumeBounce = function() {
+		    el.resumeBounce = function() {
 		    	stopBounce = false;
 
-		    	var y = anim.getTransformOffset(element).y,
-		    		minScrollTop = getMinScrollTop(element),
-		    		maxScrollTop = getMaxScrollTop(element),
+		    	var y = anim.getTransformOffset(this).y,
+		    		minScrollTop = getMinScrollTop(this),
+		    		maxScrollTop = getMaxScrollTop(this),
 		    		_y
 		    		;
 
@@ -356,29 +359,31 @@ var Scroll = {
 		    	}
 
 		    	if (_y != null) {
-		    		anim.translate(element,
+		    		anim.translate(this,
 		    			'0.4s', 'ease-in-out', '0s',
 		    			offset.x, _y);
 		    	}
 		    }
 		}
 
-		var x = anim.getTransformOffset(element).x,
-			y = - element.bounceTop;
+		var x = anim.getTransformOffset(el).x,
+			y = - el.bounceTop;
 
-		element.style.webkitTransition = '';
-		element.style.webkitTransform = anim.makeTranslateString(x, y);
+		el.style.webkitTransition = '';
+		el.style.webkitTransform = anim.makeTranslateString(x, y);
 	},
 
-	disable: function(element) {
-		var parentElement = element.parentNode || element.offsetParent;
+	disable: function(el) {
+		var parentElement = el.parentNode || el.offsetParent, offset;
 
-		if (parentElement.boundScrollElement === element) {
-			var offset = anim.getTransformOffset(element);
-			console.log(offset);
-			element.style.webkitTransition = '';
-			element.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
-			parentElement.boundScrollElement = null;
+		if (parentElement.boundScrollElement === el) {
+			offset = anim.getTransformOffset(el);
+			element = parentElement.boundScrollElement = null;
+			setTimeout(function() {
+				el.style.webkitTransition = '';
+				el.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
+			}, 50);
+			
 		}
 	}
 }

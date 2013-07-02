@@ -248,6 +248,7 @@ hooks.on('navigation:switch', function(state, page, options){
 		if (o_toolbar) {
 			app.navigation.setToolbar(o_toolbar);
 			i_toolbar.show();
+			Transition.fadeIn(c_toolbar.wrapEl);
 		} else {
 			i_toolbar.hide();
 		}
@@ -470,21 +471,15 @@ hooks.on('page:define', function(page) {
 //View Intial
 hooks.on('view:extend', function(view) {
 	var render = view.prototype.render,
-		destory = view.prototype.destory,
-		templateLoaded = {}
+		destory = view.prototype.destory
 		;
 
 	view.prototype.render = function() {
 		var that = this, args = arguments;
-		hooks.trigger('view:render', that, arguments);
-		if (!templateLoaded[that.name]) {
-			checkTemplate(that, 'template', function() {
-				templateLoaded[that.name] = true;
-				render.apply(that, args);
-			});
-		} else {
+		checkTemplate(that, 'template', function() {
+			hooks.trigger('view:render', that, arguments);
 			render.apply(that, args);
-		}
+		});
 	}
 
 	view.prototype.destory = function() {
@@ -499,8 +494,10 @@ hooks.on('page:define', function(page) {
 		teardown = page.teardown;
 
 	page.startup = function(state) {
-		hooks.trigger('page:startup', state, page);
-		startup.call(page);
+		checkTemplate(page, 'template', function() {
+			hooks.trigger('page:startup', state, page);
+			startup.call(page);
+		});
 	}
 
 	page.teardown = function(state) {
@@ -511,30 +508,19 @@ hooks.on('page:define', function(page) {
 	page.html = function(html) {
 		config.enableContent.instance.html(html);
 	}
-
-	Object.defineProperty(page, 'el', {
-		get: function() {
-			return config.enableContent.instance.getActive();
-		}
-	});
-
-	if ($) {
-		Object.defineProperty(page, '$el', {
-			get: function() {
-				return $(config.enableContent.instance.getActive());
-			}
-		});
-	}
 });
 
 hooks.on('navigation:switch', function(state, page, options) {
-	var c_content = app.config.enableContent,
-		lastDataFragment = page.el.getAttribute('data-fragment'),
-		curDataFragment = state.fragment, 
-		lastCache, templateLoaded = {}
+	var i_content = app.config.enableContent.instance,
+		curDataFragment, lastDataFragment, lastCache
 		;
 
-	if (lastDataFragment === curDataFragment && state.move === 'backward') return;
+	page.el = i_content.getActive();
+	$ && (page.$el = $(page.el));
+
+	lastDataFragment = page.el.getAttribute('data-fragment');
+	curDataFragment = state.fragment;
+	if (state.move === 'backward' && lastDataFragment === curDataFragment) return;
 
 	if ((lastCache = pagecache[lastDataFragment])) {
 		lastCache.page.teardown(lastCache.state);
@@ -543,15 +529,7 @@ hooks.on('navigation:switch', function(state, page, options) {
 
 	pagecache[curDataFragment] = {state:state, page:page};
 	page.el.setAttribute('data-fragment', curDataFragment);
-
-	if (!templateLoaded[page.name]) {
-		checkTemplate(page, 'template', function() {
-			templateLoaded[page.name] = true;
-			page.startup(state);
-		});
-	} else {
-		page.startup(state);
-	}
+	page.startup(state);
 });
 
 // Func Initial
@@ -600,8 +578,11 @@ app.definePage = function(properties) {
 }
 
 app.definePageMeta = function(meta)  {
-	pagemeta[meta.name] = meta;
-	hooks.trigger('page:defineMeta', meta);
+	if (!(meta instanceof Array)) meta = [meta]
+	meta.forEach(function(m) {
+		pagemeta[m.name] = m;
+		hooks.trigger('page:defineMeta', m);
+	});
 }
 
 app.getPage = function(name) {
@@ -676,8 +657,7 @@ app.navigation = {
 	},
 
 	getReferer: function() {
-		var state = getState();
-		return state.referer;
+		return getState().referer;
 	},
 
 	getParameter: function(name) {
@@ -701,8 +681,7 @@ app.navigation = {
 	},
 
 	setData: function(name, value) {
-		var state = getState();
-		state.datas[name] = value;
+		getState().datas[name] = value;
 	},
 
 	setTitle: function(title) {

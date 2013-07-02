@@ -44,6 +44,13 @@ function toDelimiterCase(str, sep) {
 	return str.replace(/[a-z][A-Z]/g, '$1' + sep +'$2').toLowerCase();
 }
 
+function str2ms(s) {
+	var unit = (/ms|s|m|h$/).exec(s)[0],
+		convert = {ms:1, s:1000, m:60000, h:3600000};
+
+	return parseFloat(s) * convert[unit];
+}
+
 var Animation = {
     translate: function(element, duration, timingFunction, delay, x, y, callback) {
 	    this.doTransition(element, {
@@ -90,12 +97,16 @@ var Animation = {
     		transform && transition.push('-webkit-transform ' + postfix);
     	}
 
-    	options.callback && element.addEventListener('webkitTransitionEnd', function(e){
-	    	element.removeEventListener('webkitTransitionEnd', arguments.callee, false);
-	        if(e.srcElement !== element) return;
+    	var isTransitionEnd = false;
+    	function webkitTransitionEnd(e){
+    		if (isTransitionEnd) return;
+	    	element.removeEventListener('webkitTransitionEnd', webkitTransitionEnd, false);
+	        if(e && e.srcElement !== element) return;
+	        isTransitionEnd = true;
 	        setTimeout(options.callback, 10);
-	    }, false);
-
+	    }
+    	options.callback && element.addEventListener('webkitTransitionEnd', webkitTransitionEnd, false);
+	    setTimeout(webkitTransitionEnd, str2ms(options.duration) * 1.1);
     	setTimeout(function() {
 	    	element.style.webkitTransition = transition.join(', ');
 	    	if (transform.length) {

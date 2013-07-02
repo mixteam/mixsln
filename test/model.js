@@ -27,7 +27,6 @@ function testModel() {
 		;
 
 	log('============== test model =================');
-
 	log(model['L1_1']);
 	log(model['L1_2']);
 	log(model['L1_3']['L2_1']);
