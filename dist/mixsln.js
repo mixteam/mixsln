@@ -106,7 +106,7 @@ var Animation = {
 	        setTimeout(options.callback, 10);
 	    }
     	options.callback && element.addEventListener('webkitTransitionEnd', webkitTransitionEnd, false);
-	    setTimeout(webkitTransitionEnd, str2ms(options.duration) * 1.5);
+	    //setTimeout(webkitTransitionEnd, str2ms(options.duration) * 1.5);
     	setTimeout(function() {
 	    	element.style.webkitTransition = transition.join(', ');
 	    	if (transform.length) {
@@ -611,7 +611,9 @@ for (var p in EventSourceProto) {
 } 
 
 var SCOPES = {},
-	SPLITER_REG = /\s+/
+	SPLITER_REG = /\s+/,
+	AND_SPLITER_REG = /\s*\&\&\s*/,
+	OR_SPLITER_REG = /\s*\|\|\s*/
 	;
 
 function MessageScope(scope) {
@@ -635,6 +637,63 @@ function MessageScope(scope) {
 }
 
 var MessageScopeProto = {
+	_wrapAND: function(events) {
+		var that = this, 
+			states = {}, list = events.split(AND_SPLITER_REG);
+
+		function checkState() {
+			for (var e in states) {
+				if (!states[e]) return;
+			}
+			that.trigger(events);
+			resetState();
+		}
+
+		function resetState() {
+			for (var e in states) {
+				states[e] = false;
+			}
+		}
+
+		list.forEach(function(event) {
+			states[event] = false;
+			that.on(event, function() {
+				states[event] = true;
+				checkState();
+			});
+		});
+	},
+
+	_wrapOR: function(events) {
+		var that = this, 
+			states = {}, list = events.split(OR_SPLITER_REG),
+			isTrigger = false;
+
+		function checkState() {
+			!isTrigger && that.trigger(events);
+			var state = true;
+			for (var e in states) {
+				state = state && states[e];
+			}
+			state && resetState();
+		}
+
+		function resetState() {
+			for (var e in states) {
+				states[e] = false;
+			}
+			isTrigger = false;
+		}
+
+		list.forEach(function(event) {
+			states[event] = false;
+			that.on(event, function() {
+				states[event] = true;
+				checkState();
+			});
+		});
+	},
+
 	on: function(events, callback, context) {
 		var that = this,
 			cache = that._cache,
@@ -643,6 +702,14 @@ var MessageScopeProto = {
 			;
 
 		if (!callback) return that;
+
+		if (events.match(AND_SPLITER_REG)) {
+			events = events.replace(AND_SPLITER_REG, '&&');
+			this._wrapAND(events);
+		} else if (events.match(OR_SPLITER_REG)) {
+			events = events.replace(OR_SPLITER_REG, '||');
+			this._wrapOR(events);
+		}
 
 		events = events.split(SPLITER_REG);
 
@@ -2234,7 +2301,6 @@ var doc = win.document,	$ = win['$'],
 	Scroll = am.Scroll,
 	Animation = am.Animation,
 	Transition = am.Transition,
-	hooks = Message.get('hooks'),
 	pagecache = {},
 	pagemeta = {},
 	templatecache = {}, 
@@ -2250,6 +2316,10 @@ var doc = win.document,	$ = win['$'],
 		enableScroll : false,
 		enableTransition : false
 	};
+
+
+// Message Initial
+var hooks = Message.get('hooks');
 
 // Config Initial
 hooks.on('app:start', function() {
@@ -2273,8 +2343,6 @@ hooks.on('app:start', function() {
 	}
 });
 
-// Message Initial
-
 //DOM Event Initial
 var orientationEvent = 'onorientationchange' in win?'orientationchange':'resize';
 window.addEventListener(orientationEvent, function(e){
@@ -2284,8 +2352,6 @@ window.addEventListener(orientationEvent, function(e){
 }, false);
 
 // Navigation Initial
-var lastState, lastPage, isFirstSwitch = true;
-
 hooks.on('page:define page:defineMeta', function(page) {
 	var name = page.name,
 		route = page.route;
@@ -2303,35 +2369,6 @@ hooks.on('page:define page:defineMeta', function(page) {
 		callback: route.callback,
 		last: route.last
 	});
-});
-
-navigation.on('forward backward', function(state) {
-	var meta, page = Page.get(state.name);
-
-	function pageReady() {
-		page = Page.get(state.name);
-
-		hooks.trigger('navigation:switch', state, page, {
-			isSamePage: lastPage && (lastPage.name === page.name),
-			isSameState: lastState && StateStack.isEquals(lastState, state),
-			isFirstSwitch: isFirstSwitch
-		});
-		lastState = state;
-		lastPage = page;
-		isFirstSwitch = false;
-	}
-
-	state.pageMeta || (state.pageMeta = {});
-	if (!page) {
-		if ((meta = pagemeta[state.name])) {
-			var	jsLoaded = {};
-
-			meta.css && app.loadResource(meta.css);
-			meta.js && app.loadResource(meta.js, pageReady);
-		}
-	} else {
-		pageReady();
-	}
 });
 
 // UI Initial
@@ -2382,155 +2419,11 @@ hooks.on('app:start', function() {
 	}
 });
 
-hooks.on('navigation:switch', function(state, page, options){
-	var c_navbar = config.enableNavbar,
-		c_toolbar = config.enableToolbar,
-		c_content = config.enableContent,
-		c_transition = config.enableTransition,
-		c_scroll = config.enableScroll,
-		move = state.move,
-		transition = state.transition
-		;
-
-	if (c_navbar) {
-		var i_navbar = c_navbar.instance
-			title = state.pageMeta.title || page.title,
-			buttons = state.pageMeta.buttons || page.buttons
-			;
-
-		app.navigation.setTitle(title);
-		i_navbar.removeButton();
-
-		if (buttons) {
-			buttons.forEach(function(button) {
-				var handler = button.handler;
-
-				if (button.type === 'back') {
-					if (button.autoHide !== false && state.index < 1) {
-						button.hide = true;
-					} else {
-						button.hide = false;
-					}
-					if (!handler) {
-						handler = button.handler = function() {
-							app.navigation.pop();
-						}
-					}
-				}
-
-				if (typeof handler === 'string') {
-					handler = page[handler];
-				}
-				button.handler = function(e) {
-					handler.call(page, e, state.index);
-				}
-
-				app.navigation.setButton(button);
-			});
-		} else {
-			app.navigation.setButton({
-				type: 'back',
-				text: 'back',
-				hide: state.index < 1?true:false,
-				handler: function() {
-					app.navigation.pop();
-				}
-			});
-		}
-
-		if (!options.isSamePage && !options.isFirstSwitch){
-			Transition.float(c_navbar.titleWrapEl.parentNode, transition === 'backward'?'LI':'RI', 50);
-		}
-	}
-
-	if (c_toolbar) {
-		var i_toolbar = c_toolbar.instance, 
-			o_toolbar = state.pageMeta.toolbar || page.toolbar
-			;
-
-		if (typeof o_toolbar === 'number') {
-			o_toolbar = {height: o_toolbar};
-		}
-		if (o_toolbar) {
-			app.navigation.setToolbar(o_toolbar);
-			i_toolbar.show();
-			Transition.fadeIn(c_toolbar.wrapEl);
-		} else {
-			i_toolbar.hide();
-		}
-	}
-
-	if (!options.isSamePage) {
-		var i_content = c_content.instance;
-		
-		move === 'backward' ? i_content.previous() : i_content.next();
-
-		if (c_scroll) {
-			Scroll.disable(c_scroll.wrapEl);
-			c_scroll.wrapEl = i_content.getActive();
-			Scroll.enable(c_scroll.wrapEl, page.scroll);
-		}
-
-		if (c_transition && !options.isFirstSwitch) {
-			var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
-				className = c_transition.wrapEl.className += ' ' + transition,
-				activeEl = i_content.getActive()
-				;
-
-			Transition.move(c_transition.wrapEl, offsetX, 0, function() {
-				c_transition.wrapEl.className = className.replace(' ' + transition, '');
-				c_transition.wrapEl.style.left = (-Animation.getTransformOffset(c_transition.wrapEl).x) + 'px';
-				i_content.setClassName();
-			});
-		} else {
-			i_content.setClassName();
-		}
-	}
-});
-
-hooks.on('navigation:switch orientaion:change', function() {
-	var c_navbar = config.enableNavbar,
-		c_toolbar = config.enableToolbar,
-		c_content = config.enableContent,
-		c_scroll = config.enableScroll
-		;
-
-	var offsetHeight = c_scroll?config.viewport.offsetHeight:doc.documentElement.clientHeight;
-	if (c_navbar) {
-		offsetHeight -= c_navbar.wrapEl.offsetHeight;
-	}
-	if (c_toolbar) {
-		offsetHeight -= c_toolbar.wrapEl.offsetHeight;
-	}
-	c_content.wrapEl.style[c_scroll?'height':'minHeight'] = offsetHeight + 'px';
-});
-
 //Plugin Initial
 hooks.on('app:start', function() {
 	for (var name in app.plugin) {
 		var plugin = app.plugin[name];
 		plugin.onAppStart && plugin.onAppStart();
-	}
-});
-
-hooks.on('navigation:switch', function(state, page) {
-	for (var name in app.plugin) {
-		var plugin = app.plugin[name], pluginOpt;
-
-		if (page.plugins) {
-			pluginOpt = page.plugins[name];
-		}
-
-		if (plugin) {
-			state.plugins || (state.plugins = {});
-			state.plugins[name] || (state.plugins[name] = {});
-			if (typeof pluginOpt === 'object') {
-				for (var p in pluginOpt) {
-					state.plugins[name][p] = pluginOpt[p];
-				}
-			}
-			plugin.onNavigationSwitch && plugin.onNavigationSwitch(page, state.plugins[name]);
-		}
 	}
 });
 
@@ -2569,6 +2462,13 @@ function pagePluginRun(state, page, funcName) {
 				;
 
 			if (plugin && page.plugins[name]) {
+				if (typeof page.plugins[name] === 'object') {
+					for (var p in page.plugins[name]) {
+						if (pluginOpt[p] == null) {
+							pluginOpt[p] = page.plugins[name][p];
+						}
+					}
+				}
 				plugin[funcName] && plugin[funcName](page, pluginOpt);
 			}
 		}
@@ -2687,6 +2587,10 @@ hooks.on('page:define', function(page) {
 	var startup = page.startup,
 		teardown = page.teardown;
 
+	page.ready = function(state) {
+		hooks.trigger('page:ready', state, page);
+	}
+
 	page.startup = function(state) {
 		checkTemplate(page, 'template', function() {
 			hooks.trigger('page:startup', state, page);
@@ -2704,26 +2608,230 @@ hooks.on('page:define', function(page) {
 	}
 });
 
-hooks.on('navigation:switch', function(state, page, options) {
-	var i_content = app.config.enableContent.instance,
-		curDataFragment, lastDataFragment, lastCache
+// forward backwrad Intiail
+hooks.on('app:start', function(){
+	var c_navbar = config.enableNavbar,
+		c_toolbar = config.enableToolbar,
+		c_content = config.enableContent,
+		i_content = c_content.instance,
+		c_transition = config.enableTransition,
+		c_scroll = config.enableScroll,
+		state, page, lastState, lastPage,
+		isFirstSwitch = true, isSamePage = false, isSameState = false
 		;
 
-	page.el = i_content.getActive();
-	$ && (page.$el = $(page.el));
+	// navbar
+	function setNavbar() {
+		if (c_navbar) {
+			var i_navbar = c_navbar.instance
+				title = state.pageMeta.title || page.title,
+				buttons = state.pageMeta.buttons || page.buttons
+				;
 
-	lastDataFragment = page.el.getAttribute('data-fragment');
-	curDataFragment = state.fragment;
-	if (state.move === 'backward' && lastDataFragment === curDataFragment) return;
+			app.navigation.setTitle(title);
+			i_navbar.removeButton();
 
-	if ((lastCache = pagecache[lastDataFragment])) {
-		lastCache.page.teardown(lastCache.state);
-		delete pagecache[lastDataFragment];
+			if (buttons) {
+				buttons.forEach(function(button) {
+					var handler = button.handler;
+
+					if (button.type === 'back') {
+						if (button.autoHide !== false && state.index < 1) {
+							button.hide = true;
+						} else {
+							button.hide = false;
+						}
+						if (!handler) {
+							handler = button.handler = function() {
+								app.navigation.pop();
+							}
+						}
+					}
+
+					if (typeof handler === 'string') {
+						handler = page[handler];
+					}
+					button.handler = function(e) {
+						handler.call(page, e, state.index);
+					}
+
+					app.navigation.setButton(button);
+				});
+			} else {
+				app.navigation.setButton({
+					type: 'back',
+					text: 'back',
+					hide: state.index < 1?true:false,
+					handler: function() {
+						app.navigation.pop();
+					}
+				});
+			}
+
+			if (!isSamePage && !isFirstSwitch){
+				Transition.float(c_navbar.titleWrapEl.parentNode, state.transition === 'backward'?'LI':'RI', 50);
+			}
+		}
 	}
 
-	pagecache[curDataFragment] = {state:state, page:page};
-	page.el.setAttribute('data-fragment', curDataFragment);
-	page.startup(state);
+	// toolbar
+	function setToolbar() {
+		if (c_toolbar) {
+			var i_toolbar = c_toolbar.instance, 
+				o_toolbar = state.pageMeta.toolbar || page.toolbar
+				;
+
+			if (typeof o_toolbar === 'number') {
+				o_toolbar = {height: o_toolbar};
+			}
+			if (o_toolbar) {
+				app.navigation.setToolbar(o_toolbar);
+				i_toolbar.show();
+			} else {
+				i_toolbar.hide();
+			}
+		}
+	}
+
+	// content
+	function setContent() {
+		if (!isSamePage) {		
+			state.move === 'backward' ? i_content.previous() : i_content.next();
+		}
+	}
+
+	function refreshContent() {
+		var offsetHeight = c_scroll?config.viewport.offsetHeight:doc.documentElement.clientHeight;
+		if (c_navbar) {
+			offsetHeight -= c_navbar.wrapEl.offsetHeight;
+		}
+		if (c_toolbar) {
+			offsetHeight -= c_toolbar.wrapEl.offsetHeight;
+		}
+		if (c_scroll) {
+			c_content.wrapEl.style.height = offsetHeight + 'px';
+		} else {
+			c_content.wrapEl.style.minHeight = offsetHeight + 'px';
+			c_content.instance.getActive().style.minHeight = offsetHeight + 'px';
+		}
+
+	}
+
+	// scroll
+	function setScroll() {
+		if (!isSamePage && c_scroll) {
+			Scroll.disable(c_scroll.wrapEl);
+			c_scroll.wrapEl = i_content.getActive();
+			Scroll.enable(c_scroll.wrapEl, page.scroll);
+		}
+	}
+
+	// transition
+	function setTransition() {
+		if (!isSamePage) {
+			var transition = state.transition;
+
+			if (c_transition && !isFirstSwitch) {
+				var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
+					className = c_transition.wrapEl.className += ' ' + transition
+					;
+
+				Transition.move(c_transition.wrapEl, offsetX, 0, function() {
+					c_transition.wrapEl.className = className.replace(' ' + transition, '');
+					c_transition.wrapEl.style.left = (-Animation.getTransformOffset(c_transition.wrapEl).x) + 'px';
+					i_content.setClassName();
+					hooks.trigger('navigation:switchend', state);
+				});
+			} else {
+				i_content.setClassName();
+				hooks.trigger('navigation:switchend', state);
+			}
+		}
+	}
+
+	// plugin
+	function setPlugin(funcName) {
+		for (var name in app.plugin) {
+			var plugin = app.plugin[name];
+
+			if (plugin) {
+				state.plugins || (state.plugins = {});
+				state.plugins[name] || (state.plugins[name] = {});
+				plugin[funcName] && plugin[funcName](state.plugins[name]);
+			}
+		}
+	}
+
+	// page
+	function setPage() {
+		var lastFragment = page.el.getAttribute('data-fragment'), 
+			lastCache = pagecache[lastFragment];
+
+		if (state.move === 'backward' && lastFragment === state.fragment) return;
+		if (lastCache) {
+			lastCache.page.teardown(lastCache.state);
+			delete pagecache[lastFragment];
+		}
+
+		pagecache[state.fragment] = {state:state, page:page};
+		page.el.setAttribute('data-fragment', state.fragment);
+		page.startup(state);
+	}
+
+	// dynamic load
+	function pageLoad() {
+		var meta;
+		if ((meta = pagemeta[state.name])) {
+			meta.css && app.loadResource(meta.css);
+			meta.js && app.loadResource(meta.js, pageReady);
+		}
+	}
+
+	function pageReady() {
+		page = Page.get(state.name);
+		page.el = i_content.getActive();
+		$ && (page.$el = $(page.el));
+		page.ready(state);
+		lastState = state;
+		lastPage = page;
+		isFirstSwitch = false;
+	}
+
+	navigation.on('forward backward', function(_state) {
+		state = _state;
+		page = Page.get(state.name);
+		state.pageMeta || (state.pageMeta = {});
+
+		if (lastState) {
+			isSamePage = (lastState.name === state.name);
+			isSameState = StateStack.isEquals(lastState, state);
+		}
+
+		hooks.trigger('navigation:switch', state);
+		page?pageReady():pageLoad();
+	});
+
+	hooks.on('navigation:switch', function() {
+		setContent();
+		setTransition();
+		setPlugin('onNavigationSwitch');
+	});
+
+	hooks.on('page:ready', function() {
+		setNavbar();
+		setToolbar();
+		setScroll();
+	});
+
+	hooks.on('navigation:switchend && page:ready', function() {
+		refreshContent();
+		setPlugin('onNavigationSwitchEnd');
+		setPage();
+	});
+
+	hooks.on('orientaion:change', function() {
+		refreshContent();
+	});
 });
 
 app.start = function(config) {
@@ -2904,43 +3012,43 @@ app.navigation = {
 	}
 }
 
-function simulateScrollEvent() {
-	if (doc.isSimulateScrollEvent) return;
-	doc.isSimulateScrollEvent = true;
+function simulateScrollEvent(el, isAdd) {
+	if (isAdd && el.simulateScrollEvent) return
+	if (!isAdd && !el.simulateScrollEvent) return;
 
-	function fireEvent(el, eventName) {
+	function fireEvent(eventName) {
 		var event = doc.createEvent('HTMLEvents');
 		event.initEvent(eventName, false, true);
 	    el.dispatchEvent(event);
+	}	
+
+	function scrollend(e) {
+		if (isIOS) {
+			fireEvent('scrollend');
+		} else {
+			var scrollY = window.scrollY;
+			setTimeout(function(){
+				if (window.scrollY === scrollY) {
+					fireEvent('scrollend');
+				}
+			}, 150);
+		}
 	}
 
-	var startTime, endTime, flickTime = 200;
-
-	if (isIOS) {
-		window.addEventListener('scroll', function() {
-			fireEvent(doc.body, 'scrollend');
-		}, false);
-	} else if (isAndroid){
-		doc.addEventListener('touchstart', function() {
-			startTime = Date.now();
-		}, false);
-
-		doc.addEventListener('touchend', function() {
-			endTime = Date.now();
-			if (endTime - startTime < flickTime) {
-				var scrollTop = doc.body.scrollTop,
-					scrollId = setInterval(function(){
-						if (scrollTop === doc.body.scrollTop) {
-							clearInterval(scrollId);
-							fireEvent(doc.body, 'scrollend');
-						} else {
-							scrollTop = doc.body.scrollTop
-						}
-					}, 50);
-			} else {
-				fireEvent(doc.body, 'scrollend');
+	if (isAdd) {
+		el.simulateScrollEvent || (el.simulateScrollEvent = {
+			eventNum: 0,
+			handleEvent: function(e) {
+				if (e.type === 'scroll') {
+					scrollend(e);
+				}
 			}
-		}, false);
+		})
+		el.simulateScrollEvent.eventNum++;
+		window.addEventListener('scroll', el.simulateScrollEvent, false);
+	} else if ((--el.simulateScrollEvent.eventNum) <= 0) {
+		window.removeEventListener('scroll', el.simulateScrollEvent);
+		el.simulateScrollEvent = false;
 	}
 }
 
@@ -3041,14 +3149,19 @@ app.scroll = {
 	},
 
 	addEventListener: function(name, func, isBubble) {
-		var c_scroll = config.enableScroll;
-		(c_scroll?c_scroll.wrapEl:doc.body).addEventListener(name, func, isBubble);
-		if (!c_scroll) simulateScrollEvent();
+		var c_scroll = config.enableScroll,
+			i_content = config.enableContent.instance,
+			el = c_scroll?c_scroll.wrapEl:i_content.getActive();
+		el.addEventListener(name, func, isBubble);
+		simulateScrollEvent(el, true);
 	},
 
 	removeEventListener: function(name, func) {
-		var c_scroll = config.enableScroll;
-		(c_scroll?c_scroll.wrapEl:doc.body).removeEventListener(name, func);
+		var c_scroll = config.enableScroll,
+			i_content = config.enableContent.instance,
+			el = c_scroll?c_scroll.wrapEl:i_content.getActive();
+		el.removeEventListener(name, func);
+		simulateScrollEvent(el, false);
 	},
 
 	getElement: function() {

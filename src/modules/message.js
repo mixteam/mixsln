@@ -44,7 +44,9 @@ for (var p in EventSourceProto) {
 } 
 
 var SCOPES = {},
-	SPLITER_REG = /\s+/
+	SPLITER_REG = /\s+/,
+	AND_SPLITER_REG = /\s*\&\&\s*/,
+	OR_SPLITER_REG = /\s*\|\|\s*/
 	;
 
 function MessageScope(scope) {
@@ -68,6 +70,63 @@ function MessageScope(scope) {
 }
 
 var MessageScopeProto = {
+	_wrapAND: function(events) {
+		var that = this, 
+			states = {}, list = events.split(AND_SPLITER_REG);
+
+		function checkState() {
+			for (var e in states) {
+				if (!states[e]) return;
+			}
+			that.trigger(events);
+			resetState();
+		}
+
+		function resetState() {
+			for (var e in states) {
+				states[e] = false;
+			}
+		}
+
+		list.forEach(function(event) {
+			states[event] = false;
+			that.on(event, function() {
+				states[event] = true;
+				checkState();
+			});
+		});
+	},
+
+	_wrapOR: function(events) {
+		var that = this, 
+			states = {}, list = events.split(OR_SPLITER_REG),
+			isTrigger = false;
+
+		function checkState() {
+			!isTrigger && that.trigger(events);
+			var state = true;
+			for (var e in states) {
+				state = state && states[e];
+			}
+			state && resetState();
+		}
+
+		function resetState() {
+			for (var e in states) {
+				states[e] = false;
+			}
+			isTrigger = false;
+		}
+
+		list.forEach(function(event) {
+			states[event] = false;
+			that.on(event, function() {
+				states[event] = true;
+				checkState();
+			});
+		});
+	},
+
 	on: function(events, callback, context) {
 		var that = this,
 			cache = that._cache,
@@ -76,6 +135,14 @@ var MessageScopeProto = {
 			;
 
 		if (!callback) return that;
+
+		if (events.match(AND_SPLITER_REG)) {
+			events = events.replace(AND_SPLITER_REG, '&&');
+			this._wrapAND(events);
+		} else if (events.match(OR_SPLITER_REG)) {
+			events = events.replace(OR_SPLITER_REG, '||');
+			this._wrapOR(events);
+		}
 
 		events = events.split(SPLITER_REG);
 

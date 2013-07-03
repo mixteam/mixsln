@@ -21,7 +21,7 @@
 			app.scroll.scrollTo(options.pos);
 		},
 
-		onNavigationSwitch : function(page, options) {
+		onNavigationSwitchEnd : function(options) {
 			this._options = options;
 			this.reset();
 		},
