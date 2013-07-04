@@ -20,45 +20,54 @@ function _setButton(btn, options) {
 function Navbar(wrapEl, options) {
 	options || (options = {});
 
-	this._wrapEl = wrapEl;
-	this._animWrapEl = options.animWrapEl;
-	this._backWrapEl = options.backWrapEl;
-	this._funcWrapEl = options.funcWrapEl;
-	this._titleWrapEl = options.titleWrapEl;
+	this.wrapEl = wrapEl;
+
+	options.animWrapEl?(this.animWrapEl = options.animWrapEl):
+		this.wrapEl.appendChild(this.animWrapEl = doc.createElement('ul'));
+
+	options.titleWrapEl?(this.titleWrapEl = options.titleWrapEl):
+		this.animWrapEl.appendChild(this.titleWrapEl = doc.createElement('li'));
+
+	options.titleWrapEl?(this._backWrapEl = options.backWrapEl):
+		this.animWrapEl.appendChild(this.backWrapEl = doc.createElement('li'));	
+
+	options.funcWrapEl?(this._funcWrapEl = options.funcWrapEl):
+		this.animWrapEl.appendChild(this.funcWrapEl = doc.createElement('li'));
 }
 
 var NavbarProto = {
     setTitle: function(title) {
-    	this._titleWrapEl && (this._titleWrapEl.innerHTML = title);
+    	this.titleWrapEl && (this.titleWrapEl.innerHTML = title);
     },
 
     setButton: function(options) {
     	var wrap, btn;
     	if (options.type === 'back') {
-    		wrap = this._backWrapEl;
+    		wrap = this.backWrapEl;
     		btn = wrap.querySelector('button');
     	} else if (options.type === 'func') {
-    		wrap = this._funcWrapEl;
+    		wrap = this.funcWrapEl;
     		btn = wrap.querySelector('#' + options.id);
     	} else if (options.id) {
-    		btn = this._wrapEl.querySelector('#' + options.id);
+    		btn = this.wrapEl.querySelector('#' + options.id);
     		btn && (wrap = btn.parentNode);
     	}
 
 		if (!btn && wrap) {
 			btn = doc.createElement('button');
+			btn.className = options.type;
 			wrap.appendChild(btn);
 		}
 		_setButton(btn, options);
     },
 
     getButton: function(id) {
-    	return this._funcWrapEl.querySelector('button#' + id);
+    	return this.funcWrapEl.querySelector('button#' + id);
     },
 
     removeButton: function(id) {
     	if (!id) {
-    		var btns = this._funcWrapEl.querySelectorAll('button');
+    		var btns = this.funcWrapEl.querySelectorAll('button');
     		for (var i = 0; i < btns.length; i++) {
     			this.removeButton(btns[i]);
     		}

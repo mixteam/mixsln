@@ -9,10 +9,6 @@
 			['submit', '#J_topSearchForm', '_submitFormHandler']
 		],
 
-		views : {
-			searchItems : app.getView('searchItems')
-		},
-
 		buttons : [
 			{
 				type : 'back',
@@ -90,8 +86,8 @@
 		},
 
 		refresh : function(callback) {
-			this.views.searchItems.pageno = 1;
-			this.views.searchItems.render(function() {
+			this.searchItemsView.pageno = 1;
+			this.searchItemsView.render(function() {
 				callback();
 				setTimeout(function(){
 					app.plugin.lazyload.check();	
@@ -100,7 +96,7 @@
 		},
 
 		more : function(callback) {
-			this.views.searchItems.renderMore(function() {
+			this.searchItemsView.renderMore(function() {
 				callback();
 				setTimeout(function(){
 					app.plugin.lazyload.check();
@@ -111,8 +107,8 @@
 		startup : function() {
 			// implement super.startup
 			var that = this,
-				word = decodeURIComponent(app.navigation.getParameter('word')),
-				searchItems = this.views.searchItems
+				word = decodeURIComponent(app.navigation.getParameter('word'))
+				searchItems = this.searchItemsView = app.getView('searchItems')
 				;
 
 			searchItems.word = word;
@@ -133,7 +129,7 @@
 		teardown : function() {
 			// implement super.teardown
 			var that = this,
-				searchItems = that.views.searchItems
+				searchItems = that.searchItemsView
 				;
 
 			searchItems.destroy();

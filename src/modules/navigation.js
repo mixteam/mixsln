@@ -204,7 +204,7 @@ var NavigationProto = {
 	handleEvent: function() {
     	var that = this,
     		routes = that._routes,
-    		route, fragment, 
+    		route, fragment, defaultRoute,
     		unmatched = true
 			;
 
@@ -214,15 +214,19 @@ var NavigationProto = {
 
 		for (var name in routes) {
 			route = routes[name];
-			
-			if(route.routeReg.test(fragment)) {
+
+			if (route['default']) {
+				defaultRoute = route;
+			} else if(route.routeReg.test(fragment)) {
                 unmatched = false;
 				route.callback(fragment);
 				if (route.last) break;
 			}
 		}
 
-		unmatched && that.trigger('unmatched', fragment);
+		if (unmatched && defaultRoute) {
+			defaultRoute.callback(fragment);
+		}
 	},
 
 	addRoute: function(name, routeText, options) {
@@ -245,7 +249,13 @@ var NavigationProto = {
 		}
 
 		if (options['default']) {
-			this.on('unmatched', routeHandler);
+			that._routes[name] = {
+				'default' : true,
+				callback: function(fragment) {
+					var args = extractArgs(fragment.split(ARGS_SPLITER)[1] || '');
+					routeHandler(fragment, {}, args);
+				}
+			}
 		} else if (name && routeText) {
 			routeText = convertParams(routeText);
 			routeNames = extractNames(routeText);

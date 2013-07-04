@@ -107,6 +107,26 @@ function q(selector, el) {
 	return el.querySelector(selector);
 }
 
+function handlerScrollEvent() {
+
+	function fireEvent(el, eventName) {
+		var event = doc.createEvent('HTMLEvents');
+		event.initEvent(eventName, false, true);
+	    el.dispatchEvent(event);
+	} 
+
+	if (isIOS) {
+		fireEvent(window, 'scrollend');
+	} else {
+		var scrollY = window.scrollY;
+		setTimeout(function(){
+			if (window.scrollY === scrollY) {
+				fireEvent(window, 'scrollend');
+			}
+		}, 150);
+	}
+}
+
 hooks.on('app:start', function() {
 	var c_navbar = config.enableNavbar,
 		c_toolbar = config.enableToolbar,
@@ -126,9 +146,6 @@ hooks.on('app:start', function() {
 	if (c_navbar) {
 		config.viewport.className += ' enableNavbar';
 		c_navbar.wrapEl || (c_navbar.wrapEl = q('.navbar', config.viewport));
-		c_navbar.titleWrapEl || (c_navbar.titleWrapEl = q('.navbar > ul > li:first-child', config.viewport));
-		c_navbar.backWrapEl || (c_navbar.backWrapEl = q('.navbar > ul > li:nth-child(2)', config.viewport));
-		c_navbar.funcWrapEl || (c_navbar.funcWrapEl = q('.navbar > ul > li:last-child', config.viewport));
 		c_navbar.instance = new Navbar(c_navbar.wrapEl, c_navbar);
 	}
 
@@ -141,6 +158,8 @@ hooks.on('app:start', function() {
 	if (c_scroll) {
 		config.viewport.className += ' enableScroll';
 		c_scroll.wrapEl = i_content.getActive();
+	} else {
+		window.addEventListener('scroll', handlerScrollEvent, false);
 	}
 
 	if (c_transition) {
@@ -188,16 +207,22 @@ function pagePluginRun(state, page, funcName) {
 
 	if (page.plugins) {
 		for (var name in page.plugins) {
-			var plugin = app.plugin[name], pluginOpt = (state||page).plugins[name]
+			var plugin = app.plugin[name], pluginOpt = page.plugins[name]
 				;
 
-			if (plugin && page.plugins[name]) {
-				if (typeof page.plugins[name] === 'object') {
-					for (var p in page.plugins[name]) {
-						if (pluginOpt[p] == null) {
-							pluginOpt[p] = page.plugins[name][p];
+			if (plugin && pluginOpt) {
+				if (pluginOpt === true) {
+					pluginOpt = page.plugins[name] = {};
+				}
+
+				if (state) {
+					state.plugins[name] || (state.plugins[name] = {});
+					for (var p in pluginOpt) {
+						if (state.plugins[name][p] == null) {
+							state.plugins[name][p] = page.plugins[name][p];
 						}
 					}
+					pluginOpt = state.plugins[name];
 				}
 				plugin[funcName] && plugin[funcName](page, pluginOpt);
 			}
@@ -338,7 +363,7 @@ hooks.on('page:define', function(page) {
 	}
 });
 
-// forward backwrad Intiail
+// forward backwrad Initial
 hooks.on('app:start', function(){
 	var c_navbar = config.enableNavbar,
 		c_toolbar = config.enableToolbar,
@@ -347,7 +372,7 @@ hooks.on('app:start', function(){
 		c_transition = config.enableTransition,
 		c_scroll = config.enableScroll,
 		state, page, lastState, lastPage,
-		isFirstSwitch = true, isSamePage = false, isSameState = false
+		isFirstSwitch = true, isSamePage = false
 		;
 
 	// navbar
@@ -399,7 +424,7 @@ hooks.on('app:start', function(){
 			}
 
 			if (!isSamePage && !isFirstSwitch){
-				Transition.float(c_navbar.titleWrapEl.parentNode, state.transition === 'backward'?'LI':'RI', 50);
+				Transition.float(i_navbar.animWrapEl, state.transition === 'backward'?'LI':'RI', 50);
 			}
 		}
 	}
@@ -485,7 +510,6 @@ hooks.on('app:start', function(){
 			var plugin = app.plugin[name];
 
 			if (plugin) {
-				state.plugins || (state.plugins = {});
 				state.plugins[name] || (state.plugins[name] = {});
 				plugin[funcName] && plugin[funcName](state.plugins[name]);
 			}
@@ -531,13 +555,13 @@ hooks.on('app:start', function(){
 		state = _state;
 		page = Page.get(state.name);
 		state.pageMeta || (state.pageMeta = {});
+		state.plugins || (state.plugins = {});
 
 		if (lastState) {
 			isSamePage = (lastState.name === state.name);
-			isSameState = StateStack.isEquals(lastState, state);
 		}
 
-		hooks.trigger('navigation:switch', state);
+		if (!isSamePage) hooks.trigger('navigation:switch', state);
 		page?pageReady():pageLoad();
 	});
 
@@ -551,12 +575,12 @@ hooks.on('app:start', function(){
 		setNavbar();
 		setToolbar();
 		setScroll();
+		setPage();
 	});
 
 	hooks.on('navigation:switchend && page:ready', function() {
 		refreshContent();
 		setPlugin('onNavigationSwitchEnd');
-		setPage();
 	});
 
 	hooks.on('orientaion:change', function() {
@@ -742,46 +766,6 @@ app.navigation = {
 	}
 }
 
-function simulateScrollEvent(el, isAdd) {
-	if (isAdd && el.simulateScrollEvent) return
-	if (!isAdd && !el.simulateScrollEvent) return;
-
-	function fireEvent(eventName) {
-		var event = doc.createEvent('HTMLEvents');
-		event.initEvent(eventName, false, true);
-	    el.dispatchEvent(event);
-	}	
-
-	function scrollend(e) {
-		if (isIOS) {
-			fireEvent('scrollend');
-		} else {
-			var scrollY = window.scrollY;
-			setTimeout(function(){
-				if (window.scrollY === scrollY) {
-					fireEvent('scrollend');
-				}
-			}, 150);
-		}
-	}
-
-	if (isAdd) {
-		el.simulateScrollEvent || (el.simulateScrollEvent = {
-			eventNum: 0,
-			handleEvent: function(e) {
-				if (e.type === 'scroll') {
-					scrollend(e);
-				}
-			}
-		})
-		el.simulateScrollEvent.eventNum++;
-		window.addEventListener('scroll', el.simulateScrollEvent, false);
-	} else if ((--el.simulateScrollEvent.eventNum) <= 0) {
-		window.removeEventListener('scroll', el.simulateScrollEvent);
-		el.simulateScrollEvent = false;
-	}
-}
-
 app.scroll = {
 	getScrollHeight: function() {
 		var c_scroll = config.enableScroll;
@@ -881,17 +865,15 @@ app.scroll = {
 	addEventListener: function(name, func, isBubble) {
 		var c_scroll = config.enableScroll,
 			i_content = config.enableContent.instance,
-			el = c_scroll?c_scroll.wrapEl:i_content.getActive();
+			el = c_scroll?c_scroll.wrapEl:window;
 		el.addEventListener(name, func, isBubble);
-		simulateScrollEvent(el, true);
 	},
 
 	removeEventListener: function(name, func) {
 		var c_scroll = config.enableScroll,
 			i_content = config.enableContent.instance,
-			el = c_scroll?c_scroll.wrapEl:i_content.getActive();
+			el = c_scroll?c_scroll.wrapEl:window;
 		el.removeEventListener(name, func);
-		simulateScrollEvent(el, false);
 	},
 
 	getElement: function() {

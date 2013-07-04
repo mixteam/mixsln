@@ -1,9 +1,5 @@
 (function(win, app){
-	var doc = win.document,
-		navigator = win.navigator,
-	    appVersion = navigator.appVersion,
-    	isAndroid = (/android/gi).test(appVersion),
-    	isIOS = (/iphone|ipad/gi).test(appVersion)
+	var doc = win.document
 		;
 
 	app.plugin.lazyload = {

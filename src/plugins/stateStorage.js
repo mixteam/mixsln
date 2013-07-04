@@ -8,7 +8,7 @@
 		var o = {};
 
 		for (var p in state) {
-			if (p === 'pageMeta') continue;
+			if (p === 'pageMeta' || p === 'plugins') continue;
 			var type = Object.prototype.toString.call(state[p]);
 			if (type === '[object Number]' || type === '[object String]') {
 				o[p] = state[p];
