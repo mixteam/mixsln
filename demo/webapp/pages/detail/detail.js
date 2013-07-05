@@ -46,6 +46,9 @@
 				searchbar = this.views.searchbar
 				;
 
+			console.log(app.navigation.getParameter('a'))
+			console.log(app.navigation.getParameter('b'))
+
 			this.html(html);
 			searchbar.render();
 		},
