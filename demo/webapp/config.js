@@ -1,7 +1,7 @@
 app.config.enableMessageLog = true;
 app.config.enableNavbar = true;
 app.config.enableToolbar = true;
-app.config.enableScroll = false;
+app.config.enableScroll = true;
 app.config.enableTransition = true;
 app.config.templateEngine = {
 	load: function(url, callback) {
