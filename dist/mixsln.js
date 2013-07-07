@@ -1278,6 +1278,7 @@ function anime(element, type, delegate, callback) {
 		callback : function() {
 			element.style.webkitBackfaceVisibility = 'initial';
 			element.style.webkitTransformStyle = 'flat';
+			element.style.webkitTransition = '';
 			callback && callback();
 		}
 	});	 
@@ -1309,6 +1310,7 @@ var Transition = {
 			function() {
 				element.style.webkitBackfaceVisibility = 'initial';
 				element.style.webkitTransformStyle = 'flat';
+				element.style.webkitTransition = '';
 				callback && callback();
 			}
 		)
@@ -1611,6 +1613,7 @@ function scrollEnd() {
 		if (!cancelScrollEnd) {
 			element.style.webkitBackfaceVisibility = 'initial';
 			element.style.webkitTransformStyle = 'flat';
+			element.style.webkitTransition = '';
 			fireEvent(element, 'scrollend');
 		}
 	}, 10);
@@ -2363,12 +2366,19 @@ hooks.on('app:start', function() {
 });
 
 //DOM Event Initial
-var orientationEvent = 'onorientationchange' in win?'orientationchange':'resize';
-window.addEventListener(orientationEvent, function(e){
+if ('onorientationchange' in win) {
+	window.addEventListener('onorientationchange', function(e){
+		setTimeout(function() {
+			hooks.trigger('orientaion:change');
+		}, 10);
+	}, false);
+}
+window.addEventListener('resize', function(e){
 	setTimeout(function() {
-		hooks.trigger('orientaion:change');
+		hooks.trigger('screen:resize');
 	}, 10);
-}, false);
+});
+
 
 // Navigation Initial
 hooks.on('page:define page:defineMeta', function(page) {
@@ -2679,24 +2689,19 @@ hooks.on('app:start', function(){
 				buttons.forEach(function(button) {
 					var handler = button.handler;
 
-					if (button.type === 'back') {
-						if (button.autoHide !== false && state.index < 1) {
-							button.hide = true;
-						} else {
-							button.hide = false;
-						}
-						if (!handler) {
-							handler = button.handler = function() {
-								app.navigation.pop();
-							}
-						}
-					}
-
 					if (typeof handler === 'string') {
 						handler = page[handler];
 					}
+
+					if (button.type === 'back') {
+						button.hide = (button.autoHide !== false && state.index < 1);
+						handler || (handler = function() {
+							app.navigation.pop();
+						});
+					}
+
 					button.handler = function(e) {
-						handler.call(page, e, state.index);
+						handler && handler.call(page, e, state.index);
 					}
 
 					app.navigation.setButton(button);
@@ -2712,6 +2717,7 @@ hooks.on('app:start', function(){
 				});
 			}
 
+			// TODO 暂时去掉navbar的动画效果
 			if (!isSamePage && !isFirstSwitch){
 				Transition.float(i_navbar.animWrapEl, state.transition === 'backward'?'LI':'RI', 50);
 			}
@@ -2724,6 +2730,8 @@ hooks.on('app:start', function(){
 			var i_toolbar = c_toolbar.instance, 
 				o_toolbar = state.pageMeta.toolbar || page.toolbar
 				;
+
+			c_toolbar.wrapEl.innerHTML = '';
 
 			if (typeof o_toolbar === 'number') {
 				o_toolbar = {height: o_toolbar};
@@ -2782,7 +2790,8 @@ hooks.on('app:start', function(){
 
 				Transition.move(c_transition.wrapEl, offsetX, 0, function() {
 					c_transition.wrapEl.className = className.replace(' ' + transition, '');
-					c_transition.wrapEl.style.left = (-Animation.getTransformOffset(c_transition.wrapEl).x) + 'px';
+					//c_transition.wrapEl.style.left = (-Animation.getTransformOffset(c_transition.wrapEl).x) + 'px';
+					c_transition.wrapEl.style.webkitTransform = Animation.makeTranslateString(0, 0);
 					i_content.setClassName();
 					hooks.trigger('navigation:switchend', state);
 				});
@@ -2821,7 +2830,6 @@ hooks.on('app:start', function(){
 		page.startup(state);
 	}
 
-	// dynamic load
 	function pageLoad() {
 		var meta;
 		if ((meta = pagemeta[state.name])) {
@@ -2840,39 +2848,36 @@ hooks.on('app:start', function(){
 		isFirstSwitch = false;
 	}
 
-	navigation.on('forward backward', function(_state) {
-		state = _state;
+	navigation.on('forward backward', function() {
+		state = arguments[0];
 		page = Page.get(state.name);
 		state.pageMeta || (state.pageMeta = {});
 		state.plugins || (state.plugins = {});
 
-		if (lastState) {
-			isSamePage = (lastState.name === state.name);
-		}
-
+		lastState && (isSamePage = (lastState.name === state.name));
 		if (!isSamePage) hooks.trigger('navigation:switch', state);
 		page?pageReady():pageLoad();
 	});
 
 	hooks.on('navigation:switch', function() {
 		setContent();
-		setTransition();
 		setPlugin('onNavigationSwitch');
 	});
 
 	hooks.on('page:ready', function() {
 		setNavbar();
 		setToolbar();
+		setTransition();
 		setScroll();
 		setPage();
+		refreshContent();
 	});
 
 	hooks.on('navigation:switchend && page:ready', function() {
-		refreshContent();
 		setPlugin('onNavigationSwitchEnd');
 	});
 
-	hooks.on('orientaion:change', function() {
+	hooks.on('orientaion:change screen:resize', function() {
 		refreshContent();
 	});
 });

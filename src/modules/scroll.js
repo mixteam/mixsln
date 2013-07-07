@@ -228,6 +228,7 @@ function scrollEnd() {
 		if (!cancelScrollEnd) {
 			element.style.webkitBackfaceVisibility = 'initial';
 			element.style.webkitTransformStyle = 'flat';
+			element.style.webkitTransition = '';
 			fireEvent(element, 'scrollend');
 		}
 	}, 10);

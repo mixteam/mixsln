@@ -57,6 +57,7 @@ function anime(element, type, delegate, callback) {
 		callback : function() {
 			element.style.webkitBackfaceVisibility = 'initial';
 			element.style.webkitTransformStyle = 'flat';
+			element.style.webkitTransition = '';
 			callback && callback();
 		}
 	});	 
@@ -88,6 +89,7 @@ var Transition = {
 			function() {
 				element.style.webkitBackfaceVisibility = 'initial';
 				element.style.webkitTransformStyle = 'flat';
+				element.style.webkitTransition = '';
 				callback && callback();
 			}
 		)
