@@ -4,34 +4,39 @@
 
 	app.plugin.scrollpos = {
 		_options: null,
+		_domready : false,
 
 		handleEvent: function(e) {
-			(e.type === 'scrollend') && this.setPos();
+			(e.type === 'scrollend' && this._domready) && this.setPos();
 		},
 
-		setPos: function(pos) {
-			this._options.pos = (typeof pos === 'number' ? pos: app.scroll.getScrollTop());
+		setPos: function() {
+			this._options.pos = app.scroll.getScrollTop();
 		},
 
 		reset: function(pos) {
 			var options = this._options
 				;
 
-			(pos != null) && this.setPos(pos);
+			(pos != null) && (options.pos = pos);
 			app.scroll.scrollTo(options.pos);
 		},
 
-		onNavigationSwitchEnd: function(options) {
+		onNavigationSwitch: function() {
+			this._domready = false;
+		},
+
+		onDomReady: function(options) {
 			this._options = options;
+			this._domready = true;
 			this.reset();
 		},
 
-		onPageStartup: function(page,  options) {
-			this._options = options;
+		onPageShow: function(page,  options) {
 			app.scroll.addEventListener('scrollend', this, false);
 		},
 
-		onPageTeardown: function(page, options) {
+		onPageHide: function(page, options) {
 			app.scroll.removeEventListener('scrollend', this);
 		}
 	}

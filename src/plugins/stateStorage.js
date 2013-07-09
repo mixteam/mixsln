@@ -4,6 +4,12 @@
 		SS_PREIX = 'mix_storage_001_'
 		;
 
+	try {
+		ss.setItem('testPrivateModel', 'false');
+	} catch(e) {
+		return console.error('run@private model', window.navigator.appVersion);
+	}
+
 	function cleanup(state) {
 		var o = {};
 

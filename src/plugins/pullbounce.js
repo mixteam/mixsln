@@ -47,7 +47,7 @@
 			}
 		},
 
-		onPageStartup: function(page, options) {
+		onPageShow: function(page, options) {
 			this._page = page;
 			this._options = options;
 			this._update = false;
@@ -57,7 +57,7 @@
 			app.scroll.addEventListener('panend', this, false);
 		},
 
-		onPageTeardown: function(page, options) {
+		onPageHide: function(page, options) {
 			options.top && app.scroll.removeEventListener('pulldown', this, false);
 			options.bottom && app.scroll.removeEventListener('pullup', this, false);
 			app.scroll.removeEventListener('panend', this, false);

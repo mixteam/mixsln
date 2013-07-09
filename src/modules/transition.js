@@ -55,8 +55,8 @@ function anime(element, type, delegate, callback) {
 		duration: '0.4s',
 		timingFunction: 'ease',
 		callback : function() {
-			element.style.webkitBackfaceVisibility = 'initial';
-			element.style.webkitTransformStyle = 'flat';
+			element.style.webkitBackfaceVisibility = '';
+			element.style.webkitTransformStyle = '';
 			element.style.webkitTransition = '';
 			callback && callback();
 		}
@@ -87,8 +87,8 @@ var Transition = {
 			'0.4s', 'ease', '0s',
 			offset.x + offsetX, offset.y + offsetY,
 			function() {
-				element.style.webkitBackfaceVisibility = 'initial';
-				element.style.webkitTransformStyle = 'flat';
+				element.style.webkitBackfaceVisibility = '';
+				element.style.webkitTransformStyle = '';
 				element.style.webkitTransition = '';
 				callback && callback();
 			}

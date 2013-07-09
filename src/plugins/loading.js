@@ -1,7 +1,6 @@
 (function(win, app) {
 	var doc = win.document,
 		loadingTimeout = 5000,
-		timeoutId,
 		loadingId, loadingWrap;
 
 	app.plugin.loading = {
@@ -26,12 +25,6 @@
 			loadingWrap.style.height = offsetHeight - Math.max(navbarHeight - scrollY, 0) + 'px';
 			loadingWrap.style.top = Math.max(scrollY, navbarHeight) + 'px';
 			loadingWrap.style.display = 'block';
-
-			if (!timeoutId) {
-				timeoutId = setTimeout(function(){
-					that.hide();
-				}, loadingTimeout);
-			}
 			this.ids.push(now);
 
 			return now;
@@ -45,7 +38,6 @@
 			}
 
 			if (this.ids.length === 0) {
-				clearTimeout(timeoutId);
 				loadingWrap.style.display = 'none';
 			}
 		},
@@ -54,7 +46,7 @@
 			loadingId = this.show();
 		},
 
-		onNavigationSwitchEnd: function() {
+		onDomReady: function() {
 			this.hide(loadingId);
 		}
 	}

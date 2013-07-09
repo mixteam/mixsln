@@ -4,9 +4,10 @@
 
 	app.plugin.lazyload = {
 		_options: null,
+		_domready: false,
 
 		handleEvent: function(e) {
-			(e.type === 'scrollend') && this.check();
+			(e.type === 'scrollend' && this._domready) && this.check();
 		},
 
 		check: function() {
@@ -29,12 +30,22 @@
 			}
 		},
 
-		onPageStartup : function(page, options) {
+		onNavigationSwitch: function() {
+			this._domready = false;
+		},
+
+		onDomReady: function(options) {
+			this._options = options;
+			this._domready = true;
+			this.check();
+		},
+
+		onPageShow : function(page, options) {
 			this._options = options;
 			app.scroll.addEventListener('scrollend', this, false);
 		},
 
-		onPageTeardown : function(page, options) {
+		onPageHide : function(page, options) {
 			app.scroll.removeEventListener('scrollend', this);
 		}
 	}

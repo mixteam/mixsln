@@ -118,7 +118,7 @@ function handlerScrollEvent() {
 
 	function fireEvent(el, eventName) {
 		var event = doc.createEvent('HTMLEvents');
-		event.initEvent(eventName, false, true);
+		event.initEvent(eventName, true, true);
 	    el.dispatchEvent(event);
 	} 
 
@@ -245,6 +245,14 @@ hooks.on('page:startup', function(state, page) {
 	pagePluginRun(state, page, 'onPageStartup');
 });
 
+hooks.on('page:show', function(state, page) {
+	pagePluginRun(state, page, 'onPageShow');
+});
+
+hooks.on('page:hide', function(state, page) {
+	pagePluginRun(state, page, 'onPageHide');
+});
+
 hooks.on('page:teardown', function(state, page) {
 	pagePluginRun(state, page, 'onPageTeardown');
 });
@@ -346,23 +354,40 @@ hooks.on('view:extend', function(view) {
 
 //Page Initial
 hooks.on('page:define', function(page) {
-	var startup = page.startup,
-		teardown = page.teardown;
+	var ready = page.ready,
+		startup = page.startup,
+		teardown = page.teardown,
+		show = page.show,
+		hide = page.hide,
+		isReady = false, persisted = false;
 
 	page.ready = function(state) {
+		if (isReady) return;
 		hooks.trigger('page:ready', state, page);
+		ready.call(page);
+		isReady = true;
 	}
 
 	page.startup = function(state) {
-		checkTemplate(page, 'template', function() {
-			hooks.trigger('page:startup', state, page);
-			startup.call(page);
-		});
+		hooks.trigger('page:startup', state, page);
+		startup.call(page);
+		persisted = true;
+	}
+
+	page.show = function(state) {
+		hooks.trigger('page:show', state, page);
+		show.call(page, persisted);
+	}
+
+	page.hide = function(state) {
+		hooks.trigger('page:hide', state, page);
+		hide.call(page, persisted);
 	}
 
 	page.teardown = function(state) {
 		hooks.trigger('page:teardown', state, page);
 		teardown.call(page);
+		persisted = false;
 	}
 
 	page.html = function(html) {
@@ -379,7 +404,7 @@ hooks.on('app:start', function(){
 		c_transition = config.enableTransition,
 		c_scroll = config.enableScroll,
 		state, page, lastState, lastPage,
-		isFirstSwitch = true, isSamePage = false
+		isSamePage = false
 		;
 
 	// navbar
@@ -425,8 +450,8 @@ hooks.on('app:start', function(){
 				});
 			}
 
-			// TODO 暂时去掉navbar的动画效果
-			if (!isSamePage && !isFirstSwitch){
+			// 不是同一个页面，且不是第一次页面
+			if (!isSamePage && lastPage){
 				Transition.float(i_navbar.animWrapEl, state.transition === 'backward'?'LI':'RI', 50);
 			}
 		}
@@ -461,7 +486,7 @@ hooks.on('app:start', function(){
 	}
 
 	function refreshContent() {
-		var offsetHeight = c_scroll?config.viewport.offsetHeight:doc.documentElement.clientHeight;
+		var offsetHeight = c_scroll?config.viewport.offsetHeight:window.innerHeight;
 		if (c_navbar) {
 			offsetHeight -= c_navbar.wrapEl.offsetHeight;
 		}
@@ -491,16 +516,16 @@ hooks.on('app:start', function(){
 		if (!isSamePage) {
 			var transition = state.transition;
 
-			if (c_transition && !isFirstSwitch) {
+			// 不是第一次页面
+			if (c_transition && lastPage) {
 				var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
 					className = c_transition.wrapEl.className += ' ' + transition
 					;
 
 				Transition.move(c_transition.wrapEl, offsetX, 0, function() {
-					c_transition.wrapEl.className = className.replace(' ' + transition, '');
-					//c_transition.wrapEl.style.left = (-Animation.getTransformOffset(c_transition.wrapEl).x) + 'px';
-					c_transition.wrapEl.style.webkitTransform = Animation.makeTranslateString(0, 0);
 					i_content.setClassName();
+					c_transition.wrapEl.className = className.replace(' ' + transition, '');
+					c_transition.wrapEl.style.webkitTransform = '';
 					hooks.trigger('navigation:switchend', state);
 				});
 			} else {
@@ -523,48 +548,63 @@ hooks.on('app:start', function(){
 	}
 
 	// page
-	function setPage() {
-		var lastFragment = page.el.getAttribute('data-fragment'), 
-			lastCache = pagecache[lastFragment];
-
-		if (state.move === 'backward' && lastFragment === state.fragment) return;
-		if (lastCache) {
-			lastCache.page.teardown(lastCache.state);
-			delete pagecache[lastFragment];
-		}
-
-		pagecache[state.fragment] = {state:state, page:page};
-		page.el.setAttribute('data-fragment', state.fragment);
-		page.startup(state);
-	}
-
 	function pageLoad() {
 		var meta;
 		if ((meta = pagemeta[state.name])) {
 			meta.css && app.loadResource(meta.css);
-			meta.js && app.loadResource(meta.js, pageReady);
+			meta.js && app.loadResource(meta.js, function() {
+				page = Page.get(state.name);
+				page.ready();
+				pageReady();
+			});
 		}
 	}
 
 	function pageReady() {
-		page = Page.get(state.name);
 		page.el = i_content.getActive();
 		$ && (page.$el = $(page.el));
-		page.ready(state);
+
+		setNavbar();
+		setToolbar();
+		setTransition();
+		setScroll();
+		refreshContent();
+
+		checkTemplate(page, 'template', pageShow);
+	}
+
+	function pageShow() {
+		lastPage && lastPage.hide(lastState);
+
+		var curFragment = page.el.getAttribute('data-fragment'), 
+			curCache = pagecache[curFragment];
+
+		if (state.move === 'backward' && curFragment === state.fragment) {
+			page.show(state);
+		} else {
+			if (curCache) {
+				curCache.page.teardown(curCache.state);
+				delete pagecache[curFragment];
+			}
+
+			pagecache[state.fragment] = {state:state, page:page};
+			page.el.setAttribute('data-fragment', state.fragment);
+			page.startup(state);
+			page.show(state);
+		}
+
 		lastState = state;
 		lastPage = page;
-		isFirstSwitch = false;
 	}
 
 	navigation.on('forward backward', function() {
 		state = arguments[0];
-		page = Page.get(state.name);
 		state.pageMeta || (state.pageMeta = {});
 		state.plugins || (state.plugins = {});
 
 		lastState && (isSamePage = (lastState.name === state.name));
 		if (!isSamePage) hooks.trigger('navigation:switch', state);
-		page?pageReady():pageLoad();
+		(page = Page.get(state.name))?pageReady():pageLoad();
 	});
 
 	hooks.on('navigation:switch', function() {
@@ -572,17 +612,12 @@ hooks.on('app:start', function(){
 		setPlugin('onNavigationSwitch');
 	});
 
-	hooks.on('page:ready', function() {
-		setNavbar();
-		setToolbar();
-		setTransition();
-		setScroll();
-		setPage();
-		refreshContent();
+	hooks.on('navigation:switchend', function() {
+		setPlugin('onNavigationSwitchEnd');
 	});
 
-	hooks.on('navigation:switchend && page:ready', function() {
-		setPlugin('onNavigationSwitchEnd');
+	hooks.on('page:show && navigation:switchend', function() {
+		setPlugin('onDomReady');
 	});
 
 	hooks.on('orientaion:change screen:resize', function() {

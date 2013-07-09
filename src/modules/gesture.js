@@ -19,7 +19,7 @@ function getCommonAncestor (el1, el2) {
 
 function fireEvent(element, type, extra) {
     var event = doc.createEvent('HTMLEvents');
-    event.initEvent(type, false, true);
+    event.initEvent(type, true, true);
 
     if(typeof extra === 'object') {
         for(var p in extra) {
@@ -27,10 +27,7 @@ function fireEvent(element, type, extra) {
         }
     }
 
-    while(event.cancelBubble === false && element) {
-        element.dispatchEvent(event);
-        element = element.parentNode;
-    }
+    element.dispatchEvent(event);
 }
 
 function calc(x1, y1, x2, y2, x3, y3, x4, y4) {

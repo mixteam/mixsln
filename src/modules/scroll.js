@@ -46,7 +46,7 @@ function touchBoundary(el, y) {
 
 function fireEvent(el, eventName, extra) {
 	var event = doc.createEvent('HTMLEvents');
-	event.initEvent(eventName, false, true);
+	event.initEvent(eventName, true, true);
 	for (var p in extra) {
 		event[p] = extra[p];
 	}
