@@ -15,3 +15,19 @@ app.config.templateEngine = {
 		return compiled(data);
 	}
 }
+
+app.definePageMeta({
+	"name" : "list",
+	"route" : "list\\/(P<word>[^\\/]+)\\/?",
+	"js": ["./pages/list/searchItems.js", "./pages/list/list.js"],
+	"css": ["./pages/list/list.css"]
+});
+
+app.definePageMeta({
+	"name" : "detail",
+	"route" : "detail\\/(P<pid>\\d+)\\/?",
+	"js": ["./pages/detail/searchbar.js", "./pages/detail/detail.js"],
+	"css": ["./pages/detail/detail.css"]
+});
+
+

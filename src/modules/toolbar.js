@@ -14,9 +14,8 @@ function Toolbar(wrapEl, options) {
 var ToolbarProto = {
     set: function(options) {
         options || (options = {});
-        this._wrapEl.innerHTML = '';
         options.html && (this._wrapEl.innerHTML = options.html);
-        options.el && (this._wrapEl.appendChild(options.el));
+        options.el && ((this._wrapEl.innerHTML = '') || this._wrapEl.appendChild(options.el));
         options.height && (this._wrapEl.style.height = options.height + 'px');
     },
 

@@ -8,22 +8,16 @@
 
 		onAppStart: function() {
 			loadingWrap = doc.createElement('div');
-			loadingWrap.style.cssText = 'position:absolute;left:0;top:0;width:100%;z-index:999;background:rgba(255,255,255,0.7);display:none;'
+			loadingWrap.style.cssText = 'position:absolute;left:0;top:0;width:100%;z-index:999;background:rgba(0,0,0,0);display:none;'
 			loadingWrap.className = 'loading-wrap';
 			doc.body.appendChild(loadingWrap);
 		},
 
 		show: function() {
-			var that = this,
-				now = Date.now(),
-				c_navbar = app.config.enableNavbar,
-				navbarHeight = c_navbar?c_navbar.wrapEl.offsetHeight:0,
-				offsetHeight = doc.documentElement.clientHeight,
-				scrollY = window.scrollY
-				;
+			var now = Date.now();
 
-			loadingWrap.style.height = offsetHeight - Math.max(navbarHeight - scrollY, 0) + 'px';
-			loadingWrap.style.top = Math.max(scrollY, navbarHeight) + 'px';
+			loadingWrap.style.height = window.innerHeight + 'px';
+			loadingWrap.style.top = window.scrollY + 'px';
 			loadingWrap.style.display = 'block';
 			this.ids.push(now);
 

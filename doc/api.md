@@ -49,9 +49,10 @@
 
 获得名为name的页面实例
 
-### loadResource(urls, callback)
+### loadResource(urls, type, callback)
 
 * @param {string|array} urls
+* @param {string} type - `js/css`
 * @param {function} callback
 
 依次加载urls中的资源（JS/CSS）文件，完成后调用callback。
@@ -62,23 +63,23 @@
 
 * @var {HTMLElement}
 
-设置视觉区域结点，默认为class是`viewport`的HTMLElement或者`document.body`。
+设置视觉区域节点，默认为class是`viewport`的HTMLElement或者`document.body`。
 
 ### enableMessageLog
 
 * @var {boolean}
  
-设置在控制台输出消息日子，默认为`false`
+设置在控制台输出消息日志，默认为`false`
 
 ### enableContent
 
 * @var {boolean|object}
 
-设置页面内容区域结点，默认为class是`content`的HTMLElement或者和视觉区域结点相同。
+设置页面内容区域节点，默认为class是`content`的HTMLElement或者和视觉区域节点相同。
 
-当为object时，可以有以下字段：
+当设置成object时，有以下字段：
 
-	wrapEl: 视觉区域结点
+	wrapEl: 视觉区域节点
 	cacheLength: 缓存页面内容的长度，默认为5
 
 ### enableNavbar
@@ -87,12 +88,9 @@
 
 设置是否启用导航栏，默认为`false`。
 
-当为object时，可以有以下字段：
+当设置成object时，有以下字段：
 
-	wrapEl: 导航栏结点，默认为class是`navbar`的HTMLElement。
-	titleEl: 导航栏中的标题结点。
-	backWrapEl: 导航栏中返回按钮的父结点
-	funcWrapEl: 导航栏中功能按钮的父结点
+	wrapEl: 导航栏节点，默认为class是`navbar`的HTMLElement。
 
 ### enableToolbar
 
@@ -100,9 +98,9 @@
 
 设置是否启用工具栏，默认为false。
 
-当为object时，可以有以下字段：
+当设置成object时，有以下字段：
 
-	wrapEl: 工具栏结点，默认为class是`toolbar`的HTMLElement。
+	wrapEl: 工具栏节点，默认为class是`toolbar`的HTMLElement。
 
 
 ### enableScroll
@@ -121,7 +119,29 @@
 
 * @var {object}
 
-定义模版引擎的load、compile和render方法。
+定义模版引擎的load、compile和render代理方法：
+
+**load(url, callback)**
+
+* @param {string} url
+* @param {function} callback
+
+该代理方法，需要通过callback的回调传递模板文本
+
+**compile(text)**
+
+* @param {string} url
+* @return {function} a compiled function
+
+该代理方法，需要返回一个被编译过后的函数
+
+**render(compiled, datas)**
+
+* @param {function} a compiled function
+* @param {object} a set of data
+* @return {string} a rendered result
+
+该代理方法，需要返回渲染后的结果
 
 ##app.navigation
 
@@ -130,7 +150,7 @@
 * @param {string} fragment
 * @param {object} [options]
 
-（导航）前进操作。fragment指定路径，`options`可指定以下参数：
+（导航）前进操作。fragment指定Hash片段，`options`可指定以下参数：
 
 	transition: 转场动画，backward/forward
 	type: 传递参数的类型，GET/POST
@@ -201,7 +221,7 @@
 设置工具栏，options的参数如下：
 
 	html: 插入到工具栏的HTML片段
-	el: 插入到工具栏中的DOM结点
+	el: 插入到工具栏中的DOM节点
 	height: 工具栏的高度
 
 ##app.scroll
@@ -210,48 +230,48 @@
 
 * @return {Number} height
 
-获取滚动区域的高度
+获取页面区域的滚动高度
 
 ### getScrollTop()
 
 * @return {Number} height
 
-获取滚动区域的当前位置
+获取页面区域的滚动位置
 
 ### refresh()
 
-刷新滚动区域
+刷新页面区域
 
 ### offset(el)
 
 * @param {HTMLElement} element
 * @return {object} a rectangle object
 
-返回滚动区域内某元素的矩阵数据，包括top/bottom/width/height/left/right
+返回页面区域内某元素的矩阵数据，包括`top/bottom/width/height/left/right`
 
 ### scrollTo(y)
 
 * @param {Number} y value
 
-滚动到某位置
+滚动到页面中的某位置
 
 ### scrollToElement(el)
 
 * @param {HTMLElement} element
 
-滚动到某元素
+滚动到页面中的某元素
 
 ### getBoundaryOffset()
 
 * @return {object} a offset object
 
-获取滚动区域回弹时的偏移值
+获取页面区域回弹时的偏移值
 
 ### getViewHeight()
 
 * @return {Number} height
 
-获得滚动区域的可见区域高度
+获得页面区域的可见区域高度
 
 ### stopBounce()
 
@@ -269,12 +289,12 @@
 
 绑定事件，事件包括：
 
-	scrollstart: 滚动开始
+	scrollstart: 滚动开始（只在enableScroll=true时有效）
 	scrollend: 滚动结束
-	pulldown: 上边界下拉
-	pullup: 下边界上拉
-	bouncestart: 边界回弹开始
-	bounceend: 边界回弹结束
+	pulldown: 上边界下拉（只在enableScroll=true时有效）
+	pullup: 下边界上拉（只在enableScroll=true时有效）
+	bouncestart: 边界回弹开始（只在enableScroll=true时有效）
+	bounceend: 边界回弹结束（只在enableScroll=true时有效）
 
 ### removeEventListener(name, handler)
 

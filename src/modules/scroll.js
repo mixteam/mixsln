@@ -263,10 +263,6 @@ var Scroll = {
 			el.bounceBottom = 0;
 		}
 
-	    if (!el.refresh) {
-	    	
-		}
-
 		var x = anim.getTransformOffset(el).x,
 			y = - el.bounceTop;
 

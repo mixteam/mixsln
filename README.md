@@ -1,10 +1,10 @@
 # Mix解决方案
 
-## 稳定版本(v0.3.5)
+## 稳定版本(v0.4.1)
 
-- [js开发版下载](https://raw.github.com/mixteam/mixsln/master/mixsln-debug.js)
-- [js压缩版下载](https://raw.github.com/mixteam/mixsln/master/mixsln.js)
-- [css下载](https://raw.github.com/mixteam/mixsln/master/mixsln.css)
+- [js开发版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln-debug.js)
+- [js压缩版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.js)
+- [css下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.css)
 
 ## Mix解决方案初探
 
@@ -17,7 +17,7 @@
 ## 解决了哪些问题？
 
 1. 全局导航
-2. 页面管理
+2. 生命周期
 3. 转场效果
 4. 触摸手势
 5. 页面滚动
@@ -30,6 +30,18 @@
 4. 为各平台提供统一方案，保证兼容性。
 
 ## 版本更新
+
+### v0.4.1
+
+- 优化页面生命周期
+- 优化转场动画
+- 更新文档至0.4.x
+
+### v0.4.0（未发布）
+
+- 重构系统模块
+- 优化gesture的算法
+- 优化scroll的算法
 
 ### v0.3.6
 
@@ -91,15 +103,25 @@
 
 ## 计划
 
-### v0.4.0
+### v0.4.x
 
-- 重构模块间依赖
-- 更新gesture和scroll算法
-- 更新转场动画
+- 修复bug为主
+- 主题换肤功能
+- 提供Grunt工具
+
+### v0.5.0
+
+- 优化gesture和scroll算法
+- 加入shake算法
+- pad的适配
+
+### 未定
+
+- windows phone的适配
 
 ## 其他文档
 
 * [开发者向导](https://github.com/mixteam/mixsln/blob/devel/master/guide.md)
-* [插件教程](https://github.com/mixteam/mixsln/blob/devel/master/plugin.md)
+* [插件的使用和开发](https://github.com/mixteam/mixsln/blob/devel/master/plugin.md)
 * [API手册](https://github.com/mixteam/mixsln/blob/devel/master/api.md)
 

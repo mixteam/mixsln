@@ -18,6 +18,7 @@
 		name: 'helloworld',
 		title: '你好',
 		startup: function() {
+			// 页面启动的入口
 			this.html('<h1>Hello World!</h1>');
 		}
 	});
@@ -103,7 +104,7 @@
 
 刷新后，页面上会输出`Hello, zhuxun`。
 
-## 使用默认主题（iOS）
+## 使用默认主题
 
 此默认主题中，包含了顶部导航栏，底部工具栏，页面滚动以及转场等。
 
@@ -114,13 +115,7 @@
 在body中插入一段HTML：
 
 	<div class="viewport">
-		<header class="navbar">
-			<ul>
-				<li></li>
-				<li><button class="back"></button></li>
-				<li><button class="func"></button></li>
-			</ul>
-		</header>
+		<header class="navbar"></header>
 		<section class="content"></section>
 		<footer class="toolbar"></footer>
 	</div>
@@ -137,19 +132,23 @@
 
 ## 上文涉及的方法索引
 
-### app.definePage()
+### app.definePage(properties)
 
 用于定义页面
 
-### app.navigation.push()
+### app.navigation.push(fragment[, options])
 
 前进操作（会改变Hash）
 
-### page.html()
+### app.navigation.getParameter(name)
+
+获取路由中的参数值
+
+### page.html(html)
 
 填充页面
 
-### page.template()
+### page.template(datas)
 
 渲染模板
 

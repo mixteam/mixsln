@@ -22,11 +22,11 @@ function inherit(child, parent) {
 }
 	
 function View() {
-	var el = document.createElement('div'), $el, $ = win['$'];
+	var $ = win['$'];
 
-	if (this.el) {
+	if (typeof this.el === 'string') {
 		var selectors = this.el.split(/\s*\>\s*/),
-			wrap = el
+			wrap = this.el = document.createElement('div')
 			;
 
 		selectors.forEach(function(selector) {
@@ -42,23 +42,12 @@ function View() {
 			wrap = wrap.childNodes[0];
 		});
 
-		el = el.childNodes[0];
+		this.el = this.el.removeChild(this.el.childNodes[0]);
 	}
 
 
-	Object.defineProperty(this, 'el', {
-		get: function() {
-			return el;
-		}
-	});
-
 	if ($) {
-		$el = $(el);
-		Object.defineProperty(this, '$el', {
-			get: function() {
-				return $el;
-			}
-		});
+		this.$el = $(this.el);
 	}
 }
 

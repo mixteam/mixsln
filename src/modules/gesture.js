@@ -308,6 +308,17 @@ function touchcancelHandler(event) {
     }
 
     for (var i = 0; i < event.changedTouches.length; i++) {
+        var touch = event.changedTouches[i],
+            id = touch.identifier,
+            gesture = gestures[id];
+
+        if (!gesture) continue;
+
+        if (gesture.pressingHandler) {
+            clearTimeout(gesture.pressingHandler);
+            gesture.pressingHandler = null;
+        }
+
         if (gesture.status === 'panning') {
             fireEvent(gesture.element, 'panend', {
                 touch: touch,
@@ -320,7 +331,7 @@ function touchcancelHandler(event) {
                 touchEvent: event
             });
         }
-        delete gestures[event.changedTouches[i].identifier];
+        delete gestures[id];
     }
 
     if (Object.keys(gestures).length === 0) {

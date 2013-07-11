@@ -26,6 +26,10 @@ function testModel() {
 		collection = new app.module.Collection([data2, 3, [4,5,6]])
 		;
 
+	model.on('propertyChange', function(e) {
+		console.log(e);
+	})
+
 	log('============== test model =================');
 	log(model['L1_1']);
 	log(model['L1_2']);

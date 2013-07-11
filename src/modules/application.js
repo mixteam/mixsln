@@ -14,11 +14,9 @@
 
 var doc = win.document,	$ = win['$'],
  	appVersion = navigator.appVersion,
-	isAndroid = (/android/gi).test(appVersion),
 	isIOS = (/iphone|ipad/gi).test(appVersion),
 
 	am = app.module,
-	StateStack = am.StateStack,
 	Message = am.MessageScope,
 	Navigation = am.Navigation,
 	navigation = Navigation.instance,
@@ -38,8 +36,9 @@ var doc = win.document,	$ = win['$'],
 	config = app.config = {
 		viewport : null,
 		templateEngine : null,
-		enableMessageLog: false,
+		resourceCombo: null,
 		resourceBase: './',
+		enableMessageLog: false,
 		enableContent: true,
 		enableNavbar : false,
 		enableToolbar : false,
@@ -114,14 +113,13 @@ function q(selector, el) {
 	return el.querySelector(selector);
 }
 
+function fireEvent(el, eventName) {
+	var event = doc.createEvent('HTMLEvents');
+	event.initEvent(eventName, true, true);
+    el.dispatchEvent(event);
+} 
+
 function handlerScrollEvent() {
-
-	function fireEvent(el, eventName) {
-		var event = doc.createEvent('HTMLEvents');
-		event.initEvent(eventName, true, true);
-	    el.dispatchEvent(event);
-	} 
-
 	if (isIOS) {
 		fireEvent(window, 'scrollend');
 	} else {
@@ -551,8 +549,8 @@ hooks.on('app:start', function(){
 	function pageLoad() {
 		var meta;
 		if ((meta = pagemeta[state.name])) {
-			meta.css && app.loadResource(meta.css);
-			meta.js && app.loadResource(meta.js, function() {
+			meta.css && app.loadResource(meta.css, 'css');
+			meta.js && app.loadResource(meta.js, 'js', function() {
 				page = Page.get(state.name);
 				page.ready();
 				pageReady();
@@ -670,49 +668,72 @@ app.getPage = function(name) {
 }
 
 var aEl = document.createElement('a');
-app.loadResource = function(urls, callback) {
-	if (typeof urls === 'string') {
-		urls = [urls];
-	} else {
-		urls = urls.slice(0);
-	}
-
-	function load(url, callback) {
-		aEl.href = app.config.resourceBase + url;
-		url = aEl.href;
-
-		if (resourcecache[url]) {
-			callback();
-		} else {
-			var id = resourcecache[url] = 'resource-' + Date.now() + '-' + Object.keys(resourcecache).length;
-
-			if (url.match(/\.js$/)) {
-				var script = document.createElement('script'), loaded = false;
-				script.id = id;
-				script.async = true;
-				script.onload = script.onreadystatechange  = function() {
-					if (!loaded) {
-						loaded = true;
-						callback && callback(url);
-					}
-				}
-				script.src = url;
-				doc.body.appendChild(script);
-			} else if (url.match(/\.css$/)) {
-				var link = document.createElement('link');
-				link.id = id;
-				link.type = 'text/css';
-				link.rel = 'stylesheet';
-				link.href = url;
-				doc.body.appendChild(link);
-				callback();
-			}
+app.loadResource = function(urls, type, callback) {
+	if (arguments.length === 2) {
+		if (typeof arguments[1] === 'function') {
+			callback = arguments[1];
+			type = null;
 		}
 	}
 
-	load(urls.shift(), function() {
-		if (urls.length) {
-			load(urls.shift(), arguments.callee);
+	if (typeof urls === 'string') {
+		urls = [urls];
+	}
+
+	function createid() {
+		return 'resource-' + Date.now() + '-' + Object.keys(resourcecache).length;
+	}
+
+	function createurl(url) {
+		return url.indexOf('http') === 0?url:app.config.resourceBase + url;
+	}
+
+	function load(url, callback) {
+		aEl.href = createurl(url);
+		var id = resourcecache[aEl.href] || (resourcecache[aEl.href] = createid());
+
+		if (type === 'js' || url.match(/\.js$/)) {
+			var script = document.createElement('script'), loaded = false;
+			script.id = id;
+			script.async = true;
+			script.onload = script.onreadystatechange = function() {
+				if (!loaded) {
+					loaded = true;
+					callback && callback(url);
+				}
+			}
+			script.src = url;
+			doc.body.appendChild(script);
+		} else if (type === 'css' || url.match(/\.css$/)) {
+			var link = document.createElement('link');
+			link.id = id;
+			link.type = 'text/css';
+			link.rel = 'stylesheet';
+			link.href = url;
+			doc.body.appendChild(link);
+			callback();
+		}
+	}
+
+	var u = [], combo = config.resourceCombo;
+	urls.forEach(function(url) {
+		aEl.href = createurl(url);
+		if (!resourcecache[aEl.href]) {
+			resourcecache[aEl.href] = createid();
+			u.push(url);
+		}
+	});
+
+	if (combo) {
+		u = combo(u);
+		if (typeof u === 'string') {
+			u = [u];
+		}
+	}
+
+	load(u.shift(), function() {
+		if (u.length) {
+			load(u.shift(), arguments.callee);
 		} else {
 			callback && callback();
 		}
@@ -868,7 +889,7 @@ app.scroll = {
 		if (c_scroll) {
 			return Scroll.getViewHeight(c_scroll.wrapEl);
 		} else {
-			return document.documentElement.clientHeight;
+			return window.innerHeight;
 		}
 	},
 
