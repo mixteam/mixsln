@@ -1,3 +1,3 @@
-<h1>
-	<center>World!</center>
-</h1>
+<section>
+	<input type="text" id="hello-to"><button id="say-hello">say</button>
+</section>

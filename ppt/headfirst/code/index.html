@@ -39,7 +39,7 @@
 app.config.viewport = document.querySelector('.viewport');
 app.config.enableNavibar = true;
 app.config.enableScroll = true;
-app.config.enableTransition = false;
+app.config.enableTransition = true;
 app.config.templateEngine = {
     compile : function(text) {
         return Mustache.compile(text);
@@ -56,6 +56,26 @@ app.page.define({
     template: './helloworld.tpl',
     ready: function() {
         this.fill({});
+        var btn = document.querySelector('#say-hello'),
+            text = document.querySelector('#hello-to');
+
+        btn.addEventListener('click', function() {
+            app.navigation.push('hello/' + encodeURI(text.value));
+        });
+    }
+});
+
+
+app.page.define({
+    name: 'sayhello',
+    title: 'sayhello',
+    route: 'hello\\/(P<name>[^\\/]+)',
+    template: 'sayhello.tpl',
+    ready: function() {
+        var name = decodeURI(app.navigation.getParameter('name'));
+        this.fill({
+            name : name
+        });
     }
 });
 
