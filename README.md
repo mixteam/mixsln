@@ -6,13 +6,12 @@
 - [js压缩版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.js)
 - [css下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.css)
 
-## Mix解决方案初探
+## 文档
 
-[演示文档](http://http://mixteam.github.io/mixsln/ppt/headfirst/)
-
-## 用Mix快速开发WebApp
-
-[访问文档](https://github.com/mixteam/mixsln/blob/master/doc/tutorial.md)
+* [用Mix快速开发WebApp](https://github.com/mixteam/mixsln/blob/master/doc/tutorial.md)
+* [开发者向导](https://github.com/mixteam/mixsln/blob/devel/master/guide.md)
+* [插件的使用和开发](https://github.com/mixteam/mixsln/blob/devel/master/plugin.md)
+* [API手册](https://github.com/mixteam/mixsln/blob/devel/master/api.md)
 
 ## 解决了哪些问题？
 
@@ -105,9 +104,10 @@
 
 ### v0.4.x
 
-- 修复bug为主
+- 动态加载机制
 - 主题换肤功能
 - 提供Grunt工具
+- 修复bug
 
 ### v0.5.0
 
@@ -118,10 +118,4 @@
 ### 未定
 
 - windows phone的适配
-
-## 其他文档
-
-* [开发者向导](https://github.com/mixteam/mixsln/blob/devel/master/guide.md)
-* [插件的使用和开发](https://github.com/mixteam/mixsln/blob/devel/master/plugin.md)
-* [API手册](https://github.com/mixteam/mixsln/blob/devel/master/api.md)
 

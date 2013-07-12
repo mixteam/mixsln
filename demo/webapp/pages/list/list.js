@@ -72,7 +72,11 @@
 					return function(callback) {
 						that.more(callback);
 					}
-				}
+				},
+
+				onPullEnd: function(type, callback) {
+					type === 'pulldown'?this.refresh(callback):this.more(callback);
+				}	
 			}
 		},
 

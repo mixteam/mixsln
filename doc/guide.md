@@ -38,17 +38,19 @@
 	7.4 使用路由  
 	7.5 使用模板    
 	7.6 使用插件   
-	7.7 生命周期   
+	7.7 生命周期  
 
-7. 数据
+7. 状态 
 
-8. 手势
+8. 模型
 
-9. 滚动  
+9. 手势
 
-10. 转场
+10. 滚动  
 
-11. 插件
+11. 转场
+
+12. 插件
 
 ## 简介
 
@@ -413,8 +415,17 @@ Mix的导航，实际上包括两个概念，一个是`导航栏`，一个是`�
 
 		startup: function() {
 			// 重载startup方法
-			this.html('<h1>hello world</h1>');
+			this.html('<h1>hello world</h1><p></p>');
 			console.log(this.el.innerHTML);
+		},
+
+		show: function() {
+			// 重载show方法
+			this.el.querySelector('p').innerHTML = new Date().toString();
+		},
+
+		hide: function() {
+			// 重载hide方法
 		},
 
 		teardown: function() {
@@ -427,9 +438,11 @@ Mix的导航，实际上包括两个概念，一个是`导航栏`，一个是`�
 - $el，如在js的全局作用域中存在`$`函数，则该属性为调用`$(el)`后的结果（只读）。
 - html()，设置页面内容节点的HTML。
 - startup()，重载了父类的startup方法，页面进入的入口。
+- show()，重载了父类的show方法，页面在缓存中时，显示的入口
+- hide()，重载了父类的show方法，页面在缓存中时，隐藏的入口
 - teardown()，重载了父类的teardown方法，页面退出的入口。
 
-以上是最简单的一段页面定义，在`startup`入口函数中输出`hello world`。
+以上是最简单的一段页面定义，在`startup`入口函数中输出`hello world`。关于`startup`，`show`，`hide`，`teardown`四个方法的执行顺序，请参看页面的`生命周期`。
 
 ### 获取页面
 
@@ -500,10 +513,15 @@ Mix的导航，实际上包括两个概念，一个是`导航栏`，一个是`�
 
 ![页面生命周期](./_res/circles.png)
 
+## 状态
 
-## 数据
+状态实际上是每个页面在不同请求下的一个相关数据集合。例如，上述`helloworld`页面，当Hash片段为`hello/zhuxun`以及`hello/hanquan`时，就拥有不同的两个状态。这两个状态分别承载了不同的数据。包括，参数值集合，状态在历史堆栈中的位置，是经由前进或后退达到的，等等。所以说，每个页面实际上会存在多个状态，对应着多个不同的请求（Hash片段）。
 
-数据支持单模型和集合模型，并提供监听数据改变的事件。
+所有针对状态的操作，都封装在`app.navigation`中，调用其中的API均是操作当前页面的当前状态。处于安全性和封闭性考虑，开发者无法获得除当前状态以外的状态。如果想和下个一个状态进行通信，只能通过`app.navigation.push`传递参数的方式进行。
+
+## 模型
+
+模型分为单模型和集合模型，并提供监听属性改变的事件。
 
 **app.module.Model**
 

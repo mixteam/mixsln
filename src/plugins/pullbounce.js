@@ -2,8 +2,7 @@
 	app.plugin.pullbounce = {
 		_options : null,
 		_page : null,
-		_update : false,
-		_updateHandler : null,
+		_pullType : false,
 
 		handleEvent: function(e) {
 			var that = this,
@@ -15,23 +14,23 @@
 
 			if (e.type === 'pulldown') {
 				if (offset > el.bounceTop) {
-					this._update = 'pulldown';
+					this._pullType = 'pulldown';
 				} else {
-					this._update = false;
+					this._pullType = false;
 				}
-				this._updateHandler = options.onPullDown.call(page, offset);
+				options.onPullDown.call(page, offset);
 			} else if (e.type === 'pullup') {
 				if (offset > el.bounceBottom) {
-					this._update = 'pullup';
+					this._pullType = 'pullup';
 				} else {
-					this._update = false;
+					this._pullType = false;
 				}
-				this._updateHandler = options.onPullUp.call(page, offset);
+				options.onPullUp.call(page, offset);
 			} else if (e.type === 'panend') {
-				if (offset && this._update && this._updateHandler) {
+				if (offset && this._pullType && options.onPullEnd) {
 					app.scroll.stopBounce();
 					setTimeout(function() {
-						that._updateHandler.call(page, function() {
+						options.onPullEnd.call(page, that._pullType, function() {
 							app.scroll.refresh();
 							app.scroll.resumeBounce();
 						});
@@ -50,8 +49,7 @@
 		onPageShow: function(page, options) {
 			this._page = page;
 			this._options = options;
-			this._update = false;
-			this._updateHandler = null;
+			this._pullType = false;
 			options.top && app.scroll.addEventListener('pulldown', this, false);
 			options.bottom && app.scroll.addEventListener('pullup', this, false);
 			app.scroll.addEventListener('panend', this, false);
