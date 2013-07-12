@@ -2,9 +2,9 @@
 
 ## 稳定版本(v0.4.1)
 
-- [js开发版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln-debug.js)
-- [js压缩版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.js)
-- [css下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.css)
+- [js开发版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.js)
+- [js压缩版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.min.js)
+- [css下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.min.css)
 
 ## 文档
 
