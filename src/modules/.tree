@@ -1,0 +1,46 @@
+{
+"animation.js":[],
+
+"application.js":[
+    "message.js",
+    "navigation.js",
+    "template.js",
+    "view.js",
+    "page.js",
+    "navbar.js",
+    "content.js",
+    "scroll.js",
+    "transition.js"
+],
+
+"content.js":[],
+
+"gesture.js":[],
+
+"message.js":[],
+
+"model.js":[
+    "message.js"
+],
+
+"navbar.js":[],
+
+"navigation.js":[],
+
+"page.js":[],
+
+"scroll.js":[
+    "gesture.js",
+    "animation.js"
+],
+
+"template.js":[],
+
+"toolbar.js":[],
+
+"transition.js":[
+    "animation.js"
+],
+
+"view.js":[]
+}

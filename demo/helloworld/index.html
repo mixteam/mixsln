@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="yes" name="apple-touch-fullscreen"/>
+<meta content="telephone=no,email=no" name="format-detection"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+<link rel="apple-touch-icon" href="favicon.png"/>
+<link rel="Shortcut Icon" href="favicon.png" type="image/x-icon" />
+<link type="text/css" rel="styleSheet" href="../../dist/mixsln.css"/>
+<title>Hello World</title>
+</head>
+<body>
+<div class="viewport">
+	<header class="navbar"></header>
+	<section class="content"></section>
+	<footer class="toolbar"></footer>
+</div>
+
+<script src="../libs/zepto.js" type="text/javascript"></script>
+<script src="../libs/mustache.js" type="text/javascript"></script>
+<script src="../../dist/mixsln.js" type="text/javascript"></script>
+<script type="text/javascript">
+	app.config.templateEngine = {
+		load: function(url, callback) {
+			$.get(url, callback);
+		},
+		compile : function(text) {
+			return Mustache.compile(text);
+		},
+		render : function(compiled, data) {
+			return compiled(data);
+		}
+	}
+
+	app.definePage({
+		name: 'helloworld',
+		title: '你好',
+		template: './helloworld.tpl', // 需要加载的模版，路径相对于HTML文件
+		startup: function() {
+			var that = this,
+				html = this.template({}) //经编译后，template字段会变成一个可渲染的函数
+				;
+
+			this.html(html);
+
+			// 通过this.el来获取页面中的元素
+			this.el.querySelector('button').addEventListener('click', function(e) {
+				var name = that.el.querySelector('#name').value;
+				if (name) {
+					app.navigation.push('hello/' + name);	// 改变Hash值
+				}
+			});
+		}
+	});
+
+	app.definePage({
+		name : 'hellobuddy',
+		title : '你好啊',
+		template : './hellobuddy.tpl',
+		route : 'hello\\/(P<name>[^\\/]+)\\/?',	// 设置路由（Perl风格），name为参数名
+		
+		startup : function() {
+			var name = app.navigation.getParameter('name'),// 获取路由中的`name`参数值
+				html = this.template({name:name})
+				;
+			
+			this.html(html);
+		}
+	})
+
+	app.start({
+		enableNavbar: false,
+		enableToolbar: false,
+		enableScroll: false,
+		enableTransition: false
+	});
+</script>
+</body>
+</html>

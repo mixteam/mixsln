@@ -1,39 +1,20 @@
 {
-    "name" : "mix/sln",
-    "root" : "#",
-    "version" : "0.3.0",
-    "description" : "the solution for mixjs",
-    "license" : "MIT",
-    "author" : "zhuxun <zhuxun.jb@taobao.com>",
-    "homepage": "https://github.com/organizations/mixteam",
-    "repository" : {
-        "type" : "git",
-        "url" : "git@github.com:mixteam/mixsln.git"
-    },
-    "dependencies" : {
-        "reset" : "mix/core/0.3.0/base/reset",
-        "class" : "mix/core/0.3.0/base/class",
-        "message" : "mix/core/0.3.0/base/message",
-        "util" : "mix/core/0.3.0/base/util",
-        "router" : "mix/core/0.3.0/url/router",
-        "navigate" : "mix/core/0.3.0/url/navigate",
-
-        "app" : "mix/sln/0.3.0/app"
-    },
-    "output" : {
-        "plugins/*" : ".",
-
-        "app.js" : {
-            "main" : "./app",
-            "includes" : [
-                "./modules/gesture",
-                "./modules/transform",
-                "./modules/scroll",
-                "./modules/component.js",
-                "./modules/page",
-                "./modules/navigation.js",
-                "./app"
-            ]
-        }
-    }
+  "name": "mixsln",
+  "version": "0.4.1",
+  "description": "the solution for webapp",
+  "license": "MIT",
+  "author": "zhuxun <zhuxun.jb@taobao.com>",
+  "homepage": "https://github.com/organizations/mixteam",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mixteam/mixsln.git"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-watch": "~0.4.0",
+    "grunt-contrib-cssmin": "~0.6.0",
+    "grunt-depconcat": "~0.1.2"
+  },
+  "dependencies": {}
 }

@@ -1,120 +1,61 @@
-define(function(require, exports, module) {
-require('reset');
+(function(win, app, undef) {
 
-var win = window,
-    doc = win.document,
-    Class = require('class'),
-    Message = require('message'),
 
-    STATUS = {
-		'UNKOWN' : 0,
-		'UNLOADED' : 0,
-		'READY' : 1,
-		'COMPILED' : 2,
-	},
-	pages = {},
-	Page = Class.create({
-		Implements : Message,
+var Message = app.module.MessageScope,
+	pages = {}
+	;
 
-		initialize : function() {
-			var that = this,
-				name = that.name
-				;
+function extend(target, properties) {
+	for (var key in properties) {
+		if (properties.hasOwnProperty(key)) {
+			target[key] = properties[key];
+		}
+	}
+}
 
-			Message.prototype.initialize.call(that, 'app.' + name);
+function inherit(child, parent) {
+	function Ctor() {}
+	Ctor.prototype = parent.prototype;
+	var proto = new Ctor();
+	extend(proto, child.prototype);
+	proto.constructor = child;
+	child.prototype = proto;
+}
 
-			that.status = STATUS.UNKOWN;
+function Page() {
+}
 
-			that.ready = that.ready.bind(that);
-			that.unload = that.unload.bind(that);
+var PageProto = {
+	ready : function() {/*implement*/},
+	startup : function() {/*implement*/},
+	teardown : function() {/*implement*/},
+	show : function() {/*implement*/},
+	hide : function() {/*implement*/}
+}
 
-			that.on('ready', that.ready);
-			that.on('unloaded', that.unload);
-		},
-
-		getTitle : function() {
-			//can overrewite
-			return this.title;
-		},
-
-		loadTemplate : function(url, callback) {
-			// can overwrite
-			var that = this
-				;
-
-			if (arguments.length === 1) {
-				callback = arguments[0];
-				url = that.template;
-			} 
-
-			url && app.loadFile(url, callback);
-		},
-
-		compileTemplate : function(text, callback) {
-			// can overwrite
-			var that = this,
-				engine;
-
-			if ((engine = win['Mustache'])) {
-				that.compiledTemplate = engine.compile(text);
-				callback(that.compiledTemplate);
-			}
-		},
-
-		renderTemplate : function(datas, callback) {
-			// can overwrite
-			var that = this,
-				compiledTemplate = that.compiledTemplate,
-				content = compiledTemplate(datas)
-				;
-
-			callback(content);
-		},
-
-		fill : function(datas, callback) {
-			var that = this
-				;
-
-			function _fill() {
-				that.renderTemplate(datas, function(content) {
-					that.trigger('rendered', content);
-					callback && callback();
-				});
-			}
-
-			if (!that.compiledTemplate) {
-				that.once('compiled', _fill);
-			} else {
-				_fill();
-			}
-		},
-
-		ready : function(navigation) {/*implement*/},
-		unload : function() {/*implement*/}
-	});
-
-Page.STATUS = STATUS;
+for (var p in PageProto) {
+	Page.prototype[p] = PageProto[p];
+} 
 
 Page.fn = {};
 
 Page.define = function(properties) {
-	var cPage = Page.extend(properties),
-		page
-		;
+	function ChildPage() {
+		Page.apply(this, arguments);
+		this.initialize && this.initialize.apply(this, arguments);
+		Message.mixto(this, 'page.' + this.name);
+	}
+	inherit(ChildPage, Page);
+	extend(ChildPage.prototype, Page.fn);
+	extend(ChildPage.prototype, properties);
 
-	cPage.implement(Page.fn);
-	page = new cPage();
-	return (pages[page.name] = page);
+	return (pages[properties.name] = new ChildPage());
 }
 
 Page.get = function(name) {
 	return pages[name];
 }
 
-Page.each = function(callback) {
-	Object.each(pages, callback);
-}
+app.module.Page = Page;
 
-return Page;
-
-});
+})(window, window['app']||(window['app']={module:{},plugin:{}}));

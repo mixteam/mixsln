@@ -1,0 +1,7 @@
+{
+	"name" : "default",
+	"title" : "请搜索商品",
+	"js": ["default.js"],
+	"css": ["default.css"],
+	"tpl": ["default.tpl"]
+}

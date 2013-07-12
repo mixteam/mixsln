@@ -1,62 +1,52 @@
 (function(win, app){
-	var doc = win.document,
-		scroll
+	var doc = win.document
 		;
 
-	function getScrollTop() {
-		return scroll.fn.getScrollTop();
-	}
-
-	function getScrollHeight() {
-		return scroll.fn.getScrollHeight();
-	}
-
-	function getViewHeight() {
-		return scroll.offsetHeight;
-	}
-
 	app.plugin.lazyload = {
-		_options : null,
+		_options: null,
+		_domready: false,
 
-		once : function() {
+		handleEvent: function(e) {
+			(e.type === 'scrollend' && this._domready) && this.check();
+		},
+
+		check: function() {
 			var options = this._options,
-				items = doc.querySelectorAll(options.itemSelector),
-				scrollTop = getScrollTop(),
-				scrollHeight = getScrollHeight(),
-				itemHeight = options.itemHeight,
-				viewHeight = getViewHeight() + options.viewHeightPatch,
-				start, end
+				dataAttr = options.dataAttr || 'data-src',
+				imgs = app.scroll.getElement().querySelectorAll('img[' + dataAttr + ']'),
+				viewportTop = app.scroll.getScrollTop(),
+				viewportBottom = viewportTop + app.scroll.getViewHeight()
 				;
 
-			start = Math.floor(scrollTop / itemHeight);
-			end = Math.ceil((scrollTop + viewHeight) / itemHeight);
+			for (var i = 0; i < imgs.length; i++) {
+				var img = imgs[i], offset = app.scroll.offset(img), src;
 
-			for (var i = start; i < end && i < items.length; i++) {
-				var item = items[i],
-					img = item.querySelector('img[data-src]'),
-					src = img.getAttribute('data-src')
-					;
-
-				if (src) {
+				if (((offset.top > viewportTop && offset.top < viewportBottom) ||
+						(offset.bottom > viewportTop && offset.bottom < viewportBottom)) && 
+							(src = img.getAttribute(dataAttr))) {
 					img.setAttribute('src', src);
-					img.setAttribute('data-src', '');
+					img.removeAttribute(dataAttr);
 				}
 			}
 		},
 
-		on : function(page, options) {
-			this._options = options;
-			options.dataAttr || 
-				(options.dataAttr = 'data-src');
-			scroll = app.component.get('scroll');
-
-			app.component.on('scrollEnd', this.once, this);
-			page.on('rendered', this.once, this);
+		onNavigationSwitch: function() {
+			this._domready = false;
 		},
 
-		off : function(page, options) {
-			app.component.off('scrollEnd', this.once, this);
-			page.off('rendered', this.once, this);
+		onDomReady: function(options) {
+			this._options = options;
+			this._domready = true;
+			this.check();
+		},
+
+		onPageShow : function(page, options) {
+			this._options = options;
+			app.scroll.addEventListener('scrollend', this, false);
+		},
+
+		onPageHide : function(page, options) {
+			app.scroll.removeEventListener('scrollend', this);
 		}
 	}
 })(window, window['app']);

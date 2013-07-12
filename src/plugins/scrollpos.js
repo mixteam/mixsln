@@ -1,65 +1,43 @@
 (function(win, app){
-	var doc = win.document,
-		scroll
+	var doc = win.document
 		;
 
-	function getScrollTop() {
-		return scroll.fn.getScrollTop();
-	}
-
-	function getScrollHeight() {
-		return scroll.fn.getScrollHeight();
-	}
-
-	function scroll2(pos) {
-		scroll.fn.scrollTo(pos);
-	}
-
 	app.plugin.scrollpos = {
-		_options : null,
+		_options: null,
+		_domready : false,
 
-		_setPos : function(pos) {
-			this._options.pos = (pos != null ? pos: getScrollTop());
+		handleEvent: function(e) {
+			(e.type === 'scrollend' && this._domready) && this.setPos();
 		},
 
-		_transitonEnd : function() {
-			this._options.transitonEnd = true;
+		setPos: function() {
+			this._options.pos = app.scroll.getScrollTop();
 		},
 
-		once : function() {
+		reset: function(pos) {
 			var options = this._options
 				;
 
-			if (!options.first) {
-				this._setPos(0);
-			} else {
-				options.first = false;
-			}
-
-			if (options.transitonEnd) {
-				scroll2(options.pos);
-			} else {
-				app.component.once('forwardTransitionEnd backwardTransitionEnd', function() {
-					scroll2(options.pos);
-				})
-			}
+			(pos != null) && (options.pos = pos);
+			app.scroll.scrollTo(options.pos);
 		},
 
-		on : function(page, options) {
+		onNavigationSwitch: function() {
+			this._domready = false;
+		},
+
+		onDomReady: function(options) {
 			this._options = options;
-			options.first = true;
-			options.transitonEnd = false;
-			scroll = app.component.get('scroll');
-
-			app.component.on('scrollEnd', this._setPos, this);
-			app.component.on('forwardTransitionEnd backwardTransitionEnd', this._transitonEnd, this);
-			page.on('rendered', this.once, this);
+			this._domready = true;
+			this.reset();
 		},
 
-		off : function(page, options) {
-			app.component.off('scrollEnd', this._setPos, this);
-			app.component.off('forwardTransitionEnd backwardTransitionEnd', this._transitonEnd, this);
-			page.off('rendered', this.once, this);
+		onPageShow: function(page,  options) {
+			app.scroll.addEventListener('scrollend', this, false);
+		},
+
+		onPageHide: function(page, options) {
+			app.scroll.removeEventListener('scrollend', this);
 		}
 	}
 })(window, window['app']);

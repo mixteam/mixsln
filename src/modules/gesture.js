@@ -1,24 +1,40 @@
-define(function(require, exports, module) {
+(function(win, app, undef) {
 
-require('reset');
-
-var win = window,
-    doc = win.document,
-    events = [
-        'screenX', 'screenY', 
-        'clientX', 'clientY', 
-        'pageX', 'pageY'
-    ],
-    Class = require('class')
+var doc = win.document,
+    docEl = doc.documentElement,
+    slice = Array.prototype.slice,
+    gestures = {}, lastTap = null
     ;
 
+function getCommonAncestor (el1, el2) {
+    var el = el1;
+    while (el) {
+        if (el.contains(el2) || el == el2) {
+            return el;
+        }
+        el = el.parentNode;
+    }    
+    return null;
+}
+
+function fireEvent(element, type, extra) {
+    var event = doc.createEvent('HTMLEvents');
+    event.initEvent(type, true, true);
+
+    if(typeof extra === 'object') {
+        for(var p in extra) {
+            event[p] = extra[p];
+        }
+    }
+
+    element.dispatchEvent(event);
+}
 
 function calc(x1, y1, x2, y2, x3, y3, x4, y4) {
     var rotate = Math.atan2(y4 - y3, x4 - x3) - Math.atan2(y2 - y1, x2 - x1),
         scale = Math.sqrt((Math.pow(y4 - y3, 2) + Math.pow(x4 - x3, 2)) / (Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2))),
         translate = [x3 - scale * x1 * Math.cos(rotate) + scale * y1 * Math.sin(rotate), y3 - scale * y1 * Math.cos(rotate) - scale * x1 * Math.sin(rotate)]
         ;
-
     return {
         rotate: rotate,
         scale: scale,
@@ -31,242 +47,300 @@ function calc(x1, y1, x2, y2, x3, y3, x4, y4) {
     }
 }
 
+function touchstartHandler(event) {
 
-function copyEvents(type, src, copies) {
-    var ev = document.createEvent('HTMLEvents');
-    ev.initEvent(type, true, true);
-    if (src) {
-        if (copies) {
-            Object.each(copies, function (p) {
-                ev[p] = src[p];
-            });
-        } else {
-            Object.extend(ev, src);
-        }   
+    if (Object.keys(gestures).length === 0) {
+        docEl.addEventListener('touchmove', touchmoveHandler, false);
+        docEl.addEventListener('touchend', touchendHandler, false);
+        docEl.addEventListener('touchcancel', touchcancelHandler, false);
     }
+    
+    for(var i = 0 ; i < event.changedTouches.length ; i++ ) {
+        var touch = event.changedTouches[i],
+            touchRecord = {};
 
-    return ev;
-}
-
-var Gestrue = Class.create({
-    initialize : function(element) {
-        var that = this
-            ;
-
-        that._el = element;
-        that._myGestures = {};
-        that._lastTapTime = NaN;
-
-        that._onStart = that._onStart.bind(that);
-        that._onDoing = that._onDoing.bind(that);
-        that._onEnd = that._onEnd.bind(that);
-        that._onTap = that._onTap.bind(that);
-    },
-
-    getElement : function() {
-        return that._el;
-    },
-
-    enable : function() {
-        var that = this,
-            el = that._el
-            ;
-
-        el.addEventListener('touchstart', that._onStart, false);
-        el.addEventListener('tap', that._onTap, false);
-    },
-
-    disable : function() {
-        var that = this,
-            el = that._el
-            ;
-
-        el.removeEventListener('touchstart', that._onStart, false);
-        el.removeEventListener('tap', that._onTap, false);
-    },
-
-    _onStart : function(e) {
-        var that = this,
-            el = that._el,
-            myGestures = that._myGestures
-            ;
-
-        if (Object.keys(myGestures).length === 0) {
-            doc.body.addEventListener('touchmove', that._onDoing, false);
-            doc.body.addEventListener('touchend', that._onEnd, false);
+        for (var p in touch) {
+            touchRecord[p] = touch[p];
         }
 
-        Object.each(e.changedTouches, function(touch) {
-            var touchRecord = {};
-
-            for (var p in touch)
-                touchRecord[p] = touch[p];
-
-            var gesture = {
-                startTouch: touchRecord,
-                startTime: Date.now(),
-                status: 'tapping',
-                pressingHandler: setTimeout(function () {
+        var gesture = {
+            startTouch: touchRecord,
+            startTime: Date.now(),
+            status: 'tapping',
+            element: event.srcElement,
+            pressingHandler: setTimeout(function(element) {
+                return function () {
                     if (gesture.status === 'tapping') {
                         gesture.status = 'pressing';
 
-                        var ev = copyEvents('press', touchRecord);
-                        el.dispatchEvent(ev);
+                        fireEvent(element, 'press', {
+                            touchEvent:event
+                        });
                     }
 
                     clearTimeout(gesture.pressingHandler);
                     gesture.pressingHandler = null;
-                }, 500)
-            }
-
-            myGestures[touch.identifier] = gesture;
-        });
-
-        if (Object.keys(myGestures).length == 2) {
-            var ev = copyEvents('dualtouchstart');
-            ev.touches = JSON.parse(JSON.stringify(e.touches));
-            el.dispatchEvent(ev);
+                }
+            }(event.srcElement), 500)
         }
-    },
+        gestures[touch.identifier] = gesture;
+    }
 
-    _onDoing : function(e) {
-        var that = this,
-            el = that._el,
-            myGestures = that._myGestures
-            ;
+    if (Object.keys(gestures).length == 2) {
+        var elements = [];
 
-        Object.each(e.changedTouches, function(touch) {
-            var gesture = myGestures[touch.identifier],
-                displacementX, displacementY, distance,
-                ev;
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
 
-            if (!gesture)
-                return;
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchstart', {
+            touches: slice.call(event.touches),
+            touchEvent: event
+        });
+    }
+}
 
-            displacementX = touch.clientX - gesture.startTouch.clientX;
-            displacementY = touch.clientY - gesture.startTouch.clientY;
+
+function touchmoveHandler(event) {
+    for(var i = 0 ; i < event.changedTouches.length ; i++ ) {
+        var touch = event.changedTouches[i],
+            gesture = gestures[touch.identifier];
+
+        if (!gesture) {
+            return;
+        }
+
+        var displacementX = touch.clientX - gesture.startTouch.clientX,
+            displacementY = touch.clientY - gesture.startTouch.clientY,
             distance = Math.sqrt(Math.pow(displacementX, 2) + Math.pow(displacementY, 2));
 
-            // magic number 10: moving 10px means pan, not tap
-            if (gesture.status == 'tapping' && distance > 10) {
-                gesture.status = 'panning';
-                ev = copyEvents('panstart', touch, events);
-                el.dispatchEvent(ev);
-            }
-
-            if (gesture.status == 'panning') {
-                ev = copyEvents('pan', touch, events);
-                ev.displacementX = displacementX;
-                ev.displacementY = displacementY;
-                el.dispatchEvent(ev);
-            }
-        })
-
-        if (Object.keys(myGestures).length == 2) {
-            var position = [],
-                current = [],
-                transform,
-                ev
-                ;
-
-            Object.each(e.touchs, function(touch){
-                var gesture;
-                if ((gesture = myGestures[touch.identifier])) {
-                    position.push([gesture.startTouch.clientX, gesture.startTouch.clientY]);
-                    current.push([touch.clientX, touch.clientY]);
-                }
+        // magic number 10: moving 10px means pan, not tap
+        if (gesture.status === 'tapping' && distance > 10) {
+            gesture.status = 'panning';
+            fireEvent(gesture.element, 'panstart', {
+                touch:touch,
+                touchEvent:event
             });
 
-            transform = calc(position[0][0], position[0][1], position[1][0], position[1][1], current[0][0], current[0][1], current[1][0], current[1][1]);
-
-            ev = copyEvents('dualtouch', transform);
-            ev.touches = JSON.parse(JSON.stringify(e.touches));
-            el.dispatchEvent(ev);
+            if(Math.abs(displacementX) > Math.abs(displacementY)) {
+                fireEvent(gesture.element, 'horizontalpanstart', {
+                    touch: touch,
+                    touchEvent: event
+                });
+                gesture.isVertical = false;
+            } else {
+                fireEvent(gesture.element, 'verticalpanstart', {
+                    touch: touch,
+                    touchEvent: event
+                });
+                gesture.isVertical = true;
+            }
         }
-    },
 
-    _onEnd : function(e) {
-        var that = this,
-            el = that._el,
-            myGestures = that._myGestures,
-            ev
+        if (gesture.status === 'panning') {
+            gesture.panTime = Date.now();
+            fireEvent(gesture.element, 'pan', {
+                displacementX: displacementX,
+                displacementY: displacementY,
+                touch: touch,
+                touchEvent: event
+            });
+
+
+            if(gesture.isVertical) {
+                fireEvent(gesture.element, 'verticalpan',{
+                    displacementY: displacementY,
+                    touch: touch,
+                    touchEvent: event
+                });
+            } else {
+                fireEvent(gesture.element, 'horizontalpan',{
+                    displacementX: displacementX,
+                    touch: touch,
+                    touchEvent: event
+                });
+            }
+        }
+    }
+
+    if (Object.keys(gestures).length == 2) {
+        var position = [],
+            current = [],
+            elements = [],
+            transform
             ;
-
-        if (Object.keys(myGestures).length == 2) {
-            ev = copyEvents('dualtouchend');
-            ev.touches = JSON.parse(JSON.stringify(e.touches));
-            el.dispatchEvent(ev);
+        
+        for(var i = 0 ; i < event.touches.length ; i++ ) {
+            var touch = event.touches[i];
+            var gesture = gestures[touch.identifier];
+            position.push([gesture.startTouch.clientX, gesture.startTouch.clientY]);
+            current.push([touch.clientX, touch.clientY]);
         }
 
-        for (var i = 0; i < e.changedTouches.length; i++) {
-            var touch = e.changedTouches[i],
-                id = touch.identifier,
-                gesture = myGestures[id]
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
+
+        transform = calc(position[0][0], position[0][1], position[1][0], position[1][1], current[0][0], current[0][1], current[1][0], current[1][1]);
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouch',{
+            transform : transform,
+            touches : event.touches,
+            touchEvent: event
+        });
+    }
+}
+
+
+function touchendHandler(event) {
+
+    if (Object.keys(gestures).length == 2) {
+        var elements = [];
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchend', {
+            touches: slice.call(event.touches),
+            touchEvent: event
+        });
+    }
+    
+    for (var i = 0; i < event.changedTouches.length; i++) {
+        var touch = event.changedTouches[i],
+            id = touch.identifier,
+            gesture = gestures[id];
+
+        if (!gesture) continue;
+
+        if (gesture.pressingHandler) {
+            clearTimeout(gesture.pressingHandler);
+            gesture.pressingHandler = null;
+        }
+
+        if (gesture.status === 'tapping') {
+            gesture.timestamp = Date.now();
+            fireEvent(gesture.element, 'tap', {
+                touch: touch,
+                touchEvent: event
+            });
+
+            if(lastTap && gesture.timestamp - lastTap.timestamp < 300) {
+                fireEvent(gesture.element, 'doubletap', {
+                    touch: touch,
+                    touchEvent: event
+                });
+            }
+
+            this.lastTap = gesture;
+        }
+
+        if (gesture.status === 'panning') {
+            fireEvent(gesture.element, 'panend', {
+                touch: touch,
+                touchEvent: event
+            });
+
+            var duration = Date.now() - gesture.startTime,
+                velocityX = (touch.clientX - gesture.startTouch.clientX) / duration,
+                velocityY = (touch.clientY - gesture.startTouch.clientY) / duration,
+                displacementX = touch.clientX - gesture.startTouch.clientX,
+                displacementY = touch.clientY - gesture.startTouch.clientY
                 ;
+            
+            if (duration < 300) {
+                fireEvent(gesture.element, 'flick', {
+                    duration: duration,
+                    velocityX: velocityX,
+                    velocityY: velocityY,
+                    displacementX: displacementX,
+                    displacementY: displacementY,
+                    touch: touch,
+                    touchEvent: event
+                });
 
-            if (!gesture)
-                continue;
-
-            if (gesture.pressingHandler) {
-                clearTimeout(gesture.pressingHandler);
-                gesture.pressingHandler = null;
-            }
-
-            if (gesture.status === 'tapping') {
-                ev = copyEvents('tap', touch, events);
-                el.dispatchEvent(ev);
-            }
-
-            if (gesture.status === 'panning') {
-                ev = copyEvents('panend', touch, events);
-                el.dispatchEvent(ev);
-                
-                var duration = Date.now() - gesture.startTime;
-                
-                if (duration < 300) {
-                    ev = copyEvents('flick', touch, events);
-                    ev.duration = duration;
-                    ev.valocityX = (touch.clientX - gesture.startTouch.clientX )/duration;
-                    ev.valocityY = (touch.clientY - gesture.startTouch.clientY )/duration;
-                    ev.displacementX = touch.clientX - gesture.startTouch.clientX;
-                    ev.displacementY = touch.clientY - gesture.startTouch.clientY;
-                    el.dispatchEvent(ev);
+                if(gesture.isVertical) {
+                    fireEvent(gesture.element, 'verticalflick', {
+                        duration: duration,
+                        velocityY: velocityY,
+                        displacementY: displacementY,
+                        touch: touch,
+                        touchEvent: event
+                    });
+                } else {
+                    fireEvent(gesture.element, 'horizontalflick', {
+                        duration: duration,
+                        velocityX: velocityX,
+                        displacementX: displacementX,
+                        touch: touch,
+                        touchEvent: event
+                    });
                 }
             }
-
-            if (gesture.status === 'pressing') {
-                ev = copyEvents('pressend', touch, events);
-                el.dispatchEvent(ev);
-            }
-
-            delete myGestures[id];
         }
 
-        if (Object.keys(myGestures).length == 0) {
-            doc.body.removeEventListener('touchend', that._onEnd);
-            doc.body.removeEventListener('touchmove', that._onDoing);
+        if (gesture.status === 'pressing') {
+            fireEvent(gesture.element, 'pressend', {
+                touch: touch,
+                touchEvent: event
+            });
         }
-    },
 
-    _onTap : function(e) {
-        var that = this,
-            el = that._el,
-            lastTapTime = that._lastTapTime
-            ;
-
-        if (Date.now() - lastTapTime < 500) {
-            var ev = document.createEvent('HTMLEvents');
-            ev.initEvent('doubletap', true, true);
-            Object.each(events, function (p) {
-                ev[p] = e[p];
-            })
-            el.dispatchEvent(ev);
-        }
-        that._lastTapTime = Date.now();
+        delete gestures[id];
     }
-});
 
-return Gestrue;
+    if (Object.keys(gestures).length === 0) {
+        docEl.removeEventListener('touchmove', touchmoveHandler, false);
+        docEl.removeEventListener('touchend', touchendHandler, false);
+        docEl.removeEventListener('touchcancel', touchcancelHandler, false);
+    }
+}
 
-});
+function touchcancelHandler(event) {
 
+    if (Object.keys(gestures).length == 2) {
+        var elements = [];
+        for(var p in gestures) {
+            elements.push(gestures[p].element);
+        }
+        fireEvent(getCommonAncestor(elements[0], elements[1]), 'dualtouchend', {
+            touches: slice.call(event.touches),
+            touchEvent: event
+        });
+    }
+
+    for (var i = 0; i < event.changedTouches.length; i++) {
+        var touch = event.changedTouches[i],
+            id = touch.identifier,
+            gesture = gestures[id];
+
+        if (!gesture) continue;
+
+        if (gesture.pressingHandler) {
+            clearTimeout(gesture.pressingHandler);
+            gesture.pressingHandler = null;
+        }
+
+        if (gesture.status === 'panning') {
+            fireEvent(gesture.element, 'panend', {
+                touch: touch,
+                touchEvent: event
+            });
+        }
+        if (gesture.status === 'pressing') {
+            fireEvent(gesture.element, 'pressend', {
+                touch: touch,
+                touchEvent: event
+            });
+        }
+        delete gestures[id];
+    }
+
+    if (Object.keys(gestures).length === 0) {
+        docEl.removeEventListener('touchmove', touchmoveHandler, false);
+        docEl.removeEventListener('touchend', touchendHandler, false);
+        docEl.removeEventListener('touchcancel', touchcancelHandler, false);
+    }
+}
+
+docEl.addEventListener('touchstart', touchstartHandler, false);
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}));
