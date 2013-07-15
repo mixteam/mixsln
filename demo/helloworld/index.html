@@ -10,6 +10,20 @@
 <link rel="Shortcut Icon" href="favicon.png" type="image/x-icon" />
 <link type="text/css" rel="styleSheet" href="../../dist/mixsln.css"/>
 <title>Hello World</title>
+<style>
+section.content {
+	background: url(data:image/gif;base64,R0lGODlhMgAyAMQAANnZ2eXl5ebm5tjY2NfX1+jo6Ofn5+Tk5Nra2uPj49vb2+Li4tzc3N3d3d/f3+Dg4OHh4d7e3gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAAyADIAAAX/oPNAAbQ8iRI1jglFCsIwjZm8zwlB43OsiEhEsAAkFg4aBLGIQBrOCOPgQDydiVVyJnIcdg9Hg+GI5MwIhzhZkzKWrBHE0WwwRVQ1TQFJjGYNPyYRIkIKaoQICTdjc04MPgAvCAFlDGaTDAoDC0gERTUnkAeQC1MNfjJSiCeEYkIvK1FlCwqQRE5INTMJUBCjkhGUlpjCdhAKD6i1OTUjMAonIg/KCipisQtPx4uEPGHRxnxhCw0ADQ0LCHE7dEBIPmpsfH6/NIJNhTBI6w0PDNrM/Ium7F8SFNSShQkg5Qs1beU0oXtgxt/ES5CMiAlD0Y8QZVaSLUtWjscLa9Ko/1W7VsNXwypX+miZQSbMFx5iyJhp8iDNGiVunhwAB+VHEghDFQA40CBACgVHAMAIUMOWmwIRAhzoxCAFC39OliTB9KtXAoZdwSn4MaLIIzMOrFlxwEhZEhE7Lq2Q1MKYq1hs0NUaWo7FCwEvxjpgSLErk3QOBJijCPVjEgDUCMnacaDSiUMq5iSgoyTuLytzoKh5SnFOmSrUdiT4YioBjQfJOtdAIGmrGhYAi0ESstgfzk6w3B1gBOZEkx2OArxRg8JpC00BABA5AgkFD0XWGAzgE2HomHIAaECU8qJWFrgMMFMs4wupZ9wB+2kqY6MIn2RvzPeNFFCYERY6b9Rgm/85MtA3lBAJrHMXEoc0oIJVNEQwWmI81AJDEgo0QABFQylD0wEGQIIMOjA8QY4kWUwjxxFZjEGIOk5Ug5ADRtjEQnmomDjgDDsEAs0uNa4zDh3mCCahHO7YERAVgVCkoYRkUCjGhRhBsaE3OVwIoogkUgNFPAPA8oAAb3hTU1sHRdDJK0NAUY4Ws/2ykW0eSqHNHOXQ9ccbttg41oI5lFEJbdAdMNQALTz0S1NghSEEAmHQtYsXRlX54T+mQICZCL0oaYcQMECRTi8jVEHHCzeYZgVubcgpxmhmroPUG0sw8UwaK+TwzwvpYAJQZmVZYqcXDRTwFRKv9jIHMl0g8db/obdZu6gLnD0aaQ6/OMIiG/9I8YBG/rSQjns/6paDAQsEoM2x6qlKiDIaSpEAAYDguw05cc5ZoGRyqkrXF2T4w2eIl2R2gAoq9hSHo2XFaoI6ZZjZVxuo+NZIQHSJgIA1Atj2i4FgVZqGmSzQ5YccOZKwBEXSyZnXG1nQoM8OVjShyyJh/BJGVciYkA4yEf2ITlxyIjCAOa80ccMCy931ApFVKuNPmAQccoAVlFJkqTCZSkuGo4R4eoilKBxhS1lSkIdCVyzoMvJ7ms1RrhQCYSPQjtawZYJUJ6s1V13A4XXyXokimIQuhJCxdg3SnYlpa94AEEAAzyCy1iF60SWL/x18UKGNGivSOoi5OPAqBEDtBFoPkYVegq0/1orx4NoAvTEqCnZYeKohUFyiQp4wpbBIWrb88TICTAnbZrF/nNBaV8raypSzYkCrjbTfKrRYQ99ANEaIlVpkBg0NsFnu2W0mMB4S32TaFRkpCMFCL+sbXcNQcLgDsWxTrUkg6BBCcIsxfKACJmjhMWAIVyPmABRT8OMiAaGGJl4QrmdoCB1pCNF4BEANNcirRg9rwVYu4cBD3IAhUEFdFUpikgTxig3tAUgVMIiDgZzAH2SAxMvEp5la3OI5urAH/4R2gGAMg2+/0gQnPAEKE7SlD7RA3QgcGJsBnCw9fAiZuoZiNVB2gCs25hhSgVqzjQT1gQYAaJAw7oAkakAPd8NaAU+QYTp8hUwT0FtbX5xABx08gTxUetCVEqeldKxlPnSKhUto0TxcmAAbvPAFMCZRCSiGAAA7) repeat;
+}
+
+section.content > .wrap > .active{
+	background: #FFF;
+}
+
+section.content > .wrap > .active h1 {
+	margin: 0;
+	padding: 1em;
+}
+</style>
 </head>
 <body>
 <div class="viewport">
@@ -71,10 +85,10 @@
 	})
 
 	app.start({
-		enableNavbar: false,
-		enableToolbar: false,
-		enableScroll: false,
-		enableTransition: false
+		enableNavbar: true,
+		enableToolbar: true,
+		enableScroll: true,
+		enableTransition: true
 	});
 </script>
 </body>
