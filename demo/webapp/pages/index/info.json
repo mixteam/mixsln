@@ -1,0 +1,6 @@
+{
+	"name" : "detail",
+	"title" : "首页",
+	"route" : "index\\/[^\\/]+\\/?",
+	"js": ["index.js"],
+}

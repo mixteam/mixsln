@@ -1,0 +1,20 @@
+{
+  "name": "mixsln",
+  "version": "0.4.1",
+  "description": "the solution for webapp",
+  "license": "MIT",
+  "author": "zhuxun <zhuxun.jb@taobao.com>",
+  "homepage": "https://github.com/organizations/mixteam",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mixteam/mixsln.git"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-watch": "~0.4.0",
+    "grunt-contrib-cssmin": "~0.6.0",
+    "grunt-depconcat": "~0.1.2"
+  },
+  "dependencies": {}
+}
