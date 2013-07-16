@@ -63,7 +63,7 @@ function MessageScope(scope) {
 
 	this._handler = function(e) {
 		var type = e.type, args = e.args,
-			list = that._cache[type]
+			list = that._cache[type].slice()
 			;
 
         for (var i = 0; i < list.length; i += 2) {
@@ -134,10 +134,12 @@ var MessageScopeProto = {
 	once: function(events, callback, context) {
         var that = this;
 
-        return that.on(events, function() {
+        function onceHandler() {
             callback.apply(this, arguments);
-            that.off(events, arguments.callee, context);
-        }, context);
+            that.off(events, onceHandler, context);
+        }
+
+        return that.on(events, onceHandler, context);
 	},
 
 	after: function(events, callback, context) {
