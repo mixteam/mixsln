@@ -59,6 +59,8 @@ hooks.on('app:start', function() {
 	Scroll || (config.enableScroll = false);
 	Transition || (config.enableTransition = false);
 
+	Message.isLogging = config.enableMessageLog;
+
 	config.enableNavbar === true && (config.enableNavbar = {});
 	config.enableToolbar === true && (config.enableToolbar = {});
 	config.enableScroll === true && (config.enableScroll = {});
@@ -151,7 +153,7 @@ hooks.on('app:start', function() {
 	if (c_navbar) {
 		config.viewport.className += ' enableNavbar';
 		c_navbar.wrapEl || (c_navbar.wrapEl = q('.navbar', config.viewport));
-		c_navbar.instance = new Navbar(c_navbar.wrapEl, c_navbar);
+		c_navbar.instance = new Navbar(c_navbar.wrapEl);
 	}
 
 	if (c_toolbar) {
@@ -318,6 +320,10 @@ function preloadTemplate(obj, name) {
 	}
 }
 
+hooks.once('view:extend page:define', function() {
+	Template.engine = config.templateEngine || {};
+});
+
 hooks.on('view:extend', function(view) {
 	if (view.prototype.template) {
 		preloadTemplate(view.prototype, 'template');
@@ -369,12 +375,12 @@ hooks.on('page:define', function(page) {
 	page.startup = function(state) {
 		hooks.trigger('page:startup', state, page);
 		startup.call(page);
-		persisted = true;
 	}
 
 	page.show = function(state) {
 		hooks.trigger('page:show', state, page);
 		show.call(page, persisted);
+		persisted = true;
 	}
 
 	page.hide = function(state) {
@@ -614,7 +620,7 @@ hooks.on('app:start', function(){
 		setPlugin('onNavigationSwitchEnd');
 	});
 
-	hooks.on('page:show && navigation:switchend', function() {
+	hooks.after('page:show navigation:switchend', function() {
 		setPlugin('onDomReady');
 	});
 

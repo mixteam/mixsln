@@ -17,27 +17,17 @@ function _setButton(btn, options) {
 	}
 }
 
-function Navbar(wrapEl, options) {
-	options || (options = {});
-
+function Navbar(wrapEl) {
 	this.wrapEl = wrapEl;
-
-	options.animWrapEl?(this.animWrapEl = options.animWrapEl):
-		this.wrapEl.appendChild(this.animWrapEl = doc.createElement('ul'));
-
-	options.titleWrapEl?(this.titleWrapEl = options.titleWrapEl):
-		this.animWrapEl.appendChild(this.titleWrapEl = doc.createElement('li'));
-
-	options.titleWrapEl?(this._backWrapEl = options.backWrapEl):
-		this.animWrapEl.appendChild(this.backWrapEl = doc.createElement('li'));	
-
-	options.funcWrapEl?(this._funcWrapEl = options.funcWrapEl):
-		this.animWrapEl.appendChild(this.funcWrapEl = doc.createElement('li'));
+	this.wrapEl.appendChild(this.animWrapEl = doc.createElement('ul'));
+	this.animWrapEl.appendChild(this.titleWrapEl = doc.createElement('li'));
+	this.animWrapEl.appendChild(this.backWrapEl = doc.createElement('li'));	
+	this.animWrapEl.appendChild(this.funcWrapEl = doc.createElement('li'));
 }
 
 var NavbarProto = {
     setTitle: function(title) {
-    	this.titleWrapEl && (this.titleWrapEl.innerHTML = title);
+    	this.titleWrapEl.innerHTML = title;
     },
 
     setButton: function(options) {

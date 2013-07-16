@@ -513,6 +513,8 @@ Mix的导航，实际上包括两个概念，一个是`导航栏`，一个是`�
 
 ![页面生命周期](./_res/circles.png)
 
+当页面第一次加载，并进入声明周期时，会依次进入startup->show。之后如果页面仍旧停留在缓存中时，会在show和hide中循环。最终当页面被清出缓存时，进入teardown。当经由startup进入show的时候，show的persisted参数为false，当在show和hide中循环时，show的persisted参数会true。
+
 ## 状态
 
 状态实际上是每个页面在不同请求下的一个相关数据集合。例如，上述`helloworld`页面，当Hash片段为`hello/zhuxun`以及`hello/hanquan`时，就拥有不同的两个状态。这两个状态分别承载了不同的数据。包括，参数值集合，状态在历史堆栈中的位置，是经由前进或后退达到的，等等。所以说，每个页面实际上会存在多个状态，对应着多个不同的请求（Hash片段）。
