@@ -44,8 +44,10 @@
             // {ret:'SUCCESS', value:{'a':1}}
             onSuccess: function(sid, msg) {
                 clearTimeout(sid);
-                var func = WV_Private.unregisterCall(sid).success;
-                func && func(WV_Private.parseParam(msg));
+                var func = WV_Private.unregisterCall(sid).success,
+                    param = WV_Private.parseParam(msg);
+                
+                func && func(param.value || param);
 
                 if (WindVane_Native && WindVane_Native.onComplete) {
                     WindVane_Native.onComplete(sid);
@@ -58,8 +60,10 @@
             // {ret:'FAILURE', value:{'a':1}}
             onFailure: function(sid, msg) {
                 clearTimeout(sid);
-                var func = WV_Private.unregisterCall(sid).failure;
-                func && func(WV_Private.parseParam(msg));
+                var func = WV_Private.unregisterCall(sid).failure,
+                    param = WV_Private.parseParam(msg);
+
+                func && func(param.value || param);
                 
                 if (WindVane_Native && WindVane_Native.onComplete) {
                     WindVane_Native.onComplete(sid);
@@ -73,31 +77,15 @@
             //ifUseIframe: false,
 
             buildParam: function(obj) {
-                var str = '';
-
                 if (obj && typeof obj === 'object') {
-                    for (var key in obj) {
-                        str += (key + WV_Data.KV_SPLIT + obj[key] + WV_Data.PARAM_SPLIT);
-                    }
+                    return JSON.stringify(obj);
                 } else {
-                    str = obj || '';
+                    return obj || '';
                 }
-       
-                return str + '_ts=' + Date.now();
-                // return JSON.stringify(obj);
             },
 
             parseParam: function(str) {
-                var obj = {};
-
                 if (str && typeof str === 'string') {
-                    // str = str.split(WV_Data.PARAM_SPLIT);
-                    // for (var i = 0; i < str.length; i++) {
-                    //     if (str[i]) {
-                    //         str[i] = str[i].split(WV_Data.KV_SPLIT);
-                    //         obj[str[i][0]] = obj[str[i][1]];
-                    //     }
-                    // }
                     obj = JSON.parse(str);
                 } else {
                     obj = str || {};
@@ -184,7 +172,7 @@
             },
 
             callMethod: function(obj, method, param, sid) {
-                // [for protocol] hybrid://objectName:sid/methodName?a=b&c=d
+                // [for protocol] hybrid://objectName:sid/methodName?{a:'b',c:'d'}
                 var src = WV_Data.LOCAL_PROTOCOL + '://' + obj + ':' + sid + '/' + method + '?' + param;
                 this.useIframe(sid, src);
             },
