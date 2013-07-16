@@ -575,11 +575,11 @@ docEl.addEventListener('touchstart', touchstartHandler, false);
 })(window, window['app']||(window['app']={module:{},plugin:{}}));
 (function(win, app, undef) {
 
-function EventSource() {
+function Event() {
 	this._handlers = {};
 }
 
-var EventSourceProto = {
+var EventProto = {
 	addEventListener: function(type, handler) {
 		var handlers = this._handlers, list;
 
@@ -614,8 +614,8 @@ var EventSourceProto = {
 	}
 }
 
-for (var p in EventSourceProto) {
-	EventSource.prototype[p] = EventSourceProto[p];
+for (var p in EventProto) {
+	Event.prototype[p] = EventProto[p];
 } 
 
 var SCOPES = {},
@@ -628,7 +628,7 @@ function MessageScope(scope) {
 	var that = this;
 
 	this._scope = scope;
-	this._source = new EventSource();
+	this._event = new Event();
 	this._cache = {};
 
 	this._handler = function(e) {
@@ -705,8 +705,8 @@ var MessageScopeProto = {
 	on: function(events, callback, context) {
 		var that = this,
 			cache = that._cache,
-			source = that._source,
-			list, event
+			event = that._event,
+			list, eventName
 			;
 
 		if (!callback) return that;
@@ -721,10 +721,10 @@ var MessageScopeProto = {
 
 		events = events.split(SPLITER_REG);
 
-        while (event = events.shift()) {
-            list = cache[event] || (cache[event] = []);
+        while (eventName = events.shift()) {
+            list = cache[eventName] || (cache[eventName] = []);
             if (!list.length) {
-            	source.addEventListener(event, this._handler);	
+            	event.addEventListener(eventName, this._handler);	
             }
             list.push(callback, context);
         }
@@ -735,8 +735,8 @@ var MessageScopeProto = {
 	off: function(events, callback, context) {
 		var that = this,
 			cache = that._cache,
-			source = that._source,
-			list, event
+			event = that._event,
+			list, eventName
 			;
 
         if (events) {
@@ -745,10 +745,10 @@ var MessageScopeProto = {
         	events = Object.keys(cache);
         }
 
-        while (event = events.shift()) {
-        	!(callback || context) && (cache[event] = []);
+        while (eventName = events.shift()) {
+        	!(callback || context) && (cache[eventName] = []);
 
-        	list = cache[event];
+        	list = cache[eventName];
 
             for (var i = list.length - 2; i >= 0; i -= 2) {
                 if (!(callback && list[i] !== callback ||
@@ -758,8 +758,8 @@ var MessageScopeProto = {
             }
 
             if (!list.length) {
-            	delete cache[event];
-            	source.removeEventListener(event, this._handler);
+            	delete cache[eventName];
+            	event.removeEventListener(eventName, this._handler);
         	}
         }
 
@@ -806,19 +806,19 @@ var MessageScopeProto = {
 	trigger: function(events) {
 		var that = this,
 			cache = that._cache,
-			source = that._source,
-			args, event
+			event = that._event,
+			args, eventName
 			;
 
 		events = events.split(SPLITER_REG);
 		args = Array.prototype.slice.call(arguments, 1);
 
-		while (event = events.shift()) {
-			that.log(event, args);
+		while (eventName = events.shift()) {
+			that.log(eventName, args);
 
-			if (cache[event]) {
-				source.dispatchEvent({
-					type: event, 
+			if (cache[eventName]) {
+				event.dispatchEvent({
+					type: eventName, 
 					args: args
 				});
 			}
@@ -1867,20 +1867,22 @@ function Collection(data) {
 
 	if (!data instanceof Array) return;
 
-	that.length = data.length;
-
 	that.push = function(value) {
 		data.push(value);
-		that.length = data.length;
 		that.addProperty(data.length - 1, value);
 	}
 
 	that.pop = function() {
 		var value = data.pop();
-		that.length = data.length;
 		that[data.length] = null;
 		return value;
 	}
+
+	Object.defineProperty(that, 'length', {
+		get: function() {
+			return data.length;
+		}
+	});
 
 	Model.call(that, data);
 }

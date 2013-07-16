@@ -93,20 +93,22 @@ function Collection(data) {
 
 	if (!data instanceof Array) return;
 
-	that.length = data.length;
-
 	that.push = function(value) {
 		data.push(value);
-		that.length = data.length;
 		that.addProperty(data.length - 1, value);
 	}
 
 	that.pop = function() {
 		var value = data.pop();
-		that.length = data.length;
 		that[data.length] = null;
 		return value;
 	}
+
+	Object.defineProperty(that, 'length', {
+		get: function() {
+			return data.length;
+		}
+	});
 
 	Model.call(that, data);
 }

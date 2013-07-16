@@ -305,11 +305,161 @@
 
 ## app.module.Animation
 
+提供调用Transition动画。
+
+### doTransition(element, properties, options)
+
+* @param {HTMLElement} a element
+* @param {object} the element's properties
+* @param {object} the transition's options
+
+让一个HTML元素执行transition动画。`properties`是元素的样式集，支持`transform`的属性。`options`是`transition`的参数（duration，timingFunction，delay以及callback）。
+
+	Animation.doTransition(body, {
+		backgroundColor: 'red',
+		translate:[100, 100]
+	}, {
+		duration: '0.4s',
+		timingFunction: 'ease',
+		callback: transitionEnd 
+	})
+
+### translate(element, duration, timingFunction, delay, x, y, callback)
+
+* @param {HTMLElement} a element
+* @param {string} the duration of movement
+* @param {string} the timingFunction of movement
+* @param {string} the delay of movement
+* @param {number} the x of coordinate
+* @param {number} the y of coordinate
+* @param {function} a callback function
+
+让一个HTML元素进行平移动画。
+
+### genCubicBezier(a, b)
+
+* @param {number} a 
+* @param {number} b
+* @return a array
+
+生成贝塞尔函数。
+
+### makeTranslateString(x, y)
+
+* @param {number} the x of coordinate
+* @param {number} the y of coordinate
+* @return a string
+
+返回`translate`的字符串。
+
+### getTransformOffset(element)
+
+* @param {HTMLElement}
+* @return a x/y object
+
+返回HTML元素的平移位置（X/Y）
+
 ## app.module.Collection
+
+提供集合的数据模型。目前只支持pop和push方法。
+
+### new Collection(arrayData)
+
+* @param {array} arrayData
+* @param {Collection} a collection object
+
+实例化一个集合对象。
+
+### length
+
+* @var {number} the length of collection
+
+集合模型的值长度（只读）。
+
+### pop()
+
+* @return {*} value
+
+从集合模型的栈顶弹出一个值。
+
+### push(value)
+
+* @param {*}  value
+
+往集合模型的栈顶压入一个值。
 
 ## app.module.Content
 
-## app.module.EventSource
+UI模块。提供多个节点的缓存机制。
+
+### new Content(wrapEl, options)
+
+* @param {HTMLElement} wrapEl
+* @param {object} [options]
+
+实例化一个Content对象。options可配置的参数如下：
+
+	- cacheLength: 节点缓存数量，默认为1。
+
+### setClassName()
+
+设置当前状态下DOM节点的class。
+
+### getActive()
+
+* @return {HTMLElement} the current active node
+
+返回当前激活状态的节点。
+
+### getNext()
+
+* @return {HTMLElement} the next node
+
+返回当前激活节点的下一个节点。
+
+### getPrevious()
+
+* @return {HTMLElement} the previous node
+
+返回当前激活节点的上一个节点。
+
+### next()
+
+激活下一个节点。
+
+### previous()
+
+激活上一个节点。
+
+### html(str)
+
+* @param {string} a html string
+
+设置当前激活节点的HTML。
+
+## app.module.Event
+
+提供发布/订阅者模式的模型。
+
+### addEventListener(type, handler)
+
+* @param {string} a event type
+* @param {function} a event handler
+
+监听事件。
+
+### removeEventListener(type, handler)
+
+* @param {string} a event type
+* @param {function} a event handler
+
+取消监听事件。
+
+### dispatchEvent(e)
+
+* @param {object} a event object
+
+分发一个事件。`e`对象必须包含字段`type`。
 
 ## app.module.MessageScope
 
