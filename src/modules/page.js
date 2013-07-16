@@ -43,7 +43,6 @@ Page.define = function(properties) {
 	function ChildPage() {
 		Page.apply(this, arguments);
 		this.initialize && this.initialize.apply(this, arguments);
-		Message.mixto(this, 'page.' + this.name);
 	}
 	inherit(ChildPage, Page);
 	extend(ChildPage.prototype, Page.fn);

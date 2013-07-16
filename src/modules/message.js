@@ -1,10 +1,10 @@
 (function(win, app, undef) {
 
-function EventSource() {
+function Event() {
 	this._handlers = {};
 }
 
-var EventSourceProto = {
+var EventProto = {
 	addEventListener: function(type, handler) {
 		var handlers = this._handlers, list;
 
@@ -39,21 +39,26 @@ var EventSourceProto = {
 	}
 }
 
-for (var p in EventSourceProto) {
-	EventSource.prototype[p] = EventSourceProto[p];
+for (var p in EventProto) {
+	Event.prototype[p] = EventProto[p];
 } 
 
 var SCOPES = {},
-	SPLITER_REG = /\s+/,
-	AND_SPLITER_REG = /\s*\&\&\s*/,
-	OR_SPLITER_REG = /\s*\|\|\s*/
+	SPLITER_REG = /\s+/
 	;
+
+
+function log(scope, event, args) {
+	if (MessageScope.isLogging) {
+    	console.log('[Message]', {scope:scope, event: event, args:args});
+	}
+}
 
 function MessageScope(scope) {
 	var that = this;
 
 	this._scope = scope;
-	this._source = new EventSource();
+	this._event = new Event();
 	this._cache = {};
 
 	this._handler = function(e) {
@@ -70,86 +75,21 @@ function MessageScope(scope) {
 }
 
 var MessageScopeProto = {
-	_wrapAND: function(events) {
-		var that = this, 
-			states = {}, list = events.split(AND_SPLITER_REG);
-
-		function checkState() {
-			for (var e in states) {
-				if (!states[e]) return;
-			}
-			that.trigger(events);
-			resetState();
-		}
-
-		function resetState() {
-			for (var e in states) {
-				states[e] = false;
-			}
-		}
-
-		list.forEach(function(event) {
-			states[event] = false;
-			that.on(event, function() {
-				states[event] = true;
-				checkState();
-			});
-		});
-	},
-
-	_wrapOR: function(events) {
-		var that = this, 
-			states = {}, list = events.split(OR_SPLITER_REG),
-			isTrigger = false;
-
-		function checkState() {
-			!isTrigger && that.trigger(events);
-			var state = true;
-			for (var e in states) {
-				state = state && states[e];
-			}
-			state && resetState();
-		}
-
-		function resetState() {
-			for (var e in states) {
-				states[e] = false;
-			}
-			isTrigger = false;
-		}
-
-		list.forEach(function(event) {
-			states[event] = false;
-			that.on(event, function() {
-				states[event] = true;
-				checkState();
-			});
-		});
-	},
-
 	on: function(events, callback, context) {
 		var that = this,
 			cache = that._cache,
-			source = that._source,
-			list, event
+			event = that._event,
+			list, eventName
 			;
 
 		if (!callback) return that;
 
-		if (events.match(AND_SPLITER_REG)) {
-			events = events.replace(AND_SPLITER_REG, '&&');
-			this._wrapAND(events);
-		} else if (events.match(OR_SPLITER_REG)) {
-			events = events.replace(OR_SPLITER_REG, '||');
-			this._wrapOR(events);
-		}
+		events = events.split(SPLITER_REG);	
 
-		events = events.split(SPLITER_REG);
-
-        while (event = events.shift()) {
-            list = cache[event] || (cache[event] = []);
+        while (eventName = events.shift()) {
+            list = cache[eventName] || (cache[eventName] = []);
             if (!list.length) {
-            	source.addEventListener(event, this._handler);	
+            	event.addEventListener(eventName, this._handler);	
             }
             list.push(callback, context);
         }
@@ -160,20 +100,20 @@ var MessageScopeProto = {
 	off: function(events, callback, context) {
 		var that = this,
 			cache = that._cache,
-			source = that._source,
-			list, event
+			event = that._event,
+			list, eventName
 			;
 
-        if (events) {
-        	events = events.split(SPLITER_REG);
-        } else {
+        if (!events) {
         	events = Object.keys(cache);
+        } else {
+        	events = events.split(SPLITER_REG);
         }
 
-        while (event = events.shift()) {
-        	!(callback || context) && (cache[event] = []);
+        while (eventName = events.shift()) {
+        	!(callback || context) && (cache[eventName] = []);
 
-        	list = cache[event];
+        	list = cache[eventName];
 
             for (var i = list.length - 2; i >= 0; i -= 2) {
                 if (!(callback && list[i] !== callback ||
@@ -183,8 +123,8 @@ var MessageScopeProto = {
             }
 
             if (!list.length) {
-            	delete cache[event];
-            	source.removeEventListener(event, this._handler);
+            	delete cache[eventName];
+            	event.removeEventListener(eventName, this._handler);
         	}
         }
 
@@ -192,85 +132,84 @@ var MessageScopeProto = {
 	},
 
 	once: function(events, callback, context) {
-        var that = this
-            ;
+        var that = this;
 
-        function onceHandler() {
+        return that.on(events, function() {
             callback.apply(this, arguments);
-            that.off(events, onceHandler, context);
-        }
-
-        return that.on(events, onceHandler, context);
+            that.off(events, arguments.callee, context);
+        }, context);
 	},
 
 	after: function(events, callback, context) {
 		var that = this,
-			state = {}
+			states = {}, eventName
 			;
 
 		if (!callback) return that;
 
+		events = events.split(SPLITER_REG);
+		eventName = events.join('&&');
+
 		function checkState() {
-			for (var ev in state) {
-				if (!state[ev]) return;
+			for (var e in states) {
+				if (!states[e]) return false;
 			}
-			callback.apply(context);
+			return true;
 		}
 
-		events = events.split(SPLITER_REG);
+		function resetState() {
+			for (var e in states) {
+				states[e] = false;
+			}
+		}
 
-		events.forEach(function(ev) {
-			state[ev] = false;
-			that.once(ev, function() {
-				state[ev] = true;
-				checkState();
+		events.forEach(function(event) {
+			states[event] = false;
+			that.on(event, function() {
+				states[event] = true;
+				if (checkState()) {
+					that.trigger(eventName);
+					resetState();
+				}
 			});
 		});
+
+		that.on(eventName, callback, context);
 	},
 
 	trigger: function(events) {
 		var that = this,
 			cache = that._cache,
-			source = that._source,
-			args, event
+			event = that._event,
+			args, eventName
 			;
 
 		events = events.split(SPLITER_REG);
 		args = Array.prototype.slice.call(arguments, 1);
 
-		while (event = events.shift()) {
-			that.log(event, args);
+		while (eventName = events.shift()) {
+			log(this._scope, eventName, args);
 
-			if (cache[event]) {
-				source.dispatchEvent({
-					type: event, 
+			if (cache[eventName]) {
+				event.dispatchEvent({
+					type: eventName, 
 					args: args
 				});
 			}
 		}
 
 		return that;
-	},
-
-    log : function(event, args) {
-    	if (app.config && app.config.enableMessageLog) {
-        	console.log('[Message]', {scope:this._scope, event: event, args:args});
-    	}
-    }
+	}
 }
 
 for (var p in MessageScopeProto) {
 	MessageScope.prototype[p] = MessageScopeProto[p];
 }
 
-MessageScope.mixto = function(obj, scope) {
-	var context;
+MessageScope.isLogging = false;
 
-	if (typeof scope === 'string') {
-		context = SCOPES[scope] || new MessageScope(scope);
-	} else {
-		context = scope;
-	}
+MessageScope.mixto = function(obj, scope) {
+	var context = MessageScope.get(scope);
 
     obj.prototype && (obj = obj.prototype);
 
@@ -284,10 +223,16 @@ MessageScope.mixto = function(obj, scope) {
 }
 
 MessageScope.get = function(scope) {
-	return SCOPES[scope] || (SCOPES[scope] = new MessageScope(scope));
+	if (typeof scope === 'string') {
+		return SCOPES[scope] || (SCOPES[scope] = new MessageScope(scope));
+	} else if (scope instanceof MessageScope){
+		return scope;
+	} else {
+		throw new TypeError();
+	}
 }
 
-app.module.EventSource = EventSource;
+app.module.Event = Event;
 app.module.MessageScope = MessageScope;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}));

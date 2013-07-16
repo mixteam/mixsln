@@ -9,9 +9,9 @@
 ## 文档
 
 * [用Mix快速开发WebApp](https://github.com/mixteam/mixsln/blob/master/doc/tutorial.md)
-* [开发者向导](https://github.com/mixteam/mixsln/blob/devel/master/doc/guide.md)
-* [插件的使用和开发](https://github.com/mixteam/mixsln/blob/devel/master/doc/plugin.md)
-* [API手册](https://github.com/mixteam/mixsln/blob/devel/master/doc/api.md)
+* [开发者向导](https://github.com/mixteam/mixsln/blob/master/doc/guide.md)
+* [插件的使用和开发](https://github.com/mixteam/mixsln/blob/master/doc/plugin.md)
+* [API手册](https://github.com/mixteam/mixsln/blob/master/doc/api.md)
 
 ## 解决了哪些问题？
 

@@ -8,68 +8,50 @@ function Template() {
 
 var TemplateProto = {
 	load: function(url, callback) {
-		// can overwrite
-		var that = this, engine
+		var engine = Template.engine
 			;
 
-		if (app && app.config) {
-			engine = app.config.templateEngine;
-		}
-
-		function loaded(text) {
-			callback && callback(text);
-		}
-
-		if (engine && engine.load && typeof url === 'string') {
-			engine.load(url, loaded);
+		if (engine.load && typeof url === 'string') {
+			engine.load(url, callback);
 		} else {
-			loaded(url);
+			callback && callback(url);
 		}
 	},
 
 	compile: function(text) {
-		// can overwrite
-		var that = this, engine 
-			;
+		var engine = Template.engine;
 
-		if (app && app.config) {
-			engine = app.config.templateEngine;
-		}
+		this.originTemplate = text;
 
-		that.originTemplate = text;
-
-		if (engine && engine.compile && typeof text === 'string') {
-			that.compiledTemplate = engine.compile(text);
+		if (engine.compile && typeof text === 'string') {
+			this.compiledTemplate = engine.compile(text);
 		} else {
-			that.compiledTemplate = function() {return text};
+			this.compiledTemplate = function() {return text};
 		}
 
-		return that.compiledTemplate;
+		return this.compiledTemplate;
 	},
 
 	render: function(datas) {
-		// can overwrite
-		var that = this, engine,
-			compiledTemplate = that.compiledTemplate
+		var engine = Template.engine,
+			compiledTemplate = this.compiledTemplate
 			;
 
-		if (app && app.config) {
-			engine = app.config.templateEngine;
-		}
-
-		if (engine && engine.render && typeof datas === 'object' && compiledTemplate) {
-			that.content = engine.render(compiledTemplate, datas);
+		if (engine.render && compiledTemplate && typeof datas === 'object') {
+			this.content = engine.render(compiledTemplate, datas);
 		} else {
-			that.content = compiledTemplate(datas);
+			this.content = compiledTemplate?compiledTemplate(datas):Object.prototype.toString.call(datas);
 		}
 
-		return that.content;
+		return this.content;
 	}
 }
 
 for (var p in TemplateProto) {
 	Template.prototype[p] = TemplateProto[p];
 } 
+
+Template.engine = {}
 
 app.module.Template = Template;
 
