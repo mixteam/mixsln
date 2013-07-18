@@ -583,7 +583,7 @@ hooks.on('app:start', function(){
 		var curFragment = page.el.getAttribute('data-fragment'), 
 			curCache = pagecache[curFragment];
 
-		if (state.move === 'backward' && curFragment === state.fragment) {
+		if (curFragment === state.fragment) {
 			page.show(state);
 		} else {
 			if (curCache) {
@@ -592,6 +592,7 @@ hooks.on('app:start', function(){
 			}
 
 			pagecache[state.fragment] = {state:state, page:page};
+			page.el.innerHTML = '';
 			page.el.setAttribute('data-fragment', state.fragment);
 			page.startup(state);
 			page.show(state);
