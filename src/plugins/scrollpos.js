@@ -19,7 +19,7 @@
 				;
 
 			(pos != null) && (options.pos = pos);
-			app.scroll.scrollTo(options.pos);
+			app.scroll.scrollTo(options.pos || 0);
 		},
 
 		onNavigationSwitch: function() {

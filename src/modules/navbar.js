@@ -4,7 +4,7 @@ var doc = win.document
 	;
 
 function _setButton(btn, options) {
-	(options.id != null) && btn.setAttribute('id', options.id);
+	(options.id != null) && btn.setAttribute('data-id', options.id);
 	(options['class'] != null) && (btn.className = options['class']);
 	(options.text != null) && (btn.innerHTML = options.text);
 	(options.bg != null) && (btn.style.background = options.bg);
@@ -37,9 +37,9 @@ var NavbarProto = {
     		btn = wrap.querySelector('button');
     	} else if (options.type === 'func') {
     		wrap = this.funcWrapEl;
-    		btn = wrap.querySelector('#' + options.id);
+    		btn = wrap.querySelector('button[data-id="' + options.id + '"]');
     	} else if (options.id) {
-    		btn = this.wrapEl.querySelector('#' + options.id);
+    		btn = this.wrapEl.querySelector('button[data-id="' + options.id + '"]');
     		btn && (wrap = btn.parentNode);
     	}
 
@@ -52,14 +52,21 @@ var NavbarProto = {
     },
 
     getButton: function(id) {
-    	return this.funcWrapEl.querySelector('button#' + id);
+    	return this.wrapEl.querySelector('button[data-id="' + id + '"]');
     },
 
     removeButton: function(id) {
+    	function remove(btn) {
+			if (btn) {
+				btn.handler && btn.removeEventListener('click', btn.handler);
+				btn.parentNode.removeChild(btn);
+			}
+    	}
+
     	if (!id) {
     		var btns = this.funcWrapEl.querySelectorAll('button');
     		for (var i = 0; i < btns.length; i++) {
-    			this.removeButton(btns[i]);
+    			remove(btns[i]);
     		}
     	} else {
 	    	if (typeof id === 'string') {
@@ -67,10 +74,7 @@ var NavbarProto = {
 	    	} else if (id instanceof HTMLElement) {
 	    		var btn = id;
 	    	}
-			if (btn) {
-				btn.handler && btn.removeEventListener('click', btn.handler);
-				btn.parentNode.removeChild(btn);
-			}
+	    	remove(btn);
 		}
     }
 }

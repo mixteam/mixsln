@@ -374,9 +374,10 @@ var NavigationProto = {
 		if (route) {
 			routeText = route.routeText;
 			resolved = routeText.replace(/\(P<[a-z0-9_-][a-z0-9_-]*?>.*?\)/g, function(m) {
+				PERL_REGEXP.lastIndex = 0;
 				var name = PERL_REGEXP.exec(m)[1];
 				return params[name] || 'undefined';
-			}).replace('\\', '');
+			}).replace('\\/?', '').replace('\\', '');
 		}
 
 		return resolved;

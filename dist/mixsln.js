@@ -819,7 +819,7 @@ var doc = win.document
 	;
 
 function _setButton(btn, options) {
-	(options.id != null) && btn.setAttribute('id', options.id);
+	(options.id != null) && btn.setAttribute('data-id', options.id);
 	(options['class'] != null) && (btn.className = options['class']);
 	(options.text != null) && (btn.innerHTML = options.text);
 	(options.bg != null) && (btn.style.background = options.bg);
@@ -852,9 +852,9 @@ var NavbarProto = {
     		btn = wrap.querySelector('button');
     	} else if (options.type === 'func') {
     		wrap = this.funcWrapEl;
-    		btn = wrap.querySelector('#' + options.id);
+    		btn = wrap.querySelector('button[data-id="' + options.id + '"]');
     	} else if (options.id) {
-    		btn = this.wrapEl.querySelector('#' + options.id);
+    		btn = this.wrapEl.querySelector('button[data-id="' + options.id + '"]');
     		btn && (wrap = btn.parentNode);
     	}
 
@@ -867,14 +867,21 @@ var NavbarProto = {
     },
 
     getButton: function(id) {
-    	return this.funcWrapEl.querySelector('button#' + id);
+    	return this.wrapEl.querySelector('button[data-id="' + id + '"]');
     },
 
     removeButton: function(id) {
+    	function remove(btn) {
+			if (btn) {
+				btn.handler && btn.removeEventListener('click', btn.handler);
+				btn.parentNode.removeChild(btn);
+			}
+    	}
+
     	if (!id) {
     		var btns = this.funcWrapEl.querySelectorAll('button');
     		for (var i = 0; i < btns.length; i++) {
-    			this.removeButton(btns[i]);
+    			remove(btns[i]);
     		}
     	} else {
 	    	if (typeof id === 'string') {
@@ -882,10 +889,7 @@ var NavbarProto = {
 	    	} else if (id instanceof HTMLElement) {
 	    		var btn = id;
 	    	}
-			if (btn) {
-				btn.handler && btn.removeEventListener('click', btn.handler);
-				btn.parentNode.removeChild(btn);
-			}
+	    	remove(btn);
 		}
     }
 }
@@ -925,7 +929,6 @@ function Page() {
 }
 
 var PageProto = {
-	ready : function() {/*implement*/},
 	startup : function() {/*implement*/},
 	teardown : function() {/*implement*/},
 	show : function() {/*implement*/},
@@ -2186,9 +2189,10 @@ var NavigationProto = {
 		if (route) {
 			routeText = route.routeText;
 			resolved = routeText.replace(/\(P<[a-z0-9_-][a-z0-9_-]*?>.*?\)/g, function(m) {
+				PERL_REGEXP.lastIndex = 0;
 				var name = PERL_REGEXP.exec(m)[1];
 				return params[name] || 'undefined';
-			}).replace('\\', '');
+			}).replace('\\/?', '').replace('\\', '');
 		}
 
 		return resolved;
@@ -2237,9 +2241,7 @@ var doc = win.document,	$ = win['$'],
 	Animation = am.Animation,
 	Transition = am.Transition,
 	pagecache = {},
-	pagemeta = {},
 	templatecache = {}, 
-	resourcecache = {},
 	config = app.config = {
 		viewport : null,
 		templateEngine : null,
@@ -2297,7 +2299,7 @@ window.addEventListener('resize', function(e){
 
 
 // Navigation Initial
-hooks.on('page:define page:defineMeta', function(page) {
+hooks.on('page:define', function(page) {
 	var name = page.name,
 		route = page.route;
 
@@ -2382,6 +2384,62 @@ hooks.on('app:start', function() {
 	}
 });
 
+
+//View Intial
+hooks.on('view:extend', function(view) {
+	var render = view.prototype.render,
+		destory = view.prototype.destory
+		;
+
+	view.prototype.render = function() {
+		var that = this, args = arguments;
+		checkTemplate(that, 'template', function() {
+			hooks.trigger('view:render', that, arguments);
+			render.apply(that, args);
+		});
+	}
+
+	view.prototype.destory = function() {
+		hooks.trigger('view:destory', this, arguments);
+		destory.apply(this, arguments);
+	}
+});
+
+//Page Initial
+hooks.on('page:define', function(page) {
+	var startup = page.startup,
+		teardown = page.teardown,
+		show = page.show,
+		hide = page.hide,
+		persisted = false;
+
+	page.startup = function(state) {
+		hooks.trigger('page:startup', state, page);
+		startup.call(page);
+	}
+
+	page.show = function(state) {
+		hooks.trigger('page:show', state, page);
+		show.call(page, persisted);
+		persisted = true;
+	}
+
+	page.hide = function(state) {
+		hooks.trigger('page:hide', state, page);
+		hide.call(page, persisted);
+	}
+
+	page.teardown = function(state) {
+		hooks.trigger('page:teardown', state, page);
+		teardown.call(page);
+		persisted = false;
+	}
+
+	page.html = function(html) {
+		config.enableContent.instance.html(html);
+	}
+});
+
 //Plugin Initial
 hooks.on('app:start', function() {
 	for (var name in app.plugin) {
@@ -2403,6 +2461,10 @@ function viewPluginRun(view, funcName) {
 		}
 	}
 }
+
+hooks.on('view:extend', function(ChildView) {
+	viewPluginRun(ChildView.prototype, 'onViewExtend');
+});
 
 hooks.on('view:render', function(view) {
 	viewPluginRun(view, 'onViewRender');
@@ -2543,69 +2605,6 @@ hooks.on('page:define', function(page) {
 	}
 });
 
-//View Intial
-hooks.on('view:extend', function(view) {
-	var render = view.prototype.render,
-		destory = view.prototype.destory
-		;
-
-	view.prototype.render = function() {
-		var that = this, args = arguments;
-		checkTemplate(that, 'template', function() {
-			hooks.trigger('view:render', that, arguments);
-			render.apply(that, args);
-		});
-	}
-
-	view.prototype.destory = function() {
-		hooks.trigger('view:destory', this, arguments);
-		destory.apply(this, arguments);
-	}
-});
-
-//Page Initial
-hooks.on('page:define', function(page) {
-	var ready = page.ready,
-		startup = page.startup,
-		teardown = page.teardown,
-		show = page.show,
-		hide = page.hide,
-		isReady = false, persisted = false;
-
-	page.ready = function(state) {
-		if (isReady) return;
-		hooks.trigger('page:ready', state, page);
-		ready.call(page);
-		isReady = true;
-	}
-
-	page.startup = function(state) {
-		hooks.trigger('page:startup', state, page);
-		startup.call(page);
-	}
-
-	page.show = function(state) {
-		hooks.trigger('page:show', state, page);
-		show.call(page, persisted);
-		persisted = true;
-	}
-
-	page.hide = function(state) {
-		hooks.trigger('page:hide', state, page);
-		hide.call(page, persisted);
-	}
-
-	page.teardown = function(state) {
-		hooks.trigger('page:teardown', state, page);
-		teardown.call(page);
-		persisted = false;
-	}
-
-	page.html = function(html) {
-		config.enableContent.instance.html(html);
-	}
-});
-
 // forward backwrad Initial
 hooks.on('app:start', function(){
 	var c_navbar = config.enableNavbar,
@@ -2663,7 +2662,9 @@ hooks.on('app:start', function(){
 
 			// 不是同一个页面，且不是第一次页面
 			if (!isSamePage && lastPage){
-				Transition.float(i_navbar.animWrapEl, state.transition === 'backward'?'LI':'RI', 50);
+				Transition.float(i_navbar.animWrapEl, state.transition === 'backward'?'LI':'RI', 50, function() {
+					i_navbar.animWrapEl.style.webkitTransform = '';
+				});
 			}
 		}
 	}
@@ -2724,25 +2725,23 @@ hooks.on('app:start', function(){
 
 	// transition
 	function setTransition() {
-		if (!isSamePage) {
-			var transition = state.transition;
+		var transition = state.transition;
 
-			// 不是第一次页面
-			if (c_transition && lastPage) {
-				var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
-					className = c_transition.wrapEl.className += ' ' + transition
-					;
+		// 不是第一次页面
+		if (c_transition && !isSamePage && lastPage) {
+			var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
+				className = c_transition.wrapEl.className += ' ' + transition
+				;
 
-				Transition.move(c_transition.wrapEl, offsetX, 0, function() {
-					i_content.setClassName();
-					c_transition.wrapEl.className = className.replace(' ' + transition, '');
-					c_transition.wrapEl.style.webkitTransform = '';
-					hooks.trigger('navigation:switchend', state);
-				});
-			} else {
+			Transition.move(c_transition.wrapEl, offsetX, 0, function() {
 				i_content.setClassName();
+				c_transition.wrapEl.className = className.replace(' ' + transition, '');
+				c_transition.wrapEl.style.webkitTransform = '';
 				hooks.trigger('navigation:switchend', state);
-			}
+			});
+		} else {
+			i_content.setClassName();
+			hooks.trigger('navigation:switchend', state);
 		}
 	}
 
@@ -2758,33 +2757,12 @@ hooks.on('app:start', function(){
 		}
 	}
 
-	// page
-	function pageLoad() {
-		var meta;
-		if ((meta = pagemeta[state.name])) {
-			meta.css && app.loadResource(meta.css, 'css');
-			meta.js && app.loadResource(meta.js, 'js', function() {
-				page = Page.get(state.name);
-				page.ready();
-				pageReady();
-			});
-		}
+	function setPage() {
+		page.el = i_content.getActive();
+		$ && (page.$el = $(page.el));
 	}
 
 	function pageReady() {
-		page.el = i_content.getActive();
-		$ && (page.$el = $(page.el));
-
-		setNavbar();
-		setToolbar();
-		setTransition();
-		setScroll();
-		refreshContent();
-
-		checkTemplate(page, 'template', pageShow);
-	}
-
-	function pageShow() {
 		lastPage && lastPage.hide(lastState);
 
 		var curFragment = page.el.getAttribute('data-fragment'), 
@@ -2811,16 +2789,24 @@ hooks.on('app:start', function(){
 
 	navigation.on('forward backward', function() {
 		state = arguments[0];
+		page = Page.get(state.name);
 		state.pageMeta || (state.pageMeta = {});
 		state.plugins || (state.plugins = {});
 
 		lastState && (isSamePage = (lastState.name === state.name));
-		if (!isSamePage) hooks.trigger('navigation:switch', state);
-		(page = Page.get(state.name))?pageReady():pageLoad();
+		hooks.trigger('navigation:switch', state);
+
+		setContent();
+		setPage();
+		setNavbar();
+		setToolbar();
+		setTransition();
+		setScroll();
+		refreshContent();
+		checkTemplate(page, 'template', pageReady);
 	});
 
 	hooks.on('navigation:switch', function() {
-		setContent();
 		setPlugin('onNavigationSwitch');
 	});
 
@@ -2869,89 +2855,8 @@ app.definePage = function(properties) {
 	return page;
 }
 
-app.definePageMeta = function(meta)  {
-	if (!(meta instanceof Array)) meta = [meta]
-	meta.forEach(function(m) {
-		pagemeta[m.name] = m;
-		hooks.trigger('page:defineMeta', m);
-	});
-}
-
 app.getPage = function(name) {
 	return Page.get(name);
-}
-
-var aEl = document.createElement('a');
-app.loadResource = function(urls, type, callback) {
-	if (arguments.length === 2) {
-		if (typeof arguments[1] === 'function') {
-			callback = arguments[1];
-			type = null;
-		}
-	}
-
-	if (typeof urls === 'string') {
-		urls = [urls];
-	}
-
-	function createid() {
-		return 'resource-' + Date.now() + '-' + Object.keys(resourcecache).length;
-	}
-
-	function createurl(url) {
-		return url.indexOf('http') === 0?url:app.config.resourceBase + url;
-	}
-
-	function load(url, callback) {
-		aEl.href = createurl(url);
-		var id = resourcecache[aEl.href] || (resourcecache[aEl.href] = createid());
-
-		if (type === 'js' || url.match(/\.js$/)) {
-			var script = document.createElement('script'), loaded = false;
-			script.id = id;
-			script.async = true;
-			script.onload = script.onreadystatechange = function() {
-				if (!loaded) {
-					loaded = true;
-					callback && callback(url);
-				}
-			}
-			script.src = url;
-			doc.body.appendChild(script);
-		} else if (type === 'css' || url.match(/\.css$/)) {
-			var link = document.createElement('link');
-			link.id = id;
-			link.type = 'text/css';
-			link.rel = 'stylesheet';
-			link.href = url;
-			doc.body.appendChild(link);
-			callback();
-		}
-	}
-
-	var u = [], combo = config.resourceCombo;
-	urls.forEach(function(url) {
-		aEl.href = createurl(url);
-		if (!resourcecache[aEl.href]) {
-			resourcecache[aEl.href] = createid();
-			u.push(url);
-		}
-	});
-
-	if (combo) {
-		u = combo(u);
-		if (typeof u === 'string') {
-			u = [u];
-		}
-	}
-
-	load(u.shift(), function() {
-		if (u.length) {
-			load(u.shift(), arguments.callee);
-		} else {
-			callback && callback();
-		}
-	});
 }
 
 function getState() {
@@ -2968,7 +2873,7 @@ app.navigation = {
 	},
 
 	resolveFragment: function(name, params) {
-		navigation.resolve(name, params);
+		return navigation.resolve(name, params);
 	},
 
 	getReferer: function() {

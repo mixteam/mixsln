@@ -1,8 +1,8 @@
 (function(app, undef) {
 	app.extendView({
-		name : 'searchItems',
+		name : 'searchitems',
 		el: 'div#J_searchList.search-list > ul',
-		template : './pages/list/searchItems.tpl',
+		template : './views/searchitems/searchitems.tpl',
 		word : null,
 		pageno : 1,
 
@@ -10,13 +10,19 @@
 			['click', 'a', '_itemClickHandler']
 		],
 
+		resources: {
+			css: ['./views/searchitems/searchitems.css']
+		},
+
 		plugins: {
-			domevent: true
+			domevent: true,
+			dynamic: true
 		},
 
 		_itemClickHandler : function(e) {
 			e.preventDefault();
-			app.navigation.push('detail/' + e.srcElement.getAttribute('dataid') + '/');
+			var fragment = app.navigation.resolveFragment('detail', {pid:e.srcElement.getAttribute('dataid')});
+			app.navigation.push(fragment);
 		},
 
 		_getSearchItems : function(callback) {
@@ -35,10 +41,13 @@
 			});
 		},
 
-		render : function(callback) {
+		render : function(data, callback) {
 			// implement super.render
 			var that = this
 				;
+
+			data.searchWord && (this.word = data.searchWord);
+			data.pageno && (this.pageno = data.pageno);
 
 			that._getSearchItems(function(datas) {
 				var html = that.template(datas);

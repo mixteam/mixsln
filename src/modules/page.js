@@ -26,7 +26,6 @@ function Page() {
 }
 
 var PageProto = {
-	ready : function() {/*implement*/},
 	startup : function() {/*implement*/},
 	teardown : function() {/*implement*/},
 	show : function() {/*implement*/},
