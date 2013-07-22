@@ -10,6 +10,8 @@ function runTask(grunt) {
 	context.modulePath = 'modules';
 	context.pluginPath = 'plugins';
 	context.assetPath = 'assets';
+	context.themePath = 'themes';
+	context.defaultTheme = 'ios6-default';
 
 	var depconcatTask = {
 			options: {
@@ -25,7 +27,7 @@ function runTask(grunt) {
 			},
 
 			css: {
-				src: ['<%= context.assetPath %>/*.css'],
+				src: ['<%= context.assetPath %>/base.css', '<%= context.assetPath %>/<%= context.themePath %>/<%= context.defaultTheme %>.css'],
 				dest: '<%= context.distPath %>/<%= context.name %>.css'
 			}
 		},
@@ -59,6 +61,21 @@ function runTask(grunt) {
 			}
 		},
 
+		lessTask = {
+			options: {
+				paths: ['<%= context.assetPath %>/<%= context.themePath %>/source']
+			},
+			main: {
+				files: [{
+					expand: true,
+					cwd: '<%= context.assetPath %>/<%= context.themePath %>/source/',
+					src: ['*.less'],
+					dest: '<%= context.assetPath %>/<%= context.themePath %>/',
+					ext: '.css'
+				}]
+			}
+		},
+
 
 		watchTask = {
 			'main_js' : {
@@ -71,9 +88,14 @@ function runTask(grunt) {
 				tasks: ['uglify:plugin']
 			},
 
-			'css' : {
+			'main_css' : {
 				files: ['<%= depconcat.css.src %>'],
 				tasks: ['depconcat:css', 'cssmin:main']
+			},
+
+			'theme_css' : {
+				files: ['<%= context.assetPath %>/<%= context.themePath %>/*/*.less'],
+				tasks: ['less', 'depconcat:css', 'cssmin:main']
 			}
 		}
 		;
@@ -84,15 +106,17 @@ function runTask(grunt) {
 		depconcat: depconcatTask,
 		uglify: uglifyTask,
 		watch: watchTask,
+		less: lessTask,
 		cssmin: cssminTask
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
+	grunt.loadNpmTasks('grunt-contrib-less');
 	grunt.loadNpmTasks('grunt-depconcat');
 
-	grunt.registerTask('dist', ['depconcat', 'uglify', 'cssmin']);
+	grunt.registerTask('dist', ['less', 'depconcat', 'uglify', 'cssmin']);
 	grunt.registerTask('dev', ['watch']);
 	
 	grunt.registerTask('default', ['dist']);

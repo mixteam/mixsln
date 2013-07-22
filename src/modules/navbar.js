@@ -29,7 +29,7 @@ var NavbarProto = {
     setTitle: function(title) {
     	if (typeof title === 'string') {
     		this.titleWrapEl.innerHTML = title;
-    	} else if (typeof title === 'HTMLElement') {
+    	} else if (title instanceof HTMLElement) {
     		this.titleWrapEl.innerHTML = '';
     		this.titleWrapEl.appendChild(title);
     	}

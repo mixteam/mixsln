@@ -89,6 +89,70 @@ window.addEventListener('resize', function(e){
 });
 
 
+//View Intial
+hooks.on('view:extend', function(view) {
+	var render = view.prototype.render,
+		destory = view.prototype.destory
+		;
+
+	view.prototype.render = function() {
+		var that = this, args = arguments;
+		checkTemplate(that, 'template', function() {
+			hooks.trigger('view:render', that, arguments);
+			render.apply(that, args);
+		});
+	}
+
+	view.prototype.destory = function() {
+		hooks.trigger('view:destory', this, arguments);
+		destory.apply(this, arguments);
+	}
+});
+
+//Page Initial
+hooks.on('page:define', function(page) {
+	var ready = page.ready,
+		startup = page.startup,
+		teardown = page.teardown,
+		show = page.show,
+		hide = page.hide,
+		isReady = false, persisted = false;
+
+	page.ready = function(state) {
+		if (isReady) return;
+		hooks.trigger('page:ready', state, page);
+		ready.call(page);
+		isReady = true;
+	}
+
+	page.startup = function(state) {
+		hooks.trigger('page:startup', state, page);
+		startup.call(page);
+	}
+
+	page.show = function(state) {
+		hooks.trigger('page:show', state, page);
+		show.call(page, persisted);
+		persisted = true;
+	}
+
+	page.hide = function(state) {
+		hooks.trigger('page:hide', state, page);
+		hide.call(page, persisted);
+	}
+
+	page.teardown = function(state) {
+		hooks.trigger('page:teardown', state, page);
+		teardown.call(page);
+		persisted = false;
+	}
+
+	page.html = function(html) {
+		config.enableContent.instance.html(html);
+	}
+});
+
+
 // Navigation Initial
 hooks.on('page:define page:defineMeta', function(page) {
 	var name = page.name,
@@ -336,69 +400,6 @@ hooks.on('page:define', function(page) {
 	}
 });
 
-//View Intial
-hooks.on('view:extend', function(view) {
-	var render = view.prototype.render,
-		destory = view.prototype.destory
-		;
-
-	view.prototype.render = function() {
-		var that = this, args = arguments;
-		checkTemplate(that, 'template', function() {
-			hooks.trigger('view:render', that, arguments);
-			render.apply(that, args);
-		});
-	}
-
-	view.prototype.destory = function() {
-		hooks.trigger('view:destory', this, arguments);
-		destory.apply(this, arguments);
-	}
-});
-
-//Page Initial
-hooks.on('page:define', function(page) {
-	var ready = page.ready,
-		startup = page.startup,
-		teardown = page.teardown,
-		show = page.show,
-		hide = page.hide,
-		isReady = false, persisted = false;
-
-	page.ready = function(state) {
-		if (isReady) return;
-		hooks.trigger('page:ready', state, page);
-		ready.call(page);
-		isReady = true;
-	}
-
-	page.startup = function(state) {
-		hooks.trigger('page:startup', state, page);
-		startup.call(page);
-	}
-
-	page.show = function(state) {
-		hooks.trigger('page:show', state, page);
-		show.call(page, persisted);
-		persisted = true;
-	}
-
-	page.hide = function(state) {
-		hooks.trigger('page:hide', state, page);
-		hide.call(page, persisted);
-	}
-
-	page.teardown = function(state) {
-		hooks.trigger('page:teardown', state, page);
-		teardown.call(page);
-		persisted = false;
-	}
-
-	page.html = function(html) {
-		config.enableContent.instance.html(html);
-	}
-});
-
 // forward backwrad Initial
 hooks.on('app:start', function(){
 	var c_navbar = config.enableNavbar,
@@ -607,7 +608,7 @@ hooks.on('app:start', function(){
 		state.pageMeta || (state.pageMeta = {});
 		state.plugins || (state.plugins = {});
 
-		lastState && (isSamePage = (lastState.name === state.name));
+		isSamePage = lastState && lastState.name === state.name;
 		if (!isSamePage) hooks.trigger('navigation:switch', state);
 		(page = Page.get(state.name))?pageReady():pageLoad();
 	});
