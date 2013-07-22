@@ -120,14 +120,15 @@
 			}
 		},
 
-		onViewExtend: function(viewProto) {
+		onViewExtend: function(View) {
 			var that = this,
-				res = viewProto.resources;
+				proto = View.prototype,
+				res = proto.resources;
 
 			if (res) {
-				var render = viewProto.render;	
-				viewProto.render = this._wrap(res, function(context, args) {
-					(viewProto.render = render).apply(context, args);
+				var render = proto.render;	
+				proto.render = this._wrap(res, function(context, args) {
+					(proto.render = render).apply(context, args);
 				});
 			}
 		}

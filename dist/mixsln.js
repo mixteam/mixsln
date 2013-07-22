@@ -842,7 +842,12 @@ function Navbar(wrapEl) {
 
 var NavbarProto = {
     setTitle: function(title) {
-    	this.titleWrapEl.innerHTML = title;
+    	if (typeof title === 'string') {
+    		this.titleWrapEl.innerHTML = title;
+    	} else if (title instanceof HTMLElement) {
+    		this.titleWrapEl.innerHTML = '';
+    		this.titleWrapEl.appendChild(title);
+    	}
     },
 
     setButton: function(options) {
@@ -2298,6 +2303,61 @@ window.addEventListener('resize', function(e){
 });
 
 
+//View Intial
+hooks.on('view:extend', function(view) {
+	var render = view.prototype.render,
+		destory = view.prototype.destory
+		;
+
+	view.prototype.render = function() {
+		var that = this, args = arguments;
+		checkTemplate(that, 'template', function() {
+			hooks.trigger('view:render', that, arguments);
+			render.apply(that, args);
+		});
+	}
+
+	view.prototype.destory = function() {
+		hooks.trigger('view:destory', this, arguments);
+		destory.apply(this, arguments);
+	}
+});
+
+//Page Initial
+hooks.on('page:define', function(page) {
+	var startup = page.startup,
+		teardown = page.teardown,
+		show = page.show,
+		hide = page.hide,
+		persisted = false;
+
+	page.startup = function(state) {
+		hooks.trigger('page:startup', state, page);
+		startup.call(page);
+	}
+
+	page.show = function(state) {
+		hooks.trigger('page:show', state, page);
+		show.call(page, persisted);
+		persisted = true;
+	}
+
+	page.hide = function(state) {
+		hooks.trigger('page:hide', state, page);
+		hide.call(page, persisted);
+	}
+
+	page.teardown = function(state) {
+		hooks.trigger('page:teardown', state, page);
+		teardown.call(page);
+		persisted = false;
+	}
+
+	page.html = function(html) {
+		config.enableContent.instance.html(html);
+	}
+});
+
 // Navigation Initial
 hooks.on('page:define', function(page) {
 	var name = page.name,
@@ -2384,62 +2444,6 @@ hooks.on('app:start', function() {
 	}
 });
 
-
-//View Intial
-hooks.on('view:extend', function(view) {
-	var render = view.prototype.render,
-		destory = view.prototype.destory
-		;
-
-	view.prototype.render = function() {
-		var that = this, args = arguments;
-		checkTemplate(that, 'template', function() {
-			hooks.trigger('view:render', that, arguments);
-			render.apply(that, args);
-		});
-	}
-
-	view.prototype.destory = function() {
-		hooks.trigger('view:destory', this, arguments);
-		destory.apply(this, arguments);
-	}
-});
-
-//Page Initial
-hooks.on('page:define', function(page) {
-	var startup = page.startup,
-		teardown = page.teardown,
-		show = page.show,
-		hide = page.hide,
-		persisted = false;
-
-	page.startup = function(state) {
-		hooks.trigger('page:startup', state, page);
-		startup.call(page);
-	}
-
-	page.show = function(state) {
-		hooks.trigger('page:show', state, page);
-		show.call(page, persisted);
-		persisted = true;
-	}
-
-	page.hide = function(state) {
-		hooks.trigger('page:hide', state, page);
-		hide.call(page, persisted);
-	}
-
-	page.teardown = function(state) {
-		hooks.trigger('page:teardown', state, page);
-		teardown.call(page);
-		persisted = false;
-	}
-
-	page.html = function(html) {
-		config.enableContent.instance.html(html);
-	}
-});
-
 //Plugin Initial
 hooks.on('app:start', function() {
 	for (var name in app.plugin) {
@@ -2449,12 +2453,13 @@ hooks.on('app:start', function() {
 });
 
 function viewPluginRun(view, funcName) {
-	if (view.plugins) {
-		for (var name in view.plugins) {
-			var plugin = app.plugin[name], pluginOpt = view.plugins[name]
+	var plugins = view.plugins || view.prototype.plugins;
+	if (plugins) {
+		for (var name in plugins) {
+			var plugin = app.plugin[name], pluginOpt = plugins[name]
 				;
 
-			pluginOpt === true && (pluginOpt = view.plugins[name] = {});
+			pluginOpt === true && (pluginOpt = plugins[name] = {});
 			if (plugin && pluginOpt) {
 				plugin[funcName] && plugin[funcName](view, pluginOpt);
 			}
@@ -2463,7 +2468,7 @@ function viewPluginRun(view, funcName) {
 }
 
 hooks.on('view:extend', function(ChildView) {
-	viewPluginRun(ChildView.prototype, 'onViewExtend');
+	viewPluginRun(ChildView, 'onViewExtend');
 });
 
 hooks.on('view:render', function(view) {
@@ -2793,7 +2798,7 @@ hooks.on('app:start', function(){
 		state.pageMeta || (state.pageMeta = {});
 		state.plugins || (state.plugins = {});
 
-		lastState && (isSamePage = (lastState.name === state.name));
+		isSamePage = lastState && lastState.name === state.name;
 		hooks.trigger('navigation:switch', state);
 
 		setContent();
@@ -2803,6 +2808,7 @@ hooks.on('app:start', function(){
 		setTransition();
 		setScroll();
 		refreshContent();
+		
 		checkTemplate(page, 'template', pageReady);
 	});
 
