@@ -1,10 +1,10 @@
 # Mix解决方案
 
-## 稳定版本(v0.4.1)
+## 稳定版本(v0.4.2)
 
-- [js开发版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.js)
-- [js压缩版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.min.js)
-- [css下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.min.css)
+- [js开发版下载](http://mixteam.github.io/mixsln/dist/mixsln.js)
+- [js压缩版下载](http://mixteam.github.io/mixsln/dist/mixsln.min.js)
+- [css下载（ios6默认主题样式）](http://mixteam.github.io/mixsln/dist/mixsln.min.css)
 
 ## 文档
 
@@ -29,6 +29,12 @@
 4. 为各平台提供统一方案，保证兼容性。
 
 ## 版本更新
+
+### v0.4.2
+
+- 增加主题样式，提供ios6默认主题，ios6亮色主题，以及简单主题
+- 修改pullbonce插件
+- 修复bug
 
 ### v0.4.1
 

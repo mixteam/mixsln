@@ -40,43 +40,8 @@
 			lazyload: true,
 			scrollpos: true,
 			pullbounce: {
-				top: 50,
-				bottom: 50,
-				onPullDown: function(offset) {
-					var that = this,
-						span = this.$el.find('#J_pullRefresh span'),
-						text = span.text();
-
-					if (offset > 50 && text !== '松开即刷新') {
-						span.text('松开即刷新');
-					} else if (offset < 50 && text !== '下拉可刷新'){
-						span.text('下拉可刷新');
-					}
-
-					return function(callback) {
-						that.refresh(callback);
-					}
-				},
-
-				onPullUp: function(offset) {
-					var that = this,
-						span = this.$el.find('#J_pullRefresh span'),
-						text = span.text();
-
-					if (offset > 50 && text !== '松开即加载更多') {
-						span.text('松开即加载更多');
-					} else if (offset < 50 && text !== '上拉可加载更多'){
-						span.text('上拉可加载更多');
-					}
-
-					return function(callback) {
-						that.more(callback);
-					}
-				},
-
-				onPullEnd: function(type, callback) {
-					type === 'pulldown'?this.refresh(callback):this.more(callback);
-				}	
+				onPullDown: '_pullDownHandler',
+				onPullUp: '_pullUpHandler'
 			}
 		},
 
@@ -89,7 +54,7 @@
 			app.navigation.push('list/' + encodeURIComponent(word) + '/');
 		},
 
-		refresh : function(callback) {
+		_pullDownHandler : function(callback) {
 			this.searchItemsView.pageno = 1;
 			this.searchItemsView.render(function() {
 				callback();
@@ -99,7 +64,7 @@
 			});
 		},
 
-		more : function(callback) {
+		_pullUpHandler : function(callback) {
 			this.searchItemsView.renderMore(function() {
 				callback();
 				setTimeout(function(){
@@ -123,7 +88,6 @@
 			this.html(html);
 			this.$el.find('.searchcontent').append(searchItems.el);
 			searchItems.render(function() {
-				that.$el.find('#J_pullRefresh, #J_pullUpdate').css('visibility', 'visible');
 				setTimeout(function(){
 					app.plugin.lazyload.check();	
 				}, 500);

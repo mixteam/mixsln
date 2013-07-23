@@ -27,7 +27,12 @@ function Navbar(wrapEl) {
 
 var NavbarProto = {
     setTitle: function(title) {
-    	this.titleWrapEl.innerHTML = title;
+    	if (typeof title === 'string') {
+    		this.titleWrapEl.innerHTML = title;
+    	} else if (title instanceof HTMLElement) {
+    		this.titleWrapEl.innerHTML = '';
+    		this.titleWrapEl.appendChild(title);
+    	}
     },
 
     setButton: function(options) {

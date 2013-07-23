@@ -1,0 +1,58 @@
+.navbar-button-back() when (@navbar-has-back = 'true') {
+	&.back {
+	    margin: @navbar-back-margin;
+
+		&:after {
+		    content: "";
+		    display: block;
+		    position: absolute;
+		    margin-top: 0px;
+		    margin-bottom: 0px;
+		    width: @navbar-back-width;
+		    height: @navbar-back-height;
+		    left: @navbar-back-left;
+		    top: @navbar-back-top;
+		    background: @navbar-back-background;
+		    background-size: contain;
+		}
+	}
+}
+
+header.navbar {
+	height: @header-navbar-height;
+	background: @header-navbar-background;
+	background-size: contain;
+	border-top: @header-navbar-border-top;
+	border-bottom: @header-navbar-border-bottom;
+    font-size: @header-navbar-font-size;
+    font-weight: @header-navbar-font-weight;
+    color: @header-navbar-color;
+    text-shadow: @header-navbar-text-shadow;
+    -webkit-box-shadow: @header-navbar-box-shadow;
+
+    button {
+		height: @navbar-button-height;
+		background: @navbar-button-background;
+		background-size: contain;
+	    color: @navbar-button-color;
+	    text-shadow: @navbar-button-text-shadow;
+	    font-size: @navbar-button-font-size;
+	    font-weight: @navbar-button-font-weight;
+	    border-top: @navbar-button-border-top;
+	    border-bottom: @navbar-button-border-bottom;
+	    border-left: @navbar-button-border-left;
+	    border-right: @navbar-button-border-right;
+	    border-radius: @navbar-button-border-radius;
+	    -webkit-box-shadow: @navbar-button-box-shadow;
+
+	    .navbar-button-back();
+    }
+}
+
+.viewport > section.content > .wrap {
+	background: @content-wrap-background;
+
+	.active {
+		background: @content-active-background;
+	}
+}
