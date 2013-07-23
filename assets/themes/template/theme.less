@@ -1,11 +1,8 @@
 .navbar-button-back() when (@navbar-has-back = 'true') {
 	&.back {
 	    margin: @navbar-back-margin;
-	    border-left: 0;
-	    border-top-left-radius: 0;
-	    border-bottom-left-radius: 0;
 
-		&:before {
+		&:after {
 		    content: "";
 		    display: block;
 		    position: absolute;
