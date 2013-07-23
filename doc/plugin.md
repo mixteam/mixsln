@@ -8,6 +8,23 @@
 
 要使用插件，必须引入这些插件的js文件。插件的js文件位于`dist/plugins`下。
 
+## 索引
+
+1. [开发自定义插件](#开发自定义插件)
+	
+	1.1 [命名](#命名)  
+	1.2 [切入点](#切入点)  
+	1.3 [技巧和原则](#技巧和原则)  
+
+2. [一些预置的插件](#一些预置的插件)  
+
+	2.1 [domevent](#domevent)  
+	2.2 [lazyload](#lazyload)  
+	2.3 [scrollpos](#scrollpos)  
+	2.4 [stateStorage](#stateStorage)  
+	2.5 [loading](#loading)  
+	2.6 [pullbonce](#pullbonce)  
+
 ## 开发自定义插件
 
 ### 命名
