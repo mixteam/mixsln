@@ -2909,6 +2909,10 @@ app.loadResource = function(urls, type, callback) {
 	}
 
 	function load(url, callback) {
+		if (!url) {
+			return callback();
+		}
+		
 		aEl.href = createurl(url);
 		var id = resourcecache[aEl.href] || (resourcecache[aEl.href] = createid());
 
