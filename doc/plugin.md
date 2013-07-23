@@ -6,6 +6,8 @@
 - 页面场景。页面定义时，页面进入时等
 - 视图场景。视图扩展时，视图渲染时等
 
+要使用插件，必须引入这些插件的js文件。插件的js文件位于`dist/plugins`下。
+
 ## 开发自定义插件
 
 ### 命名
@@ -146,6 +148,8 @@
 
 ## 一些预置的插件
 
+插件的使用，可参见[demo](http://mixteam.github.io/mixsln/demo/webapp/)。
+
 ### domevent
 
 在页面中支持事件的绑定和解绑。**需zepto支持**。
@@ -266,22 +270,18 @@
 
 	plugins: {
 		pullbounce: {
-			top: 50,	// 下拉的高度
-			bottom: 50,	// 上拉的高度
-			onPullDown: function(offset) {
-				// 每次下拉时，都会进入，offset为下拉的偏移值。
-
+			onPullDown: function(callback) {
+				// 页面下拉后触发
+				// ... 继续操作
+				callback(); // 完成操作后，执行callback
 			},
-			onPullUp: function(offset) {
-				// 每次上拉时，都会进入，offset为上拉的偏移值。
-
-			},
-			onPullEnd: function(type, callback) {
-				// 上拉/下拉结束后调用，type为pulldown/pullup。
-				// 调用callback，恢复滚动状态
+			onPullUp: function(callback) {
+				// 页面上拉后触发
+				// ... 继续操作
+				callback(); // 完成操作后，执行callback
 			}
 		}
 	}
 
-关于该插件的使用，可插件框架提供的demo。
+onPullDown和onPullUp的值，也可以当前的page的方法名。
 

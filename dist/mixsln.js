@@ -2360,7 +2360,8 @@ hooks.on('page:define', function(page) {
 	}
 
 	page.html = function(html) {
-		config.enableContent.instance.html(html);
+		this.el.innerHTML = html;
+		//config.enableContent.instance.html(html);
 	}
 });
 
@@ -2912,7 +2913,7 @@ app.loadResource = function(urls, type, callback) {
 		if (!url) {
 			return callback();
 		}
-		
+
 		aEl.href = createurl(url);
 		var id = resourcecache[aEl.href] || (resourcecache[aEl.href] = createid());
 

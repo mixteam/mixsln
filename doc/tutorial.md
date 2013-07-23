@@ -2,9 +2,9 @@
 
 ## 获取代码（v0.4.x）
 
-- [js开发版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln-debug.js)
-- [js压缩版下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.js)
-- [css下载](https://raw.github.com/mixteam/mixsln/master/dist/mixsln.css)
+- [js开发版下载](http://mixteam.github.io/mixsln/dist/mixsln.js)
+- [js压缩版下载](http://mixteam.github.io/mixsln/dist/mixsln.min.js)
+- [css下载（ios6默认主题样式）](http://mixteam.github.io/mixsln/dist/mixsln.min.css)
 
 ## Hello World
 
@@ -105,8 +105,6 @@
 刷新后，页面上会输出`Hello, zhuxun`。
 
 ## 使用默认主题
-
-此默认主题中，包含了顶部导航栏，底部工具栏，页面滚动以及转场等。
 
 引入框架CSS：
 
