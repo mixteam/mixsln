@@ -819,7 +819,7 @@ var doc = win.document
 	;
 
 function _setButton(btn, options) {
-	(options.id != null) && btn.setAttribute('id', options.id);
+	(options.id != null) && btn.setAttribute('data-id', options.id);
 	(options['class'] != null) && (btn.className = options['class']);
 	(options.text != null) && (btn.innerHTML = options.text);
 	(options.bg != null) && (btn.style.background = options.bg);
@@ -854,17 +854,17 @@ var NavbarProto = {
     	var wrap, btn;
     	if (options.type === 'back') {
     		wrap = this.backWrapEl;
-    		btn = wrap.querySelector('button');
+    		btn = wrap.querySelector('a');
     	} else if (options.type === 'func') {
     		wrap = this.funcWrapEl;
-    		btn = wrap.querySelector('#' + options.id);
+    		btn = wrap.querySelector('a[data-id="' + options.id + '"]');
     	} else if (options.id) {
-    		btn = this.wrapEl.querySelector('#' + options.id);
+    		btn = this.wrapEl.querySelector('a[data-id="' + options.id + '"]');
     		btn && (wrap = btn.parentNode);
     	}
 
 		if (!btn && wrap) {
-			btn = doc.createElement('button');
+			btn = doc.createElement('a');
 			btn.className = options.type;
 			wrap.appendChild(btn);
 		}
@@ -872,14 +872,21 @@ var NavbarProto = {
     },
 
     getButton: function(id) {
-    	return this.funcWrapEl.querySelector('button#' + id);
+    	return this.wrapEl.querySelector('a[data-id="' + id + '"]');
     },
 
     removeButton: function(id) {
+    	function remove(btn) {
+			if (btn) {
+				btn.handler && btn.removeEventListener('click', btn.handler);
+				btn.parentNode.removeChild(btn);
+			}
+    	}
+
     	if (!id) {
-    		var btns = this.funcWrapEl.querySelectorAll('button');
+    		var btns = this.funcWrapEl.querySelectorAll('a');
     		for (var i = 0; i < btns.length; i++) {
-    			this.removeButton(btns[i]);
+    			remove(btns[i]);
     		}
     	} else {
 	    	if (typeof id === 'string') {
@@ -887,10 +894,7 @@ var NavbarProto = {
 	    	} else if (id instanceof HTMLElement) {
 	    		var btn = id;
 	    	}
-			if (btn) {
-				btn.handler && btn.removeEventListener('click', btn.handler);
-				btn.parentNode.removeChild(btn);
-			}
+	    	remove(btn);
 		}
     }
 }

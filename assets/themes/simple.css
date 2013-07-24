@@ -11,8 +11,9 @@ header.navbar {
   text-shadow: none;
   -webkit-box-shadow: none;
 }
-header.navbar button {
-  height: 32px;
+header.navbar a {
+  height: 30px;
+  line-height: 30px;
   background: #ffffff;
   background-size: contain;
   color: #4e4e4e;
@@ -26,10 +27,10 @@ header.navbar button {
   border-radius: 5px;
   -webkit-box-shadow: inset 0 -1px 1px #dedede;
 }
-header.navbar button.back {
+header.navbar a.back {
   margin: 0 0 0 14px;
 }
-header.navbar button.back:after {
+header.navbar a.back:after {
   content: "";
   display: block;
   position: absolute;

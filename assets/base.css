@@ -87,7 +87,7 @@ header.navbar > ul > li:last-child {
     padding:0 10px;
 }
 
-header.navbar button {
+header.navbar a {
     top: 0;
     display: inline-block;
     text-align: center;

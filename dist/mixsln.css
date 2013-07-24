@@ -87,7 +87,7 @@ header.navbar > ul > li:last-child {
     padding:0 10px;
 }
 
-header.navbar button {
+header.navbar a {
     top: 0;
     display: inline-block;
     text-align: center;
@@ -182,8 +182,9 @@ header.navbar {
   text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.4);
   -webkit-box-shadow: 0 1.5px 0.5px rgba(0, 0, 0, 0.3);
 }
-header.navbar button {
-  height: 29px;
+header.navbar a {
+  height: 28px;
+  line-height: 28px;
   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAA4CAYAAAA8YJLsAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAA9hAAAPYQB1ayvdAAAABZ0RVh0Q3JlYXRpb24gVGltZQAwNy8yMi8xM4uhIv4AAAAcdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzbovLKMAAAAQklEQVQYlaWPwQkAMAgDg9N3i07S1ZJ+xGCh/fQjnodoMOZSSEAIQnZSlQOFYBe0ZUfbLsgPW7PjuNeunz5iOX7iBok+naBU0f5vAAAAAElFTkSuQmCC) repeat-x 0 0;
   background-size: contain;
   color: #ffffff;
@@ -197,10 +198,10 @@ header.navbar button {
   border-radius: 4.5px;
   -webkit-box-shadow: 0 0.5px 1px rgba(255, 255, 255, 0.5), inset 0 0.5px 1px rgba(0, 0, 0, 0.2);
 }
-header.navbar button.back {
+header.navbar a.back {
   margin: 0 0 0 14px;
 }
-header.navbar button.back:after {
+header.navbar a.back:after {
   content: "";
   display: block;
   position: absolute;
