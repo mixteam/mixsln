@@ -702,8 +702,8 @@ app.loadResource = function(urls, type, callback) {
 			return callback();
 		}
 
-		aEl.href = createurl(url);
-		var id = resourcecache[aEl.href] || (resourcecache[aEl.href] = createid());
+		url = aEl.href = createurl(url);
+		var id = resourcecache[url] || (resourcecache[url] = createid());
 
 		if (type === 'js' || url.match(/\.js$/)) {
 			var script = document.createElement('script'), loaded = false;
