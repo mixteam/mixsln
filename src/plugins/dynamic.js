@@ -31,7 +31,7 @@
 
 				url = aEl.href = createurl(url);
 
-				if (resourcecache[url]) {
+				if (typeof resourcecache[url] === 'string') {
 					return callback();
 				}
 				
@@ -64,7 +64,7 @@
 			urls.forEach(function(url) {
 				aEl.href = createurl(url);
 				if (!resourcecache[aEl.href]) {
-					resourcecache[aEl.href] = createid();
+					resourcecache[aEl.href] = true;
 					u.push(url);
 				}
 			});
