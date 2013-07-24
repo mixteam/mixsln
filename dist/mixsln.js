@@ -2920,7 +2920,12 @@ app.loadResource = function(urls, type, callback) {
 		}
 
 		url = aEl.href = createurl(url);
-		var id = resourcecache[url] || (resourcecache[url] = createid());
+
+		if (typeof resourcecache[url] === 'string') {
+			return callback();
+		}
+
+		var id = resourcecache[url] = createid();
 
 		if (type === 'js' || url.match(/\.js$/)) {
 			var script = document.createElement('script'), loaded = false;
@@ -2949,7 +2954,7 @@ app.loadResource = function(urls, type, callback) {
 	urls.forEach(function(url) {
 		aEl.href = createurl(url);
 		if (!resourcecache[aEl.href]) {
-			resourcecache[aEl.href] = createid();
+			resourcecache[aEl.href] = true;
 			u.push(url);
 		}
 	});
