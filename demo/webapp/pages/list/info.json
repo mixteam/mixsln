@@ -1,8 +1,0 @@
-{
-	"name": "list",
-	"title": "搜索列表",
-	"route": "list\\/(P<word>[^\\/]+)\\/?",
-	"js": ["searchItem.js", "list.js"],
-	"css": ["list.css"],
-	"tpl": ["searchItem.tpl", "list.tpl"]
-}

@@ -1,5 +1,4 @@
 (function(app, undef) {
-	var searchbar = app.getView('searchbar');
 
 	app.definePage({
 		name: 'detail',
@@ -29,11 +28,7 @@
 			}
 		],
 		toolbar: {
-			height: 50,
-			el: searchbar.el
-		},
-		views: {
-			searchbar: searchbar,
+			height: 50
 		},
 		plugins: {
 			domevent: true
@@ -42,17 +37,25 @@
 		startup : function() {
 			// implement super.startup
 			var pid = app.navigation.getParameter('pid'),
-				html = this.template({}),
-				searchbar = this.views.searchbar
+				html = this.template()
 				;
 
 			this.html(html);
+		},
+
+		show: function() {
+			var searchbar = this.searchbarView = app.getView('searchbar');
+
+			app.navigation.setToolbar({el: searchbar.el});
 			searchbar.render();
+		},
+
+		hide: function() {
+			this.searchbarView.destory();
 		},
 
 		teardown : function() {
 			// implement super.teardown
-			this.views.searchbar.destory();
 		}
 	});
 

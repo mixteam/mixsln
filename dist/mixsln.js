@@ -2191,9 +2191,10 @@ var NavigationProto = {
 		if (route) {
 			routeText = route.routeText;
 			resolved = routeText.replace(/\(P<[a-z0-9_-][a-z0-9_-]*?>.*?\)/g, function(m) {
+				PERL_REGEXP.lastIndex = 0;
 				var name = PERL_REGEXP.exec(m)[1];
 				return params[name] || 'undefined';
-			}).replace('\\', '');
+			}).replace('\\/?', '').replace('\\', '');
 		}
 
 		return resolved;
@@ -2914,8 +2915,8 @@ app.loadResource = function(urls, type, callback) {
 			return callback();
 		}
 
-		aEl.href = createurl(url);
-		var id = resourcecache[aEl.href] || (resourcecache[aEl.href] = createid());
+		url = aEl.href = createurl(url);
+		var id = resourcecache[url] || (resourcecache[url] = createid());
 
 		if (type === 'js' || url.match(/\.js$/)) {
 			var script = document.createElement('script'), loaded = false;
@@ -2979,7 +2980,7 @@ app.navigation = {
 	},
 
 	resolveFragment: function(name, params) {
-		navigation.resolve(name, params);
+		return navigation.resolve(name, params);
 	},
 
 	getReferer: function() {

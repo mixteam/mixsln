@@ -767,7 +767,7 @@ app.navigation = {
 	},
 
 	resolveFragment: function(name, params) {
-		navigation.resolve(name, params);
+		return navigation.resolve(name, params);
 	},
 
 	getReferer: function() {
