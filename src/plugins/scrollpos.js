@@ -1,4 +1,4 @@
-(function(win, app){
+;(function(win, app){
 	var doc = win.document
 		;
 
@@ -40,4 +40,4 @@
 			app.scroll.removeEventListener('scrollend', this);
 		}
 	}
-})(window, window['app']);
+})(window, window['app'])

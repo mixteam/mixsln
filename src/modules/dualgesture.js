@@ -1,6 +1,6 @@
 //@require gesture
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,
     docEl = doc.documentElement
@@ -126,4 +126,4 @@ function dualtouchendHandler(event) {
 
 docEl.addEventListener('dualtouchstart', dualtouchstartHandler, false);
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

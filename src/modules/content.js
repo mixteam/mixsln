@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 
 function Content(wrapEl, options) {
@@ -67,4 +67,4 @@ for (var p in ContentProto) {
 
 app.module.Content = Content;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

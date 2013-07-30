@@ -1,6 +1,6 @@
 //@require message
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 function StateStack() {
 	var that = this;
@@ -393,4 +393,4 @@ Navigation.instance = new Navigation();
 app.module.StateStack = StateStack;
 app.module.Navigation = Navigation;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

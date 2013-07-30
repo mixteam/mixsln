@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,
     docEl = doc.documentElement,
@@ -343,4 +343,4 @@ function touchcancelHandler(event) {
 
 docEl.addEventListener('touchstart', touchstartHandler, false);
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

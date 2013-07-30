@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document
 	;
@@ -55,4 +55,4 @@ Template.engine = {}
 
 app.module.Template = Template;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

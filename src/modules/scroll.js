@@ -1,7 +1,7 @@
 //@require gesture
 //@require animation
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,
 	docEl = doc.documentElement,
@@ -387,4 +387,4 @@ var Scroll = {
 
 app.module.Scroll = Scroll;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

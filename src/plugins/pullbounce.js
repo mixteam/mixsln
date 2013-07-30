@@ -1,4 +1,4 @@
-(function(win, app){
+;(function(win, app){
 	var doc = win.document,
 		config = app.config,
 		bounceHeight = 50;
@@ -145,4 +145,4 @@
 			app.scroll.removeEventListener('panend', this, false);
 		}
 	}
-})(window, window['app']);
+})(window, window['app'])

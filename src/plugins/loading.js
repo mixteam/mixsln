@@ -1,4 +1,4 @@
-(function(win, app) {
+;(function(win, app) {
 	var doc = win.document,
 		loadingTimeout = 5000,
 		loadingId, loadingWrap;
@@ -46,4 +46,4 @@
 	}
 
 
-})(window, window['app']);
+})(window, window['app'])

@@ -10,7 +10,7 @@
 //@require transition
 
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,	$ = win['$'],
  	appVersion = navigator.appVersion,
@@ -415,51 +415,55 @@ hooks.on('app:start', function(){
 
 	// navbar
 	function setNavbar() {
-		if (c_navbar) {
-			var i_navbar = c_navbar.instance
-				title = state.pageMeta.title || page.title,
-				buttons = state.pageMeta.buttons || page.buttons
-				;
+		var title = state.pageMeta.title || page.title,
+			buttons = state.pageMeta.buttons || page.buttons
+			;
 
-			app.navigation.setTitle(title);
-			i_navbar.removeButton();
+		if (buttons) {
+			for (var i = 0; i < buttons.length; i++)  {
+				var button = buttons[i],
+					handler = button.handler;
 
-			if (buttons) {
-				buttons.forEach(function(button) {
-					var handler = button.handler;
+				button.id || (button.id = 'btn-' + Date.now());
 
-					if (typeof handler === 'string') {
-						handler = page[handler];
-					}
+				if (typeof handler === 'string') {
+					handler = page[handler];
+				}
 
-					if (button.type === 'back') {
-						button.hide = (button.autoHide !== false && state.index < 1);
-						handler || (handler = function() {
-							app.navigation.pop();
-						});
-					}
+				if (button.type === 'back') {
+					button.hide = (button.autoHide !== false && state.index < 1);
+					handler || (handler = function() {
+						app.navigation.pop();
+					});
+				}
 
-					button.handler = function(e) {
+				button.handler = (function(handler) {
+					return function(e) {
 						handler && handler.call(page, e, state.index);
 					}
-
-					app.navigation.setButton(button);
-				});
-			} else {
-				app.navigation.setButton({
-					type: 'back',
-					text: 'back',
-					hide: state.index < 1?true:false,
-					handler: function() {
-						app.navigation.pop();
-					}
-				});
+				})(handler);
 			}
+		} else {
+			buttons = [{
+				id: 'back',
+				type: 'back',
+				text: 'back',
+				hide: state.index < 1?true:false,
+				handler: function() {
+					app.navigation.pop();
+				}
+			}];
+		}
 
-			// 不是同一个页面，且不是第一次页面
-			if (!isSamePage && lastPage){
-				Transition.float(i_navbar.animWrapEl, state.transition === 'backward'?'LI':'RI', 50);
+		// 第一次页面或同一个页面
+		if (isSamePage || !lastPage) {
+			app.navigation.resetNavbar();
+			app.navigation.setTitle(title);
+			for (var i = 0; i < buttons.length; i++) {
+				app.navigation.setButton(buttons[i]);
 			}
+		} else {
+			app.navigation.switchNavbar(title, state.transition, buttons);
 		}
 	}
 
@@ -655,7 +659,11 @@ app.extendView = function(properties) {
 }
 
 app.getView = function(name) {
-	return new (View.get(name));
+	var ChildView = View.get(name),
+		context = Object.create(ChildView.prototype),
+		args = Array.prototype.slice.call(arguments, 1);
+	ChildView.apply(context, args);
+	return context;
 }
 
 app.definePage = function(properties) {
@@ -805,16 +813,16 @@ app.navigation = {
 
 	setTitle: function(title) {
 		var state = getState();
-		if (app.config.enableNavbar) {
-			app.config.enableNavbar.instance.setTitle(title);
+		if (config.enableNavbar) {
+			config.enableNavbar.instance.setTitle(title);
 		}
 		state.pageMeta.title = title;
 	},
 
 	setButton: function(options) {
 		var state = getState();
-		if (app.config.enableNavbar) {
-			app.config.enableNavbar.instance.setButton(options);
+		if (config.enableNavbar) {
+			config.enableNavbar.instance.setButton(options);
 		}
 		if (!state.pageMeta.buttons) {
 			state.pageMeta.buttons = [options];
@@ -833,10 +841,27 @@ app.navigation = {
 		}
 	},
 
+	switchNavbar: function(title, type, buttons) {
+		if (config.enableNavbar) {
+			this.resetNavbar();
+			this.setTitle(title);
+			for (var i = 0; i < buttons.length; i++) {
+				this.setButton(buttons[i]);
+			}
+			Transition.float(config.enableNavbar.instance.animWrapEl, type === 'backward'?'LI':'RI', 50);
+		}
+	},
+
+	resetNavbar: function() {
+		if (config.enableNavbar) {
+			config.enableNavbar.instance.removeButton();
+		}
+	},
+
 	setToolbar: function(options) {
 		var state = getState();
-		if (app.config.enableToolbar) {
-			app.config.enableToolbar.instance.set(options);
+		if (config.enableToolbar) {
+			config.enableToolbar.instance.set(options);
 		}
 		state.pageMeta.toolbar = options;
 	}
@@ -958,4 +983,4 @@ app.scroll = {
 	}
 }
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
