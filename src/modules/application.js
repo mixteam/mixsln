@@ -116,14 +116,7 @@ hooks.on('page:define', function(page) {
 		teardown = page.teardown,
 		show = page.show,
 		hide = page.hide,
-		isReady = false, persisted = false;
-
-	page.ready = function(state) {
-		if (isReady) return;
-		hooks.trigger('page:ready', state, page);
-		ready.call(page);
-		isReady = true;
-	}
+		persisted = false;
 
 	page.startup = function(state) {
 		hooks.trigger('page:startup', state, page);
@@ -147,9 +140,13 @@ hooks.on('page:define', function(page) {
 		persisted = false;
 	}
 
+	page.ready = function(state) {
+		hooks.trigger('page:ready', state, page);
+		ready.call(page);
+	}
+
 	page.html = function(html) {
 		this.el.innerHTML = html;
-		//config.enableContent.instance.html(html);
 	}
 });
 
@@ -528,14 +525,8 @@ hooks.on('app:start', function(){
 
 			// 不是第一次页面
 			if (c_transition && lastPage) {
-				var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
-					className = c_transition.wrapEl.className += ' ' + transition
-					;
-
-				Transition.move(c_transition.wrapEl, offsetX, 0, function() {
-					i_content.setClassName();
-					c_transition.wrapEl.className = className.replace(' ' + transition, '');
-					c_transition.wrapEl.style.webkitTransform = '';
+				hooks.trigger('transition:begin', transition, c_transition.wrapEl);
+				hooks.once('transition:end', function() {
 					hooks.trigger('navigation:switchend', state);
 				});
 			} else {
@@ -564,13 +555,12 @@ hooks.on('app:start', function(){
 			meta.css && app.loadResource(meta.css, 'css');
 			meta.js && app.loadResource(meta.js, 'js', function() {
 				page = Page.get(state.name);
-				page.ready();
-				pageReady();
+				pageLoaded();
 			});
 		}
 	}
 
-	function pageReady() {
+	function pageLoaded() {
 		page.el = i_content.getActive();
 		$ && (page.$el = $(page.el));
 
@@ -615,7 +605,7 @@ hooks.on('app:start', function(){
 
 		isSamePage = lastState && lastState.name === state.name;
 		if (!isSamePage) hooks.trigger('navigation:switch', state);
-		(page = Page.get(state.name))?pageReady():pageLoad();
+		(page = Page.get(state.name))?pageLoaded():pageLoad();
 	});
 
 	hooks.on('navigation:switch', function() {
@@ -623,11 +613,24 @@ hooks.on('app:start', function(){
 		setPlugin('onNavigationSwitch');
 	});
 
+	hooks.on('transition:begin', function(transition, wrapEl) {
+		var offsetX = wrapEl.offsetWidth * (transition === 'backward'?1:-1),
+			className = wrapEl.className += ' ' + transition
+			;
+
+		Transition.move(wrapEl, offsetX, 0, function() {
+			i_content.setClassName();
+			wrapEl.className = className.replace(' ' + transition, '');
+			wrapEl.style.webkitTransform = '';
+			hooks.trigger('transition:end');
+		});
+	});
+
 	hooks.on('navigation:switchend', function() {
 		setPlugin('onNavigationSwitchEnd');
 	});
 
-	hooks.after('page:show navigation:switchend', function() {
+	hooks.after('navigation:switchend page:show', function() {
 		setPlugin('onDomReady');
 	});
 

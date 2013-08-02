@@ -168,9 +168,9 @@ var MessageScopeProto = {
 		events.forEach(function(event) {
 			states[event] = false;
 			that.on(event, function() {
-				states[event] = true;
+				states[event] = Array.prototype.slice.call(arguments);
 				if (checkState()) {
-					that.trigger(eventName);
+					that.trigger(eventName, states);
 					resetState();
 				}
 			});

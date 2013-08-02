@@ -26,11 +26,11 @@ function Page() {
 }
 
 var PageProto = {
-	ready : function() {/*implement*/},
 	startup : function() {/*implement*/},
 	teardown : function() {/*implement*/},
 	show : function() {/*implement*/},
-	hide : function() {/*implement*/}
+	hide : function() {/*implement*/},
+	ready : function() {/*implement*/}
 }
 
 for (var p in PageProto) {
