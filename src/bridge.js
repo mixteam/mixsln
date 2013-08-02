@@ -36,7 +36,7 @@
        
             fireEvent: function(eventname, eventparam) {
                 var ev = doc.createEvent('HTMLEvents');
-                ev.initEvent(eventname, true, true);
+                ev.initEvent(eventname, false, true);
                 ev.param = WV_Private.parseParam(eventparam);
                 doc.dispatchEvent(ev);
             },
@@ -86,7 +86,11 @@
 
             parseParam: function(str) {
                 if (str && typeof str === 'string') {
-                    obj = JSON.parse(str);
+                    try {
+                        obj = JSON.parse(str);
+                    } catch(e) {
+                        obj = eval('(' + str + ')');
+                    }
                 } else {
                     obj = str || {};
                 }
