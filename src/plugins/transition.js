@@ -101,7 +101,8 @@
 
 			if (!prevEl) {
 				prevEl = wrapEl.querySelector('.inactive:last-child');
-				prevEl.style.cssText = 'position:absolute;display:block;';
+				prevEl.style.cssText = 'position:absolute;display:block;left:0;z-index:1;';
+				activeEl.style.cssText = 'position:absolute;z-index:2;'
 			} else {
 				prevEl.style.cssText = 'position:absolute;display:block;';
 			}
