@@ -11,7 +11,9 @@ function Content(wrapEl, options) {
 	for (var i = 0; i < this._cacheLength; i++) {
 		html += '<div class="inactive" index="' + i + '"></div>';
 	}
-	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div>';
+	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="loading"><div></div><div>加载中</div></div>';
+	this.contentEl = this._wrapEl.childNodes[0];
+	this.loadingEl = this._wrapEl.childNodes[1];
 
 	this.setClassName();
 }
@@ -27,19 +29,34 @@ var ContentProto = {
 		}
 	},
 
+	showLoading: function(text) {
+		var wrapRect = this._wrapEl.getBoundingClientRect(), spanRect,
+			spanEl = this.loadingEl.childNodes[1];
+
+		this.loadingEl.style.display = 'block';
+		text && (spanEl.innerHTML = text);
+		spanRect = spanEl.getBoundingClientRect();
+		spanEl.style.left = (wrapRect.width - spanRect.width) / 2 + 'px';
+		spanEl.style.top = ((window.innerHeight - spanRect.height) / 2 - wrapRect.top) + 'px';
+	},
+
+	hideLoading: function() {
+		this.loadingEl.style.display = '';
+	},
+
 	getActive : function() {
 		var index = this._cacheIndex;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	getNext: function() {
 		var index = (this._cacheIndex + 1) % this._cacheLength;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	getPrevious: function() {
 		var index = (this._cacheIndex - 1 + this._cacheLength) % this._cacheLength;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	next: function() {

@@ -170,7 +170,9 @@ function Content(wrapEl, options) {
 	for (var i = 0; i < this._cacheLength; i++) {
 		html += '<div class="inactive" index="' + i + '"></div>';
 	}
-	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div>';
+	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="loading"><div></div><div>加载中</div></div>';
+	this.contentEl = this._wrapEl.childNodes[0];
+	this.loadingEl = this._wrapEl.childNodes[1];
 
 	this.setClassName();
 }
@@ -186,19 +188,34 @@ var ContentProto = {
 		}
 	},
 
+	showLoading: function(text) {
+		var wrapRect = this._wrapEl.getBoundingClientRect(), spanRect,
+			spanEl = this.loadingEl.childNodes[1];
+
+		this.loadingEl.style.display = 'block';
+		text && (spanEl.innerHTML = text);
+		spanRect = spanEl.getBoundingClientRect();
+		spanEl.style.left = (wrapRect.width - spanRect.width) / 2 + 'px';
+		spanEl.style.top = ((window.innerHeight - spanRect.height) / 2 - wrapRect.top) + 'px';
+	},
+
+	hideLoading: function() {
+		this.loadingEl.style.display = '';
+	},
+
 	getActive : function() {
 		var index = this._cacheIndex;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	getNext: function() {
 		var index = (this._cacheIndex + 1) % this._cacheLength;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	getPrevious: function() {
 		var index = (this._cacheIndex - 1 + this._cacheLength) % this._cacheLength;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	next: function() {
@@ -2453,7 +2470,7 @@ hooks.on('app:start', function() {
 
 	if (c_transition) {
 		config.viewport.className += ' enableTransition';
-		c_transition.wrapEl = i_content.getActive().parentNode;
+		c_transition.wrapEl = i_content.contentEl;
 	}
 });
 
@@ -2745,17 +2762,25 @@ hooks.on('app:start', function(){
 
 			// 不是第一次页面
 			if (c_transition && lastPage) {
-				var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
-					className = c_transition.wrapEl.className += ' ' + transition
+				var wrapEl = c_transition.wrapEl,
+					transitionEl = i_content.loadingEl.querySelector('div'),
+					offsetRect = wrapEl.getBoundingClientRect(),
+					offsetWidth = offsetRect.width,
+					offsetX = offsetWidth * (transition === 'backward'?1:-1),
+					className = wrapEl.className += ' ' + transition
 					;
 
-				Transition.move(c_transition.wrapEl, offsetX, 0, function() {
+				transitionEl.style[(transition === 'backward'?'right':'left')] = offsetWidth + 'px';
+				i_content.showLoading();
+
+				Transition.move(transitionEl, offsetX, 0, function() {
 					i_content.setClassName();
-					c_transition.wrapEl.className = className.replace(' ' + transition, '');
-					c_transition.wrapEl.style.webkitTransform = '';
-					hooks.trigger('navigation:switchend', state);
+					wrapEl.className = className.replace(' ' + transition, '');
+					transitionEl.style.cssText = '';
+					hooks.trigger('navigation:switchend');
 				});
 			} else {
+				i_content.showLoading();
 				i_content.setClassName();
 				hooks.trigger('navigation:switchend', state);
 			}
@@ -2845,6 +2870,7 @@ hooks.on('app:start', function(){
 	});
 
 	hooks.after('page:show navigation:switchend', function() {
+		i_content.hideLoading();
 		setPlugin('onDomReady');
 	});
 

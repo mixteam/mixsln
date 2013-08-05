@@ -236,7 +236,7 @@ hooks.on('app:start', function() {
 
 	if (c_transition) {
 		config.viewport.className += ' enableTransition';
-		c_transition.wrapEl = i_content.getActive().parentNode;
+		c_transition.wrapEl = i_content.contentEl;
 	}
 });
 
@@ -528,17 +528,25 @@ hooks.on('app:start', function(){
 
 			// 不是第一次页面
 			if (c_transition && lastPage) {
-				var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
-					className = c_transition.wrapEl.className += ' ' + transition
+				var wrapEl = c_transition.wrapEl,
+					transitionEl = i_content.loadingEl.querySelector('div'),
+					offsetRect = wrapEl.getBoundingClientRect(),
+					offsetWidth = offsetRect.width,
+					offsetX = offsetWidth * (transition === 'backward'?1:-1),
+					className = wrapEl.className += ' ' + transition
 					;
 
-				Transition.move(c_transition.wrapEl, offsetX, 0, function() {
+				transitionEl.style[(transition === 'backward'?'right':'left')] = offsetWidth + 'px';
+				i_content.showLoading();
+
+				Transition.move(transitionEl, offsetX, 0, function() {
 					i_content.setClassName();
-					c_transition.wrapEl.className = className.replace(' ' + transition, '');
-					c_transition.wrapEl.style.webkitTransform = '';
-					hooks.trigger('navigation:switchend', state);
+					wrapEl.className = className.replace(' ' + transition, '');
+					transitionEl.style.cssText = '';
+					hooks.trigger('navigation:switchend');
 				});
 			} else {
+				i_content.showLoading();
 				i_content.setClassName();
 				hooks.trigger('navigation:switchend', state);
 			}
@@ -628,6 +636,7 @@ hooks.on('app:start', function(){
 	});
 
 	hooks.after('page:show navigation:switchend', function() {
+		i_content.hideLoading();
 		setPlugin('onDomReady');
 	});
 
