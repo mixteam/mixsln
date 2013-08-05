@@ -11,9 +11,11 @@ function Content(wrapEl, options) {
 	for (var i = 0; i < this._cacheLength; i++) {
 		html += '<div class="inactive" index="' + i + '"></div>';
 	}
-	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="loading"><div></div><div>加载中</div></div>';
+	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="loading"><div></div><div></div></div>';
 	this.contentEl = this._wrapEl.childNodes[0];
 	this.loadingEl = this._wrapEl.childNodes[1];
+	this.loadingShadeEl = this.loadingEl.childNodes[0];
+	this.loadingItemEl = this.loadingEl.childNodes[1];
 
 	this.setClassName();
 }
@@ -30,18 +32,23 @@ var ContentProto = {
 	},
 
 	showLoading: function(text) {
-		var wrapRect = this._wrapEl.getBoundingClientRect(), spanRect,
-			spanEl = this.loadingEl.childNodes[1];
+		var wrapRect, spanRect;
 
 		this.loadingEl.style.display = 'block';
-		text && (spanEl.innerHTML = text);
-		spanRect = spanEl.getBoundingClientRect();
-		spanEl.style.left = (wrapRect.width - spanRect.width) / 2 + 'px';
-		spanEl.style.top = ((window.innerHeight - spanRect.height) / 2 - wrapRect.top) + 'px';
+
+		if (text) {
+			this.loadingItemEl.innerHTML = text;
+			this.loadingItemEl.style.display = 'block';
+			wrapRect = this._wrapEl.getBoundingClientRect();
+			spanRect = this.loadingItemEl.getBoundingClientRect();
+			this.loadingItemEl.style.left = (wrapRect.width - spanRect.width) / 2 + 'px';
+			this.loadingItemEl.style.top = ((window.innerHeight - spanRect.height) / 2 - wrapRect.top) + 'px';
+		}
 	},
 
 	hideLoading: function() {
 		this.loadingEl.style.display = '';
+		this.loadingItemEl.style.cssText = '';
 	},
 
 	getActive : function() {

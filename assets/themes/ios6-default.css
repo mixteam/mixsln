@@ -49,12 +49,13 @@ header.navbar a.back:after {
 .viewport > section.content > .wrap .active {
   background: #ffffff;
 }
+.viewport > section.content > .loading {
+  background: transparent;
+}
 .viewport > section.content > .loading > div:first-child {
-  display: block;
   background-color: #FFF;
 }
 .viewport > section.content > .loading > div:last-child {
-  display: block;
   width: 100px;
   height: 90px;
   line-height: 100px;

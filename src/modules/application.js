@@ -529,24 +529,24 @@ hooks.on('app:start', function(){
 			// 不是第一次页面
 			if (c_transition && lastPage) {
 				var wrapEl = c_transition.wrapEl,
-					transitionEl = i_content.loadingEl.querySelector('div'),
-					offsetRect = wrapEl.getBoundingClientRect(),
-					offsetWidth = offsetRect.width,
+					loadingEl = i_content.loadingEl,
+					loadingShadeEl = i_content.loadingShadeEl,
+					offsetWidth = wrapEl.getBoundingClientRect().width,
 					offsetX = offsetWidth * (transition === 'backward'?1:-1),
 					className = wrapEl.className += ' ' + transition
 					;
 
-				transitionEl.style[(transition === 'backward'?'right':'left')] = offsetWidth + 'px';
-				i_content.showLoading();
+				loadingShadeEl.style[(transition === 'backward'?'right':'left')] = offsetWidth + 'px';
+				loadingShadeEl.style.display = 'block';
+				app.view.showLoading('正在加载');
 
-				Transition.move(transitionEl, offsetX, 0, function() {
+				Transition.move(loadingShadeEl, offsetX, 0, function() {
 					i_content.setClassName();
 					wrapEl.className = className.replace(' ' + transition, '');
-					transitionEl.style.cssText = '';
+					loadingShadeEl.style.cssText = '';
 					hooks.trigger('navigation:switchend');
 				});
 			} else {
-				i_content.showLoading();
 				i_content.setClassName();
 				hooks.trigger('navigation:switchend', state);
 			}
@@ -636,7 +636,7 @@ hooks.on('app:start', function(){
 	});
 
 	hooks.after('page:show navigation:switchend', function() {
-		i_content.hideLoading();
+		app.view.hideLoading();
 		setPlugin('onDomReady');
 	});
 
@@ -873,6 +873,16 @@ app.navigation = {
 			config.enableToolbar.instance.set(options);
 		}
 		state.pageMeta.toolbar = options;
+	}
+}
+
+app.view = {
+	showLoading: function(text) {
+		config.enableContent.instance.showLoading(text);
+	},
+
+	hideLoading: function() {
+		config.enableContent.instance.hideLoading();
 	}
 }
 
