@@ -89,7 +89,7 @@ function runTask(grunt) {
 			},
 
 			'main_css' : {
-				files: ['<%= depconcat.css.src %>'],
+				files: ['<%= context.assetPath %>/base.css'],
 				tasks: ['depconcat:css', 'cssmin:main']
 			},
 
