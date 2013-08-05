@@ -9,5 +9,9 @@
 }
 
 .viewport > section.content > .wrap > .active {
-	background-color: #eeeeee;
+	background-color: #EEE;
+}
+
+.viewport > section.content > .loading > div:first-child {
+	background-color: #EEE;
 }

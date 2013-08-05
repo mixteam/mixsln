@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+), [-\d.]+, \d+\)/,
 	MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+)\)$/,
@@ -156,8 +156,8 @@ var Animation = {
 
 app.module.Animation = Animation;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 
 function Content(wrapEl, options) {
@@ -170,7 +170,11 @@ function Content(wrapEl, options) {
 	for (var i = 0; i < this._cacheLength; i++) {
 		html += '<div class="inactive" index="' + i + '"></div>';
 	}
-	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div>';
+	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="loading"><div></div><div></div></div>';
+	this.contentEl = this._wrapEl.childNodes[0];
+	this.loadingEl = this._wrapEl.childNodes[1];
+	this.loadingShadeEl = this.loadingEl.childNodes[0];
+	this.loadingItemEl = this.loadingEl.childNodes[1];
 
 	this.setClassName();
 }
@@ -186,19 +190,39 @@ var ContentProto = {
 		}
 	},
 
+	showLoading: function(text) {
+		var wrapRect, spanRect;
+
+		this.loadingEl.style.display = 'block';
+
+		if (text) {
+			this.loadingItemEl.innerHTML = text;
+			this.loadingItemEl.style.display = 'block';
+			wrapRect = this._wrapEl.getBoundingClientRect();
+			spanRect = this.loadingItemEl.getBoundingClientRect();
+			this.loadingItemEl.style.left = (wrapRect.width - spanRect.width) / 2 + 'px';
+			this.loadingItemEl.style.top = ((window.innerHeight - spanRect.height) / 2 - wrapRect.top) + 'px';
+		}
+	},
+
+	hideLoading: function() {
+		this.loadingEl.style.display = '';
+		this.loadingItemEl.style.cssText = '';
+	},
+
 	getActive : function() {
 		var index = this._cacheIndex;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	getNext: function() {
 		var index = (this._cacheIndex + 1) % this._cacheLength;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	getPrevious: function() {
 		var index = (this._cacheIndex - 1 + this._cacheLength) % this._cacheLength;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	next: function() {
@@ -226,8 +250,8 @@ for (var p in ContentProto) {
 
 app.module.Content = Content;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 var doc = win.document,
     docEl = doc.documentElement,
@@ -572,8 +596,8 @@ function touchcancelHandler(event) {
 
 docEl.addEventListener('touchstart', touchstartHandler, false);
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 function Event() {
 	this._handlers = {};
@@ -812,8 +836,8 @@ MessageScope.get = function(scope) {
 app.module.Event = Event;
 app.module.MessageScope = MessageScope;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 var doc = win.document
 	;
@@ -905,8 +929,8 @@ for (var p in NavbarProto) {
 
 app.module.Navbar = Navbar;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 
 var Message = app.module.MessageScope,
@@ -965,8 +989,8 @@ Page.get = function(name) {
 
 app.module.Page = Page;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 var doc = win.document
 	;
@@ -1023,8 +1047,8 @@ Template.engine = {}
 
 app.module.Template = Template;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 var doc = win.document
 	;
@@ -1061,8 +1085,8 @@ for (var p in ToolbarProto) {
 
 app.module.Toolbar = Toolbar;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 var doc = win.document,
 	views = {}
@@ -1144,10 +1168,10 @@ View.get = function(name) {
 
 app.module.View = View;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
 
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,
 	anim = app.module.Animation,
@@ -1308,11 +1332,11 @@ var Transition = {
 
 app.module.Transition = Transition;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
 
 
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,
 	docEl = doc.documentElement,
@@ -1698,10 +1722,10 @@ var Scroll = {
 
 app.module.Scroll = Scroll;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
 
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var Message = app.module.MessageScope,
 	mid = 0, cid = 0;
@@ -1818,10 +1842,10 @@ app.module.Model = Model;
 app.module.Collection = Collection;
 
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
 
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 function StateStack() {
 	var that = this;
@@ -2214,7 +2238,7 @@ Navigation.instance = new Navigation();
 app.module.StateStack = StateStack;
 app.module.Navigation = Navigation;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
 
 
 
@@ -2227,7 +2251,7 @@ app.module.Navigation = Navigation;
 
 
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,	$ = win['$'],
  	appVersion = navigator.appVersion,
@@ -2453,7 +2477,7 @@ hooks.on('app:start', function() {
 
 	if (c_transition) {
 		config.viewport.className += ' enableTransition';
-		c_transition.wrapEl = i_content.getActive().parentNode;
+		c_transition.wrapEl = i_content.contentEl;
 	}
 });
 
@@ -2745,15 +2769,23 @@ hooks.on('app:start', function(){
 
 			// 不是第一次页面
 			if (c_transition && lastPage) {
-				var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
-					className = c_transition.wrapEl.className += ' ' + transition
+				var wrapEl = c_transition.wrapEl,
+					loadingEl = i_content.loadingEl,
+					loadingShadeEl = i_content.loadingShadeEl,
+					offsetWidth = wrapEl.getBoundingClientRect().width,
+					offsetX = offsetWidth * (transition === 'backward'?1:-1),
+					className = wrapEl.className += ' ' + transition
 					;
 
-				Transition.move(c_transition.wrapEl, offsetX, 0, function() {
+				loadingShadeEl.style[(transition === 'backward'?'right':'left')] = offsetWidth + 'px';
+				loadingShadeEl.style.display = 'block';
+				app.view.showLoading('正在加载');
+
+				Transition.move(loadingShadeEl, offsetX, 0, function() {
 					i_content.setClassName();
-					c_transition.wrapEl.className = className.replace(' ' + transition, '');
-					c_transition.wrapEl.style.webkitTransform = '';
-					hooks.trigger('navigation:switchend', state);
+					wrapEl.className = className.replace(' ' + transition, '');
+					loadingShadeEl.style.cssText = '';
+					hooks.trigger('navigation:switchend');
 				});
 			} else {
 				i_content.setClassName();
@@ -2845,6 +2877,7 @@ hooks.on('app:start', function(){
 	});
 
 	hooks.after('page:show navigation:switchend', function() {
+		app.view.hideLoading();
 		setPlugin('onDomReady');
 	});
 
@@ -2876,7 +2909,11 @@ app.extendView = function(properties) {
 }
 
 app.getView = function(name) {
-	return new (View.get(name));
+	var ChildView = View.get(name),
+		context = Object.create(ChildView.prototype),
+		args = Array.prototype.slice.call(arguments, 1);
+	ChildView.apply(context, args);
+	return context;
 }
 
 app.definePage = function(properties) {
@@ -3080,6 +3117,16 @@ app.navigation = {
 	}
 }
 
+app.view = {
+	showLoading: function(text) {
+		config.enableContent.instance.showLoading(text);
+	},
+
+	hideLoading: function() {
+		config.enableContent.instance.hideLoading();
+	}
+}
+
 app.scroll = {
 	getScrollHeight: function() {
 		var c_scroll = config.enableScroll;
@@ -3196,4 +3243,4 @@ app.scroll = {
 	}
 }
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

@@ -16,7 +16,11 @@
 		plugins : {
 			dynamic: true,
 			lazyload: true,
-			scrollpos: true
+			scrollpos: true,
+			pullbounce: {
+				onPullDown: '_onPullDownHandler',
+				onPullUp: '_onPullUpHandler'
+			}
 		},
 
 		_onPullDownHandler : function(callback) {
@@ -24,7 +28,7 @@
 			this.searchitemsView.render({pageno: 1}, function() {
 				callback();
 				setTimeout(function(){
-					app.plugin.lazyload.check();	
+					app.plugin.lazyload.check();
 				}, 500);
 			});
 		},
