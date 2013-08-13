@@ -63,10 +63,12 @@ function touchstartHandler(e) {
 	element = parentElement.boundScrollElement;
 
 	if (!element) return;
+	var offset = anim.getTransformOffset(element);
+
 	element.style.webkitBackfaceVisibility = 'hidden';
 	element.style.webkitTransformStyle = 'preserve-3d';
 	element.style.webkitTransition = '';
-	element.style.webkitTransform = getComputedStyle(element).webkitTransform;
+	element.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
 }
 
 function touchmoveHandler(e) {	
@@ -108,10 +110,14 @@ function panHandler(e) {
 
     if ((getBoundaryOffset(element, y))) {
     	if (y > element.minScrollTop) {
-    		var name = 'pulldown';
+    		var name = 'pulldown',
+    			offset = Math.abs(y - element.minScrollTop);
+
     	} else if (y < element.maxScrollTop) {
-    		var name = 'pullup';
+    		var name = 'pullup',
+    			offset = Math.abs(element.maxScrollTop - y);
     	}
+    	element.bounceOffset = offset;
     	fireEvent(element, name);
     }
 
