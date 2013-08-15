@@ -5,7 +5,7 @@
 		navigation = app.module.Navigation.instance,
 		stack = navigation.getStack(), state,
 		config = app.config,
-		slideWrap, slideWrapWidth, slideStack = [];
+		slideWrap, slideWrapWidth, slidesWrapHeight, slideStack = [];
 
 	app.extendView({
 		name: 'slideview',
@@ -15,7 +15,7 @@
 				wrap = document.createElement('div'),
 				lastSlide = slideStack[slideStack.length - 1]
 
-			wrap.style.cssText = 'z-index:' + (slideStack.length + 10) + ';position:absolute;width:100%;height:100%;left:0;top:0;background:#FFF;';
+			wrap.style.cssText = 'z-index:' + (slideStack.length + 1000) + ';position:absolute;width:100%;height:100%;left:0;top:0;background:#FFF;';
 			wrap.appendChild(this.el);
 			slideWrap.appendChild(wrap);
 
@@ -24,16 +24,18 @@
 				if (config.enableNavbar) {
 					headerHeight = config.enableNavbar.wrapEl.getBoundingClientRect().height;
 				}
-				if (config.enableToolbar) {
-					footerHeight = config.enableToolbar.wrapEl.getBoundingClientRect().height;
-				}
+				// if (config.enableToolbar) {
+				// 	footerHeight = config.enableToolbar.wrapEl.getBoundingClientRect().height;
+				// }
 				if (config.enableScroll) {
 					contentHeight = window.innerHeight;	
 				}
-				slideWrap.style.height = (contentHeight - headerHeight - footerHeight) + 'px';
+				slideWrap.style.height = (contentHeight - headerHeight) + 'px';
 				slideWrap.style.top = (headerHeight + window.scrollY) + 'px';
 				slideWrap.style.display = '';
-				slideWrapWidth = slideWrap.getBoundingClientRect().width;
+				var rect = slideWrap.getBoundingClientRect();
+				slideWrapWidth = rect.width;
+				slidesWrapHeight = rect.height;
 			}
 
 			// if (lastSlide) {
@@ -64,7 +66,7 @@
 					}
 				});
 
-				if (config.enableScroll) {
+				if (that.el.getBoundingClientRect().height > slidesWrapHeight) {
 					Scroll.enable(that.el);
 				}
 
@@ -84,6 +86,7 @@
 			}
 
 			Transition.slide(wrap, 'RO', slideWrapWidth, function() {
+				Scroll.disable(slide.view.el);
 				slideWrap.removeChild(wrap);
 				that.hide && that.hide();
 
@@ -126,7 +129,7 @@
 	app.plugin.slideview = {
 		onAppStart: function() {
 			slideWrap = document.createElement('div');
-			slideWrap.style.cssText = 'z-index:9;display:none;position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0);overflow:hidden;'
+			slideWrap.style.cssText = 'z-index:999;display:none;position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0);overflow:hidden;'
 			doc.body.appendChild(slideWrap);
 		},
 

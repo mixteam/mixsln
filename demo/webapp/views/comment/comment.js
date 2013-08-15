@@ -50,7 +50,7 @@
 				'min-height': '100%'
 			});
 			var html = '';
-			for (var i = 0; i < 200; i++) {
+			for (var i = 0; i < 10; i++) {
 				html += '<li>全部评论' + (i + 1) + '</li>';
 			}
 			this.$el.html('<ul>' + html + '</ul>');
