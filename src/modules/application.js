@@ -829,6 +829,13 @@ app.navigation = {
 	},
 
 	setButton: function(options) {
+		if (options instanceof Array) {
+			for (var i = 0; i < options.length; i++) {
+				this.setButton(options[i]);
+			}
+			return;
+		}
+
 		var state = getState();
 		if (config.enableNavbar) {
 			config.enableNavbar.instance.setButton(options);
@@ -862,9 +869,12 @@ app.navigation = {
 	},
 
 	resetNavbar: function() {
+		var state = getState();
+
 		if (config.enableNavbar) {
 			config.enableNavbar.instance.removeButton();
 		}
+		state.pageMeta.buttons = [];
 	},
 
 	setToolbar: function(options) {

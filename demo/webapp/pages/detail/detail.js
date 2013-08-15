@@ -15,21 +15,23 @@
 				type: 'func',
 				text: '评论',
 				handler: function() {
-					alert('go comment');
+					this.commentView.slideIn();
 				}
 			},
 			{
-				id: 'shop',
+				id: 'pic',
 				type: 'func',
-				text: '店铺',
+				text: '图文',
 				handler: function() {
-					alert('go shop');
+					this.picView.slideIn();
 				}
 			}
 		],
+
 		toolbar: {
 			height: 50
 		},
+
 		plugins: {
 			domevent: true
 		},
@@ -44,10 +46,14 @@
 		},
 
 		show: function() {
-			var searchbar = this.searchbarView = app.getView('searchbar');
+			var searchbar = this.searchbarView = app.getView('searchbar'),
+				comment = this.commentView = app.getView('comment'),
+				pic = this.picView = app.getView('pic');
 
 			app.navigation.setToolbar({el: searchbar.el});
 			searchbar.render();
+			comment.render();
+			pic.render();
 		},
 
 		hide: function() {

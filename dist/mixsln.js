@@ -487,17 +487,18 @@ function touchendHandler(event) {
         }
 
         if (gesture.status === 'panning') {
-            fireEvent(gesture.element, 'panend', {
-                touch: touch,
-                touchEvent: event
-            });
-
             var duration = Date.now() - gesture.startTime,
                 velocityX = (touch.clientX - gesture.startTouch.clientX) / duration,
                 velocityY = (touch.clientY - gesture.startTouch.clientY) / duration,
                 displacementX = touch.clientX - gesture.startTouch.clientX,
                 displacementY = touch.clientY - gesture.startTouch.clientY
                 ;
+
+            fireEvent(gesture.element, 'panend', {
+                isflick: duration < 300,
+                touch: touch,
+                touchEvent: event
+            });
             
             if (duration < 300) {
                 fireEvent(gesture.element, 'flick', {
@@ -1151,12 +1152,14 @@ for (var p in ViewProto) {
 View.fn = {};
 
 View.extend = function(properties) {
+	var ParentView = views[properties.parent] || View;
+
 	function ChildView() {
-		View.apply(this, arguments);
+		ParentView.apply(this, arguments);
 		this.initialize && this.initialize.apply(this, arguments);
 	}
-	inherit(ChildView, View);
-	extend(ChildView.prototype, View.fn);
+	inherit(ChildView, ParentView);
+	extend(ChildView.prototype, ParentView.fn);
 	extend(ChildView.prototype, properties);
 	
 	return (views[properties.name] = ChildView);
@@ -3076,6 +3079,13 @@ app.navigation = {
 	},
 
 	setButton: function(options) {
+		if (options instanceof Array) {
+			for (var i = 0; i < options.length; i++) {
+				this.setButton(options[i]);
+			}
+			return;
+		}
+
 		var state = getState();
 		if (config.enableNavbar) {
 			config.enableNavbar.instance.setButton(options);
@@ -3109,9 +3119,12 @@ app.navigation = {
 	},
 
 	resetNavbar: function() {
+		var state = getState();
+
 		if (config.enableNavbar) {
 			config.enableNavbar.instance.removeButton();
 		}
+		state.pageMeta.buttons = [];
 	},
 
 	setToolbar: function(options) {
