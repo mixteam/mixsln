@@ -537,13 +537,13 @@ hooks.on('app:start', function(){
 					;
 
 				loadingShadeEl.style[(transition === 'backward'?'right':'left')] = offsetWidth + 'px';
-				loadingShadeEl.style.display = 'block';
-				app.view.showLoading('正在加载');
+				loadingEl.style.display = 'block';
 
 				Transition.move(loadingShadeEl, offsetX, 0, function() {
 					i_content.setClassName();
 					wrapEl.className = className.replace(' ' + transition, '');
 					loadingShadeEl.style.cssText = '';
+					loadingEl.style.cssText = '';
 					hooks.trigger('navigation:switchend');
 				});
 			} else {
@@ -572,8 +572,10 @@ hooks.on('app:start', function(){
 			meta.css && app.loadResource(meta.css, 'css');
 			meta.js && app.loadResource(meta.js, 'js', function() {
 				page = Page.get(state.name);
-				page.ready();
-				pageReady();
+				if (page) {
+					page.ready();
+					pageReady();
+				}
 			});
 		}
 	}
@@ -636,7 +638,6 @@ hooks.on('app:start', function(){
 	});
 
 	hooks.after('page:show navigation:switchend', function() {
-		app.view.hideLoading();
 		setPlugin('onDomReady');
 	});
 
@@ -873,16 +874,6 @@ app.navigation = {
 			config.enableToolbar.instance.set(options);
 		}
 		state.pageMeta.toolbar = options;
-	}
-}
-
-app.view = {
-	showLoading: function(text) {
-		config.enableContent.instance.showLoading(text);
-	},
-
-	hideLoading: function() {
-		config.enableContent.instance.hideLoading();
 	}
 }
 

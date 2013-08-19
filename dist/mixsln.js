@@ -170,11 +170,11 @@ function Content(wrapEl, options) {
 	for (var i = 0; i < this._cacheLength; i++) {
 		html += '<div class="inactive" index="' + i + '"></div>';
 	}
-	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="loading"><div></div><div></div></div>';
+	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="loading"><div class="loading-shade"></div></div><div class="loading-item"></div>';
 	this.contentEl = this._wrapEl.childNodes[0];
 	this.loadingEl = this._wrapEl.childNodes[1];
 	this.loadingShadeEl = this.loadingEl.childNodes[0];
-	this.loadingItemEl = this.loadingEl.childNodes[1];
+	this.loadingItemEl = this._wrapEl.childNodes[2];
 
 	this.setClassName();
 }
@@ -191,22 +191,21 @@ var ContentProto = {
 	},
 
 	showLoading: function(text) {
-		var wrapRect, spanRect;
-
-		this.loadingEl.style.display = 'block';
-
 		if (text) {
 			this.loadingItemEl.innerHTML = text;
-			this.loadingItemEl.style.display = 'block';
-			wrapRect = this._wrapEl.getBoundingClientRect();
-			spanRect = this.loadingItemEl.getBoundingClientRect();
-			this.loadingItemEl.style.left = (wrapRect.width - spanRect.width) / 2 + 'px';
-			this.loadingItemEl.style.top = ((window.innerHeight - spanRect.height) / 2 - wrapRect.top) + 'px';
+
+			if (this.loadingItemEl.style.display !== 'block') {
+				this.loadingItemEl.style.display = 'block';
+				var wrapRect = this._wrapEl.getBoundingClientRect();
+				var spanRect = this.loadingItemEl.getBoundingClientRect();
+				this.loadingItemEl.style.left = (wrapRect.width - spanRect.width) / 2 + 'px';
+				this.loadingItemEl.style.top = ((window.innerHeight - spanRect.height) / 2 - wrapRect.top) + 'px';
+			}
 		}
 	},
 
 	hideLoading: function() {
-		this.loadingEl.style.display = '';
+		this.loadingItemEl.innerHTML = '';
 		this.loadingItemEl.style.cssText = '';
 	},
 
@@ -487,17 +486,18 @@ function touchendHandler(event) {
         }
 
         if (gesture.status === 'panning') {
-            fireEvent(gesture.element, 'panend', {
-                touch: touch,
-                touchEvent: event
-            });
-
             var duration = Date.now() - gesture.startTime,
                 velocityX = (touch.clientX - gesture.startTouch.clientX) / duration,
                 velocityY = (touch.clientY - gesture.startTouch.clientY) / duration,
                 displacementX = touch.clientX - gesture.startTouch.clientX,
                 displacementY = touch.clientY - gesture.startTouch.clientY
                 ;
+
+            fireEvent(gesture.element, 'panend', {
+                isflick: duration < 300,
+                touch: touch,
+                touchEvent: event
+            });
             
             if (duration < 300) {
                 fireEvent(gesture.element, 'flick', {
@@ -2784,13 +2784,13 @@ hooks.on('app:start', function(){
 					;
 
 				loadingShadeEl.style[(transition === 'backward'?'right':'left')] = offsetWidth + 'px';
-				loadingShadeEl.style.display = 'block';
-				app.view.showLoading('正在加载');
+				loadingEl.style.display = 'block';
 
 				Transition.move(loadingShadeEl, offsetX, 0, function() {
 					i_content.setClassName();
 					wrapEl.className = className.replace(' ' + transition, '');
 					loadingShadeEl.style.cssText = '';
+					loadingEl.style.cssText = '';
 					hooks.trigger('navigation:switchend');
 				});
 			} else {
@@ -2819,8 +2819,10 @@ hooks.on('app:start', function(){
 			meta.css && app.loadResource(meta.css, 'css');
 			meta.js && app.loadResource(meta.js, 'js', function() {
 				page = Page.get(state.name);
-				page.ready();
-				pageReady();
+				if (page) {
+					page.ready();
+					pageReady();
+				}
 			});
 		}
 	}
@@ -2883,7 +2885,6 @@ hooks.on('app:start', function(){
 	});
 
 	hooks.after('page:show navigation:switchend', function() {
-		app.view.hideLoading();
 		setPlugin('onDomReady');
 	});
 
@@ -3120,16 +3121,6 @@ app.navigation = {
 			config.enableToolbar.instance.set(options);
 		}
 		state.pageMeta.toolbar = options;
-	}
-}
-
-app.view = {
-	showLoading: function(text) {
-		config.enableContent.instance.showLoading(text);
-	},
-
-	hideLoading: function() {
-		config.enableContent.instance.hideLoading();
 	}
 }
 

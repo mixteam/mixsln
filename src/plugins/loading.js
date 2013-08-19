@@ -1,47 +1,36 @@
 ;(function(win, app) {
 	var doc = win.document,
-		loadingTimeout = 5000,
-		loadingId, loadingWrap;
+		config = app.config,
+		id, ids = [];
 
 	app.plugin.loading = {
 		ids: [],
 
-		onAppStart: function() {
-			loadingWrap = doc.createElement('div');
-			loadingWrap.style.cssText = 'position:absolute;left:0;top:0;width:100%;z-index:999;background:rgba(0,0,0,0);display:none;'
-			loadingWrap.className = 'loading-wrap';
-			doc.body.appendChild(loadingWrap);
-		},
-
 		show: function() {
 			var now = Date.now();
-
-			loadingWrap.style.height = window.innerHeight + 'px';
-			loadingWrap.style.top = window.scrollY + 'px';
-			loadingWrap.style.display = 'block';
-			this.ids.push(now);
-
+			config.enableContent.instance.showLoading('正在加载');
+			ids.push(now);
 			return now;
 		},
 
-		hide: function(id) {
-			if (id) {
-				this.ids.splice(this.ids.indexOf(id), 1);
+		hide: function(_id) {
+			if (_id) {
+				ids.splice(ids.indexOf(_id), 1);
 			} else {
-				this.ids = [];
+				ids = [];
 			}
 
-			if (this.ids.length === 0) {
-				loadingWrap.style.display = 'none';
+			if (ids.length === 0) {
+				config.enableContent.instance.hideLoading();
 			}
 		},
 
 		onNavigationSwitch: function() {
-			loadingId = this.show();
+			id = this.show();
 		},
 
 		onDomReady: function() {
-			this.hide(loadingId);
+			this.hide(id);
 		}
 	}
 

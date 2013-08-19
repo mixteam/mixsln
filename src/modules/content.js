@@ -11,11 +11,11 @@ function Content(wrapEl, options) {
 	for (var i = 0; i < this._cacheLength; i++) {
 		html += '<div class="inactive" index="' + i + '"></div>';
 	}
-	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="loading"><div></div><div></div></div>';
+	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="loading"><div class="loading-shade"></div></div><div class="loading-item"></div>';
 	this.contentEl = this._wrapEl.childNodes[0];
 	this.loadingEl = this._wrapEl.childNodes[1];
 	this.loadingShadeEl = this.loadingEl.childNodes[0];
-	this.loadingItemEl = this.loadingEl.childNodes[1];
+	this.loadingItemEl = this._wrapEl.childNodes[2];
 
 	this.setClassName();
 }
@@ -32,22 +32,21 @@ var ContentProto = {
 	},
 
 	showLoading: function(text) {
-		var wrapRect, spanRect;
-
-		this.loadingEl.style.display = 'block';
-
 		if (text) {
 			this.loadingItemEl.innerHTML = text;
-			this.loadingItemEl.style.display = 'block';
-			wrapRect = this._wrapEl.getBoundingClientRect();
-			spanRect = this.loadingItemEl.getBoundingClientRect();
-			this.loadingItemEl.style.left = (wrapRect.width - spanRect.width) / 2 + 'px';
-			this.loadingItemEl.style.top = ((window.innerHeight - spanRect.height) / 2 - wrapRect.top) + 'px';
+
+			if (this.loadingItemEl.style.display !== 'block') {
+				this.loadingItemEl.style.display = 'block';
+				var wrapRect = this._wrapEl.getBoundingClientRect();
+				var spanRect = this.loadingItemEl.getBoundingClientRect();
+				this.loadingItemEl.style.left = (wrapRect.width - spanRect.width) / 2 + 'px';
+				this.loadingItemEl.style.top = ((window.innerHeight - spanRect.height) / 2 - wrapRect.top) + 'px';
+			}
 		}
 	},
 
 	hideLoading: function() {
-		this.loadingEl.style.display = '';
+		this.loadingItemEl.innerHTML = '';
 		this.loadingItemEl.style.cssText = '';
 	},
 
