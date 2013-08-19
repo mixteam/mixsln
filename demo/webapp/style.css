@@ -12,6 +12,6 @@
 	background-color: #EEE;
 }
 
-.viewport > section.content > .loading > div:first-child {
+.viewport > section.content > .trans > .trans-shade {
 	background-color: #EEE;
 }

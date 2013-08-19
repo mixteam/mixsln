@@ -49,19 +49,6 @@ header.navbar a.back:after {
 .viewport > section.content > .wrap .active {
   background: #ffffff;
 }
-.viewport > section.content > .loading {
-  background: transparent;
-}
-.viewport > section.content > .loading > .loading-shade {
+.viewport > section.content > .trans > div {
   background-color: #FFF;
-}
-.viewport > section.content > .loading-item {
-  width: 100px;
-  height: 90px;
-  line-height: 100px;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: #FFF;
-  text-align: center;
-  font-size: 11px;
-  border-radius: 13px;
 }

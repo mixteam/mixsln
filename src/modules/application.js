@@ -529,21 +529,21 @@ hooks.on('app:start', function(){
 			// 不是第一次页面
 			if (c_transition && lastPage) {
 				var wrapEl = c_transition.wrapEl,
-					loadingEl = i_content.loadingEl,
-					loadingShadeEl = i_content.loadingShadeEl,
+					transEl = i_content.transEl,
+					transShadeEl = i_content.transShadeEl,
 					offsetWidth = wrapEl.getBoundingClientRect().width,
 					offsetX = offsetWidth * (transition === 'backward'?1:-1),
 					className = wrapEl.className += ' ' + transition
 					;
 
-				loadingShadeEl.style[(transition === 'backward'?'right':'left')] = offsetWidth + 'px';
-				loadingEl.style.display = 'block';
+				transShadeEl.style[(transition === 'backward'?'right':'left')] = offsetWidth + 'px';
+				transEl.style.display = 'block';
 
-				Transition.move(loadingShadeEl, offsetX, 0, function() {
+				Transition.move(transShadeEl, offsetX, 0, function() {
 					i_content.setClassName();
 					wrapEl.className = className.replace(' ' + transition, '');
-					loadingShadeEl.style.cssText = '';
-					loadingEl.style.cssText = '';
+					transShadeEl.style.cssText = '';
+					transEl.style.cssText = '';
 					hooks.trigger('navigation:switchend');
 				});
 			} else {

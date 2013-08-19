@@ -11,11 +11,10 @@ function Content(wrapEl, options) {
 	for (var i = 0; i < this._cacheLength; i++) {
 		html += '<div class="inactive" index="' + i + '"></div>';
 	}
-	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="loading"><div class="loading-shade"></div></div><div class="loading-item"></div>';
+	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="trans"><div></div></div>';
 	this.contentEl = this._wrapEl.childNodes[0];
-	this.loadingEl = this._wrapEl.childNodes[1];
-	this.loadingShadeEl = this.loadingEl.childNodes[0];
-	this.loadingItemEl = this._wrapEl.childNodes[2];
+	this.transEl = this._wrapEl.childNodes[1];
+	this.transShadeEl = this.transEl.childNodes[0];
 
 	this.setClassName();
 }
@@ -29,25 +28,6 @@ var ContentProto = {
 		} else if (this._cacheLength > 1){
 			this.getPrevious().className = 'inactive';
 		}
-	},
-
-	showLoading: function(text) {
-		if (text) {
-			this.loadingItemEl.innerHTML = text;
-
-			if (this.loadingItemEl.style.display !== 'block') {
-				this.loadingItemEl.style.display = 'block';
-				var wrapRect = this._wrapEl.getBoundingClientRect();
-				var spanRect = this.loadingItemEl.getBoundingClientRect();
-				this.loadingItemEl.style.left = (wrapRect.width - spanRect.width) / 2 + 'px';
-				this.loadingItemEl.style.top = ((window.innerHeight - spanRect.height) / 2 - wrapRect.top) + 'px';
-			}
-		}
-	},
-
-	hideLoading: function() {
-		this.loadingItemEl.innerHTML = '';
-		this.loadingItemEl.style.cssText = '';
 	},
 
 	getActive : function() {
