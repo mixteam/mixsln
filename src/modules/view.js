@@ -63,12 +63,14 @@ for (var p in ViewProto) {
 View.fn = {};
 
 View.extend = function(properties) {
+	var ParentView = views[properties.parent] || View;
+
 	function ChildView() {
-		View.apply(this, arguments);
+		ParentView.apply(this, arguments);
 		this.initialize && this.initialize.apply(this, arguments);
 	}
-	inherit(ChildView, View);
-	extend(ChildView.prototype, View.fn);
+	inherit(ChildView, ParentView);
+	extend(ChildView.prototype, ParentView.fn);
 	extend(ChildView.prototype, properties);
 	
 	return (views[properties.name] = ChildView);
