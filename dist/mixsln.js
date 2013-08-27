@@ -827,7 +827,7 @@ function _setButton(btn, options) {
 	(options['class'] != null) && (btn.className = options['class']);
 	(options.text != null) && (btn.innerHTML = options.text);
 	(options.bg != null) && (btn.style.background = options.bg);
-	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" />');
+	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" width="100%" height="100%" />');
 	(options.hide === true) ? (btn.style.display = 'none'):(btn.style.display = '');
 	options.onChange && options.onChange.call(btn, options);
 	if (options.handler) {
