@@ -669,8 +669,10 @@ app.extendView = function(properties) {
 }
 
 app.getView = function(name) {
-	var ChildView = View.get(name),
-		context = Object.create(ChildView.prototype),
+	var ChildView = View.get(name);
+	if (!ChildView) return;
+
+	var context = Object.create(ChildView.prototype),
 		args = Array.prototype.slice.call(arguments, 1);
 	ChildView.apply(context, args);
 	return context;
