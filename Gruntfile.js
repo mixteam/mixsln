@@ -29,6 +29,11 @@ function runTask(grunt) {
 			css: {
 				src: ['<%= context.assetPath %>/base.css', '<%= context.assetPath %>/<%= context.themePath %>/<%= context.defaultTheme %>.css'],
 				dest: '<%= context.distPath %>/<%= context.name %>.css'
+			},
+
+			notheme_css: {
+				src: ['<%= context.assetPath %>/base.css'],
+				dest: '<%= context.distPath %>/<%= context.name %>-notheme.css'
 			}
 		},
 
@@ -56,7 +61,8 @@ function runTask(grunt) {
 			},
 			main: {
 				files: {
-					'<%= context.distPath %>/<%= context.name %>.min.css' : '<%= depconcat.css.dest %>'
+					'<%= context.distPath %>/<%= context.name %>.min.css' : '<%= depconcat.css.dest %>',
+					'<%= context.distPath %>/<%= context.name %>-notheme.min.css' : '<%= depconcat.notheme_css.dest %>'
 				}
 			}
 		},
@@ -95,7 +101,7 @@ function runTask(grunt) {
 
 			'theme_css' : {
 				files: ['<%= context.assetPath %>/<%= context.themePath %>/*/*.less'],
-				tasks: ['less', 'depconcat:css', 'cssmin:main']
+				tasks: ['less', 'depconcat:css', 'depconcat:notheme_css', 'cssmin:main']
 			}
 		}
 		;
