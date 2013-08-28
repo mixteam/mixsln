@@ -587,7 +587,6 @@ hooks.on('app:start', function(){
 
 		setNavbar();
 		setToolbar();
-		//refreshContent();
 		setScroll();
 		setTransition();
 
@@ -623,10 +622,11 @@ hooks.on('app:start', function(){
 		state = arguments[0];
 		state.pageMeta || (state.pageMeta = {});
 		state.plugins || (state.plugins = {});
+		page = Page.get(state.name);
 
 		isSamePage = lastState && lastState.name === state.name;
 		hooks.trigger('navigation:switch', state);
-		(page = Page.get(state.name))?pageReady():pageLoad();
+		page?pageReady():pageLoad();
 	});
 
 	hooks.on('navigation:switch', function() {
