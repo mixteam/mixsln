@@ -509,7 +509,6 @@ hooks.on('app:start', function(){
 			c_content.wrapEl.style.minHeight = offsetHeight + 'px';
 			c_content.instance.getActive().style.minHeight = offsetHeight + 'px';
 		}
-
 	}
 
 	// scroll
@@ -544,12 +543,14 @@ hooks.on('app:start', function(){
 					wrapEl.className = className.replace(' ' + transition, '');
 					transShadeEl.style.cssText = '';
 					transEl.style.cssText = '';
-					hooks.trigger('navigation:switchend');
+					hooks.trigger('navigation:switchend', state);
 				});
 			} else {
 				i_content.setClassName();
 				hooks.trigger('navigation:switchend', state);
 			}
+		} else {
+			hooks.trigger('navigation:switchend', state);
 		}
 	}
 
@@ -586,9 +587,9 @@ hooks.on('app:start', function(){
 
 		setNavbar();
 		setToolbar();
-		setTransition();
+		//refreshContent();
 		setScroll();
-		refreshContent();
+		setTransition();
 
 		checkTemplate(page, 'template', pageShow);
 	}
@@ -624,7 +625,7 @@ hooks.on('app:start', function(){
 		state.plugins || (state.plugins = {});
 
 		isSamePage = lastState && lastState.name === state.name;
-		if (!isSamePage) hooks.trigger('navigation:switch', state);
+		hooks.trigger('navigation:switch', state);
 		(page = Page.get(state.name))?pageReady():pageLoad();
 	});
 
@@ -634,6 +635,7 @@ hooks.on('app:start', function(){
 	});
 
 	hooks.on('navigation:switchend', function() {
+		refreshContent();
 		setPlugin('onNavigationSwitchEnd');
 	});
 
