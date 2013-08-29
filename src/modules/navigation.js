@@ -128,7 +128,7 @@ StateStack.isEquals = function(state1, state2) {
 var NAMED_REGEXP = /\:([a-z0-9_-][a-z0-9_-]*)/gi,
 	SPLAT_REGEXP = /\*([a-z0-9_-][a-z0-9_-]*)/gi,
 	PERL_REGEXP = /P\<([a-z0-9_-][a-z0-9_-]*?)\>/gi,
-	ARGS_SPLITER = '!',
+	ARGS_SPLITER = '?',
 	his = win.history,
 	loc = win.location,
 	Message = app.module.MessageScope
@@ -155,7 +155,7 @@ function extractNames(routeText) {
 function extractArgs(str) {
 	if (!str) return {};
 
-	var split = str.substring(1).split('&'),
+	var split = str.split('&'),
 		args = {}
 		;
 
@@ -174,7 +174,7 @@ function extractArgs(str) {
 function parseRoute(routeText) {
 	routeText = routeText.replace(PERL_REGEXP, '');
 
-	return new RegExp('^(' + routeText + ')(' + ARGS_SPLITER + '.*?)?$');
+	return new RegExp('^(' + routeText + ')$');
 }
 
 
@@ -217,7 +217,7 @@ var NavigationProto = {
 
 			if (route['default']) {
 				defaultRoute = route;
-			} else if(route.routeReg.test(fragment)) {
+			} else if(route.routeReg.test(fragment.split(ARGS_SPLITER)[0])) {
                 unmatched = false;
 				route.callback(fragment);
 				if (route.last) break;
@@ -265,8 +265,9 @@ var NavigationProto = {
 				routeText: routeText,
 				routeReg: routeReg,
 				callback: function(fragment) {
-					var matched = fragment.match(routeReg).slice(2),
-						args = extractArgs(matched.pop() || ''),
+					var split = fragment.split(ARGS_SPLITER),
+						matched = split[0].match(routeReg).slice(2),
+						args = extractArgs(split[1] || ''),
 						params = {}
 						;
 
