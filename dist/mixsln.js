@@ -2148,14 +2148,18 @@ var NavigationProto = {
 		var that = this,
 			stack = that._stack,
 			state = stack.getState(),
+            stateIdx = stack.getIndex()
 			args = []
 			;
 
+        fragment || (fragment = '');
 		options || (options = {});
 		stack.move = 'forward';
 		stack.transition = 'forward';
 
-		if (fragment != null) {
+		if ((/^https?\:/i).test(fragment)) {
+            location.href = fragment;
+        } else if (fragment) {
 			if (!state || state.fragment !== fragment || 
 					options.data) {
 
@@ -2179,7 +2183,7 @@ var NavigationProto = {
 				stack.type = options.type.toUpperCase();
 				setFragment(fragment + (args.length ? ARGS_SPLITER + args.join('&') : ''));
 			}
-		} else {
+		} else if (stateIdx < stack._states.length - 1){
 			his.forward();
 		}
 	},
