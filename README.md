@@ -1,10 +1,11 @@
 # Mix解决方案
 
-## 稳定版本(v0.4.2)
+## 稳定版本(v0.4.3)
 
 - [js开发版下载](http://mixteam.github.io/mixsln/dist/mixsln.js)
 - [js压缩版下载](http://mixteam.github.io/mixsln/dist/mixsln.min.js)
 - [css下载（ios6默认主题样式）](http://mixteam.github.io/mixsln/dist/mixsln.min.css)
+- [css下载（无主题样式）](http://mixteam.github.io/mixsln/dist/mixsln-notheme.min.css)
 
 ## 文档
 
@@ -29,6 +30,15 @@
 4. 为各平台提供统一方案，保证兼容性。
 
 ## 版本更新
+
+### v0.4.3
+
+- 增加view继承的功能，增加侧边栏滑出的插件（合并自feature_v0.4_003分支）
+- 更新转场效果（合并自feature_v0.4_002分支）
+- 修改loading插件
+- 增加没有主题样式的CSS文件(mixsln-notheme.css)
+- 头部导航栏样式调整
+- bug修复
 
 ### v0.4.2
 
