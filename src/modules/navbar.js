@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document
 	;
@@ -8,7 +8,7 @@ function _setButton(btn, options) {
 	(options['class'] != null) && (btn.className = options['class']);
 	(options.text != null) && (btn.innerHTML = options.text);
 	(options.bg != null) && (btn.style.background = options.bg);
-	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" />');
+	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" width="100%" height="100%" />');
 	(options.hide === true) ? (btn.style.display = 'none'):(btn.style.display = '');
 	options.onChange && options.onChange.call(btn, options);
 	if (options.handler) {
@@ -90,4 +90,4 @@ for (var p in NavbarProto) {
 
 app.module.Navbar = Navbar;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

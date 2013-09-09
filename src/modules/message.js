@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 function Event() {
 	this._handlers = {};
@@ -237,4 +237,4 @@ MessageScope.get = function(scope) {
 app.module.Event = Event;
 app.module.MessageScope = MessageScope;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

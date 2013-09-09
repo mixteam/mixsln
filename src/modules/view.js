@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,
 	views = {}
@@ -63,12 +63,14 @@ for (var p in ViewProto) {
 View.fn = {};
 
 View.extend = function(properties) {
+	var ParentView = views[properties.parent] || View;
+
 	function ChildView() {
-		View.apply(this, arguments);
+		ParentView.apply(this, arguments);
 		this.initialize && this.initialize.apply(this, arguments);
 	}
-	inherit(ChildView, View);
-	extend(ChildView.prototype, View.fn);
+	inherit(ChildView, ParentView);
+	extend(ChildView.prototype, ParentView.fn);
 	extend(ChildView.prototype, properties);
 	
 	return (views[properties.name] = ChildView);
@@ -80,4 +82,4 @@ View.get = function(name) {
 
 app.module.View = View;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

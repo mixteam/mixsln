@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 
 var Message = app.module.MessageScope,
@@ -57,4 +57,4 @@ Page.get = function(name) {
 
 app.module.Page = Page;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

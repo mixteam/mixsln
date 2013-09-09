@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,
     docEl = doc.documentElement,
@@ -234,17 +234,18 @@ function touchendHandler(event) {
         }
 
         if (gesture.status === 'panning') {
-            fireEvent(gesture.element, 'panend', {
-                touch: touch,
-                touchEvent: event
-            });
-
             var duration = Date.now() - gesture.startTime,
                 velocityX = (touch.clientX - gesture.startTouch.clientX) / duration,
                 velocityY = (touch.clientY - gesture.startTouch.clientY) / duration,
                 displacementX = touch.clientX - gesture.startTouch.clientX,
                 displacementY = touch.clientY - gesture.startTouch.clientY
                 ;
+
+            fireEvent(gesture.element, 'panend', {
+                isflick: duration < 300,
+                touch: touch,
+                touchEvent: event
+            });
             
             if (duration < 300) {
                 fireEvent(gesture.element, 'flick', {
@@ -343,4 +344,4 @@ function touchcancelHandler(event) {
 
 docEl.addEventListener('touchstart', touchstartHandler, false);
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

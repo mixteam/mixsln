@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+), [-\d.]+, \d+\)/,
 	MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+)\)$/,
@@ -156,8 +156,8 @@ var Animation = {
 
 app.module.Animation = Animation;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 
 function Content(wrapEl, options) {
@@ -170,7 +170,10 @@ function Content(wrapEl, options) {
 	for (var i = 0; i < this._cacheLength; i++) {
 		html += '<div class="inactive" index="' + i + '"></div>';
 	}
-	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div>';
+	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="trans"><div></div></div>';
+	this.contentEl = this._wrapEl.childNodes[0];
+	this.transEl = this._wrapEl.childNodes[1];
+	this.transShadeEl = this.transEl.childNodes[0];
 
 	this.setClassName();
 }
@@ -188,17 +191,17 @@ var ContentProto = {
 
 	getActive : function() {
 		var index = this._cacheIndex;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	getNext: function() {
 		var index = (this._cacheIndex + 1) % this._cacheLength;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	getPrevious: function() {
 		var index = (this._cacheIndex - 1 + this._cacheLength) % this._cacheLength;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	next: function() {
@@ -226,8 +229,8 @@ for (var p in ContentProto) {
 
 app.module.Content = Content;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 var doc = win.document,
     docEl = doc.documentElement,
@@ -463,17 +466,18 @@ function touchendHandler(event) {
         }
 
         if (gesture.status === 'panning') {
-            fireEvent(gesture.element, 'panend', {
-                touch: touch,
-                touchEvent: event
-            });
-
             var duration = Date.now() - gesture.startTime,
                 velocityX = (touch.clientX - gesture.startTouch.clientX) / duration,
                 velocityY = (touch.clientY - gesture.startTouch.clientY) / duration,
                 displacementX = touch.clientX - gesture.startTouch.clientX,
                 displacementY = touch.clientY - gesture.startTouch.clientY
                 ;
+
+            fireEvent(gesture.element, 'panend', {
+                isflick: duration < 300,
+                touch: touch,
+                touchEvent: event
+            });
             
             if (duration < 300) {
                 fireEvent(gesture.element, 'flick', {
@@ -572,8 +576,8 @@ function touchcancelHandler(event) {
 
 docEl.addEventListener('touchstart', touchstartHandler, false);
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 function Event() {
 	this._handlers = {};
@@ -812,8 +816,8 @@ MessageScope.get = function(scope) {
 app.module.Event = Event;
 app.module.MessageScope = MessageScope;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 var doc = win.document
 	;
@@ -823,7 +827,7 @@ function _setButton(btn, options) {
 	(options['class'] != null) && (btn.className = options['class']);
 	(options.text != null) && (btn.innerHTML = options.text);
 	(options.bg != null) && (btn.style.background = options.bg);
-	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" />');
+	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" width="100%" height="100%" />');
 	(options.hide === true) ? (btn.style.display = 'none'):(btn.style.display = '');
 	options.onChange && options.onChange.call(btn, options);
 	if (options.handler) {
@@ -905,8 +909,8 @@ for (var p in NavbarProto) {
 
 app.module.Navbar = Navbar;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 
 var Message = app.module.MessageScope,
@@ -965,8 +969,8 @@ Page.get = function(name) {
 
 app.module.Page = Page;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 var doc = win.document
 	;
@@ -1023,8 +1027,8 @@ Template.engine = {}
 
 app.module.Template = Template;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 var doc = win.document
 	;
@@ -1061,8 +1065,8 @@ for (var p in ToolbarProto) {
 
 app.module.Toolbar = Toolbar;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
-(function(win, app, undef) {
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
 
 var doc = win.document,
 	views = {}
@@ -1127,12 +1131,14 @@ for (var p in ViewProto) {
 View.fn = {};
 
 View.extend = function(properties) {
+	var ParentView = views[properties.parent] || View;
+
 	function ChildView() {
-		View.apply(this, arguments);
+		ParentView.apply(this, arguments);
 		this.initialize && this.initialize.apply(this, arguments);
 	}
-	inherit(ChildView, View);
-	extend(ChildView.prototype, View.fn);
+	inherit(ChildView, ParentView);
+	extend(ChildView.prototype, ParentView.fn);
 	extend(ChildView.prototype, properties);
 	
 	return (views[properties.name] = ChildView);
@@ -1144,10 +1150,10 @@ View.get = function(name) {
 
 app.module.View = View;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
 
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,
 	anim = app.module.Animation,
@@ -1308,11 +1314,11 @@ var Transition = {
 
 app.module.Transition = Transition;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
 
 
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,
 	docEl = doc.documentElement,
@@ -1374,10 +1380,12 @@ function touchstartHandler(e) {
 	element = parentElement.boundScrollElement;
 
 	if (!element) return;
+	var offset = anim.getTransformOffset(element);
+
 	element.style.webkitBackfaceVisibility = 'hidden';
 	element.style.webkitTransformStyle = 'preserve-3d';
 	element.style.webkitTransition = '';
-	element.style.webkitTransform = getComputedStyle(element).webkitTransform;
+	element.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
 }
 
 function touchmoveHandler(e) {	
@@ -1419,10 +1427,14 @@ function panHandler(e) {
 
     if ((getBoundaryOffset(element, y))) {
     	if (y > element.minScrollTop) {
-    		var name = 'pulldown';
+    		var name = 'pulldown',
+    			offset = Math.abs(y - element.minScrollTop);
+
     	} else if (y < element.maxScrollTop) {
-    		var name = 'pullup';
+    		var name = 'pullup',
+    			offset = Math.abs(element.maxScrollTop - y);
     	}
+    	element.bounceOffset = offset;
     	fireEvent(element, name);
     }
 
@@ -1698,10 +1710,10 @@ var Scroll = {
 
 app.module.Scroll = Scroll;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
 
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var Message = app.module.MessageScope,
 	mid = 0, cid = 0;
@@ -1818,10 +1830,10 @@ app.module.Model = Model;
 app.module.Collection = Collection;
 
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
 
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 function StateStack() {
 	var that = this;
@@ -1949,7 +1961,7 @@ StateStack.isEquals = function(state1, state2) {
 var NAMED_REGEXP = /\:([a-z0-9_-][a-z0-9_-]*)/gi,
 	SPLAT_REGEXP = /\*([a-z0-9_-][a-z0-9_-]*)/gi,
 	PERL_REGEXP = /P\<([a-z0-9_-][a-z0-9_-]*?)\>/gi,
-	ARGS_SPLITER = '!',
+	ARGS_SPLITER = '?',
 	his = win.history,
 	loc = win.location,
 	Message = app.module.MessageScope
@@ -1976,7 +1988,7 @@ function extractNames(routeText) {
 function extractArgs(str) {
 	if (!str) return {};
 
-	var split = str.substring(1).split('&'),
+	var split = str.split('&'),
 		args = {}
 		;
 
@@ -1995,7 +2007,7 @@ function extractArgs(str) {
 function parseRoute(routeText) {
 	routeText = routeText.replace(PERL_REGEXP, '');
 
-	return new RegExp('^(' + routeText + ')(' + ARGS_SPLITER + '.*?)?$');
+	return new RegExp('^(' + routeText + ')$');
 }
 
 
@@ -2038,7 +2050,7 @@ var NavigationProto = {
 
 			if (route['default']) {
 				defaultRoute = route;
-			} else if(route.routeReg.test(fragment)) {
+			} else if(route.routeReg.test(fragment.split(ARGS_SPLITER)[0])) {
                 unmatched = false;
 				route.callback(fragment);
 				if (route.last) break;
@@ -2086,8 +2098,9 @@ var NavigationProto = {
 				routeText: routeText,
 				routeReg: routeReg,
 				callback: function(fragment) {
-					var matched = fragment.match(routeReg).slice(2),
-						args = extractArgs(matched.pop() || ''),
+					var split = fragment.split(ARGS_SPLITER),
+						matched = split[0].match(routeReg).slice(2),
+						args = extractArgs(split[1] || ''),
 						params = {}
 						;
 
@@ -2135,14 +2148,18 @@ var NavigationProto = {
 		var that = this,
 			stack = that._stack,
 			state = stack.getState(),
+            stateIdx = stack.getIndex()
 			args = []
 			;
 
+        fragment || (fragment = '');
 		options || (options = {});
 		stack.move = 'forward';
 		stack.transition = 'forward';
 
-		if (fragment != null) {
+		if ((/^https?\:/i).test(fragment)) {
+            location.href = fragment;
+        } else if (fragment) {
 			if (!state || state.fragment !== fragment || 
 					options.data) {
 
@@ -2166,7 +2183,7 @@ var NavigationProto = {
 				stack.type = options.type.toUpperCase();
 				setFragment(fragment + (args.length ? ARGS_SPLITER + args.join('&') : ''));
 			}
-		} else {
+		} else if (stateIdx < stack._states.length - 1){
 			his.forward();
 		}
 	},
@@ -2214,7 +2231,7 @@ Navigation.instance = new Navigation();
 app.module.StateStack = StateStack;
 app.module.Navigation = Navigation;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
 
 
 
@@ -2227,7 +2244,7 @@ app.module.Navigation = Navigation;
 
 
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,	$ = win['$'],
  	appVersion = navigator.appVersion,
@@ -2453,7 +2470,7 @@ hooks.on('app:start', function() {
 
 	if (c_transition) {
 		config.viewport.className += ' enableTransition';
-		c_transition.wrapEl = i_content.getActive().parentNode;
+		c_transition.wrapEl = i_content.contentEl;
 	}
 });
 
@@ -2632,51 +2649,55 @@ hooks.on('app:start', function(){
 
 	// navbar
 	function setNavbar() {
-		if (c_navbar) {
-			var i_navbar = c_navbar.instance
-				title = state.pageMeta.title || page.title,
-				buttons = state.pageMeta.buttons || page.buttons
-				;
+		var title = state.pageMeta.title || page.title,
+			buttons = state.pageMeta.buttons || page.buttons
+			;
 
-			app.navigation.setTitle(title);
-			i_navbar.removeButton();
+		if (buttons) {
+			for (var i = 0; i < buttons.length; i++)  {
+				var button = buttons[i],
+					handler = button.handler;
 
-			if (buttons) {
-				buttons.forEach(function(button) {
-					var handler = button.handler;
+				button.id || (button.id = 'btn-' + Date.now());
 
-					if (typeof handler === 'string') {
-						handler = page[handler];
-					}
+				if (typeof handler === 'string') {
+					handler = page[handler];
+				}
 
-					if (button.type === 'back') {
-						button.hide = (button.autoHide !== false && state.index < 1);
-						handler || (handler = function() {
-							app.navigation.pop();
-						});
-					}
+				if (button.type === 'back') {
+					button.hide = (button.autoHide !== false && state.index < 1);
+					handler || (handler = function() {
+						app.navigation.pop();
+					});
+				}
 
-					button.handler = function(e) {
+				button.handler = (function(handler) {
+					return function(e) {
 						handler && handler.call(page, e, state.index);
 					}
-
-					app.navigation.setButton(button);
-				});
-			} else {
-				app.navigation.setButton({
-					type: 'back',
-					text: 'back',
-					hide: state.index < 1?true:false,
-					handler: function() {
-						app.navigation.pop();
-					}
-				});
+				})(handler);
 			}
+		} else {
+			buttons = [{
+				id: 'back',
+				type: 'back',
+				text: 'back',
+				hide: state.index < 1?true:false,
+				handler: function() {
+					app.navigation.pop();
+				}
+			}];
+		}
 
-			// 不是同一个页面，且不是第一次页面
-			if (!isSamePage && lastPage){
-				Transition.float(i_navbar.animWrapEl, state.transition === 'backward'?'LI':'RI', 50);
+		// 第一次页面或同一个页面
+		if (isSamePage || !lastPage) {
+			app.navigation.resetNavbar();
+			app.navigation.setTitle(title);
+			for (var i = 0; i < buttons.length; i++) {
+				app.navigation.setButton(buttons[i]);
 			}
+		} else {
+			app.navigation.switchNavbar(title, state.transition, buttons);
 		}
 	}
 
@@ -2722,7 +2743,6 @@ hooks.on('app:start', function(){
 			c_content.wrapEl.style.minHeight = offsetHeight + 'px';
 			c_content.instance.getActive().style.minHeight = offsetHeight + 'px';
 		}
-
 	}
 
 	// scroll
@@ -2741,20 +2761,30 @@ hooks.on('app:start', function(){
 
 			// 不是第一次页面
 			if (c_transition && lastPage) {
-				var offsetX = c_transition.wrapEl.offsetWidth * (transition === 'backward'?1:-1),
-					className = c_transition.wrapEl.className += ' ' + transition
+				var wrapEl = c_transition.wrapEl,
+					transEl = i_content.transEl,
+					transShadeEl = i_content.transShadeEl,
+					offsetWidth = wrapEl.getBoundingClientRect().width,
+					offsetX = offsetWidth * (transition === 'backward'?1:-1),
+					className = wrapEl.className += ' ' + transition
 					;
 
-				Transition.move(c_transition.wrapEl, offsetX, 0, function() {
+				transShadeEl.style[(transition === 'backward'?'right':'left')] = offsetWidth + 'px';
+				transEl.style.display = 'block';
+
+				Transition.move(transShadeEl, offsetX, 0, function() {
 					i_content.setClassName();
-					c_transition.wrapEl.className = className.replace(' ' + transition, '');
-					c_transition.wrapEl.style.webkitTransform = '';
+					wrapEl.className = className.replace(' ' + transition, '');
+					transShadeEl.style.cssText = '';
+					transEl.style.cssText = '';
 					hooks.trigger('navigation:switchend', state);
 				});
 			} else {
 				i_content.setClassName();
 				hooks.trigger('navigation:switchend', state);
 			}
+		} else {
+			hooks.trigger('navigation:switchend', state);
 		}
 	}
 
@@ -2777,8 +2807,10 @@ hooks.on('app:start', function(){
 			meta.css && app.loadResource(meta.css, 'css');
 			meta.js && app.loadResource(meta.js, 'js', function() {
 				page = Page.get(state.name);
-				page.ready();
-				pageReady();
+				if (page) {
+					page.ready();
+					pageReady();
+				}
 			});
 		}
 	}
@@ -2789,9 +2821,8 @@ hooks.on('app:start', function(){
 
 		setNavbar();
 		setToolbar();
-		setTransition();
 		setScroll();
-		refreshContent();
+		setTransition();
 
 		checkTemplate(page, 'template', pageShow);
 	}
@@ -2825,10 +2856,11 @@ hooks.on('app:start', function(){
 		state = arguments[0];
 		state.pageMeta || (state.pageMeta = {});
 		state.plugins || (state.plugins = {});
+		page = Page.get(state.name);
 
 		isSamePage = lastState && lastState.name === state.name;
-		if (!isSamePage) hooks.trigger('navigation:switch', state);
-		(page = Page.get(state.name))?pageReady():pageLoad();
+		hooks.trigger('navigation:switch', state);
+		page?pageReady():pageLoad();
 	});
 
 	hooks.on('navigation:switch', function() {
@@ -2837,6 +2869,7 @@ hooks.on('app:start', function(){
 	});
 
 	hooks.on('navigation:switchend', function() {
+		refreshContent();
 		setPlugin('onNavigationSwitchEnd');
 	});
 
@@ -2872,7 +2905,13 @@ app.extendView = function(properties) {
 }
 
 app.getView = function(name) {
-	return new (View.get(name));
+	var ChildView = View.get(name);
+	if (!ChildView) return;
+
+	var context = Object.create(ChildView.prototype),
+		args = Array.prototype.slice.call(arguments, 1);
+	ChildView.apply(context, args);
+	return context;
 }
 
 app.definePage = function(properties) {
@@ -2920,7 +2959,12 @@ app.loadResource = function(urls, type, callback) {
 		}
 
 		url = aEl.href = createurl(url);
-		var id = resourcecache[url] || (resourcecache[url] = createid());
+
+		if (typeof resourcecache[url] === 'string') {
+			return callback();
+		}
+
+		var id = resourcecache[url] = createid();
 
 		if (type === 'js' || url.match(/\.js$/)) {
 			var script = document.createElement('script'), loaded = false;
@@ -2949,7 +2993,7 @@ app.loadResource = function(urls, type, callback) {
 	urls.forEach(function(url) {
 		aEl.href = createurl(url);
 		if (!resourcecache[aEl.href]) {
-			resourcecache[aEl.href] = createid();
+			resourcecache[aEl.href] = true;
 			u.push(url);
 		}
 	});
@@ -3017,16 +3061,23 @@ app.navigation = {
 
 	setTitle: function(title) {
 		var state = getState();
-		if (app.config.enableNavbar) {
-			app.config.enableNavbar.instance.setTitle(title);
+		if (config.enableNavbar) {
+			config.enableNavbar.instance.setTitle(title);
 		}
 		state.pageMeta.title = title;
 	},
 
 	setButton: function(options) {
+		if (options instanceof Array) {
+			for (var i = 0; i < options.length; i++) {
+				this.setButton(options[i]);
+			}
+			return;
+		}
+
 		var state = getState();
-		if (app.config.enableNavbar) {
-			app.config.enableNavbar.instance.setButton(options);
+		if (config.enableNavbar) {
+			config.enableNavbar.instance.setButton(options);
 		}
 		if (!state.pageMeta.buttons) {
 			state.pageMeta.buttons = [options];
@@ -3045,10 +3096,30 @@ app.navigation = {
 		}
 	},
 
+	switchNavbar: function(title, type, buttons) {
+		if (config.enableNavbar) {
+			this.resetNavbar();
+			this.setTitle(title);
+			for (var i = 0; i < buttons.length; i++) {
+				this.setButton(buttons[i]);
+			}
+			Transition.float(config.enableNavbar.instance.animWrapEl, type === 'backward'?'LI':'RI', 50);
+		}
+	},
+
+	resetNavbar: function() {
+		var state = getState();
+
+		if (config.enableNavbar) {
+			config.enableNavbar.instance.removeButton();
+		}
+		state.pageMeta.buttons = [];
+	},
+
 	setToolbar: function(options) {
 		var state = getState();
-		if (app.config.enableToolbar) {
-			app.config.enableToolbar.instance.set(options);
+		if (config.enableToolbar) {
+			config.enableToolbar.instance.set(options);
 		}
 		state.pageMeta.toolbar = options;
 	}
@@ -3170,4 +3241,4 @@ app.scroll = {
 	}
 }
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

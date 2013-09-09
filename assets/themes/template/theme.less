@@ -18,7 +18,7 @@
 	}
 }
 
-header.navbar {
+.navbar {
 	height: @header-navbar-height;
 	background: @header-navbar-background;
 	background-size: contain;
@@ -50,10 +50,14 @@ header.navbar {
     }
 }
 
-.viewport > section.content > .wrap {
+.viewport > .content > .wrap {
 	background: @content-wrap-background;
 
 	.active {
 		background: @content-active-background;
 	}
+}
+
+.viewport > .content > .trans > div {
+	.content-trans-shade-style();
 }

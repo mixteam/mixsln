@@ -1,4 +1,4 @@
-(function(win, app){
+;(function(win, app){
 	var View = app.module.View,
 		Page = app.module.Page
 		;
