@@ -1,6 +1,6 @@
 //@require message
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var Message = app.module.MessageScope,
 	mid = 0, cid = 0;
@@ -117,4 +117,4 @@ app.module.Model = Model;
 app.module.Collection = Collection;
 
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

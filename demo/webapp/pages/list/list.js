@@ -1,62 +1,31 @@
 (function(app, undef) {
+	
 	app.definePage({
 		name : 'list',
 		title : '搜索列表',
 		route : 'list\\/(P<word>[^\\/]+)\\/?',
 		template : './pages/list/list.tpl',
 
-		events : [
-			['submit', '#J_topSearchForm', '_submitFormHandler']
-		],
-
 		buttons : [
 			{
 				type : 'back',
 				text : '返回'
-			},
-			{
-				id : 'filter',
-				type : 'func',
-				text : '筛选',
-				handler : function(e) {
-					var btn = e.srcElement;
-					if (btn.innerText === '筛选') {
-						app.navigation.setButton({
-							id: 'filter',
-							text: '完成'
-						});
-					} else if (btn.innerText === '完成') {
-						app.navigation.setButton({
-							id: 'filter',
-							text: '筛选'
-						});
-					}
-				}
 			}
 		],
 
 		plugins : {
-			domevent: true,
+			dynamic: true,
 			lazyload: true,
 			scrollpos: true,
 			pullbounce: {
-				onPullDown: '_pullDownHandler',
-				onPullUp: '_pullUpHandler'
+				onPullDown: '_onPullDownHandler',
+				onPullUp: '_onPullUpHandler'
 			}
 		},
 
-		_submitFormHandler : function(e, that) {
-			e.preventDefault();
-
-			var word = this.$el.find('#J_topSearchForm .c-form-search input').val()
-				;
-
-			app.navigation.push('list/' + encodeURIComponent(word) + '/');
-		},
-
-		_pullDownHandler : function(callback) {
-			this.searchItemsView.pageno = 1;
-			this.searchItemsView.render(function() {
+		_onPullDownHandler : function(callback) {
+			this.searchitemsView.pageno = 1;
+			this.searchitemsView.render({pageno: 1}, function() {
 				callback();
 				setTimeout(function(){
 					app.plugin.lazyload.check();	
@@ -64,8 +33,8 @@
 			});
 		},
 
-		_pullUpHandler : function(callback) {
-			this.searchItemsView.renderMore(function() {
+		_onPullUpHandler : function(callback) {
+			this.searchitemsView.renderMore(function() {
 				callback();
 				setTimeout(function(){
 					app.plugin.lazyload.check();
@@ -76,18 +45,20 @@
 		startup : function() {
 			// implement super.startup
 			var that = this,
-				word = decodeURIComponent(app.navigation.getParameter('word'))
-				searchItems = this.searchItemsView = app.getView('searchItems')
+				word = decodeURIComponent(app.navigation.getParameter('word')),
+				searchbar = this.searchbarView = app.getView('searchbar'),
+				searchitems = this.searchitemsView = app.getView('searchitems'),
+				html = this.template();
 				;
 
-			searchItems.word = word;
-			searchItems.pageno = 1;
 			app.navigation.setTitle('"' + word + '" 的搜索列表');
-			
-			var html = this.template({searchWord: word});
 			this.html(html);
-			this.$el.find('.searchcontent').append(searchItems.el);
-			searchItems.render(function() {
+			this.$el.find('.searchform').append(searchbar.el);
+			this.$el.find('.searchcontent').append(searchitems.el);
+
+			searchbar.render(word);
+			searchitems.render({searchWord: word, pageno: 1}, function() {
+				that.$el.find('#J_pullRefresh, #J_pullUpdate').css('visibility', 'visible');
 				setTimeout(function(){
 					app.plugin.lazyload.check();	
 				}, 500);
@@ -96,11 +67,12 @@
 
 		teardown : function() {
 			// implement super.teardown
-			var that = this,
-				searchItems = that.searchItemsView
+			var searchbar = this.searchbarView,
+				searchitems = this.searchitemsView
 				;
 
-			searchItems.destroy();
+			searchbar.destroy();
+			searchitems.destroy();
 		}
 	});
 

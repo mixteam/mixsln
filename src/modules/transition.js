@@ -1,6 +1,6 @@
 //@require animation
 
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document,
 	anim = app.module.Animation,
@@ -161,4 +161,4 @@ var Transition = {
 
 app.module.Transition = Transition;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

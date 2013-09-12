@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 
 function Content(wrapEl, options) {
@@ -11,7 +11,10 @@ function Content(wrapEl, options) {
 	for (var i = 0; i < this._cacheLength; i++) {
 		html += '<div class="inactive" index="' + i + '"></div>';
 	}
-	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div>';
+	this._wrapEl.innerHTML = '<div class="wrap">' + html + '</div><div class="trans"><div></div></div>';
+	this.contentEl = this._wrapEl.childNodes[0];
+	this.transEl = this._wrapEl.childNodes[1];
+	this.transShadeEl = this.transEl.childNodes[0];
 
 	this.setClassName();
 }
@@ -29,17 +32,17 @@ var ContentProto = {
 
 	getActive : function() {
 		var index = this._cacheIndex;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	getNext: function() {
 		var index = (this._cacheIndex + 1) % this._cacheLength;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	getPrevious: function() {
 		var index = (this._cacheIndex - 1 + this._cacheLength) % this._cacheLength;
-		return this._wrapEl.querySelector('.wrap > div:nth-child(' + (index + 1) + ')');
+		return this.contentEl.childNodes[index];
 	},
 
 	next: function() {
@@ -67,4 +70,4 @@ for (var p in ContentProto) {
 
 app.module.Content = Content;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

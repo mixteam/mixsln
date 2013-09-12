@@ -29,6 +29,7 @@
 	5.2 [获取视图](#获取视图)  
 	5.3 [使用模板](#使用模板)  
 	5.4 [使用插件](#使用插件)  
+    5.5 [继承视图](#继承视图)  
 
 6. [页面](#页面)
 
@@ -401,6 +402,21 @@ Mix的导航，实际上包括两个概念，一个是`导航栏`，一个是`�
 
 
 每个插件，都有不同的行为，具体可查看[插件](plugin.md)一章。
+
+### 继承视图
+
+视图是可以继承的，这样便于对视图进行的扩展。例如：
+
+
+	app.extendView({
+		name: 'myview',,
+		parent: 'baseview',
+		render: function() {
+			// TODO
+		}
+	});
+
+`myview`继承自`baseview`。可以在上下文中访问baseview的方法。但需要注意的是，调用myview的render方法，并不会执行baseview的render方法，需通过`this.__proto__.render`的方式来访问baseview的render方法。
 
 ## 页面
 

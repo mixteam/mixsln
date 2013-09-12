@@ -18,7 +18,7 @@
 	}
 }
 
-header.navbar {
+.navbar {
 	height: @header-navbar-height;
 	background: @header-navbar-background;
 	background-size: contain;
@@ -30,8 +30,9 @@ header.navbar {
     text-shadow: @header-navbar-text-shadow;
     -webkit-box-shadow: @header-navbar-box-shadow;
 
-    button {
+    a {
 		height: @navbar-button-height;
+		line-height: @navbar-button-height;
 		background: @navbar-button-background;
 		background-size: contain;
 	    color: @navbar-button-color;
@@ -49,10 +50,14 @@ header.navbar {
     }
 }
 
-.viewport > section.content > .wrap {
+.viewport > .content > .wrap {
 	background: @content-wrap-background;
 
 	.active {
 		background: @content-active-background;
 	}
+}
+
+.viewport > .content > .trans > div {
+	.content-trans-shade-style();
 }

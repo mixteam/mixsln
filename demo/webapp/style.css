@@ -7,23 +7,11 @@
 	margin: 0 auto;
 	overflow: hidden;
 }
-/*
-.viewport > .content > .wrap > div:nth-child(1) {
-	background-color: red;
+
+.viewport > section.content > .wrap > .active {
+	background-color: #EEE;
 }
 
-.viewport > .content > .wrap > div:nth-child(2) {
-	background-color: orange;
+.viewport > section.content > .trans > .trans-shade {
+	background-color: #EEE;
 }
-
-.viewport > .content > .wrap > div:nth-child(3) {
-	background-color: yellow;
-}
-
-.viewport > .content > .wrap > div:nth-child(4) {
-	background-color: green;
-}
-
-.viewport > .content > .wrap > div:nth-child(5) {
-	background-color: cyan;
-}*/

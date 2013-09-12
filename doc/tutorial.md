@@ -79,9 +79,9 @@
 
 ## 使用路由
 
-通过`Hello World`中的输入框，我们可以改变Hash值，例如`hello/zhuxun`。此时我希望获取其中的`zhuxun`，并把它动态输出到页面中。这样就需要用到路由的功能。
+通过`Hello World`中的输入框，我们可以改变Hash值，例如`hello/zhuxun`。此时希望获取其中的`zhuxun`，并把它动态输出到页面中。这样就需要用到路由的功能。
 	
-新建一个`hellobuddy.tpl`的模板文件，内容如下：
+新建一个`hellobuddy.tpl`的模板文件（必须是以".tpl"结尾的路径），内容如下：
 
 	<h1>Hello, <em>{{name}}</em></h1>
 

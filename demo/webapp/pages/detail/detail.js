@@ -1,5 +1,4 @@
 (function(app, undef) {
-	var searchbar = app.getView('searchbar');
 
 	app.definePage({
 		name: 'detail',
@@ -16,25 +15,23 @@
 				type: 'func',
 				text: '评论',
 				handler: function() {
-					alert('go comment');
+					this.commentView.slideIn();
 				}
 			},
 			{
-				id: 'shop',
+				id: 'pic',
 				type: 'func',
-				text: '店铺',
+				text: '图文',
 				handler: function() {
-					alert('go shop');
+					this.picView.slideIn();
 				}
 			}
 		],
+
 		toolbar: {
-			height: 50,
-			el: searchbar.el
+			height: 50
 		},
-		views: {
-			searchbar: searchbar,
-		},
+
 		plugins: {
 			domevent: true
 		},
@@ -42,17 +39,29 @@
 		startup : function() {
 			// implement super.startup
 			var pid = app.navigation.getParameter('pid'),
-				html = this.template({}),
-				searchbar = this.views.searchbar
+				html = this.template()
 				;
 
 			this.html(html);
+		},
+
+		show: function() {
+			var searchbar = this.searchbarView = app.getView('searchbar'),
+				comment = this.commentView = app.getView('comment'),
+				pic = this.picView = app.getView('pic');
+
+			app.navigation.setToolbar({el: searchbar.el});
 			searchbar.render();
+			comment.render();
+			pic.render();
+		},
+
+		hide: function() {
+			this.searchbarView.destory();
 		},
 
 		teardown : function() {
 			// implement super.teardown
-			this.views.searchbar.destory();
 		}
 	});
 

@@ -1,4 +1,4 @@
-(function(win, app, undef) {
+;(function(win, app, undef) {
 
 var doc = win.document
 	;
@@ -35,4 +35,4 @@ for (var p in ToolbarProto) {
 
 app.module.Toolbar = Toolbar;
 
-})(window, window['app']||(window['app']={module:{},plugin:{}}));
+})(window, window['app']||(window['app']={module:{},plugin:{}}))

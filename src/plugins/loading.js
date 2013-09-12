@@ -1,49 +1,78 @@
-(function(win, app) {
+;(function(win, app) {
 	var doc = win.document,
-		loadingTimeout = 5000,
-		loadingId, loadingWrap;
+		config = app.config,
+		id, ids = [], wrap, item;
 
 	app.plugin.loading = {
-		ids: [],
+		show: function(text) {
+			if (text) {
+				item.innerHTML = text;
 
-		onAppStart: function() {
-			loadingWrap = doc.createElement('div');
-			loadingWrap.style.cssText = 'position:absolute;left:0;top:0;width:100%;z-index:999;background:rgba(0,0,0,0);display:none;'
-			loadingWrap.className = 'loading-wrap';
-			doc.body.appendChild(loadingWrap);
-		},
+				if (wrap.style.display !== 'block') {
+					wrap.style.display = 'block';
+					var bodyRect = document.body.getBoundingClientRect();
+					var spanRect = item.getBoundingClientRect();
+					item.style.left = (bodyRect.width - spanRect.width) / 2 + 'px';
+					item.style.top = ((window.innerHeight - spanRect.height) / 2 - bodyRect.top) + 'px';
+				}
+			}
 
-		show: function() {
 			var now = Date.now();
-
-			loadingWrap.style.height = window.innerHeight + 'px';
-			loadingWrap.style.top = window.scrollY + 'px';
-			loadingWrap.style.display = 'block';
-			this.ids.push(now);
-
+			ids.push(now);
 			return now;
 		},
 
-		hide: function(id) {
-			if (id) {
-				this.ids.splice(this.ids.indexOf(id), 1);
+		hide: function(_id) {
+			if (_id) {
+				ids.splice(ids.indexOf(_id), 1);
 			} else {
-				this.ids = [];
+				ids = [];
 			}
 
-			if (this.ids.length === 0) {
-				loadingWrap.style.display = 'none';
+			if (ids.length === 0) {
+				item.innerHTML = '';
+				wrap.style.display = 'none';
 			}
+		},
+
+		onAppStart: function() {
+			wrap = document.createElement('div');
+			wrap.className = 'loading';
+			wrap.style.cssText = [
+				'display: none', 
+				'background: transparent', 
+				'position: absolute',
+				'width: 100%', 
+				'height: 100%', 
+				'left: 0', 
+				'top: 0',
+				'overflow: hidden', 
+				'z-index: 99999'
+			].join(';');
+			item = document.createElement('div');
+			item.style.cssText = [
+				'position:absolute',
+				'width: 100px',
+				'height: 90px',
+				'line-height: 100px',
+				'background-color: rgba(0,0,0,0.5)',
+				'color: #FFF',
+				'text-align: center',
+				'font-size: 11px',
+				'border-radius: 13px'
+			].join(';');
+			wrap.appendChild(item);
+			doc.body.appendChild(wrap);
 		},
 
 		onNavigationSwitch: function() {
-			loadingId = this.show();
+			id = this.show('正在加载');
 		},
 
 		onDomReady: function() {
-			this.hide(loadingId);
+			this.hide(id);
 		}
 	}
 
 
-})(window, window['app']);
+})(window, window['app'])

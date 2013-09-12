@@ -1,4 +1,4 @@
-(function(win, app){
+;(function(win, app){
 	var ss = win.sessionStorage,
 		stack = app.module.Navigation.instance.getStack(),
 		SS_PREIX = 'mix_storage_001_'
@@ -83,4 +83,4 @@
 			this.loadAll();
 		}
 	};
-})(window, window['app']);
+})(window, window['app'])
