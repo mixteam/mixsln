@@ -130,8 +130,8 @@ var NAMED_REGEXP = /\:([a-z0-9_-][a-z0-9_-]*)/gi,
 	PERL_REGEXP = /P\<([a-z0-9_-][a-z0-9_-]*?)\>/gi,
 	ARGS_SPLITER = '?',
 	his = win.history,
-	loc = win.location,
-	Message = app.module.MessageScope
+	loc = win.location
+	//Message = app.module.MessageScope
 	;
 
 function convertParams(routeText) {
@@ -193,7 +193,7 @@ function Navigation() {
 	that._routes = {};
 	that._stack = new StateStack();
 
-	Message.mixto(this, 'navigation');
+	//Message.mixto(this, 'navigation');
 }
 
 var NavigationProto = {
@@ -224,8 +224,12 @@ var NavigationProto = {
 			}
 		}
 
-		if (unmatched && defaultRoute) {
-			defaultRoute.callback(fragment);
+		if (unmatched) {
+			if (defaultRoute) {
+				defaultRoute.callback(fragment);
+			} else {
+				this._stack.pushState('unmatched', fragment, {}, {});
+			}
 		}
 	},
 
@@ -245,7 +249,7 @@ var NavigationProto = {
 		function routeHandler(fragment, params, args) {
 			var state = that._stack.pushState(name, fragment, params, args);
 			options.callback && options.callback(state);
-			that.trigger(state.move, state);
+			//that.trigger(state.move, state);
 		}
 
 		if (options['default']) {
@@ -277,7 +281,7 @@ var NavigationProto = {
 
 					routeHandler(fragment, params, args);
 				},
-				last: !!options.last
+				last: options.last
 			}
 		}
 	},

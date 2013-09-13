@@ -169,8 +169,10 @@ hooks.on('page:define page:defineMeta', function(page) {
 
 	navigation.addRoute(route.name, route.text, {
 		'default': route['default'],
-		callback: route.callback,
-		last: route.last
+		callback: function(state) {
+			Message.get('navigation').trigger(state.move, state);
+		},
+		last: true
 	});
 });
 
@@ -410,7 +412,7 @@ hooks.on('app:start', function(){
 		c_transition = config.enableTransition,
 		c_scroll = config.enableScroll,
 		state, page, lastState, lastPage,
-		isSamePage = false
+		isSamePage = false, isSameState = false
 		;
 
 	// navbar
@@ -424,7 +426,7 @@ hooks.on('app:start', function(){
 				var button = buttons[i],
 					handler = button.handler;
 
-				button.id || (button.id = 'btn-' + Date.now());
+				button.id || (button.id = 'btn-' + Date.now() + '-' + parseInt(Math.random() * 10));
 
 				if (typeof handler === 'string') {
 					handler = page[handler];
@@ -594,17 +596,21 @@ hooks.on('app:start', function(){
 	}
 
 	function pageShow() {
-		lastPage && lastPage.hide(lastState);
+		var oldFragment = page.el.getAttribute('data-fragment'), 
+			oldCache = pagecache[oldFragment];
 
-		var curFragment = page.el.getAttribute('data-fragment'), 
-			curCache = pagecache[curFragment];
+		if (!isSameState && lastPage) {
+			lastPage.hide(lastState);
+		}
 
-		if (curFragment === state.fragment) {
-			page.show(state);
+		if (oldFragment === state.fragment) {
+			if (!isSameState) {
+				page.show(state);
+			}
 		} else {
-			if (curCache) {
-				curCache.page.teardown(curCache.state);
-				delete pagecache[curFragment];
+			if (oldCache) {
+				oldCache.page.teardown(oldCache.state);
+				delete pagecache[oldFragment];
 			}
 
 			pagecache[state.fragment] = {state:state, page:page};
@@ -616,15 +622,20 @@ hooks.on('app:start', function(){
 
 		lastState = state;
 		lastPage = page;
+
+		hooks.trigger('page:domready');
 	}
 
-	navigation.on('forward backward', function() {
+	Message.get('navigation').on('forward backward', function() {
 		state = arguments[0];
 		state.pageMeta || (state.pageMeta = {});
 		state.plugins || (state.plugins = {});
 		page = Page.get(state.name);
 
-		isSamePage = lastState && lastState.name === state.name;
+		if (lastState) {
+			isSamePage = lastState.name === state.name;
+			isSameState = lastState.fragment === state.fragment;
+		}
 		hooks.trigger('navigation:switch', state);
 		page?pageReady():pageLoad();
 	});
@@ -639,7 +650,7 @@ hooks.on('app:start', function(){
 		setPlugin('onNavigationSwitchEnd');
 	});
 
-	hooks.after('page:show navigation:switchend', function() {
+	hooks.after('page:domready navigation:switchend', function() {
 		setPlugin('onDomReady');
 	});
 

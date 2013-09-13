@@ -1151,8 +1151,6 @@ View.get = function(name) {
 app.module.View = View;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
-
-
 ;(function(win, app, undef) {
 
 var doc = win.document,
@@ -1315,9 +1313,6 @@ var Transition = {
 app.module.Transition = Transition;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
-
-
-
 ;(function(win, app, undef) {
 
 var doc = win.document,
@@ -1711,8 +1706,6 @@ var Scroll = {
 app.module.Scroll = Scroll;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
-
-
 ;(function(win, app, undef) {
 
 var Message = app.module.MessageScope,
@@ -1831,8 +1824,6 @@ app.module.Collection = Collection;
 
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
-
-
 ;(function(win, app, undef) {
 
 function StateStack() {
@@ -1963,8 +1954,8 @@ var NAMED_REGEXP = /\:([a-z0-9_-][a-z0-9_-]*)/gi,
 	PERL_REGEXP = /P\<([a-z0-9_-][a-z0-9_-]*?)\>/gi,
 	ARGS_SPLITER = '?',
 	his = win.history,
-	loc = win.location,
-	Message = app.module.MessageScope
+	loc = win.location
+	//Message = app.module.MessageScope
 	;
 
 function convertParams(routeText) {
@@ -2026,7 +2017,7 @@ function Navigation() {
 	that._routes = {};
 	that._stack = new StateStack();
 
-	Message.mixto(this, 'navigation');
+	//Message.mixto(this, 'navigation');
 }
 
 var NavigationProto = {
@@ -2057,8 +2048,12 @@ var NavigationProto = {
 			}
 		}
 
-		if (unmatched && defaultRoute) {
-			defaultRoute.callback(fragment);
+		if (unmatched) {
+			if (defaultRoute) {
+				defaultRoute.callback(fragment);
+			} else {
+				this._stack.pushState('unmatched', fragment, {}, {});
+			}
 		}
 	},
 
@@ -2078,7 +2073,7 @@ var NavigationProto = {
 		function routeHandler(fragment, params, args) {
 			var state = that._stack.pushState(name, fragment, params, args);
 			options.callback && options.callback(state);
-			that.trigger(state.move, state);
+			//that.trigger(state.move, state);
 		}
 
 		if (options['default']) {
@@ -2110,7 +2105,7 @@ var NavigationProto = {
 
 					routeHandler(fragment, params, args);
 				},
-				last: !!options.last
+				last: options.last
 			}
 		}
 	},
@@ -2232,18 +2227,6 @@ app.module.StateStack = StateStack;
 app.module.Navigation = Navigation;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
-
-
-
-
-
-
-
-
-
-
-
-
 ;(function(win, app, undef) {
 
 var doc = win.document,	$ = win['$'],
@@ -2403,8 +2386,10 @@ hooks.on('page:define page:defineMeta', function(page) {
 
 	navigation.addRoute(route.name, route.text, {
 		'default': route['default'],
-		callback: route.callback,
-		last: route.last
+		callback: function(state) {
+			Message.get('navigation').trigger(state.move, state);
+		},
+		last: true
 	});
 });
 
@@ -2644,7 +2629,7 @@ hooks.on('app:start', function(){
 		c_transition = config.enableTransition,
 		c_scroll = config.enableScroll,
 		state, page, lastState, lastPage,
-		isSamePage = false
+		isSamePage = false, isSameState = false
 		;
 
 	// navbar
@@ -2658,7 +2643,7 @@ hooks.on('app:start', function(){
 				var button = buttons[i],
 					handler = button.handler;
 
-				button.id || (button.id = 'btn-' + Date.now());
+				button.id || (button.id = 'btn-' + Date.now() + '-' + parseInt(Math.random() * 10));
 
 				if (typeof handler === 'string') {
 					handler = page[handler];
@@ -2828,17 +2813,21 @@ hooks.on('app:start', function(){
 	}
 
 	function pageShow() {
-		lastPage && lastPage.hide(lastState);
+		var oldFragment = page.el.getAttribute('data-fragment'), 
+			oldCache = pagecache[oldFragment];
 
-		var curFragment = page.el.getAttribute('data-fragment'), 
-			curCache = pagecache[curFragment];
+		if (!isSameState && lastPage) {
+			lastPage.hide(lastState);
+		}
 
-		if (curFragment === state.fragment) {
-			page.show(state);
+		if (oldFragment === state.fragment) {
+			if (!isSameState) {
+				page.show(state);
+			}
 		} else {
-			if (curCache) {
-				curCache.page.teardown(curCache.state);
-				delete pagecache[curFragment];
+			if (oldCache) {
+				oldCache.page.teardown(oldCache.state);
+				delete pagecache[oldFragment];
 			}
 
 			pagecache[state.fragment] = {state:state, page:page};
@@ -2850,15 +2839,20 @@ hooks.on('app:start', function(){
 
 		lastState = state;
 		lastPage = page;
+
+		hooks.trigger('page:domready');
 	}
 
-	navigation.on('forward backward', function() {
+	Message.get('navigation').on('forward backward', function() {
 		state = arguments[0];
 		state.pageMeta || (state.pageMeta = {});
 		state.plugins || (state.plugins = {});
 		page = Page.get(state.name);
 
-		isSamePage = lastState && lastState.name === state.name;
+		if (lastState) {
+			isSamePage = lastState.name === state.name;
+			isSameState = lastState.fragment === state.fragment;
+		}
 		hooks.trigger('navigation:switch', state);
 		page?pageReady():pageLoad();
 	});
@@ -2873,7 +2867,7 @@ hooks.on('app:start', function(){
 		setPlugin('onNavigationSwitchEnd');
 	});
 
-	hooks.after('page:show navigation:switchend', function() {
+	hooks.after('page:domready navigation:switchend', function() {
 		setPlugin('onDomReady');
 	});
 
