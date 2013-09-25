@@ -43,7 +43,9 @@ var doc = win.document,	$ = win['$'],
 		enableNavbar : false,
 		enableToolbar : false,
 		enableScroll : false,
-		enableTransition : false
+		enableTransition : false,
+		pushState: false,
+		basePath: '/'
 	};
 
 
@@ -599,34 +601,31 @@ hooks.on('app:start', function(){
 		var oldFragment = page.el.getAttribute('data-fragment'), 
 			oldCache = pagecache[oldFragment];
 
-		if (!isSameState && lastPage) {
-			lastPage.hide(lastState);
-		}
+		if (!isSameState && !(isSamePage && state.isDefault)) {
+			lastPage && lastPage.hide(lastState);
 
-		if (oldFragment === state.fragment) {
-			if (!isSameState) {
-				page.show(state);
-			}
-		} else {
-			if (oldCache) {
-				oldCache.page.teardown(oldCache.state);
-				delete pagecache[oldFragment];
+			if (oldFragment !== state.fragment && !isSamePage) {
+				if (oldCache) {
+					oldCache.page.teardown(oldCache.state);
+					delete pagecache[oldFragment];
+				}
+
+				pagecache[state.fragment] = {state:state, page:page};
+				page.el.innerHTML = '';
+				page.el.setAttribute('data-fragment', state.fragment);
+				page.startup(state);
 			}
 
-			pagecache[state.fragment] = {state:state, page:page};
-			page.el.innerHTML = '';
-			page.el.setAttribute('data-fragment', state.fragment);
-			page.startup(state);
 			page.show(state);
-		}
 
-		lastState = state;
-		lastPage = page;
+			lastState = state;
+			lastPage = page;
+		}		
 
 		hooks.trigger('page:domready');
 	}
 
-	Message.get('navigation').on('forward backward', function() {
+	Message.get('navigation').on('forward backward replace', function() {
 		state = arguments[0];
 		state.pageMeta || (state.pageMeta = {});
 		state.plugins || (state.plugins = {});
@@ -797,6 +796,12 @@ function getState() {
 
 app.navigation = {
 	push: function(fragment, options) {
+		navigation.push(fragment, options);
+	},
+
+	replace: function(fragment, options) {
+		options || (options = {});
+		options.replace = true;
 		navigation.push(fragment, options);
 	},
 
