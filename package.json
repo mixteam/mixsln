@@ -1,6 +1,6 @@
 {
   "name": "mixsln",
-  "version": "0.4.2",
+  "version": "0.4.4",
   "description": "the solution for webapp",
   "license": "MIT",
   "author": "zhuxun <zhuxun.jb@taobao.com>",
@@ -14,8 +14,9 @@
     "grunt-contrib-uglify": "~0.2.0",
     "grunt-contrib-watch": "~0.4.0",
     "grunt-contrib-cssmin": "~0.6.0",
-    "grunt-depconcat": "~0.1.2",
-    "grunt-contrib-less": "~0.6.4"
+    "grunt-depconcat": "~0.2.0",
+    "grunt-contrib-less": "~0.6.4",
+    "grunt-contrib-clean": "~0.5.0"
   },
   "dependencies": {}
 }

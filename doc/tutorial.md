@@ -2,9 +2,10 @@
 
 ## 获取代码（v0.4.x）
 
-- [js开发版下载](http://mixteam.github.io/mixsln/dist/mixsln.js)
-- [js压缩版下载](http://mixteam.github.io/mixsln/dist/mixsln.min.js)
-- [css下载（ios6默认主题样式）](http://mixteam.github.io/mixsln/dist/mixsln.min.css)
+- [js开发版下载](http://mixteam.github.io/mixsln/dist/mixsln.debug.js)
+- [js压缩版下载](http://mixteam.github.io/mixsln/dist/mixsln.js)
+- [css下载（ios6默认主题样式）](http://mixteam.github.io/mixsln/dist/mixsln.css)
+- [css下载（无主题样式）](http://mixteam.github.io/mixsln/dist/mixsln-notheme.css)
 
 ## Hello World
 
