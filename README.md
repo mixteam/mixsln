@@ -1,11 +1,11 @@
 # Mix解决方案
 
-## 稳定版本(v0.4.3)
+## 稳定版本(v0.4.4)
 
-- [js开发版下载](http://mixteam.github.io/mixsln/dist/mixsln.js)
-- [js压缩版下载](http://mixteam.github.io/mixsln/dist/mixsln.min.js)
-- [css下载（ios6默认主题样式）](http://mixteam.github.io/mixsln/dist/mixsln.min.css)
-- [css下载（无主题样式）](http://mixteam.github.io/mixsln/dist/mixsln-notheme.min.css)
+- [js开发版下载](http://mixteam.github.io/mixsln/dist/mixsln.debug.js)
+- [js压缩版下载](http://mixteam.github.io/mixsln/dist/mixsln.js)
+- [css下载（ios6默认主题样式）](http://mixteam.github.io/mixsln/dist/mixsln.css)
+- [css下载（无主题样式）](http://mixteam.github.io/mixsln/dist/mixsln-notheme.css)
 
 ## 文档
 
@@ -30,6 +30,12 @@
 4. 为各平台提供统一方案，保证兼容性。
 
 ## 版本更新
+
+### v0.4.4
+
+- 增加app.navigation.replace接口
+- 修复创建导航栏按钮的bug
+- 修正触发forward/backward的时机
 
 ### v0.4.3
 

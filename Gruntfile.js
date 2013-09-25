@@ -1,19 +1,19 @@
-var path = require('path'),
-	fs = require('fs')
-	;
+'use strict';
 
+module.exports = function (grunt) {
+	grunt.initConfig({
+		pkg: grunt.file.readJSON('package.json'),
+		srcPath: 'src',
+		distPath: 'dist',
+		modulePath: 'modules',
+		pluginPath: 'plugins',
+		assetPath: 'assets',
+		themePath: 'themes',
+		defaultTheme: 'ios6-default',
 
-function runTask(grunt) {
-	var context = grunt.file.readJSON('package.json');
-	context.srcPath = 'src';
-	context.distPath = 'dist';
-	context.modulePath = 'modules';
-	context.pluginPath = 'plugins';
-	context.assetPath = 'assets';
-	context.themePath = 'themes';
-	context.defaultTheme = 'ios6-default';
+		clean: ['<%= distPath%>/*'],
 
-	var depconcatTask = {
+		depconcat: {
 			options: {
 				separator: '\n'
 			},
@@ -22,113 +22,99 @@ function runTask(grunt) {
 				options : {
 					except: ['dualgesture.js', 'matrix.js'],
 				},
-				src: ['<%= context.srcPath %>/<%= context.modulePath %>/*.js'],
-				dest: '<%= context.distPath %>/<%= context.name %>.js'
+				src: ['<%= srcPath %>/<%= modulePath %>/*.js'],
+				dest: '<%= distPath %>/<%= pkg.name %>.debug.js'
 			},
 
 			css: {
-				src: ['<%= context.assetPath %>/base.css', '<%= context.assetPath %>/<%= context.themePath %>/<%= context.defaultTheme %>.css'],
-				dest: '<%= context.distPath %>/<%= context.name %>.css'
+				src: ['<%= assetPath %>/base.css', '<%= assetPath %>/<%= themePath %>/<%= defaultTheme %>.css'],
+				dest: '<%= distPath %>/<%= pkg.name %>.debug.css'
 			},
 
 			notheme_css: {
-				src: ['<%= context.assetPath %>/base.css'],
-				dest: '<%= context.distPath %>/<%= context.name %>-notheme.css'
+				src: ['<%= assetPath %>/base.css'],
+				dest: '<%= distPath %>/<%= pkg.name %>-notheme.debug.css'
 			}
 		},
 
-		uglifyTask = {
+		uglify: {
 			main: {
 				files: {
-					'<%= context.distPath %>/<%= context.name %>.min.js': '<%= depconcat.js.dest %>'
+					'<%= distPath %>/<%= pkg.name %>.js': '<%= depconcat.js.dest %>'
 				}
 			},
 
 			plugin: {
 				files : [{
 					expand: true,
-					cwd: '<%= context.srcPath %>/<%= context.pluginPath %>/',
+					cwd: '<%= srcPath %>/<%= pluginPath %>/',
 					src: ['*.js'],
-					dest: '<%= context.distPath %>/<%= context.pluginPath %>/',
-					ext: '.min.js'
+					dest: '<%= distPath %>/<%= pluginPath %>/',
+					ext: '.js'
 				}]
 			}
 		},
 
-		cssminTask = {
+		less: {
+			options: {
+				paths: ['<%= assetPath %>/<%= themePath %>/source']
+			},
+			main: {
+				files: [{
+					expand: true,
+					cwd: '<%= assetPath %>/<%= themePath %>/source/',
+					src: ['*.less'],
+					dest: '<%= assetPath %>/<%= themePath %>/',
+					ext: '.debug.css'
+				}]
+			}
+		},
+
+		cssmin: {
 			options: {
 				report: 'min'
 			},
 			main: {
 				files: {
-					'<%= context.distPath %>/<%= context.name %>.min.css' : '<%= depconcat.css.dest %>',
-					'<%= context.distPath %>/<%= context.name %>-notheme.min.css' : '<%= depconcat.notheme_css.dest %>'
+					'<%= distPath %>/<%= pkg.name %>.css' : '<%= depconcat.css.dest %>',
+					'<%= distPath %>/<%= pkg.name %>-notheme.css' : '<%= depconcat.notheme_css.dest %>'
 				}
 			}
 		},
 
-		lessTask = {
-			options: {
-				paths: ['<%= context.assetPath %>/<%= context.themePath %>/source']
-			},
-			main: {
-				files: [{
-					expand: true,
-					cwd: '<%= context.assetPath %>/<%= context.themePath %>/source/',
-					src: ['*.less'],
-					dest: '<%= context.assetPath %>/<%= context.themePath %>/',
-					ext: '.css'
-				}]
-			}
-		},
-
-
-		watchTask = {
+		watch: {
 			'main_js' : {
 				files: ['<%= depconcat.js.src %>'],
 				tasks: ['depconcat:js', 'uglify:main']
 			},
 
 			'plugin_js' :  {
-				files: ['<%= context.srcPath %>/<%= context.pluginPath %>/*.js'],
+				files: ['<%= srcPath %>/<%= pluginPath %>/*.js'],
 				tasks: ['uglify:plugin']
 			},
 
 			'main_css' : {
-				files: ['<%= context.assetPath %>/base.css'],
+				files: ['<%= assetPath %>/base.css'],
 				tasks: ['depconcat:css', 'cssmin:main']
 			},
 
 			'theme_css' : {
-				files: ['<%= context.assetPath %>/<%= context.themePath %>/*/*.less'],
+				files: ['<%= assetPath %>/<%= themePath %>/*/*.less'],
 				tasks: ['less', 'depconcat:css', 'depconcat:notheme_css', 'cssmin:main']
 			}
 		}
-		;
 
-
-	grunt.initConfig({
-		context: context,
-		depconcat: depconcatTask,
-		uglify: uglifyTask,
-		watch: watchTask,
-		less: lessTask,
-		cssmin: cssminTask
 	});
 
+	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-contrib-less');
 	grunt.loadNpmTasks('grunt-depconcat');
 
-	grunt.registerTask('dist', ['less', 'depconcat', 'uglify', 'cssmin']);
+	grunt.registerTask('dist', ['clean','less', 'depconcat', 'uglify', 'cssmin']);
 	grunt.registerTask('dev', ['watch']);
 	
 	grunt.registerTask('default', ['dist']);
-
 };
-
-module.exports = function(grunt) {
-	runTask(grunt);
-}

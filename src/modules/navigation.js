@@ -88,6 +88,9 @@ var StateStackProto = {
 				states.push(cur);
 				cur.referer = location.href.replace(/#[^#]*/, '#' + states[stateIdx - 1].fragment);
 			}
+		} else if (move === 'replace') {
+			cur.referer = location.href.replace(/#[^#]*/, '#' + states[stateIdx].fragment);
+			states[stateIdx] = cur;
 		}
 
 		cur.move = move;
@@ -130,8 +133,8 @@ var NAMED_REGEXP = /\:([a-z0-9_-][a-z0-9_-]*)/gi,
 	PERL_REGEXP = /P\<([a-z0-9_-][a-z0-9_-]*?)\>/gi,
 	ARGS_SPLITER = '?',
 	his = win.history,
-	loc = win.location,
-	Message = app.module.MessageScope
+	loc = win.location
+	//Message = app.module.MessageScope
 	;
 
 function convertParams(routeText) {
@@ -182,8 +185,12 @@ function getFragment() {
 	return loc.hash.slice(1) || '';
 }
 
-function setFragment(fragment) {
-	loc.hash = fragment;
+function setFragment(fragment, isReplace) {
+	if (isReplace) {
+		loc.replace('#' + fragment);
+	} else {
+		loc.hash = fragment;
+	}
 }
 
 function Navigation() {
@@ -193,7 +200,7 @@ function Navigation() {
 	that._routes = {};
 	that._stack = new StateStack();
 
-	Message.mixto(this, 'navigation');
+	//Message.mixto(this, 'navigation');
 }
 
 var NavigationProto = {
@@ -224,8 +231,12 @@ var NavigationProto = {
 			}
 		}
 
-		if (unmatched && defaultRoute) {
-			defaultRoute.callback(fragment);
+		if (unmatched) {
+			if (defaultRoute) {
+				defaultRoute.callback(fragment);
+			} else {
+				this._stack.pushState('unmatched', fragment, {}, {});
+			}
 		}
 	},
 
@@ -244,13 +255,14 @@ var NavigationProto = {
 
 		function routeHandler(fragment, params, args) {
 			var state = that._stack.pushState(name, fragment, params, args);
+			state.isDefault = !!options['default'];
 			options.callback && options.callback(state);
-			that.trigger(state.move, state);
+			//that.trigger(state.move, state);
 		}
 
 		if (options['default']) {
 			that._routes[name] = {
-				'default' : true,
+				'default': true,
 				callback: function(fragment) {
 					var args = extractArgs(fragment.split(ARGS_SPLITER)[1] || '');
 					routeHandler(fragment, {}, args);
@@ -277,7 +289,7 @@ var NavigationProto = {
 
 					routeHandler(fragment, params, args);
 				},
-				last: !!options.last
+				last: options.last
 			}
 		}
 	},
@@ -321,7 +333,7 @@ var NavigationProto = {
 
         fragment || (fragment = '');
 		options || (options = {});
-		stack.move = 'forward';
+		stack.move = !!options.replace?'replace':'forward';
 		stack.transition = 'forward';
 
 		if ((/^https?\:/i).test(fragment)) {
@@ -348,7 +360,7 @@ var NavigationProto = {
 				}
 
 				stack.type = options.type.toUpperCase();
-				setFragment(fragment + (args.length ? ARGS_SPLITER + args.join('&') : ''));
+				setFragment(fragment + (args.length ? ARGS_SPLITER + args.join('&') : ''), !!options.replace);
 			}
 		} else if (stateIdx < stack._states.length - 1){
 			his.forward();
