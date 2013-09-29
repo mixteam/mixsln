@@ -332,7 +332,7 @@ var Scroll = {
         el.style.webkitTransform = anim.makeTranslateString(x, y);
     },
 
-    scollToElement: function(el, child) {
+    scrollToElement: function(el, child) {
     	var offset = this.offset(el, child);
     	this.scrollTo(el, offset.top);
     },

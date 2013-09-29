@@ -35,6 +35,7 @@
 
 - 增加app.navigation.replace接口
 - 修复创建导航栏按钮的bug
+- 修复scroll的一个api命名的bug
 - 修正触发forward/backward的时机
 
 ### v0.4.3
