@@ -2072,7 +2072,7 @@ function scrollEnd() {
 	cancelScrollEnd = false;
 
 	setTimeout(function() {
-		if (!cancelScrollEnd) {
+		if (!cancelScrollEnd && element) {
 			element.style.webkitBackfaceVisibility = 'initial';
 			element.style.webkitTransformStyle = 'flat';
 			element.style.webkitTransition = '';
@@ -2127,7 +2127,6 @@ var Scroll = {
 				el.style.webkitTransition = '';
 				el.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
 			}, 50);
-			
 		}
 	},
 
