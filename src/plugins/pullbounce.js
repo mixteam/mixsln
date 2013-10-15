@@ -121,6 +121,7 @@
 								(options.onPullUp?'<section id="J_pullUpdate"><span>上拉可加载更多</span></section>':'');
 
 			page.el = page.el.querySelector('#J_pullContent');
+			page.el.style.minHeight = config.enableContent.wrapEl.offsetHeight + 'px';
 		},
 
 		onPageShow: function(page, options) {
