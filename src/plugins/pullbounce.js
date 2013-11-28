@@ -56,6 +56,7 @@
 				;
 
 			if (e.type === 'panstart') {
+				this._pullType = null;
 				this._onPullStart();
 			} else if (e.type === 'pulldown') {
 				if (offset > bounceHeight) {
