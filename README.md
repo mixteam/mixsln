@@ -1,6 +1,6 @@
 # Mix解决方案
 
-## 稳定版本(v0.4.4)
+## 稳定版本(v0.4.5)
 
 - [js开发版下载](http://mixteam.github.io/mixsln/dist/mixsln.debug.js)
 - [js压缩版下载](http://mixteam.github.io/mixsln/dist/mixsln.js)
@@ -30,6 +30,11 @@
 4. 为各平台提供统一方案，保证兼容性。
 
 ## 版本更新
+
+### v0.4.5
+
+- 修复scroll的bug  
+- 更新pullbounce插件
 
 ### v0.4.4
 
