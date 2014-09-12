@@ -601,19 +601,24 @@ hooks.on('app:start', function(){
 		var oldFragment = page.el.getAttribute('data-fragment'), 
 			oldCache = pagecache[oldFragment];
 
-		if (!isSameState && !(isSamePage && state.isDefault)) {
-			lastPage && lastPage.hide(lastState);
 
+		// 如果前一个页面和当前页面的hash值不同（!isSameState）
+		// 并且两个页面都不是默认页面（也就是说如果是默认页面，不管怎么改变hash都不再会进入startup和show）
+		if (!isSameState && !(isSamePage && state.isDefault)) {
+			lastPage && lastPage.hide(lastState); //如果有上一个页面，就先执行上一个页面的hide方法
+			page.el.setAttribute('data-fragment', state.fragment);
+
+			// 如果被替换的这个dom上的state和当前页面的state不同
+			// 且是不同页面（也就是，在有dom缓存的清空下，页面只有当被别的页面替换时才会被销毁（teardown））
 			if (oldFragment !== state.fragment && !isSamePage) {
 				if (oldCache) {
-					oldCache.page.teardown(oldCache.state);
+					oldCache.page.teardown(oldCache.state); // 销毁这个dom缓存的page
 					delete pagecache[oldFragment];
 				}
 
 				pagecache[state.fragment] = {state:state, page:page};
 				page.el.innerHTML = '';
-				page.el.setAttribute('data-fragment', state.fragment);
-				page.startup(state);
+				page.startup(state);	// 新的page执行startup
 			}
 
 			page.show(state);

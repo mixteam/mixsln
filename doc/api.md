@@ -178,6 +178,16 @@
 	type: 传递参数的类型，GET/POST
 	data: 参数键值对
 
+### replace(fragment, options)
+
+* @param {string} fragment
+* @param {object} [options]
+
+（导航）替换操作。fragment指定Hash片段，`options`参数的字段包括：
+
+	type: 传递参数的类型，GET/POST
+	data: 参数键值对
+
 ### pop()
 
 （导航）后退操作。

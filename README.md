@@ -1,6 +1,6 @@
 # Mix解决方案
 
-## 稳定版本(v0.4.4)
+## 稳定版本(v0.4.5)
 
 - [js开发版下载](http://mixteam.github.io/mixsln/dist/mixsln.debug.js)
 - [js压缩版下载](http://mixteam.github.io/mixsln/dist/mixsln.js)
@@ -31,10 +31,16 @@
 
 ## 版本更新
 
+### v0.4.5
+
+- 修复scroll的bug  
+- 更新pullbounce插件
+
 ### v0.4.4
 
 - 增加app.navigation.replace接口
 - 修复创建导航栏按钮的bug
+- 修复scroll的一个api命名的bug
 - 修正触发forward/backward的时机
 
 ### v0.4.3
