@@ -1,7 +1,7 @@
 ;(function(win, app, undef) {
 
-var MATRIX3D_REG = /^matrix3d\(\d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+), [-\d.]+, \d+\)/,
-	MATRIX_REG = /^matrix\(\d+, \d+, \d+, \d+, ([-\d.]+), ([-\d.]+)\)$/,
+var MATRIX3D_REG = /^matrix3d\((?:[-\d.]+,\s*){12}([-\d.]+),\s*([-\d.]+)(?:,\s*[-\d.]+){2}\)/,
+	MATRIX_REG = /^matrix\((?:[-\d.]+,\s*){4}([-\d.]+),\s*([-\d.]+)\)$/,
 	TRANSFORM_REG = /^(translate|rotate|scale)(X|Y|Z|3d)?|(matrix)(3d)?|(perspective)|(skew)(X|Y)?$/i,
 
     isAndroid = (/android/gi).test(navigator.appVersion),
@@ -155,6 +155,580 @@ var Animation = {
 }
 
 app.module.Animation = Animation;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
+
+function Event() {
+	this._handlers = {};
+}
+
+var EventProto = {
+	addEventListener: function(type, handler) {
+		var handlers = this._handlers, list;
+
+		list = handlers[type] || (handlers[type] = []);
+		list.push(handler);
+	},
+
+	removeEventListener: function(type, handler) {
+		var handlers = this._handlers;
+
+		if (!handlers[type]) return;
+
+		handlers[type] = handlers[type].filter(function(h) {
+			return h != handler;
+		});
+
+		if (!handlers[type].length) {
+			delete handlers[type];
+		}
+	},
+
+	dispatchEvent: function(e) {
+		var handlers = this._handlers,
+			type = e.type;
+
+		handlers.hasOwnProperty(type)  &&
+			handlers[type].forEach(function(handler) {
+				handler(e);
+			});
+
+		this['on' + type] && this['on' + type](e);
+	}
+}
+
+for (var p in EventProto) {
+	Event.prototype[p] = EventProto[p];
+} 
+
+var SCOPES = {},
+	SPLITER_REG = /\s+/
+	;
+
+
+function log(scope, event, args) {
+	if (MessageScope.isLogging) {
+    	console.log('[Message]', {scope:scope, event: event, args:args});
+	}
+}
+
+function MessageScope(scope) {
+	var that = this;
+
+	this._scope = scope;
+	this._event = new Event();
+	this._cache = {};
+
+	this._handler = function(e) {
+		var type = e.type, args = e.args,
+			list = that._cache[type].slice()
+			;
+
+        for (var i = 0; i < list.length; i += 2) {
+            list[i].apply(list[i + 1], args);
+        }
+	}
+
+	SCOPES[scope] = this;
+}
+
+var MessageScopeProto = {
+	on: function(events, callback, context) {
+		var that = this,
+			cache = that._cache,
+			event = that._event,
+			list, eventName
+			;
+
+		if (!callback) return that;
+
+		events = events.split(SPLITER_REG);	
+
+        while (eventName = events.shift()) {
+            list = cache[eventName] || (cache[eventName] = []);
+            if (!list.length) {
+            	event.addEventListener(eventName, this._handler);	
+            }
+            list.push(callback, context);
+        }
+
+        return that; 
+	},
+
+	off: function(events, callback, context) {
+		var that = this,
+			cache = that._cache,
+			event = that._event,
+			list, eventName
+			;
+
+        if (!events) {
+        	events = Object.keys(cache);
+        } else {
+        	events = events.split(SPLITER_REG);
+        }
+
+        while (eventName = events.shift()) {
+        	!(callback || context) && (cache[eventName] = []);
+
+        	list = cache[eventName];
+
+            for (var i = list.length - 2; i >= 0; i -= 2) {
+                if (!(callback && list[i] !== callback ||
+                        context && list[i + 1] !== context)) {
+                    list.splice(i, 2);
+                }
+            }
+
+            if (!list.length) {
+            	delete cache[eventName];
+            	event.removeEventListener(eventName, this._handler);
+        	}
+        }
+
+        return that;
+	},
+
+	once: function(events, callback, context) {
+        var that = this;
+
+        function onceHandler() {
+            callback.apply(this, arguments);
+            that.off(events, onceHandler, context);
+        }
+
+        return that.on(events, onceHandler, context);
+	},
+
+	after: function(events, callback, context) {
+		var that = this,
+			states = {}, eventName
+			;
+
+		if (!callback) return that;
+
+		events = events.split(SPLITER_REG);
+		eventName = events.join('&&');
+
+		function checkState() {
+			for (var e in states) {
+				if (!states[e]) return false;
+			}
+			return true;
+		}
+
+		function resetState() {
+			for (var e in states) {
+				states[e] = false;
+			}
+		}
+
+		events.forEach(function(event) {
+			states[event] = false;
+			that.on(event, function() {
+				states[event] = true;
+				if (checkState()) {
+					that.trigger(eventName);
+					resetState();
+				}
+			});
+		});
+
+		that.on(eventName, callback, context);
+	},
+
+	trigger: function(events) {
+		var that = this,
+			cache = that._cache,
+			event = that._event,
+			args, eventName
+			;
+
+		events = events.split(SPLITER_REG);
+		args = Array.prototype.slice.call(arguments, 1);
+
+		while (eventName = events.shift()) {
+			log(this._scope, eventName, args);
+
+			if (cache[eventName]) {
+				event.dispatchEvent({
+					type: eventName, 
+					args: args
+				});
+			}
+		}
+
+		return that;
+	}
+}
+
+for (var p in MessageScopeProto) {
+	MessageScope.prototype[p] = MessageScopeProto[p];
+}
+
+MessageScope.isLogging = false;
+
+MessageScope.mixto = function(obj, scope) {
+	var context = MessageScope.get(scope);
+
+    obj.prototype && (obj = obj.prototype);
+
+    for (var name in MessageScopeProto) {
+		void function(func) {
+			obj[name] = function() {
+        		func.apply(context, arguments);
+    		}
+    	}(MessageScopeProto[name]);
+    }
+}
+
+MessageScope.get = function(scope) {
+	if (typeof scope === 'string') {
+		return SCOPES[scope] || (SCOPES[scope] = new MessageScope(scope));
+	} else if (scope instanceof MessageScope){
+		return scope;
+	} else {
+		throw new TypeError();
+	}
+}
+
+app.module.Event = Event;
+app.module.MessageScope = MessageScope;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
+
+var doc = win.document
+	;
+
+function Template() {
+}
+
+var TemplateProto = {
+	load: function(url, callback) {
+		var engine = Template.engine
+			;
+
+		if (engine.load && typeof url === 'string') {
+			engine.load(url, callback);
+		} else {
+			callback && callback(url);
+		}
+	},
+
+	compile: function(text) {
+		var engine = Template.engine;
+
+		this.originTemplate = text;
+
+		if (engine.compile && typeof text === 'string') {
+			this.compiledTemplate = engine.compile(text);
+		} else {
+			this.compiledTemplate = function() {return text};
+		}
+
+		return this.compiledTemplate;
+	},
+
+	render: function(datas) {
+		var engine = Template.engine,
+			compiledTemplate = this.compiledTemplate
+			;
+
+		if (engine.render && compiledTemplate && typeof datas === 'object') {
+			this.content = engine.render(compiledTemplate, datas);
+		} else {
+			this.content = compiledTemplate?compiledTemplate(datas):Object.prototype.toString.call(datas);
+		}
+
+		return this.content;
+	}
+}
+
+for (var p in TemplateProto) {
+	Template.prototype[p] = TemplateProto[p];
+} 
+
+Template.engine = {}
+
+app.module.Template = Template;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
+
+var doc = win.document,
+	views = {}
+	;
+
+function extend(target, properties) {
+	for (var key in properties) {
+		if (properties.hasOwnProperty(key)) {
+			target[key] = properties[key];
+		}
+	}
+}
+
+function inherit(child, parent) {
+	function Ctor() {}
+	Ctor.prototype = parent.prototype;
+	var proto = new Ctor();
+	extend(proto, child.prototype);
+	proto.constructor = child;
+	child.prototype = proto;
+}
+	
+function View() {
+	var $ = win['$'];
+
+	if (typeof this.el === 'string') {
+		var selectors = this.el.split(/\s*\>\s*/),
+			wrap = this.el = document.createElement('div')
+			;
+
+		selectors.forEach(function(selector) {
+			var matches;
+			if ((matches = selector.match(/^(\w+)?(?:\#([^.]+))?(?:\.(.+))?$/i))) {
+				var node = document.createElement(matches[1] || 'div');
+				matches[2] && node.setAttribute('id', matches[2]);
+				matches[3] && (node.className = matches[3]);
+				wrap.appendChild(node);
+			} else {
+				wrap.innerHTML = selector;
+			}
+			wrap = wrap.childNodes[0];
+		});
+
+		this.el = this.el.removeChild(this.el.childNodes[0]);
+	}
+
+
+	if ($) {
+		this.$el = $(this.el);
+	}
+}
+
+var ViewProto = {
+	render: function(callback) {/*implement*/},
+	destory: function(callback) {/*implement*/}
+}
+
+for (var p in ViewProto) {
+	View.prototype[p] = ViewProto[p];
+} 
+
+View.fn = {};
+
+View.extend = function(properties) {
+	var ParentView = views[properties.parent] || View;
+
+	function ChildView() {
+		ParentView.apply(this, arguments);
+		this.initialize && this.initialize.apply(this, arguments);
+	}
+	inherit(ChildView, ParentView);
+	extend(ChildView.prototype, ParentView.fn);
+	extend(ChildView.prototype, properties);
+	
+	return (views[properties.name] = ChildView);
+}
+
+View.get = function(name) {
+	return views[name];
+}
+
+app.module.View = View;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
+
+
+var Message = app.module.MessageScope,
+	pages = {}
+	;
+
+function extend(target, properties) {
+	for (var key in properties) {
+		if (properties.hasOwnProperty(key)) {
+			target[key] = properties[key];
+		}
+	}
+}
+
+function inherit(child, parent) {
+	function Ctor() {}
+	Ctor.prototype = parent.prototype;
+	var proto = new Ctor();
+	extend(proto, child.prototype);
+	proto.constructor = child;
+	child.prototype = proto;
+}
+
+function Page() {
+}
+
+var PageProto = {
+	ready : function() {/*implement*/},
+	startup : function() {/*implement*/},
+	teardown : function() {/*implement*/},
+	show : function() {/*implement*/},
+	hide : function() {/*implement*/}
+}
+
+for (var p in PageProto) {
+	Page.prototype[p] = PageProto[p];
+} 
+
+Page.fn = {};
+
+Page.define = function(properties) {
+	function ChildPage() {
+		Page.apply(this, arguments);
+		this.initialize && this.initialize.apply(this, arguments);
+	}
+	inherit(ChildPage, Page);
+	extend(ChildPage.prototype, Page.fn);
+	extend(ChildPage.prototype, properties);
+
+	return (pages[properties.name] = new ChildPage());
+}
+
+Page.get = function(name) {
+	return pages[name];
+}
+
+app.module.Page = Page;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
+
+var doc = win.document
+	;
+
+function _setButton(btn, options) {
+	(options.id != null) && btn.setAttribute('data-id', options.id);
+	(options['class'] != null) && (btn.className = options['class']);
+	(options.text != null) && (btn.innerHTML = options.text);
+	(options.bg != null) && (btn.style.background = options.bg);
+	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" width="100%" height="100%" />');
+	(options.hide === true) ? (btn.style.display = 'none'):(btn.style.display = '');
+	options.onChange && options.onChange.call(btn, options);
+	if (options.handler) {
+		btn.handler && btn.removeEventListener('click', btn.handler, false);
+		btn.addEventListener('click', (btn.handler = options.handler), false);
+	}
+}
+
+function Navbar(wrapEl) {
+	this.wrapEl = wrapEl;
+	this.wrapEl.appendChild(this.animWrapEl = doc.createElement('ul'));
+	this.animWrapEl.appendChild(this.titleWrapEl = doc.createElement('li'));
+	this.animWrapEl.appendChild(this.backWrapEl = doc.createElement('li'));	
+	this.animWrapEl.appendChild(this.funcWrapEl = doc.createElement('li'));
+}
+
+var NavbarProto = {
+    setTitle: function(title) {
+    	if (typeof title === 'string') {
+    		this.titleWrapEl.innerHTML = title;
+    	} else if (title instanceof HTMLElement) {
+    		this.titleWrapEl.innerHTML = '';
+    		this.titleWrapEl.appendChild(title);
+    	}
+    },
+
+    setButton: function(options) {
+    	var wrap, btn;
+    	if (options.type === 'back') {
+    		wrap = this.backWrapEl;
+    		btn = wrap.querySelector('a');
+    	} else if (options.type === 'func') {
+    		wrap = this.funcWrapEl;
+    		btn = wrap.querySelector('a[data-id="' + options.id + '"]');
+    	} else if (options.id) {
+    		btn = this.wrapEl.querySelector('a[data-id="' + options.id + '"]');
+    		btn && (wrap = btn.parentNode);
+    	}
+
+		if (!btn && wrap) {
+			btn = doc.createElement('a');
+			btn.className = options.type;
+			wrap.appendChild(btn);
+		}
+		_setButton(btn, options);
+    },
+
+    getButton: function(id) {
+    	return this.wrapEl.querySelector('a[data-id="' + id + '"]');
+    },
+
+    removeButton: function(id) {
+    	function remove(btn) {
+			if (btn) {
+				btn.handler && btn.removeEventListener('click', btn.handler);
+				btn.parentNode.removeChild(btn);
+			}
+    	}
+
+    	if (!id) {
+    		var btns = this.funcWrapEl.querySelectorAll('a');
+    		for (var i = 0; i < btns.length; i++) {
+    			remove(btns[i]);
+    		}
+    	} else {
+	    	if (typeof id === 'string') {
+	    		var btn = this.getButton(id);
+	    	} else if (id instanceof HTMLElement) {
+	    		var btn = id;
+	    	}
+	    	remove(btn);
+		}
+    }
+}
+
+for (var p in NavbarProto) {
+	Navbar.prototype[p] = NavbarProto[p];
+}
+
+app.module.Navbar = Navbar;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
+
+var doc = win.document
+	;
+
+
+function Toolbar(wrapEl, options) {
+	options || (options = {});
+
+	this._wrapEl = wrapEl;
+    this.set(options);
+}
+
+var ToolbarProto = {
+    set: function(options) {
+        options || (options = {});
+        options.html && (this._wrapEl.innerHTML = options.html);
+        options.el && ((this._wrapEl.innerHTML = '') || this._wrapEl.appendChild(options.el));
+        options.height && (this._wrapEl.style.height = options.height + 'px');
+    },
+
+    show: function(options) {
+        options && this.set(options);
+    	this._wrapEl.style.display = '';
+    },
+
+    hide: function() {
+    	this._wrapEl.style.display = 'none';
+    }
+}
+
+for (var p in ToolbarProto) {
+	Toolbar.prototype[p] = ToolbarProto[p];
+}
+
+app.module.Toolbar = Toolbar;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
 ;(function(win, app, undef) {
@@ -579,580 +1153,6 @@ docEl.addEventListener('touchstart', touchstartHandler, false);
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
 ;(function(win, app, undef) {
 
-function Event() {
-	this._handlers = {};
-}
-
-var EventProto = {
-	addEventListener: function(type, handler) {
-		var handlers = this._handlers, list;
-
-		list = handlers[type] || (handlers[type] = []);
-		list.push(handler);
-	},
-
-	removeEventListener: function(type, handler) {
-		var handlers = this._handlers;
-
-		if (!handlers[type]) return;
-
-		handlers[type] = handlers[type].filter(function(h) {
-			return h != handler;
-		});
-
-		if (!handlers[type].length) {
-			delete handlers[type];
-		}
-	},
-
-	dispatchEvent: function(e) {
-		var handlers = this._handlers,
-			type = e.type;
-
-		handlers.hasOwnProperty(type)  &&
-			handlers[type].forEach(function(handler) {
-				handler(e);
-			});
-
-		this['on' + type] && this['on' + type](e);
-	}
-}
-
-for (var p in EventProto) {
-	Event.prototype[p] = EventProto[p];
-} 
-
-var SCOPES = {},
-	SPLITER_REG = /\s+/
-	;
-
-
-function log(scope, event, args) {
-	if (MessageScope.isLogging) {
-    	console.log('[Message]', {scope:scope, event: event, args:args});
-	}
-}
-
-function MessageScope(scope) {
-	var that = this;
-
-	this._scope = scope;
-	this._event = new Event();
-	this._cache = {};
-
-	this._handler = function(e) {
-		var type = e.type, args = e.args,
-			list = that._cache[type].slice()
-			;
-
-        for (var i = 0; i < list.length; i += 2) {
-            list[i].apply(list[i + 1], args);
-        }
-	}
-
-	SCOPES[scope] = this;
-}
-
-var MessageScopeProto = {
-	on: function(events, callback, context) {
-		var that = this,
-			cache = that._cache,
-			event = that._event,
-			list, eventName
-			;
-
-		if (!callback) return that;
-
-		events = events.split(SPLITER_REG);	
-
-        while (eventName = events.shift()) {
-            list = cache[eventName] || (cache[eventName] = []);
-            if (!list.length) {
-            	event.addEventListener(eventName, this._handler);	
-            }
-            list.push(callback, context);
-        }
-
-        return that; 
-	},
-
-	off: function(events, callback, context) {
-		var that = this,
-			cache = that._cache,
-			event = that._event,
-			list, eventName
-			;
-
-        if (!events) {
-        	events = Object.keys(cache);
-        } else {
-        	events = events.split(SPLITER_REG);
-        }
-
-        while (eventName = events.shift()) {
-        	!(callback || context) && (cache[eventName] = []);
-
-        	list = cache[eventName];
-
-            for (var i = list.length - 2; i >= 0; i -= 2) {
-                if (!(callback && list[i] !== callback ||
-                        context && list[i + 1] !== context)) {
-                    list.splice(i, 2);
-                }
-            }
-
-            if (!list.length) {
-            	delete cache[eventName];
-            	event.removeEventListener(eventName, this._handler);
-        	}
-        }
-
-        return that;
-	},
-
-	once: function(events, callback, context) {
-        var that = this;
-
-        function onceHandler() {
-            callback.apply(this, arguments);
-            that.off(events, onceHandler, context);
-        }
-
-        return that.on(events, onceHandler, context);
-	},
-
-	after: function(events, callback, context) {
-		var that = this,
-			states = {}, eventName
-			;
-
-		if (!callback) return that;
-
-		events = events.split(SPLITER_REG);
-		eventName = events.join('&&');
-
-		function checkState() {
-			for (var e in states) {
-				if (!states[e]) return false;
-			}
-			return true;
-		}
-
-		function resetState() {
-			for (var e in states) {
-				states[e] = false;
-			}
-		}
-
-		events.forEach(function(event) {
-			states[event] = false;
-			that.on(event, function() {
-				states[event] = true;
-				if (checkState()) {
-					that.trigger(eventName);
-					resetState();
-				}
-			});
-		});
-
-		that.on(eventName, callback, context);
-	},
-
-	trigger: function(events) {
-		var that = this,
-			cache = that._cache,
-			event = that._event,
-			args, eventName
-			;
-
-		events = events.split(SPLITER_REG);
-		args = Array.prototype.slice.call(arguments, 1);
-
-		while (eventName = events.shift()) {
-			log(this._scope, eventName, args);
-
-			if (cache[eventName]) {
-				event.dispatchEvent({
-					type: eventName, 
-					args: args
-				});
-			}
-		}
-
-		return that;
-	}
-}
-
-for (var p in MessageScopeProto) {
-	MessageScope.prototype[p] = MessageScopeProto[p];
-}
-
-MessageScope.isLogging = false;
-
-MessageScope.mixto = function(obj, scope) {
-	var context = MessageScope.get(scope);
-
-    obj.prototype && (obj = obj.prototype);
-
-    for (var name in MessageScopeProto) {
-		void function(func) {
-			obj[name] = function() {
-        		func.apply(context, arguments);
-    		}
-    	}(MessageScopeProto[name]);
-    }
-}
-
-MessageScope.get = function(scope) {
-	if (typeof scope === 'string') {
-		return SCOPES[scope] || (SCOPES[scope] = new MessageScope(scope));
-	} else if (scope instanceof MessageScope){
-		return scope;
-	} else {
-		throw new TypeError();
-	}
-}
-
-app.module.Event = Event;
-app.module.MessageScope = MessageScope;
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}))
-;(function(win, app, undef) {
-
-var doc = win.document
-	;
-
-function _setButton(btn, options) {
-	(options.id != null) && btn.setAttribute('data-id', options.id);
-	(options['class'] != null) && (btn.className = options['class']);
-	(options.text != null) && (btn.innerHTML = options.text);
-	(options.bg != null) && (btn.style.background = options.bg);
-	(options.icon != null) && (btn.innerHTML = '<img src="' + options.icon + '" border="0" width="100%" height="100%" />');
-	(options.hide === true) ? (btn.style.display = 'none'):(btn.style.display = '');
-	options.onChange && options.onChange.call(btn, options);
-	if (options.handler) {
-		btn.handler && btn.removeEventListener('click', btn.handler, false);
-		btn.addEventListener('click', (btn.handler = options.handler), false);
-	}
-}
-
-function Navbar(wrapEl) {
-	this.wrapEl = wrapEl;
-	this.wrapEl.appendChild(this.animWrapEl = doc.createElement('ul'));
-	this.animWrapEl.appendChild(this.titleWrapEl = doc.createElement('li'));
-	this.animWrapEl.appendChild(this.backWrapEl = doc.createElement('li'));	
-	this.animWrapEl.appendChild(this.funcWrapEl = doc.createElement('li'));
-}
-
-var NavbarProto = {
-    setTitle: function(title) {
-    	if (typeof title === 'string') {
-    		this.titleWrapEl.innerHTML = title;
-    	} else if (title instanceof HTMLElement) {
-    		this.titleWrapEl.innerHTML = '';
-    		this.titleWrapEl.appendChild(title);
-    	}
-    },
-
-    setButton: function(options) {
-    	var wrap, btn;
-    	if (options.type === 'back') {
-    		wrap = this.backWrapEl;
-    		btn = wrap.querySelector('a');
-    	} else if (options.type === 'func') {
-    		wrap = this.funcWrapEl;
-    		btn = wrap.querySelector('a[data-id="' + options.id + '"]');
-    	} else if (options.id) {
-    		btn = this.wrapEl.querySelector('a[data-id="' + options.id + '"]');
-    		btn && (wrap = btn.parentNode);
-    	}
-
-		if (!btn && wrap) {
-			btn = doc.createElement('a');
-			btn.className = options.type;
-			wrap.appendChild(btn);
-		}
-		_setButton(btn, options);
-    },
-
-    getButton: function(id) {
-    	return this.wrapEl.querySelector('a[data-id="' + id + '"]');
-    },
-
-    removeButton: function(id) {
-    	function remove(btn) {
-			if (btn) {
-				btn.handler && btn.removeEventListener('click', btn.handler);
-				btn.parentNode.removeChild(btn);
-			}
-    	}
-
-    	if (!id) {
-    		var btns = this.funcWrapEl.querySelectorAll('a');
-    		for (var i = 0; i < btns.length; i++) {
-    			remove(btns[i]);
-    		}
-    	} else {
-	    	if (typeof id === 'string') {
-	    		var btn = this.getButton(id);
-	    	} else if (id instanceof HTMLElement) {
-	    		var btn = id;
-	    	}
-	    	remove(btn);
-		}
-    }
-}
-
-for (var p in NavbarProto) {
-	Navbar.prototype[p] = NavbarProto[p];
-}
-
-app.module.Navbar = Navbar;
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}))
-;(function(win, app, undef) {
-
-
-var Message = app.module.MessageScope,
-	pages = {}
-	;
-
-function extend(target, properties) {
-	for (var key in properties) {
-		if (properties.hasOwnProperty(key)) {
-			target[key] = properties[key];
-		}
-	}
-}
-
-function inherit(child, parent) {
-	function Ctor() {}
-	Ctor.prototype = parent.prototype;
-	var proto = new Ctor();
-	extend(proto, child.prototype);
-	proto.constructor = child;
-	child.prototype = proto;
-}
-
-function Page() {
-}
-
-var PageProto = {
-	ready : function() {/*implement*/},
-	startup : function() {/*implement*/},
-	teardown : function() {/*implement*/},
-	show : function() {/*implement*/},
-	hide : function() {/*implement*/}
-}
-
-for (var p in PageProto) {
-	Page.prototype[p] = PageProto[p];
-} 
-
-Page.fn = {};
-
-Page.define = function(properties) {
-	function ChildPage() {
-		Page.apply(this, arguments);
-		this.initialize && this.initialize.apply(this, arguments);
-	}
-	inherit(ChildPage, Page);
-	extend(ChildPage.prototype, Page.fn);
-	extend(ChildPage.prototype, properties);
-
-	return (pages[properties.name] = new ChildPage());
-}
-
-Page.get = function(name) {
-	return pages[name];
-}
-
-app.module.Page = Page;
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}))
-;(function(win, app, undef) {
-
-var doc = win.document
-	;
-
-function Template() {
-}
-
-var TemplateProto = {
-	load: function(url, callback) {
-		var engine = Template.engine
-			;
-
-		if (engine.load && typeof url === 'string') {
-			engine.load(url, callback);
-		} else {
-			callback && callback(url);
-		}
-	},
-
-	compile: function(text) {
-		var engine = Template.engine;
-
-		this.originTemplate = text;
-
-		if (engine.compile && typeof text === 'string') {
-			this.compiledTemplate = engine.compile(text);
-		} else {
-			this.compiledTemplate = function() {return text};
-		}
-
-		return this.compiledTemplate;
-	},
-
-	render: function(datas) {
-		var engine = Template.engine,
-			compiledTemplate = this.compiledTemplate
-			;
-
-		if (engine.render && compiledTemplate && typeof datas === 'object') {
-			this.content = engine.render(compiledTemplate, datas);
-		} else {
-			this.content = compiledTemplate?compiledTemplate(datas):Object.prototype.toString.call(datas);
-		}
-
-		return this.content;
-	}
-}
-
-for (var p in TemplateProto) {
-	Template.prototype[p] = TemplateProto[p];
-} 
-
-Template.engine = {}
-
-app.module.Template = Template;
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}))
-;(function(win, app, undef) {
-
-var doc = win.document
-	;
-
-
-function Toolbar(wrapEl, options) {
-	options || (options = {});
-
-	this._wrapEl = wrapEl;
-    this.set(options);
-}
-
-var ToolbarProto = {
-    set: function(options) {
-        options || (options = {});
-        options.html && (this._wrapEl.innerHTML = options.html);
-        options.el && ((this._wrapEl.innerHTML = '') || this._wrapEl.appendChild(options.el));
-        options.height && (this._wrapEl.style.height = options.height + 'px');
-    },
-
-    show: function(options) {
-        options && this.set(options);
-    	this._wrapEl.style.display = '';
-    },
-
-    hide: function() {
-    	this._wrapEl.style.display = 'none';
-    }
-}
-
-for (var p in ToolbarProto) {
-	Toolbar.prototype[p] = ToolbarProto[p];
-}
-
-app.module.Toolbar = Toolbar;
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}))
-;(function(win, app, undef) {
-
-var doc = win.document,
-	views = {}
-	;
-
-function extend(target, properties) {
-	for (var key in properties) {
-		if (properties.hasOwnProperty(key)) {
-			target[key] = properties[key];
-		}
-	}
-}
-
-function inherit(child, parent) {
-	function Ctor() {}
-	Ctor.prototype = parent.prototype;
-	var proto = new Ctor();
-	extend(proto, child.prototype);
-	proto.constructor = child;
-	child.prototype = proto;
-}
-	
-function View() {
-	var $ = win['$'];
-
-	if (typeof this.el === 'string') {
-		var selectors = this.el.split(/\s*\>\s*/),
-			wrap = this.el = document.createElement('div')
-			;
-
-		selectors.forEach(function(selector) {
-			var matches;
-			if ((matches = selector.match(/^(\w+)?(?:\#([^.]+))?(?:\.(.+))?$/i))) {
-				var node = document.createElement(matches[1] || 'div');
-				matches[2] && node.setAttribute('id', matches[2]);
-				matches[3] && (node.className = matches[3]);
-				wrap.appendChild(node);
-			} else {
-				wrap.innerHTML = selector;
-			}
-			wrap = wrap.childNodes[0];
-		});
-
-		this.el = this.el.removeChild(this.el.childNodes[0]);
-	}
-
-
-	if ($) {
-		this.$el = $(this.el);
-	}
-}
-
-var ViewProto = {
-	render: function(callback) {/*implement*/},
-	destory: function(callback) {/*implement*/}
-}
-
-for (var p in ViewProto) {
-	View.prototype[p] = ViewProto[p];
-} 
-
-View.fn = {};
-
-View.extend = function(properties) {
-	var ParentView = views[properties.parent] || View;
-
-	function ChildView() {
-		ParentView.apply(this, arguments);
-		this.initialize && this.initialize.apply(this, arguments);
-	}
-	inherit(ChildView, ParentView);
-	extend(ChildView.prototype, ParentView.fn);
-	extend(ChildView.prototype, properties);
-	
-	return (views[properties.name] = ChildView);
-}
-
-View.get = function(name) {
-	return views[name];
-}
-
-app.module.View = View;
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}))
-;(function(win, app, undef) {
-
 var doc = win.document,
 	anim = app.module.Animation,
 	TYPE_XY = {
@@ -1311,517 +1311,6 @@ var Transition = {
 }
 
 app.module.Transition = Transition;
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}))
-;(function(win, app, undef) {
-
-var doc = win.document,
-	docEl = doc.documentElement,
-	anim = app.module.Animation,
-	element, panFixRatio = 2,
-	cancelScrollEnd = false,
-	lockTouched = 0;
-	stopBounce = false,
-	prevented = false
-	;
-
-function getMinScrollTop(el) {
-	return 0 - (el.bounceTop || 0);
-}
-
-function getMaxScrollTop(el) {
-    var rect = el.getBoundingClientRect(),
-    	pRect = el.parentNode.getBoundingClientRect(),
-    	minTop = getMinScrollTop(el),
-    	maxTop = 0 - rect.height + pRect.height
-    	;
-
-    return Math.min(maxTop + (el.bounceBottom || 0), minTop);
-}
-
-function getBoundaryOffset(el, y) {
-	if(y > el.minScrollTop) {
-        return y - el.minScrollTop;
-    } else if (y < el.maxScrollTop){
-        return el.maxScrollTop - y;
-    }
-}
-
-function touchBoundary(el, y) {
-	if (y > el.minScrollTop) {
-		y = el.minScrollTop;
-	} else if (y < el.maxScrollTop) {
-		y = el.maxScrollTop;
-	}
-	return y;
-}
-
-function fireEvent(el, eventName, extra) {
-	var event = doc.createEvent('HTMLEvents');
-	event.initEvent(eventName, true, true);
-	for (var p in extra) {
-		event[p] = extra[p];
-	}
-    el.dispatchEvent(event);
-}
-
-function touchstartHandler(e) {
-	if (stopBounce) return;
-
-	var parentElement = e.srcElement;
-	while (!parentElement.boundScrollEvent) {
-		parentElement = parentElement.parentNode || parentElement.offsetParent;
-	}
-	element = parentElement.boundScrollElement;
-
-	if (!element) return;
-	var offset = anim.getTransformOffset(element);
-
-	element.style.webkitBackfaceVisibility = 'hidden';
-	element.style.webkitTransformStyle = 'preserve-3d';
-	element.style.webkitTransition = '';
-	element.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
-}
-
-function touchmoveHandler(e) {	
-	e.preventDefault();
-	return false;
-}
-
-function touchendHandler(e) {
-	// TODO
-}
-
-function panstartHandler(e) {
-	if (stopBounce || !element) return;
-
-	element.transformOffset = anim.getTransformOffset(element);
-	element.minScrollTop = getMinScrollTop(element);
-	element.maxScrollTop = getMaxScrollTop(element);
-	panFixRatio = 2.5;
-	stopBounce = false;
-	cancelScrollEnd = false;
-	fireEvent(element, 'scrollstart');
-}
-
-function panHandler(e) {
-	if (stopBounce || !element) return;
-
-    var y = element.transformOffset.y + e.displacementY
-        ;
-
-    if(y > element.minScrollTop) {
-    	y = element.minScrollTop + (y - element.minScrollTop) / panFixRatio;
-    	panFixRatio *= 1.003;
-    	if (panFixRatio > 4) panFixRatio = 4;
-    } else if(y < element.maxScrollTop) {
-    	y = element.maxScrollTop - (element.maxScrollTop - y) / panFixRatio;
-    	panFixRatio *= 1.003;
-    	if (panFixRatio > 4) panFixRatio = 4;
-    }
-
-    if ((getBoundaryOffset(element, y))) {
-    	if (y > element.minScrollTop) {
-    		var name = 'pulldown',
-    			offset = Math.abs(y - element.minScrollTop);
-
-    	} else if (y < element.maxScrollTop) {
-    		var name = 'pullup',
-    			offset = Math.abs(element.maxScrollTop - y);
-    	}
-    	element.bounceOffset = offset;
-    	fireEvent(element, name);
-    }
-
-    element.style.webkitTransition = '';
-    element.style.webkitTransform = anim.makeTranslateString(element.transformOffset.x, y);
-}
-
-function panendHandler(e) {
-	if (stopBounce || !element) return;
-
-	var y = anim.getTransformOffset(element).y
-	if (getBoundaryOffset(element, y)) {
-		bounceEnd();
-	} else {
-		scrollEnd();
-	}
-}
-
-function bounceStart(v) {
-	if (stopBounce || !element) return;
-
-    var s0 = anim.getTransformOffset(element).y,
-    	a = 0.008 * ( v / Math.abs(v));
-    	t = v / a;
-    	s = s0 + t * v / 2
-    	;
-
-    fireEvent(element, 'bouncestart');
-
-    anim.translate(element, 
-    	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
-    	element.transformOffset.x, s.toFixed(0),
-		bounceEnd
-    );
-}
-
-function bounceEnd() {
-	if (stopBounce || !element) return;
-
-	var y = anim.getTransformOffset(element).y;
-	y = touchBoundary(element, y);
-
-    anim.translate(element, 
-    	'0.4s', 'ease-in-out', '0s', 
-    	element.transformOffset.x, y,
-    	function() {
-    		fireEvent(element, 'bounceend');
-    		scrollEnd();
-    	}
-    );
-}
-
-function flickHandler(e) {
-	if (stopBounce || !element) return;
-	
-    var s0 = anim.getTransformOffset(element).y,
-        v, a, t, s,
-        _v, _s, _t
-        ;
-
-    cancelScrollEnd = true;
-
-    if(s0 > element.minScrollTop || s0 < element.maxScrollTop) {
-    	bounceStart(v);
-    } else {
-    	v = e.velocityY;
-        if (v > 1.5) v = 1.5;
-        if (v < -1.5) v = -1.5;
-        a = 0.0015 * ( v / Math.abs(v));
-		t = v / a;
-        s = s0 + t * v / 2;
-
-        if (s > element.minScrollTop) {
-    	    _s = element.minScrollTop - s0;
-            _t = (v - Math.sqrt(-2 * a *_s + v * v)) / a;
-            _v = v - a * _t;
-
-	        anim.translate(element, 
-	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
-	        	element.transformOffset.x, element.minScrollTop,
-	        	function() {
-	        		bounceStart(_v)
-	        	}
-	        );
-            
-        } else if (s < element.maxScrollTop) {
-            _s = element.maxScrollTop - s0;
-            _t = (v + Math.sqrt(-2 * a * _s + v * v)) / a;
-            _v = v - a * _t;
-
-	        anim.translate(element, 
-	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
-	        	element.transformOffset.x, element.maxScrollTop,
-	        	function() {
-	        		bounceStart(_v)
-	        	}
-	        );
-        } else {
-	        anim.translate(element, 
-	        	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
-	        	element.transformOffset.x, s.toFixed(0),
-	        	scrollEnd
-	        );
-        }
-	}
-}
-
-function scrollEnd() {
-	if (stopBounce || !element) return;
-	
-	cancelScrollEnd = false;
-
-	setTimeout(function() {
-		if (!cancelScrollEnd) {
-			element.style.webkitBackfaceVisibility = 'initial';
-			element.style.webkitTransformStyle = 'flat';
-			element.style.webkitTransition = '';
-			fireEvent(element, 'scrollend');
-		}
-	}, 10);
-}
-
-var Scroll = {
-	enable: function(el, options) {
-		var parentElement = el.parentNode || el.offsetParent
-			;
-
-	    if (!prevented) {
-	    	prevented = true;
-	    	docEl.addEventListener('touchmove', touchmoveHandler, false);
-	    }
-
-	    if (!parentElement.boundScrollEvent) {
-	    	parentElement.boundScrollEvent = true;
-			parentElement.addEventListener('touchstart', touchstartHandler, false);
-			parentElement.addEventListener('touchend', touchendHandler, false);
-		    parentElement.addEventListener('panstart', panstartHandler, false);
-		    parentElement.addEventListener('pan', panHandler, false);
-		    parentElement.addEventListener('panend', panendHandler, false);
-		    parentElement.addEventListener('flick', flickHandler, false);
-	    }
-	    parentElement.boundScrollElement = el;
-
-		if (options) {
-			el.bounceTop = options.bounceTop;
-			el.bounceBottom = options.bounceBottom;
-		} else {
-			el.bounceTop = 0;
-			el.bounceBottom = 0;
-		}
-
-		var x = anim.getTransformOffset(el).x,
-			y = - el.bounceTop;
-
-		el.style.webkitTransition = '';
-		el.style.webkitTransform = anim.makeTranslateString(x, y);
-	},
-
-	disable: function(el) {
-		var parentElement = el.parentNode || el.offsetParent, offset;
-
-		if (parentElement.boundScrollElement === el) {
-			offset = anim.getTransformOffset(el);
-			element = parentElement.boundScrollElement = null;
-			setTimeout(function() {
-				el.style.webkitTransition = '';
-				el.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
-			}, 50);
-			
-		}
-	},
-
-	getScrollHeight: function(el) {
-		return el.getBoundingClientRect().height - (el.bounceTop||0) - (el.bounceBottom||0);
-	},
-
-    getScrollTop: function(el) {
-    	var offset = anim.getTransformOffset(el);
-		return -(offset.y + (el.bounceTop||0));
-	},
-
-    refresh: function(el) {
-        el.style.height = 'auto';
-        el.style.height = el.offsetHeight + 'px';
-        el.offset = anim.getTransformOffset(el);
-        el.minScrollTop = getMinScrollTop(el);
-        el.maxScrollTop = getMaxScrollTop(el);
-        this.scrollTo(el, -el.offset.y - el.bounceTop);
-    },
-
-    offset: function(el, child) {
-    	var elRect = el.getBoundingClientRect(),
-    		childRect = child.getBoundingClientRect(),
-    		offsetRect = {
-	        	top: childRect.top - ((el.bounceTop || 0) + elRect.top),
-	        	left: childRect.left - elRect.left,
-	        	right: elRect.right - childRect.right,
-	        	width: childRect.width,
-	        	height: childRect.height
-	        };
-
-	    offsetRect.bottom = offsetRect.top + childRect.height;
-	    return offsetRect;
-    },
-
-    scrollTo: function(el, y) {
-    	var x = anim.getTransformOffset(el).x,
-    		y = -y - (el.bounceTop || 0);
-
-    	y = touchBoundary(el, y);
-		el.style.webkitTransition = '';
-        el.style.webkitTransform = anim.makeTranslateString(x, y);
-    },
-
-    scollToElement: function(el, child) {
-    	var offset = this.offset(el, child);
-    	this.scrollTo(el, offset.top);
-    },
-
-    getViewHeight: function(el) {
-    	return el.parentNode.getBoundingClientRect().height;
-    },
-
-    getBoundaryOffset: function(el) {
-	    var y = anim.getTransformOffset(el).y;
-	    return getBoundaryOffset(el, y);
-    },
-
-    stopBounce: function(el) {
-    	stopBounce = true;
-
-    	var offset = anim.getTransformOffset(el),
-    		minScrollTop = getMinScrollTop(el),
-    		maxScrollTop = getMaxScrollTop(el),
-    		y = null
-    		;
-
-    	if (offset.y > minScrollTop + (el.bounceTop||0)) {
-    		y = minScrollTop + (el.bounceTop||0);
-    	} else if (offset.y < maxScrollTop - (el.bounceBottom||0)) {
-    		y = maxScrollTop - (el.bounceBottom||0);
-    	}
-
-    	if (y != null) {
-    		anim.translate(el,
-    			'0.4s', 'ease-in-out', '0s',
-    			offset.x, y);
-    	}
-    },
-
-    resumeBounce: function(el) {
-    	stopBounce = false;
-
-    	var offset = anim.getTransformOffset(el),
-    		minScrollTop = getMinScrollTop(el),
-    		maxScrollTop = getMaxScrollTop(el),
-    		y
-    		;
-
-    	if (offset.y > minScrollTop) {
-    		y = minScrollTop;
-    	} else if (offset < maxScrollTop){
-    		y = maxScrollTop;
-    	}
-
-    	if (y != null) {
-    		anim.translate(el,
-    			'0.4s', 'ease-in-out', '0s',
-    			offset.x, y);
-    	}
-    }
-}
-
-app.module.Scroll = Scroll;
-
-})(window, window['app']||(window['app']={module:{},plugin:{}}))
-;(function(win, app, undef) {
-
-var Message = app.module.MessageScope,
-	mid = 0, cid = 0;
-
-function Model(data) {
-	var that = this,
-		initializing  = true,
-		children = {}
-		;
-
-	Message.mixto(that, 'model-' + mid++);
-
-	that.addProperty = function(key, value) {
-		Object.defineProperty(that, key, {
-			get: function() {
-				return children[key] || data[key];
-			},
-			set: function(value) {
-				if (children[key]) {
-					children[key].destory();
-					delete children[key];
-				}
-
-				if (value != null) {
-					data[key] = value;
-					if (typeof value === 'object') {
-						children[key] = new Model(value);
-						children[key].on('propertyChange',  function(e) {
-							that.trigger('propertyChange', {
-								target: e.target,
-								value: e.value,
-								name: e.name,
-								path: key + '.' + e.path
-							});
-						});
-					}
-				}
-
-				!initializing && that.trigger('propertyChange', {
-					target: that,
-					value: children[key] || data[key],
-					name: key,
-					path: key
-				});
-			}
-		});
-
-		that[key] = value;
-	}
-
-	that.update = function(data) {
-		if (data instanceof Array) {
-			for (var i = 0; i < data.length; i++) {
-				if (!(data[i] instanceof Model)) {
-					this.addProperty(i, data[i]);
-				}
-			}
-		} else {
-			for (var key in data) {
-				if (that.hasOwnProperty(key)) {
-					throw new Error('property conflict "' + key + '"');
-				}
-
-				if (data.hasOwnProperty(key) && !(data[key] instanceof Model)) {
-					this.addProperty(key, data[key]);
-				}
-			}
-		}
-	}
-
-	that.destory = function() {
-		for (var key in children) {
-			children[key].destory();
-		}
-		that.off();
-	}
-
-	that.on('propertyChange', function(e) {
-		that.trigger('change:' + e.path, e.value);
-	});
-
-	that.update(data);
-
-	initializing = false;
-}
-
-function Collection(data) {
-	var that = this
-		;
-
-	if (!data instanceof Array) return;
-
-	that.push = function(value) {
-		data.push(value);
-		that.addProperty(data.length - 1, value);
-	}
-
-	that.pop = function() {
-		var value = data.pop();
-		that[data.length] = null;
-		return value;
-	}
-
-	Object.defineProperty(that, 'length', {
-		get: function() {
-			return data.length;
-		}
-	});
-
-	Model.call(that, data);
-}
-
-app.module.Model = Model;
-app.module.Collection = Collection;
-
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
 ;(function(win, app, undef) {
@@ -2233,6 +1722,517 @@ Navigation.instance = new Navigation();
 
 app.module.StateStack = StateStack;
 app.module.Navigation = Navigation;
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
+
+var Message = app.module.MessageScope,
+	mid = 0, cid = 0;
+
+function Model(data) {
+	var that = this,
+		initializing  = true,
+		children = {}
+		;
+
+	Message.mixto(that, 'model-' + mid++);
+
+	that.addProperty = function(key, value) {
+		Object.defineProperty(that, key, {
+			get: function() {
+				return children[key] || data[key];
+			},
+			set: function(value) {
+				if (children[key]) {
+					children[key].destory();
+					delete children[key];
+				}
+
+				if (value != null) {
+					data[key] = value;
+					if (typeof value === 'object') {
+						children[key] = new Model(value);
+						children[key].on('propertyChange',  function(e) {
+							that.trigger('propertyChange', {
+								target: e.target,
+								value: e.value,
+								name: e.name,
+								path: key + '.' + e.path
+							});
+						});
+					}
+				}
+
+				!initializing && that.trigger('propertyChange', {
+					target: that,
+					value: children[key] || data[key],
+					name: key,
+					path: key
+				});
+			}
+		});
+
+		that[key] = value;
+	}
+
+	that.update = function(data) {
+		if (data instanceof Array) {
+			for (var i = 0; i < data.length; i++) {
+				if (!(data[i] instanceof Model)) {
+					this.addProperty(i, data[i]);
+				}
+			}
+		} else {
+			for (var key in data) {
+				if (that.hasOwnProperty(key)) {
+					throw new Error('property conflict "' + key + '"');
+				}
+
+				if (data.hasOwnProperty(key) && !(data[key] instanceof Model)) {
+					this.addProperty(key, data[key]);
+				}
+			}
+		}
+	}
+
+	that.destory = function() {
+		for (var key in children) {
+			children[key].destory();
+		}
+		that.off();
+	}
+
+	that.on('propertyChange', function(e) {
+		that.trigger('change:' + e.path, e.value);
+	});
+
+	that.update(data);
+
+	initializing = false;
+}
+
+function Collection(data) {
+	var that = this
+		;
+
+	if (!data instanceof Array) return;
+
+	that.push = function(value) {
+		data.push(value);
+		that.addProperty(data.length - 1, value);
+	}
+
+	that.pop = function() {
+		var value = data.pop();
+		that[data.length] = null;
+		return value;
+	}
+
+	Object.defineProperty(that, 'length', {
+		get: function() {
+			return data.length;
+		}
+	});
+
+	Model.call(that, data);
+}
+
+app.module.Model = Model;
+app.module.Collection = Collection;
+
+
+})(window, window['app']||(window['app']={module:{},plugin:{}}))
+;(function(win, app, undef) {
+
+var doc = win.document,
+	docEl = doc.documentElement,
+	anim = app.module.Animation,
+	element, panFixRatio = 2,
+	cancelScrollEnd = false,
+	lockTouched = 0;
+	stopBounce = false,
+	prevented = false
+	;
+
+function getMinScrollTop(el) {
+	return 0 - (el.bounceTop || 0);
+}
+
+function getMaxScrollTop(el) {
+    var rect = el.getBoundingClientRect(),
+    	pRect = el.parentNode.getBoundingClientRect(),
+    	minTop = getMinScrollTop(el),
+    	maxTop = 0 - rect.height + pRect.height
+    	;
+
+    return Math.min(maxTop + (el.bounceBottom || 0), minTop);
+}
+
+function getBoundaryOffset(el, y) {
+	if(y > el.minScrollTop) {
+        return y - el.minScrollTop;
+    } else if (y < el.maxScrollTop){
+        return el.maxScrollTop - y;
+    }
+}
+
+function touchBoundary(el, y) {
+	if (y > el.minScrollTop) {
+		y = el.minScrollTop;
+	} else if (y < el.maxScrollTop) {
+		y = el.maxScrollTop;
+	}
+	return y;
+}
+
+function fireEvent(el, eventName, extra) {
+	var event = doc.createEvent('HTMLEvents');
+	event.initEvent(eventName, true, true);
+	for (var p in extra) {
+		event[p] = extra[p];
+	}
+    el.dispatchEvent(event);
+}
+
+function touchstartHandler(e) {
+	if (stopBounce) return;
+
+	var parentElement = e.srcElement;
+	while (!parentElement.boundScrollEvent) {
+		parentElement = parentElement.parentNode || parentElement.offsetParent;
+	}
+	element = parentElement.boundScrollElement;
+
+	if (!element) return;
+	var offset = anim.getTransformOffset(element);
+
+	element.style.webkitBackfaceVisibility = 'hidden';
+	element.style.webkitTransformStyle = 'preserve-3d';
+	element.style.webkitTransition = '';
+	element.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
+}
+
+function touchmoveHandler(e) {	
+	e.preventDefault();
+	return false;
+}
+
+function touchendHandler(e) {
+	// TODO
+}
+
+function panstartHandler(e) {
+	if (stopBounce || !element) return;
+
+	element.transformOffset = anim.getTransformOffset(element);
+	element.minScrollTop = getMinScrollTop(element);
+	element.maxScrollTop = getMaxScrollTop(element);
+	panFixRatio = 2.5;
+	stopBounce = false;
+	cancelScrollEnd = false;
+	fireEvent(element, 'scrollstart');
+}
+
+function panHandler(e) {
+	if (stopBounce || !element) return;
+
+    var y = element.transformOffset.y + e.displacementY
+        ;
+
+    if(y > element.minScrollTop) {
+    	y = element.minScrollTop + (y - element.minScrollTop) / panFixRatio;
+    	panFixRatio *= 1.003;
+    	if (panFixRatio > 4) panFixRatio = 4;
+    } else if(y < element.maxScrollTop) {
+    	y = element.maxScrollTop - (element.maxScrollTop - y) / panFixRatio;
+    	panFixRatio *= 1.003;
+    	if (panFixRatio > 4) panFixRatio = 4;
+    }
+
+    if ((getBoundaryOffset(element, y))) {
+    	if (y > element.minScrollTop) {
+    		var name = 'pulldown',
+    			offset = Math.abs(y - element.minScrollTop);
+
+    	} else if (y < element.maxScrollTop) {
+    		var name = 'pullup',
+    			offset = Math.abs(element.maxScrollTop - y);
+    	}
+    	element.bounceOffset = offset;
+    	fireEvent(element, name);
+    }
+
+    element.style.webkitTransition = '';
+    element.style.webkitTransform = anim.makeTranslateString(element.transformOffset.x, y);
+}
+
+function panendHandler(e) {
+	if (stopBounce || !element) return;
+
+	var y = anim.getTransformOffset(element).y
+	if (getBoundaryOffset(element, y)) {
+		bounceEnd();
+	} else {
+		scrollEnd();
+	}
+}
+
+function bounceStart(v) {
+	if (stopBounce || !element) return;
+
+    var s0 = anim.getTransformOffset(element).y,
+    	a = 0.008 * ( v / Math.abs(v));
+    	t = v / a;
+    	s = s0 + t * v / 2
+    	;
+
+    fireEvent(element, 'bouncestart');
+
+    anim.translate(element, 
+    	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
+    	element.transformOffset.x, s.toFixed(0),
+		bounceEnd
+    );
+}
+
+function bounceEnd() {
+	if (stopBounce || !element) return;
+
+	var y = anim.getTransformOffset(element).y;
+	y = touchBoundary(element, y);
+
+    anim.translate(element, 
+    	'0.4s', 'ease-in-out', '0s', 
+    	element.transformOffset.x, y,
+    	function() {
+    		fireEvent(element, 'bounceend');
+    		scrollEnd();
+    	}
+    );
+}
+
+function flickHandler(e) {
+	if (stopBounce || !element) return;
+	
+    var s0 = anim.getTransformOffset(element).y,
+        v, a, t, s,
+        _v, _s, _t
+        ;
+
+    cancelScrollEnd = true;
+
+    if(s0 > element.minScrollTop || s0 < element.maxScrollTop) {
+    	bounceStart(v);
+    } else {
+    	v = e.velocityY;
+        if (v > 1.5) v = 1.5;
+        if (v < -1.5) v = -1.5;
+        a = 0.0015 * ( v / Math.abs(v));
+		t = v / a;
+        s = s0 + t * v / 2;
+
+        if (s > element.minScrollTop) {
+    	    _s = element.minScrollTop - s0;
+            _t = (v - Math.sqrt(-2 * a *_s + v * v)) / a;
+            _v = v - a * _t;
+
+	        anim.translate(element, 
+	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
+	        	element.transformOffset.x, element.minScrollTop,
+	        	function() {
+	        		bounceStart(_v)
+	        	}
+	        );
+            
+        } else if (s < element.maxScrollTop) {
+            _s = element.maxScrollTop - s0;
+            _t = (v + Math.sqrt(-2 * a * _s + v * v)) / a;
+            _v = v - a * _t;
+
+	        anim.translate(element, 
+	        	_t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, -t + _t) + ')', '0s', 
+	        	element.transformOffset.x, element.maxScrollTop,
+	        	function() {
+	        		bounceStart(_v)
+	        	}
+	        );
+        } else {
+	        anim.translate(element, 
+	        	t.toFixed(0) + 'ms', 'cubic-bezier(' + anim.genCubicBezier(-t, 0) + ')', '0s', 
+	        	element.transformOffset.x, s.toFixed(0),
+	        	scrollEnd
+	        );
+        }
+	}
+}
+
+function scrollEnd() {
+	if (stopBounce || !element) return;
+	
+	cancelScrollEnd = false;
+
+	setTimeout(function() {
+		if (!cancelScrollEnd) {
+			element.style.webkitBackfaceVisibility = 'initial';
+			element.style.webkitTransformStyle = 'flat';
+			element.style.webkitTransition = '';
+			fireEvent(element, 'scrollend');
+		}
+	}, 10);
+}
+
+var Scroll = {
+	enable: function(el, options) {
+		var parentElement = el.parentNode || el.offsetParent
+			;
+
+	    if (!prevented) {
+	    	prevented = true;
+	    	docEl.addEventListener('touchmove', touchmoveHandler, false);
+	    }
+
+	    if (!parentElement.boundScrollEvent) {
+	    	parentElement.boundScrollEvent = true;
+			parentElement.addEventListener('touchstart', touchstartHandler, false);
+			parentElement.addEventListener('touchend', touchendHandler, false);
+		    parentElement.addEventListener('panstart', panstartHandler, false);
+		    parentElement.addEventListener('pan', panHandler, false);
+		    parentElement.addEventListener('panend', panendHandler, false);
+		    parentElement.addEventListener('flick', flickHandler, false);
+	    }
+	    parentElement.boundScrollElement = el;
+
+		if (options) {
+			el.bounceTop = options.bounceTop;
+			el.bounceBottom = options.bounceBottom;
+		} else {
+			el.bounceTop = 0;
+			el.bounceBottom = 0;
+		}
+
+		var x = anim.getTransformOffset(el).x,
+			y = - el.bounceTop;
+
+		el.style.webkitTransition = '';
+		el.style.webkitTransform = anim.makeTranslateString(x, y);
+	},
+
+	disable: function(el) {
+		var parentElement = el.parentNode || el.offsetParent, offset;
+
+		if (parentElement.boundScrollElement === el) {
+			offset = anim.getTransformOffset(el);
+			element = parentElement.boundScrollElement = null;
+			setTimeout(function() {
+				el.style.webkitTransition = '';
+				el.style.webkitTransform = anim.makeTranslateString(offset.x, offset.y);
+			}, 50);
+			
+		}
+	},
+
+	getScrollHeight: function(el) {
+		return el.getBoundingClientRect().height - (el.bounceTop||0) - (el.bounceBottom||0);
+	},
+
+    getScrollTop: function(el) {
+    	var offset = anim.getTransformOffset(el);
+		return -(offset.y + (el.bounceTop||0));
+	},
+
+    refresh: function(el) {
+        el.style.height = 'auto';
+        el.style.height = el.offsetHeight + 'px';
+        el.offset = anim.getTransformOffset(el);
+        el.minScrollTop = getMinScrollTop(el);
+        el.maxScrollTop = getMaxScrollTop(el);
+        this.scrollTo(el, -el.offset.y - el.bounceTop);
+    },
+
+    offset: function(el, child) {
+    	var elRect = el.getBoundingClientRect(),
+    		childRect = child.getBoundingClientRect(),
+    		offsetRect = {
+	        	top: childRect.top - ((el.bounceTop || 0) + elRect.top),
+	        	left: childRect.left - elRect.left,
+	        	right: elRect.right - childRect.right,
+	        	width: childRect.width,
+	        	height: childRect.height
+	        };
+
+	    offsetRect.bottom = offsetRect.top + childRect.height;
+	    return offsetRect;
+    },
+
+    scrollTo: function(el, y) {
+    	var x = anim.getTransformOffset(el).x,
+    		y = -y - (el.bounceTop || 0);
+
+    	y = touchBoundary(el, y);
+		el.style.webkitTransition = '';
+        el.style.webkitTransform = anim.makeTranslateString(x, y);
+    },
+
+    scollToElement: function(el, child) {
+    	var offset = this.offset(el, child);
+    	this.scrollTo(el, offset.top);
+    },
+
+    getViewHeight: function(el) {
+    	return el.parentNode.getBoundingClientRect().height;
+    },
+
+    getBoundaryOffset: function(el) {
+	    var y = anim.getTransformOffset(el).y;
+	    return getBoundaryOffset(el, y);
+    },
+
+    stopBounce: function(el) {
+    	stopBounce = true;
+
+    	var offset = anim.getTransformOffset(el),
+    		minScrollTop = getMinScrollTop(el),
+    		maxScrollTop = getMaxScrollTop(el),
+    		y = null
+    		;
+
+    	if (offset.y > minScrollTop + (el.bounceTop||0)) {
+    		y = minScrollTop + (el.bounceTop||0);
+    	} else if (offset.y < maxScrollTop - (el.bounceBottom||0)) {
+    		y = maxScrollTop - (el.bounceBottom||0);
+    	}
+
+    	if (y != null) {
+    		anim.translate(el,
+    			'0.4s', 'ease-in-out', '0s',
+    			offset.x, y);
+    	}
+    },
+
+    resumeBounce: function(el) {
+    	stopBounce = false;
+
+    	var offset = anim.getTransformOffset(el),
+    		minScrollTop = getMinScrollTop(el),
+    		maxScrollTop = getMaxScrollTop(el),
+    		y
+    		;
+
+    	if (offset.y > minScrollTop) {
+    		y = minScrollTop;
+    	} else if (offset < maxScrollTop){
+    		y = maxScrollTop;
+    	}
+
+    	if (y != null) {
+    		anim.translate(el,
+    			'0.4s', 'ease-in-out', '0s',
+    			offset.x, y);
+    	}
+    }
+}
+
+app.module.Scroll = Scroll;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
 ;(function(win, app, undef) {
