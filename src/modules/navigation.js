@@ -324,7 +324,7 @@ var NavigationProto = {
 		stack.move = 'forward';
 		stack.transition = 'forward';
 
-		if ((/^https?\:/i).test(fragment)) {
+		if ((/^(https?\:)?\/\//i).test(fragment)) {
             location.href = fragment;
         } else if (fragment) {
 			if (!state || state.fragment !== fragment || 
