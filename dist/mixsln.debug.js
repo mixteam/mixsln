@@ -1151,6 +1151,8 @@ View.get = function(name) {
 app.module.View = View;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
+
+
 ;(function(win, app, undef) {
 
 var doc = win.document,
@@ -1313,6 +1315,9 @@ var Transition = {
 app.module.Transition = Transition;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
+
+
+
 ;(function(win, app, undef) {
 
 var doc = win.document,
@@ -1706,6 +1711,8 @@ var Scroll = {
 app.module.Scroll = Scroll;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
+
+
 ;(function(win, app, undef) {
 
 var Message = app.module.MessageScope,
@@ -1824,6 +1831,8 @@ app.module.Collection = Collection;
 
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
+
+
 ;(function(win, app, undef) {
 
 function StateStack() {
@@ -2160,7 +2169,7 @@ var NavigationProto = {
 		stack.move = !!options.replace?'replace':'forward';
 		stack.transition = 'forward';
 
-		if ((/^https?\:/i).test(fragment)) {
+		if ((/^(https?\:)?\/\//i).test(fragment)) {
             location.href = fragment;
         } else if (fragment) {
 			if (!state || state.fragment !== fragment || 
@@ -2235,6 +2244,18 @@ app.module.StateStack = StateStack;
 app.module.Navigation = Navigation;
 
 })(window, window['app']||(window['app']={module:{},plugin:{}}))
+
+
+
+
+
+
+
+
+
+
+
+
 ;(function(win, app, undef) {
 
 var doc = win.document,	$ = win['$'],
@@ -2950,9 +2971,13 @@ app.loadResource = function(urls, type, callback) {
 		return 'resource-' + Date.now() + '-' + Object.keys(resourcecache).length;
 	}
 
-	function createurl(url) {
-		return url.indexOf('http') === 0?url:app.config.resourceBase + url;
-	}
+    function createurl(url) {
+        if (!!url.match(/^(https?\:)?\/\//)) {
+            return url;
+        } else {
+            return app.config.resourceBase + url;
+        }
+    }
 
 	function load(url, callback) {
 		if (!url) {
