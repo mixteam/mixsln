@@ -1649,7 +1649,7 @@ var NavigationProto = {
 		stack.move = !!options.replace?'replace':'forward';
 		stack.transition = 'forward';
 
-		if ((/^https?\:/i).test(fragment)) {
+		if ((/^(https?\:)?\/\//i).test(fragment)) {
             location.href = fragment;
         } else if (fragment) {
 			if (!state || state.fragment !== fragment || 
@@ -2955,7 +2955,11 @@ app.loadResource = function(urls, type, callback) {
 	}
 
 	function createurl(url) {
-		return url.indexOf('http') === 0?url:app.config.resourceBase + url;
+		if (!!url.match(/^(https?\:)?\/\//)) {
+			return url;
+		} else {
+			return app.config.resourceBase + url;
+		}
 	}
 
 	function load(url, callback) {

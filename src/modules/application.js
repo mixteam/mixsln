@@ -731,7 +731,11 @@ app.loadResource = function(urls, type, callback) {
 	}
 
 	function createurl(url) {
-		return url.indexOf('http') === 0?url:app.config.resourceBase + url;
+		if (!!url.match(/^(https?\:)?\/\//)) {
+			return url;
+		} else {
+			return app.config.resourceBase + url;
+		}
 	}
 
 	function load(url, callback) {
